@@ -101,7 +101,7 @@ static void post(uint8_t kind, const struct op_rx_msg *m)
 static void listen(uint8_t w)
 {
 	cur = w;
-	nrf_radio_frequency_set(NRF_RADIO, w ? CONFIG_OP_CH_B_MHZ : CONFIG_OP_CH_A_MHZ);
+	nrf_radio_frequency_set(NRF_RADIO, w ? OP_CH_B_MHZ : OP_CH_A_MHZ);
 	nrf_radio_packetptr_set(NRF_RADIO, buf[w]);
 	win[w].ant = op_ant_pick(&ant, w, frame);
 	op_rx_ant_select(win[w].ant);
@@ -265,7 +265,7 @@ static void radio_init(void)
 		.balen = 3,
 		.whiteen = true,
 	};
-	uint32_t aa = 0x8E89BED6u ^ ((uint32_t)CONFIG_OP_PACK_ID * 0x9E3779B1u);
+	uint32_t aa = 0x8E89BED6u ^ ((uint32_t)OP_PACK_ID * 0x9E3779B1u);
 
 	nrf_radio_mode_set(NRF_RADIO, NRF_RADIO_MODE_BLE_2MBIT);
 	nrf_radio_fast_ramp_up_enable_set(NRF_RADIO, true);
@@ -330,7 +330,7 @@ int op_rx_start(void)
 	IRQ_CONNECT(TIMER0_IRQn, 0, timer_isr, NULL, 0);
 	irq_enable(TIMER0_IRQn);
 	printk("RX start pack_id=%d fA=%d fB=%d win_us=%d exp_a_us=%d cc_b_us=%d deadline_us=%d\n",
-	       CONFIG_OP_PACK_ID, CONFIG_OP_CH_A_MHZ, CONFIG_OP_CH_B_MHZ, W_US, EXP_A_US, CC_B_US,
+	       OP_PACK_ID, OP_CH_A_MHZ, OP_CH_B_MHZ, W_US, EXP_A_US, CC_B_US,
 	       DEADLINE);
 	nrf_timer_task_trigger(NRF_TIMER0, NRF_TIMER_TASK_START);
 	acquire();

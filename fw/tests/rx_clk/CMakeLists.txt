@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.20.0)
+find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
+project(rx_clk)
+target_sources(app PRIVATE src/main.c ../../src/clk/op_clk.c ../../src/rx_app/op_jslot.c)
+target_include_directories(app PRIVATE ../../src/clk ../../src/rx_app)

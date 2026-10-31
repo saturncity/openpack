@@ -146,7 +146,10 @@ def build():
         C("C28", "10u", v3, gnd); C("C29", "100n", v3, gnd); C("C32", "100n", v3, gnd)   # C32 at pad F4 (VDDH)
         pins = {"C3": i2s_sck, "C4": i2s_lrck, "C5": i2s_sdin, "D5": shdnz}   # I2S on free GPIO (nRF5340 PSEL)
         vsense = Net("VBAT_SENSE")
-        R("R12", "1M", vbat, vsense);   # tapped at the cell: no FET/switch drop in the reading; R("R13", "1M", vsense, gnd); C("C30", "100n", vsense, gnd)
+        # tapped at the cell: no FET/switch drop in the reading
+        R("R12", "1M", vbat, vsense)
+        R("R13", "1M", vsense, gnd)
+        C("C30", "100n", vsense, gnd)
         pins["5"] = vsense      # P0.04/AIN0: cell voltage (PK-8, PK-10, cutoff in audit.py); 2 uA standby drain
         # AlInGaP LEDs (Vf ~2.0 V): 1k from a 3.0-3.3 V GPIO gives 1.0-1.3 mA, within standard drive
         leds = [("D1", "Z0", "green BAT", "LED_BAT_OK", "LTST-C191KGKT"), ("D2", "Z1", "red BAT LOW", "LED_BAT_LOW", "LTST-C191KRKT"),
@@ -195,10 +198,10 @@ def bom_rows(circuit):
     for (mpn, val), refs in sorted(groups.items(), key=lambda kv: sorted(kv[1])[0]):
         unit, src = prices.PRICES[mpn]
         rows.append({"refs": " ".join(sorted(refs, key=lambda r: (r.rstrip("0123456789"), int("0" + r.lstrip("ABCDEFGHIJKLMNOPQRSTUVWXYZ"))))),
-                     "qty": len(refs), "value": val, "mpn": mpn, "unit_usd": f"{unit:.2f}",
+                     "qty": len(refs), "value": val, "mpn": mpn, "unit_usd": f"{unit:.4f}",
                      "ext_usd": f"{unit * len(refs):.2f}", "source": src})
     for item, qty, unit, src in prices.EXTRAS:
-        rows.append({"refs": "-", "qty": qty, "value": item, "mpn": "-", "unit_usd": f"{unit:.2f}",
+        rows.append({"refs": "-", "qty": qty, "value": item, "mpn": "-", "unit_usd": f"{unit:.4f}",
                      "ext_usd": f"{unit * qty:.2f}", "source": src})
     return rows
 
