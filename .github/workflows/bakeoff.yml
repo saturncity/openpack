@@ -25,6 +25,13 @@ jobs:
         run: |
           git clone --depth 1 --branch "$VISQOL_TAG" https://github.com/google/visqol "$RUNNER_TEMP/visqol"
           cd "$RUNNER_TEMP/visqol"
+          # the pinned armadillo 9.860.2 URL is dead (sourceforge 404); headers-only dep, use 12.6.7
+          curl -fL --retry 5 -o "$RUNNER_TEMP/arma.tar.xz" https://sourceforge.net/projects/arma/files/armadillo-12.6.7.tar.xz/download
+          sha=$(sha256sum "$RUNNER_TEMP/arma.tar.xz" | cut -d' ' -f1)
+          sed -i -e "s|d856ea58c18998997bcae6689784d2d3eeb5daf1379d569fddc277fe046a996b|$sha|" \
+            -e 's|armadillo-9.860.2"|armadillo-12.6.7"|' \
+            -e "s|urls = \[\"http://sourceforge.net/projects/arma/files/armadillo-9.860.2.tar.xz\"\]|urls = [\"file://$RUNNER_TEMP/arma.tar.xz\"]|" WORKSPACE
+          grep -n -A3 'strip_prefix = "armadillo' WORKSPACE
           bazelisk build :visqol -c opt
           echo "VISQOL_BIN=$PWD/bazel-bin/visqol" >> "$GITHUB_ENV"
       - run: python3 sim/codec/bakeoff.py
