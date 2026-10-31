@@ -30,6 +30,12 @@ sets:
       sigma:              {value: 4, unit: ms, source: "set by ConfigSet 10, generalized-Pareto scale", estimate: false}
       kappa:              {value: 0, unit: shape, source: "set by ConfigSet 10", estimate: false}
       power:              {value: 15, unit: dBm, source: "phone/laptop typical 14-20 dBm EIRP, under fcc 30 dBm cap", estimate: true}
+  mid_busy:                 # #27, bsim (b) sweep point between the two committed sets; not a gate number
+    gilbert_elliott:
+      busy_fraction:      {value: 0.25, unit: fraction of time per BLE channel, source: "PLAN.md Phase 2 (b) sweep 10/25/40 %", estimate: true}
+    actmod:
+      ConfigSet:          {value: 25, unit: "-ConfigSet=25 -power=20", source: "calibrated #27 with tests/bsim/probe/run.sh 25: AIR-1 packet loss on 2437/2442 = 0.262/0.270 (target 0.25, within the +-0.04 probe tolerance)", estimate: false}
+      power:              {value: 20, unit: dBm, source: "actmod default 20 dBm", estimate: false}
   worst_case_iperf:
     gilbert_elliott:
       busy_fraction:      {value: 0.40, unit: fraction of time per BLE channel, source: "audit.py worst case; ADR-0003 phase-1 busy fraction", estimate: true}

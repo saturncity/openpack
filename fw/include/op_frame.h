@@ -3,8 +3,26 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#if defined(CONFIG_OP_TEST_FRAME_LEN) && CONFIG_OP_TEST_FRAME_LEN > 0
+#define OP_FRAME_LEN CONFIG_OP_TEST_FRAME_LEN /* test only, fw/Kconfig */
+#else
 #define OP_FRAME_LEN 42
+#endif
 #define OP_FRAME_US  1000
+
+/* Pack id (AIR-2 address) and carrier pair (AIR-5): Kconfig, or the bsim command line on test builds
+ * (CONFIG_OP_TEST_BSIM_ARGS, src/bsim_args.c), so one build serves every pack id in bsim.
+ */
+#if defined(CONFIG_OP_TEST_BSIM_ARGS)
+extern int op_pack_id, op_ch_a_mhz, op_ch_b_mhz;
+#define OP_PACK_ID  op_pack_id
+#define OP_CH_A_MHZ op_ch_a_mhz
+#define OP_CH_B_MHZ op_ch_b_mhz
+#else
+#define OP_PACK_ID  CONFIG_OP_PACK_ID
+#define OP_CH_A_MHZ CONFIG_OP_CH_A_MHZ
+#define OP_CH_B_MHZ CONFIG_OP_CH_B_MHZ
+#endif
 
 /* FW-2: one frame per IPC message, app core -> net core. */
 int op_ipc_init(void (*rx)(const uint8_t *frame, size_t len));
