@@ -1,0 +1,89 @@
+* OpenPack receiver driver under hostile loads (RX-8, ADR-0014, #81 review M2/S5).
+* Same driver as rx_driver.cir. Load: ~100 m of mic cable = 10 nF from each leg to the shield, plus 600 ohm across.
+* (1) loop gain of each stage with that load (voltage injection at the op-amp - input, where the source impedance
+*     (feedback network, k-ohms) << the load (op-amp input)): T = -v(ina)/v(inaa).
+* (2) step response: 0.5 V, 10 ns step straight into C40 (the DAC's 470R/2.2n filter bypassed, so the edge is as fast as
+*     the stage allows), outputs watched for overshoot.
+* (3) phantom short: P48 through 6.8k on both legs, relay closed, steady state; at 1 ms XLR pin 2 is shorted to the
+*     shield. Watch the S1J clamp currents.
+.include opa1656.lib
+Vsup v12 0 dc 12
+R1 v12 v12r 10
+D9 v12r v12a dbat54
+C7 v12a 0 100u
+R45 v12a vcm1 22k
+R46 vcm1 0 22k
+C43 vcm1 0 22u
+R53 vcm1 vcm 10k
+C49 vcm 0 22u
+D8 vcm v12a dbat54
+Vstep stp 0 dc 0 pulse(0 0.5 10u 10n 10n 1 2)
+* Ven = 1 enables the step (runs 1-2), 0 removes it for the phantom run
+Ven en 0 dc 1
+Bstep dacf 0 v = v(stp) * v(en)
+C40 cin dacf 47u
+R41 cin ina 2.0k
+R42 ina oa 3.65k
+C41 ina oa 100p
+R43 oa inb 4.99k
+R44 inb ob 4.99k
+C42 inb ob 100p
+* loop-break sources between the feedback node and the op-amp - pin (0 V DC; ac 1 in turn)
+VxA inaa ina dc 0 ac 0
+VxB inbb inb dc 0 ac 0
+XA vcm inaa oa v12a 0 opa1656
+XB vcm inbb ob v12a 0 opa1656
+R47 oa cp 22
+D3 0 cp ds1j
+D5 cp v12a ds1j
+C47 cp cx 47u
+R54 cx 0 10k
+Rk1a cx co 0.1
+R49 co 0 100k
+R48 co cold 22
+R50 ob hp 22
+Vd4 0 d4a dc 0
+D4 d4a hp ds1j
+D6 hp v12a ds1j
+C48 hp hx 47u
+R55 hx 0 10k
+Rk1b hx ho 0.1
+R52 ho 0 100k
+R51 ho hot 22
+Ccab1 hot 0 10n
+Ccab2 cold 0 10n
+Rload hot cold 600
+* phantom: 6.8k from +48 V to each pin (IEC 61938), off in runs 1-2
+Vp48 p48 0 dc 0
+Rph1 p48 hot 6.8k
+Rph2 p48 cold 6.8k
+* hot-to-shield short, closed at 1 ms (only run 3 lasts that long)
+Vsh shc 0 dc 0 pulse(0 1 1m 1u 1u 1 2)
+Ssh hot shn shc 0 swshort
+Vam shn 0 dc 0
+* 1 ohm: cable conductor + connector contact (100 m of 0.22 mm2 is ~8 ohm per conductor)
+.model swshort sw(vt=0.5 vh=0.1 ron=1 roff=1e12)
+.nodeset v(vcm)=5.8 v(vcm1)=5.8 v(oa)=5.8 v(ob)=5.8 v(ina)=5.8 v(inb)=5.8 v(cin)=5.8 v(cp)=5.8 v(hp)=5.8 v(v12a)=11.6 v(xa.p1)=5.8 v(xa.p2)=5.8 v(xa.p2i)=5.8 v(xb.p1)=5.8 v(xb.p2)=5.8 v(xb.p2i)=5.8
+* gear integration: trapezoidal rings on the 10 ns edge into the 47 uF caps
+.options method=gear
+.control
+set noaskquit
+* 1) loop gains
+alter @vxa[acmag] = 1
+ac dec 50 1k 200meg
+wrdata loopa.txt v(ina) v(inaa)
+alter @vxa[acmag] = 0
+alter @vxb[acmag] = 1
+ac dec 50 1k 200meg
+wrdata loopb.txt v(inb) v(inbb)
+alter @vxb[acmag] = 0
+* 2) step into the cable load
+tran 2n 40u
+wrdata step.txt v(oa) v(ob) v(hot) v(cold)
+* 3) phantom short
+alter ven dc = 0
+alter vp48 dc = 48
+tran 1u 12m
+wrdata short.txt i(vd4) i(vam) v(hp) v(hx) v(v12a)
+.endc
+.end

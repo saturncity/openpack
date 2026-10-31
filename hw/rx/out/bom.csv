@@ -1,0 +1,47 @@
+refs,qty,value,mpn,unit_usd,ext_usd,unit_gbp,ext_gbp,uk_distributor,source
+C1 C4 C6 C10 C30 C32 C34,7,10u,C_10u_0603_X5R,0.06,0.42,0.05,0.32,LCSC,est. (10 uF 10 V 0603 X5R)
+C2 C8 C11 C12 C23 C31 C33 C35 C36 C44 C45 C61,12,100n,C_100n_0402,0.02,0.24,0.02,0.18,LCSC,est.
+C3 C5,2,1u,C_1u_0402,0.03,0.06,0.02,0.05,LCSC,est.
+C7,1,100u 25V,ALU_100u_25V,0.10,0.10,0.08,0.08,LCSC,"est. (100 uF 25 V SMD aluminium, 6.3 mm)"
+C9 C40,2,47u 25V,ALU_47u_25V,0.08,0.16,0.06,0.12,LCSC,"est. (47 uF 25 V SMD aluminium, 5 mm)"
+C20 C21 C22,3,10p,C_10p_0402_C0G,0.02,0.06,0.02,0.05,LCSC,est.
+C37 C38,2,2u2,C_2u2_0603_X7R,0.03,0.06,0.02,0.05,LCSC,est.
+C39,1,2n2,C_2n2_0402_C0G,0.02,0.02,0.02,0.02,LCSC,est.
+C41 C42,2,100p,C_100p_0402_C0G,0.02,0.04,0.02,0.03,LCSC,est.
+C43 C49,2,22u 25V,ALU_22u_25V,0.07,0.14,0.05,0.11,LCSC,"est. (22 uF 25 V SMD aluminium, 5 mm)"
+C46,1,10u,C_10u_1206_25V_X7R,0.12,0.12,0.09,0.09,LCSC,est. (10 uF 25 V 1206 X7R)
+C47 C48,2,47u 63V BP,ALU_BP_47u_63V,0.25,0.50,0.19,0.38,Farnell UK / RS UK,"est. (47 uF 63 V bipolar aluminium, 10 mm, e.g. Nichicon UEP series)"
+C60,1,1n,C_1n_0402,0.02,0.02,0.02,0.02,LCSC,est.
+D1,1,SMF15A,SMF15A,0.10,0.10,0.08,0.08,LCSC / Farnell UK,"est. (SMF 200 W TVS SOD-123F, q100)"
+D2,1,SMF5.0A,SMF5.0A,0.10,0.10,0.08,0.08,LCSC / Farnell UK,"est. (SMF 200 W TVS SOD-123F, q100)"
+D3 D4 D5 D6 D7,5,S1J,S1J,0.04,0.20,0.03,0.15,LCSC / Farnell UK,"est. (S1J 1 A 600 V SMA, IFSM 30 A, q100)"
+D8 D9 D10,3,BAT54,"BAT54,215",0.03,0.09,0.02,0.07,LCSC / Farnell UK,"est. (Nexperia BAT54 SOT-23, q100)"
+J1,1,backplane 2x13,HDR_2x13_2.54_SMD_KEY14,0.40,0.40,0.30,0.30,LCSC,"est. (2x13 2.54 mm gold pin header, pin 14 pulled as the key, q100)"
+J2,1,SWD,TC2030-pads,0.00,0.00,0.00,0.00,-,footprint only
+J3,1,ANT_A,U.FL-R-SMT-1(10),0.45,0.45,0.34,0.34,Farnell UK / RS UK,"est. (Hirose U.FL receptacle, q100)"
+J4,1,ANT_B,U.FL-R-SMT-1(10),0.45,0.45,0.34,0.34,Farnell UK / RS UK,"est. (Hirose U.FL receptacle, q100)"
+J5,1,TO_MODULE,U.FL-R-SMT-1(10),0.45,0.45,0.34,0.34,Farnell UK / RS UK,"est. (Hirose U.FL receptacle, q100)"
+K1,1,TQ2SA-12V,TQ2SA-12V,3.20,3.20,2.43,2.43,Farnell UK / RS UK,"est. (Panasonic TQ2 DPDT 12 V signal relay, q100; Farnell UK 1124056)"
+Q1,1,BSS138,BSS138,0.05,0.05,0.04,0.04,LCSC / Farnell UK,"est. (onsemi BSS138 SOT-23, q100)"
+R1,1,10,R_0603_1%,0.02,0.02,0.02,0.02,LCSC,est.
+R20 R31 R32,3,100,R_0402_1%,0.02,0.06,0.02,0.05,LCSC,est.
+R21 R22 R23 R25 R26 R27,6,1k,R_0402_1%,0.02,0.12,0.02,0.09,LCSC,est.
+R24 R28 R29 R30 R38 R53 R54 R55 R62,9,10k,R_0402_1%,0.02,0.18,0.02,0.14,LCSC,est.
+R33 R34 R35,3,DNP (100),DNP,0.00,0.00,0.00,0.00,-,not fitted (#81 review S4): pads only; fit 100 R 0402 for a digital add-on
+R36 R37 R49 R52 R63,5,100k,R_0402_1%,0.02,0.10,0.02,0.08,LCSC,est.
+R40,1,470,R_0402_1%,0.02,0.02,0.02,0.02,LCSC,est.
+R41,1,2.0k,R_0402_1%,0.02,0.02,0.02,0.02,LCSC,est.
+R42,1,3.65k,R_0402_1%,0.02,0.02,0.02,0.02,LCSC,est.
+R43 R44,2,4.99k,R_0402_1%,0.02,0.04,0.02,0.03,LCSC,est.
+R45 R46,2,22k,R_0402_1%,0.02,0.04,0.02,0.03,LCSC,est.
+R47 R48 R50 R51,4,22,R_0603_1%,0.02,0.08,0.02,0.06,LCSC,est.
+R60,1,249k,R_0402_1%,0.02,0.02,0.02,0.02,LCSC,est.
+R61,1,9.76k,R_0402_1%,0.02,0.02,0.02,0.02,LCSC,est.
+U1,1,BT40NE,BT40NE,16.76,16.76,12.74,12.74,DigiKey UK,"Digi-Key qty-100 cut tape, part 22107427 (hw/pack/prices.py BT40NE_DIGIKEY_Q100)"
+U2,1,PE4259,PE4259-63,0.41,0.41,0.31,0.31,LCSC C470892,"LCSC C470892 qty-100, via findchips.com/LCSC snapshot read 2026-10-31 (range $0.32-0.49)"
+U3,1,PCM5102A,PCM5102APWR,2.80,2.80,2.13,2.13,Mouser UK / Farnell UK,"Digi-Key qty-100, via findchips.com snapshot read 2026-10-31 (Mouser q100 $2.78)"
+U4 U5,2,TLV76733,TLV76733DGNR,0.40,0.80,0.30,0.61,Farnell UK / DigiKey UK / Mouser UK,"est. (TI TLV767 1 A 16 V LDO, HVSSOP-8, q100)"
+U6,1,OPA1656,OPA1656IDR,1.84,1.84,1.40,1.40,DigiKey UK / Mouser UK,"Digi-Key qty-100 cut tape, 2026-10-31 (same as hw/pack/prices.py)"
+U7,1,TPS3808G01,TPS3808G01DBVR,0.80,0.80,0.61,0.61,Farnell UK / Mouser UK,"est. (TI TPS3808 adjustable supervisor, SOT-23-6, q100)"
+-,1,PCB 4-layer ~40x80 mm (50 ohm RF traces),-,1.50,1.50,1.14,1.14,JLCPCB (ships to UK),est. (qty-100 panel share)
+-,1,U.FL-U.FL jumper 50 mm (switch out -> module u.FL),-,1.50,1.50,1.14,1.14,LCSC / RS UK,est.

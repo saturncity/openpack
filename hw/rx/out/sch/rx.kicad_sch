@@ -1,0 +1,171 @@
+(kicad_sch
+  (version 20250114)
+  (generator "skidl")
+  (generator_version "0.2.0")
+  (uuid 580e9439-f5de-4128-99ba-7fd564042b1a)
+  (paper "A4")
+  (title_block
+    (title "OpenPack receiver sub-board")
+    (date "2026-10-31")
+    (company "")
+    (comment 1 "Generated with SKiDL")
+    (comment 2 "")
+    (comment 3 "")
+    (comment 4 ""))
+  (lib_symbols)
+  (sheet
+    (at 139.45 130.81)
+    (size 18.29 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid 818fbebb-2eeb-5f44-8419-8ff160c87ce5)
+    (property "Sheetname" "power1"
+      (at 139.45 130.1 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "rx_power1.kicad_sch"
+      (at 139.45 149.17 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top))))
+  (sheet
+    (at 128.27 107.95)
+    (size 17.78 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid c7ab11de-16e8-5383-9c0b-f71038184bd8)
+    (property "Sheetname" "mcu1"
+      (at 128.27 107.24 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "rx_mcu1.kicad_sch"
+      (at 128.27 126.31 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top))))
+  (sheet
+    (at 128.27 62.23)
+    (size 17.78 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid 39453a1b-d097-5c39-8ed3-629107628224)
+    (property "Sheetname" "rf1"
+      (at 128.27 61.52 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "rx_rf1.kicad_sch"
+      (at 128.27 80.59 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top))))
+  (sheet
+    (at 151.13 107.95)
+    (size 17.78 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid 35c9c436-70b3-5350-93c8-31fc2ce87e7e)
+    (property "Sheetname" "dac1"
+      (at 151.13 107.24 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "rx_dac1.kicad_sch"
+      (at 151.13 126.31 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top))))
+  (sheet
+    (at 138.94 85.09)
+    (size 19.3 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid d8927df6-ec32-5990-a575-a86ff084286e)
+    (property "Sheetname" "driver1"
+      (at 138.94 84.38 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "rx_driver1.kicad_sch"
+      (at 138.94 103.45 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top))))
+  (sheet
+    (at 151.13 62.23)
+    (size 17.78 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid 0018f056-40ec-5d59-94b9-678794088173)
+    (property "Sheetname" "mute1"
+      (at 151.13 61.52 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "rx_mute1.kicad_sch"
+      (at 151.13 80.59 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top)))))

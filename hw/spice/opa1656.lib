@@ -1,0 +1,21 @@
+* Generic OPA1656 macromodel (one channel) from TI SBOS901C 6.6 numbers; TI's own model needs a login.
+*   GBW 53 MHz (gm 1 mA/V into 3 pF), DC gain 100 dB, en 4.3 nV/rtHz white (1.12k series resistor, no 1/f),
+*   open-loop output impedance 26 ohm (SBOS901C ZO at 1 MHz), output clamp 0.5 V from each rail (AOL test range
+*   at RL = 2k, tighter than the 0.25 V headline). ASSUMPTION, not from the datasheet text: a second pole at 30 MHz,
+*   which gives ~55 deg phase margin at unity gain, so capacitive-load tests are not optimistic. Re-run with TI's model.
+*   Input CM range (V-)..(V+)-2.25 V is not modelled: tests assert it on the input nodes.
+.subckt opa1656 inp inm out vp vn
+Rn inp npi 1.12k
+G1 0 p1 npi inm 1m
+Rp p1 0 100meg
+Cp p1 0 3p
+E2 p2i 0 p1 0 1
+R2 p2i p2 1k
+C2 p2 0 5.305p
+* smooth clamp (softplus, 50 mV knee) to (V-)+0.5 .. (V+)-0.5: a hard min/max stalls the transient solver
+Bo oi 0 v = v(vn) + 0.5 + ln(1 + exp(20 * (v(p2) - v(vn) - 0.5))) / 20 - ln(1 + exp(20 * (v(p2) - v(vp) + 0.5))) / 20
+Ro oi out 26
+.ends
+* BAT54 Schottky (~0.3 V at 10 mA) and S1J 1 A rectifier (Vf ~1 V at 1 A), generic models
+.model dbat54 d(is=2e-7 n=1.05 rs=1 cjo=10p)
+.model ds1j d(is=5n n=1.8 rs=0.04 cjo=12p)
