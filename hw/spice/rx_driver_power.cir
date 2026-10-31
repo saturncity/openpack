@@ -1,0 +1,58 @@
+* OpenPack receiver driver power cycle (RX-8, ADR-0014, #81 review M1/M3): no thump at the XLR.
+* +12 V ramps up in 1 ms at t = 0. Firmware closes the mute relay K1 at t = 5 s (OUT_EN, after VCM has settled).
+* At t = 6 s the brick dies: +12 V falls to 0 in 2 ms. The TPS3808 supervisor (SENSE at 10.78 V on raw +12 V)
+* pulls the relay gate low at once. K1 then needs its release time: TQ2SA max 4 ms without a coil diode (Panasonic TQ
+* datasheet); the flyback diode slows it, so 8 ms is modelled (operate also 8 ms). Meanwhile the BAT54 hold-up diode
+* keeps C7 charged for the op-amps. DAC silent (XSMT low; ground-centred output at 0 V). Load 10k balanced + 10 nF cable.
+.include opa1656.lib
+Vsup v12 0 pwl(0 0 1m 12 6 12 6.002 0 7 0)
+R1 v12 v12r 10
+D9 v12r v12a dbat54
+C7 v12a 0 100u
+R45 v12a vcm1 22k
+R46 vcm1 0 22k
+C43 vcm1 0 22u
+R53 vcm1 vcm 10k
+C49 vcm 0 22u
+D8 vcm v12a dbat54
+Vdac dacf 0 dc 0
+C40 cin dacf 47u
+R41 cin ina 2.0k
+R42 ina oa 3.65k
+C41 ina oa 100p
+R43 oa inb 4.99k
+R44 inb ob 4.99k
+C42 inb ob 100p
+XA vcm ina oa v12a 0 opa1656
+XB vcm inb ob v12a 0 opa1656
+R47 oa cp 22
+D3 0 cp ds1j
+D5 cp v12a ds1j
+C47 cp cx 47u
+R54 cx 0 10k
+Sk1a cx co rly 0 swrly
+R49 co 0 100k
+R48 co cold 22
+R50 ob hp 22
+D4 0 hp ds1j
+D6 hp v12a ds1j
+C48 hp hx 47u
+R55 hx 0 10k
+Sk1b hx ho rly 0 swrly
+R52 ho 0 100k
+R51 ho hot 22
+Rload hot cold 10k
+Ccab1 hot 0 10n
+Ccab2 cold 0 10n
+* relay drive = OUT_EN (firmware, t > 5 s) AND supervisor (+12 V > 10.78 V); mechanical delay as an RC
+Bdrv drv 0 v = (time > 5 && v(v12) > 10.78) ? 1 : 0
+Rd drv rly 1k
+Cd rly 0 11.5u
+.model swrly sw(vt=0.5 vh=0.05 ron=0.1 roff=1e12)
+.options method=gear
+.control
+set noaskquit
+tran 100u 7 0 200u
+wrdata power.txt v(hot) v(cold) v(vcm) v(v12a) v(rly) v(v12)
+.endc
+.end
