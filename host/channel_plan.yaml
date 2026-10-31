@@ -1,0 +1,14 @@
+# Single source of pack id -> carrier pair (API-3, SYS-6, AIR-5). MHz.
+# Each pack: one gap carrier (clear of Wi-Fi 1/6/11) + one carrier under Wi-Fi.
+# Packs 1-2 use gap carriers as A (only 2423/2425 can be A: fA <= 2440);
+# packs 3-8 use the other six gap carriers as B.
+# In-band carriers spread 2/2/4 over Wi-Fi 11/1/6, >= 3 MHz apart.
+packs:
+  1: {fA: 2423, fB: 2463}
+  2: {fA: 2425, fB: 2466}
+  3: {fA: 2406, fB: 2448}
+  4: {fA: 2410, fB: 2450}
+  5: {fA: 2428, fB: 2473}
+  6: {fA: 2431, fB: 2475}
+  7: {fA: 2434, fB: 2477}
+  8: {fA: 2437, fB: 2479}
