@@ -2,7 +2,7 @@
 #include <zephyr/kernel.h>
 
 #define ROLE (IS_ENABLED(CONFIG_OP_ROLE_PACK) ? "pack" : "rx")
-#define CORE (IS_ENABLED(CONFIG_SOC_NRF5340_CPUNET) ? "net" : IS_ENABLED(CONFIG_SOC_NRF5340_CPUAPP) ? "app" : "host")
+#define CORE (IS_ENABLED(CONFIG_SOC_COMPATIBLE_NRF5340_CPUNET) ? "net" : IS_ENABLED(CONFIG_SOC_COMPATIBLE_NRF5340_CPUAPP) ? "app" : "host")
 
 int main(void)
 {
