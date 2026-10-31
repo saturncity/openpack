@@ -1,10 +1,12 @@
 import os
+import sys
 import threading
 
 import pytest
 import yaml
 from fastapi.testclient import TestClient
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from host import channel_plan, modules
 from host.app import app
 
