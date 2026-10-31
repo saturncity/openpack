@@ -1,0 +1,119 @@
+(kicad_sch
+  (version 20250114)
+  (generator "skidl")
+  (generator_version "0.2.0")
+  (uuid 5fda53f8-b8d5-467c-8fa9-fb97f109aba9)
+  (paper "A4")
+  (title_block
+    (title "OpenPack body-pack")
+    (date "2026-10-31")
+    (company "")
+    (comment 1 "Generated with SKiDL")
+    (comment 2 "")
+    (comment 3 "")
+    (comment 4 ""))
+  (lib_symbols)
+  (sheet
+    (at 139.45 107.95)
+    (size 18.29 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid 818fbebb-2eeb-5f44-8419-8ff160c87ce5)
+    (property "Sheetname" "power1"
+      (at 139.45 107.24 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "pack_power1.kicad_sch"
+      (at 139.45 126.31 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top))))
+  (sheet
+    (at 137.41 130.81)
+    (size 22.35 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid 8cd18c6f-5a34-578b-be21-29b4c5eade79)
+    (property "Sheetname" "front_end1"
+      (at 137.41 130.1 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "pack_front_end1.kicad_sch"
+      (at 137.41 149.17 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top))))
+  (sheet
+    (at 139.7 85.09)
+    (size 17.78 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid bd70bb8b-a1aa-55f9-b4f0-63f6d32e4cdc)
+    (property "Sheetname" "adc1"
+      (at 139.7 84.38 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "pack_adc1.kicad_sch"
+      (at 139.7 103.45 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top))))
+  (sheet
+    (at 138.43 62.23)
+    (size 20.32 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid ecc9282c-b34f-5ef3-80e9-8c79a5068349)
+    (property "Sheetname" "mcu_usb1"
+      (at 138.43 61.52 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "pack_mcu_usb1.kicad_sch"
+      (at 138.43 80.59 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top)))))

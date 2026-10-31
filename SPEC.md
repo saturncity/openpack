@@ -52,7 +52,7 @@
 | PK-5 | Antenna: 31 mm quarter-wave wire whip, exits top face, ≥ 40 mm from the cell (R15, R10) | CAD check |
 | PK-6 | Power: one removable protected 18650 in a holder with positive retention; reverse-polarity protection; no charging circuit (R7). Boost to 5 V for preamp/bias; LDO 3.3 V | Schematic ERC |
 | PK-7 | Runtime ≥ 16 h at max TX power continuous (R8). Design draw ≤ 0.6 W | `audit.py`, PPK2 |
-| PK-8 | Controls: recessed slide power switch only (R4). LEDs: power/battery (green, red < 3.4 V), peak/clip (amber at −3 dBFS, red at clip). No "link" LED (one-way link cannot know) (R14) | Inspection |
+| PK-8 | Controls: recessed slide power switch only (R4). LEDs: power/battery (green, red < 3.4 V; firmware shutdown < 3.2 V cell under load, ADR-0012), peak/clip (amber ≥ −10 dBFS, red ≥ −7 dBFS: the single-ended ADC input clips near −6.3 dBFS, ADR-0012). No "link" LED (one-way link cannot know) (R14) | Inspection |
 | PK-9 | Config/DFU: recessed USB-C, USB CDC text protocol (`id`, `chan`, `power`, `region`, `save`, `info`), MCUboot serial DFU. Not a charging port | pytest over pty / DK |
 | PK-10 | Telemetry in every frame: battery, peak, clip flag, temperature flag (AIR-3) | bsim |
 | PK-11 | Enclosure body ≤ 100 × 65 × 25 mm (clip excluded), PETG, printed belt clip, battery door without tools, conformal-coated PCB (R15) | CadQuery tests |
