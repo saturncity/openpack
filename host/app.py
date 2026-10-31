@@ -1,7 +1,9 @@
 """OpenPack host API (SPEC API-1). No authentication in v1: LAN only (API-4, see README)."""
+import asyncio
 import os
+import time
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
 from . import channel_plan, modules
@@ -91,11 +93,73 @@ def pair(n: int, body: Pair, request: Request):
     return body
 
 
+SCAN_TTL = 10.0  # API-5
+app.state.scan_cache = None  # (monotonic time, result)
+
+
 @app.get("/rf/scan")
 def scan(request: Request):
-    # ponytail: asks rx 1 only, no 10 s cache (API-5 ticket)
-    r = _ask(request, 1, "scan", timeout=5.0)
-    return {"rssi_dbm": {int(k): float(v) for k, v in (x.split(":") for x in r.split())}}
+    """API-5: every receiver that is not locked scans; per-frequency max; cached 10 s."""
+    c = app.state.scan_cache
+    if c and time.monotonic() - c[0] < SCAN_TTL:
+        return c[1]
+    rssi = {}
+    for n in sorted(request.app.state.plan):
+        try:
+            if _kv(_ask(request, n, "status")).get("locked") == "1":
+                continue
+            r = _ask(request, n, "scan", timeout=5.0)
+        except HTTPException:
+            continue  # dead receiver: others still scan
+        for k, v in (x.split(":") for x in r.split()):
+            rssi[int(k)] = max(float(v), rssi.get(int(k), -999.0))
+    if not rssi:
+        raise HTTPException(503, "no unlocked receiver could scan")
+    out = {"rssi_dbm": rssi}
+    app.state.scan_cache = (time.monotonic(), out)
+    return out
+
+
+PERIOD, MAX_AGE = 0.1, 0.2  # API-2: 10 Hz, <= 200 ms
+
+
+@app.websocket("/telemetry")
+async def telemetry(ws: WebSocket):
+    """Each pack has its own poller, so a dead module only blanks its own entry (status null)."""
+    await ws.accept()
+    ports = app.state.ports
+    latest = {}  # pack -> (monotonic time of reply, status dict)
+
+    async def poll(n):
+        while True:
+            t0 = time.monotonic()
+            try:
+                if n > len(ports):
+                    raise modules.ModuleError("no port")
+                st = _kv(await asyncio.to_thread(modules.request, ports[n - 1], "status", b"", 0.15))
+                latest[n] = (time.monotonic(), st)
+            except modules.ModuleError:
+                latest.pop(n, None)
+            await asyncio.sleep(max(0, PERIOD - (time.monotonic() - t0)))
+
+    tasks = [asyncio.create_task(poll(n)) for n in app.state.plan]
+    gone = asyncio.create_task(ws.receive())  # completes on client disconnect
+    tasks.append(gone)
+    try:
+        while not gone.done():
+            await asyncio.sleep(PERIOD)
+            now, out = time.monotonic(), []
+            for n in sorted(app.state.plan):
+                t, st = latest.get(n, (0, None))
+                age = now - t
+                fresh = st is not None and age <= MAX_AGE
+                out.append({"id": n, "age_ms": round(age * 1000) if fresh else None, "status": st if fresh else None})
+            await ws.send_json({"packs": out})
+    except WebSocketDisconnect:
+        pass
+    finally:
+        for t in tasks:
+            t.cancel()
 
 
 @app.post("/rx/{n}/firmware")

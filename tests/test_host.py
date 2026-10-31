@@ -1,6 +1,7 @@
 import os
 import sys
 import threading
+import time
 
 import pytest
 import yaml
@@ -41,12 +42,13 @@ def fake_module(replies):
     return os.ttyname(slave), seen, (master, slave)
 
 
-REPLIES = {"info": "ok fw=0.1", "status": "ok locked=1 rssi=-60 loss=0.0 batt=90", "trim": "ok", "pair": "ok",
+REPLIES = {"info": "ok fw=0.1", "status": "ok locked=1 rssi=-60 loss=0.0 batt=90 peak=-12 clip=0 temp=0", "trim": "ok", "pair": "ok",
            "scan": "ok 2400:-90 2402:-88", "dfu": "ok"}
 
 
 @pytest.fixture
 def client():
+    app.state.scan_cache = None
     mods = [fake_module(REPLIES) for _ in range(8)]
     app.state.ports = [m[0] for m in mods]
     yield TestClient(app), mods  # fds left open: closing a pty with a blocked reader hangs on macOS
@@ -86,7 +88,6 @@ def test_api(client):
     assert c.put("/rx/3/pair", json={"pack": 3, "fA": 2406, "fB": 2448}).status_code == 200
     assert "pair 3 2406 2448" in mods[2][1]
     assert c.put("/rx/3/pair", json={"pack": 3, "fA": 2406, "fB": 2450}).status_code == 422
-    assert c.get("/rf/scan").json() == {"rssi_dbm": {"2400": -90.0, "2402": -88.0}}
     assert c.post("/rx/4/firmware", content=b"\x00\x01\x02\n\x03").status_code == 200
     assert mods[3][1][-1] == b"\x00\x01\x02\n\x03"
     assert c.get("/openapi.json").json()["openapi"].startswith("3.1")
@@ -106,3 +107,31 @@ def test_silent_module():
     master, slave = os.openpty()
     with pytest.raises(modules.ModuleError):
         modules.request(os.ttyname(slave), "info", timeout=0.2)
+
+
+def test_telemetry_rate_age_and_dead_module(client):
+    c, mods = client
+    app.state.ports[0] = "/dev/does-not-exist"  # one dead module
+    with c.websocket_connect("/telemetry") as ws:
+        ws.receive_json()
+        t0, msgs = time.monotonic(), []
+        while time.monotonic() - t0 < 1.0:
+            msgs.append(ws.receive_json())
+    assert 7 <= len(msgs) <= 13  # ~10 Hz
+    last = msgs[-1]["packs"]
+    assert len(last) == 8 and last[0]["status"] is None  # dead one blank...
+    assert all(p["status"]["batt"] == "90" and p["age_ms"] <= 200 for p in last[1:])  # ...others live, fresh
+
+
+def test_scan_cache(client):
+    c, mods = client
+    assert c.get("/rf/scan").status_code == 503  # all fake receivers report locked=1
+    mods2 = fake_module({**REPLIES, "status": "ok locked=0 rssi=0 loss=0 batt=90"})
+    app.state.ports[2] = mods2[0]
+    first = c.get("/rf/scan").json()
+    assert first == {"rssi_dbm": {"2400": -90.0, "2402": -88.0}}
+    n = mods2[1].count("scan")
+    assert c.get("/rf/scan").json() == first and mods2[1].count("scan") == n  # cached
+    app.state.scan_cache = (time.monotonic() - 11, first)
+    c.get("/rf/scan")
+    assert mods2[1].count("scan") == n + 1  # expired -> rescanned
