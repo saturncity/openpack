@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.20.0)
+find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
+project(op_proto_test)
+set(P ${CMAKE_CURRENT_SOURCE_DIR}/../../src/proto)
+target_sources(app PRIVATE src/main.c ${P}/proto.c ${P}/proto_rx.c ${P}/proto_pack.c)
+target_include_directories(app PRIVATE ${P})
