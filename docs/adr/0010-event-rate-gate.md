@@ -1,0 +1,7 @@
+# ADR-0010: dropout event/h is a hardware gate; simulation reports it
+Status: accepted. 2026-10-31. Issue #62. Covers QUESTIONS.md Q3, PLAN.md Phase 2 gate.
+- **Context:** Q3's "≤ 1 audible dropout event/h" depends on three inputs the twin cannot know until Phase 5: per-copy floor loss (p_good), phone leakage into gap carriers, and receive-antenna directivity. Asserting it in bsim would pass or fail on guessed parameters.
+- **Decision:** G2 (bsim) *asserts* residual loss ≤ 0.1 % at the Phase 1 busy fraction with time diversity on, ≤ 2 consecutive lost frames, and *reports* events/h (no assert). G5 (bench) and G6 (4-pack, real house) *assert* ≤ 1 event/h over 1 h.
+- **Escalation rule on the G2 report:** simulated rate ≤ 10 events/h (within 10× of target) → proceed to Phase 5 and measure p_good, gap-carrier leakage and antenna directivity, then re-run G2 with measured inputs. Rate > 10 events/h → open a PLC upgrade ticket (G.711 Appendix I-style pitch-period waveform extrapolation, replaces repeat-with-fade) and close it before Phase 5 starts.
+- **Consequences:** G2 can pass while R1 is still unproven; R1 is proven or failed at G5/G6. Changing the 1 event/h target needs a new ADR and a stop-and-ask to the owner (hands-off.md reason 5).
+- **Requirements check:** R1 ✓ (asserted where its inputs are real; early warning via the 10× rule). Option "assert in sim" ✗ R1 (gate would depend on guessed inputs, false pass or false fail).
