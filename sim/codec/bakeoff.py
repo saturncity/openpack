@@ -1,6 +1,6 @@
 """Codec bake-off (#13): ViSQOL + PESQ-WB of each codec vs the unquantised input. Needs sim/.cache/venv (numpy scipy soundfile pesq
 remotezip) + the ViSQOL binary (see quality.py). Run: sim/.cache/venv/bin/python sim/codec/bakeoff.py  -> RESULTS.md, sim/.cache/ab/*.wav
-Corpus is fetched by HTTP range from the VCTK 0.92 (Edinburgh) and VocalSet 1.2 (Zenodo) zips into sim/.cache/corpus (gitignored)."""
+Corpus is fetched by HTTP range from the VCTK 0.92 (Edinburgh) and VocalSet 1.1 (Zenodo) zips into sim/.cache/corpus (gitignored)."""
 import io, json, os, sys
 import numpy as np
 import soundfile as sf
@@ -13,7 +13,7 @@ import quality
 
 CACHE = os.path.join(HERE, "..", ".cache")
 VCTK = "https://datashare.ed.ac.uk/bitstream/handle/10283/3443/VCTK-Corpus-0.92.zip?sequence=2&isAllowed=y"
-VOCALSET = "https://zenodo.org/api/records/1442513/files/VocalSet1-2.zip/content"
+VOCALSET = "https://zenodo.org/records/1442513/files/VocalSet11.zip?download=1"
 # 6 female + 4 male VCTK speakers, 1 utterance each
 VCTK_FILES = [f"wav48_silence_trimmed/p{s}/p{s}_{u:03d}_mic1.flac" for s, u in
               [(225, 1), (228, 4), (233, 7), (236, 10), (240, 12), (243, 3), (226, 8), (229, 2), (232, 5), (241, 6)]]
@@ -40,7 +40,7 @@ def fetch():
         z = None
         if names is None:
             z = RemoteZip(url); allw = [n for n in z.namelist() if n.endswith(".wav") and not n.startswith("__")]; allw.sort()
-            names = [next(n for n in allw if f"data_by_singer/{p}" in n) for p in VOCALSET_PICK]
+            names = [next(n for n in allw if f"FULL/{p}" in n) for p in VOCALSET_PICK]
         for n in names:
             f = os.path.join(d, ("vctk_" if "flac" in n else "vs_") + os.path.basename(n))
             if not os.path.exists(f):
@@ -94,7 +94,7 @@ def main():
 
 def write_md(res, clips):
     L = ["# Codec bake-off (#13)", "",
-         f"{len(clips)} clips (10 VCTK 0.92, 10 VocalSet 1.2, 1 synthetic whisper->scream sweep), 48 kHz, first {SECS:.0f} s after leading silence, "
+         f"{len(clips)} clips (10 VCTK 0.92, 10 VocalSet 1.1, 1 synthetic whisper->scream sweep), 48 kHz, first {SECS:.0f} s after leading silence, "
          f"peak-normalised to {PEAK_DB} dBFS (\"0 dB\") and again at -20 dB. Reference = unquantised float input; degraded = codec output "
          "(frames of 48 samples, no loss). `pcm16` = plain 16-bit rounding (ceiling for any 16-bit codec input). "
          "ViSQOL v3.3.3 audio mode 48 kHz (MOS-LQO); PESQ WB after 16 kHz resample (secondary). Regenerate: `sim/codec/bakeoff.py`.", "",
