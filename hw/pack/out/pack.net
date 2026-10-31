@@ -2,47 +2,10 @@
   (version "D")
   (design
     (source "pack.py")
-    (date "10/31/2026 10:05 PM")
+    (date "10/31/2026 10:06 PM")
     (tool "SKiDL (3.0.0)")
     (sheet
       (number 1)
-      (name "/power1/")
-      (tstamps "/1c71258b-4a63-53c3-96a6-ba5ec56f90dd/")
-      (title_block
-        (title)
-        (company)
-        (rev)
-        (date)
-        (source "out/pack.py")
-        (comment
-          (number "1")
-          (value ""))
-        (comment
-          (number "2")
-          (value ""))
-        (comment
-          (number "3")
-          (value ""))
-        (comment
-          (number "4")
-          (value ""))
-        (comment
-          (number "5")
-          (value ""))
-        (comment
-          (number "6")
-          (value ""))
-        (comment
-          (number "7")
-          (value ""))
-        (comment
-          (number "8")
-          (value ""))
-        (comment
-          (number "9")
-          (value ""))))
-    (sheet
-      (number 2)
       (name "/front_end1/")
       (tstamps "/8d458167-a4a2-545c-9c81-b5f4bde18935/")
       (title_block
@@ -79,9 +42,9 @@
           (number "9")
           (value ""))))
     (sheet
-      (number 3)
-      (name "/mcu_usb1/")
-      (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/")
+      (number 2)
+      (name "/")
+      (tstamps "/")
       (title_block
         (title)
         (company)
@@ -116,7 +79,7 @@
           (number "9")
           (value ""))))
     (sheet
-      (number 4)
+      (number 3)
       (name "/adc1/")
       (tstamps "/ca570d45-6888-5db3-a2e2-6ac096a64ee4/")
       (title_block
@@ -153,9 +116,46 @@
           (number "9")
           (value ""))))
     (sheet
+      (number 4)
+      (name "/mcu_usb1/")
+      (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/")
+      (title_block
+        (title)
+        (company)
+        (rev)
+        (date)
+        (source "out/pack.py")
+        (comment
+          (number "1")
+          (value ""))
+        (comment
+          (number "2")
+          (value ""))
+        (comment
+          (number "3")
+          (value ""))
+        (comment
+          (number "4")
+          (value ""))
+        (comment
+          (number "5")
+          (value ""))
+        (comment
+          (number "6")
+          (value ""))
+        (comment
+          (number "7")
+          (value ""))
+        (comment
+          (number "8")
+          (value ""))
+        (comment
+          (number "9")
+          (value ""))))
+    (sheet
       (number 5)
-      (name "/")
-      (tstamps "/")
+      (name "/power1/")
+      (tstamps "/1c71258b-4a63-53c3-96a6-ba5ec56f90dd/")
       (title_block
         (title)
         (company)

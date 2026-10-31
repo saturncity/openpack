@@ -193,17 +193,26 @@ def bom_rows(circuit):
     return rows
 
 
+def erc():
+    """Run SKiDL ERC on the built circuit; return (errors, warnings) counted by ERC alone."""
+    import skidl
+    from skidl.logger import active_logger
+    seen, report = {}, active_logger.report_summary   # read ERC's own counters before it restores the logger
+    active_logger.report_summary = lambda phase: (
+        seen.setdefault(phase, (active_logger.error.count, active_logger.warning.count)), report(phase))
+    try:
+        skidl.ERC()
+    finally:
+        active_logger.report_summary = report
+    return seen["running ERC"]
+
+
 def main(argv):
     import builtins, os, skidl
-    from skidl.logger import active_logger
     OUT.mkdir(exist_ok=True)
     os.chdir(OUT)  # SKiDL drops .log/.erc/_sklib.py files in the cwd
     build()
-    seen, report = {}, active_logger.report_summary   # read ERC's own counters before it restores the logger
-    active_logger.report_summary = lambda phase: (seen.setdefault(phase, (active_logger.error.count, active_logger.warning.count)), report(phase))
-    skidl.ERC()
-    active_logger.report_summary = report
-    errs, warns = seen["running ERC"]
+    errs, warns = erc()
     (OUT / "erc.txt").write_text(f"SKiDL ERC: {errs} errors, {warns} warnings\n")
     print(f"ERC: {errs} errors, {warns} warnings")
     skidl.generate_netlist(file_=str(OUT / "pack.net"))
@@ -212,9 +221,11 @@ def main(argv):
         w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
     print(f"BOM total ${sum(float(r['ext_usd']) for r in rows):.2f} ex. cell")
     if "--no-sch" not in argv:
-        skidl.generate_schematic(filepath=str(OUT / "sch"), top_name="pack", title="OpenPack body-pack")
-        skidl.generate_schematic(filepath=str(OUT / "svg"), top_name="pack", title="OpenPack body-pack", format="svg")
-    return errs
+        # auto_stub: power and high-fanout nets become labels, short local nets are wired
+        opts = dict(top_name="pack", title="OpenPack body-pack", flatness=0, auto_stub=True)
+        skidl.generate_schematic(filepath=str(OUT / "sch"), **opts)
+        skidl.generate_schematic(filepath=str(OUT / "svg"), format="svg", **opts)
+    return errs + warns
 
 
 if __name__ == "__main__":
