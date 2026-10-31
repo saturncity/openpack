@@ -1,5 +1,5 @@
 """PK-1..PK-6, PK-9, PK-12 (#31): the SKiDL pack schematic builds, passes ERC, and the committed BOM is current."""
-import builtins, csv, os, pathlib, sys
+import builtins, csv, importlib.util, os, pathlib
 import pytest
 
 if os.environ.get("CI"):
@@ -7,11 +7,17 @@ if os.environ.get("CI"):
 else:
     pytest.importorskip("skidl")
 PACK = pathlib.Path(__file__).resolve().parents[1] / "hw/pack"
-sys.path.insert(0, str(PACK))
+
+
+def _load_pack():  # by path: mech/pack.py is also importable as "pack"
+    spec = importlib.util.spec_from_file_location("hw_pack_sch", PACK / "pack.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def test_pack_erc_and_bom(tmp_path, monkeypatch):
-    import pack
+    pack = _load_pack()
     monkeypatch.chdir(tmp_path)  # SKiDL writes log files into the cwd
     pack.build()
     assert pack.erc() == (0, 0)
