@@ -38,12 +38,12 @@ jobs:
           echo "== devices"; ls "$BSIM_OUT_PATH"/bin/bs_*device* "$BSIM_OUT_PATH"/bin/bs_2G4_phy*
           echo "== channels/modems"; ls "$BSIM_OUT_PATH/lib"
           echo "== impl status (RADIO, UART, TIMER, DPPI, RTC, GPIOTE, IPC, I2S, CLOCK)"
-          grep -iE '^\| \*\*(RADIO|UART|UARTE|TIMER|DPPI|RTC|GPIOTE|IPC|I2S|CLOCK|PDM)' modules/bsim_hw_models/nrf_hw_models/docs/README_impl_status.md | cut -c1-140
+          grep -iE '^\| \*\*(RADIO|UART|TIMER|DPPI|RTC|GPIOTE|IPC|I2S|CLOCK|PDM)' modules/bsim_hw_models/nrf_hw_models/docs/README_impl_status.md | cut -c1-140
           echo "== nrf_hw_models revision"; west list -f '{name} {revision}' nrf_hw_models babblesim_ext_2G4_device_WLAN_actmod
       - name: build probes
         run: |
-          ls -d /opt/toolchains/* || true
-          export ZEPHYR_SDK_INSTALL_DIR="${ZEPHYR_SDK_INSTALL_DIR:-$(ls -d /opt/toolchains/zephyr-sdk-* | head -1)}"
+          find /opt/toolchains -maxdepth 1 || true
+          export ZEPHYR_SDK_INSTALL_DIR="${ZEPHYR_SDK_INSTALL_DIR:-$(find /opt/toolchains -maxdepth 1 -name 'zephyr-sdk-*' | head -1)}"
           echo "SDK=$ZEPHYR_SDK_INSTALL_DIR"
           B=nrf5340bsim/nrf5340/cpunet
           west build -p -b "$B" openpack/tests/bsim/probe/radio -d b_tx --no-sysbuild -- -DCONFIG_PROBE_ROLE_TX=y
