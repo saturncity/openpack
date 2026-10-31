@@ -355,3 +355,118 @@ if __name__ == "__main__":
     under13 = [f for f in gaps if abs(f - UK_WIFI_13) <= 9]
     print(f"  plan gap carriers under UK Wi-Fi 13 (2463-2481 occupied): {under13} -> packs"
           f" {[k for k, ab in plan.items() if ab['fB'] in under13 or ab['fA'] in under13]} lose their gap copy if 13 is used")
+
+
+# ---- Audit 4: R1 under UK rules, receive-side isolation (#89, docs/analysis/r1-uk-isolation.md). ----
+# EN 300 328 and IR 2030 limit only what the pack radiates. Rack antenna gain, its front-to-back ratio and the
+# receiver's filter are not regulated. The interference numbers use the BabbleSim modem tables
+# (sim/loss/bsim_modem.py), so they predict the twin; bsim (c) via tests/bsim/scenarios/run.py
+# --rx-gain/--wifi-gain/--near-att checks them. Antenna, coax and reflection figures are estimates (est.).
+PATCH_DBI = 8.0          # est.: 2.4 GHz flat-panel/patch, 8-9 dBi, ~65-75 deg beamwidth (catalogue class)
+FTB_DB = 15.0            # est.: front-to-back design value; catalogue patches state 15-25 dB
+SIDE_DB = 10.0           # est.: rejection 90 deg off-axis for a ~70 deg beam (vs boresight)
+REFL_PATH_M, REFL_LOSS_DB = 15.0, 6.0   # est.: Wi-Fi via one stage-wall bounce into the front lobe
+COAX_DB_M = {"LMR-400": 0.22, "LMR-240": 0.42, "RG-58": 1.0}   # est., 2.4 GHz catalogue attenuation
+CONN_DB = 0.5            # est.: two N/BNC connectors
+TD_BITS = (81 + PKT_OVH_B) * 8   # TD-length copy, the one (c) asserts on
+MARGIN_DB = 3.0          # design margin over the twin's threshold (real phones, multipath)
+R1_PLAN = "docs/analysis/r1-uk-plan.yaml"
+
+
+def _bsim_modem():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("bsim_modem", pathlib.Path(__file__).resolve().parent / "sim/loss/bsim_modem.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def rejection_db(direction, ftb=FTB_DB):
+    """Wi-Fi rejection of the rack patch relative to its on-axis gain, by where the Wi-Fi sits. One reflection off
+    the stage arrives on-axis and caps it: direct at 2 m vs reflected over REFL_PATH_M with REFL_LOSS_DB."""
+    direct = {"behind": ftb, "beside": SIDE_DB, "front": 0.0}[direction]
+    refl = 20 * math.log10(REFL_PATH_M / 2.0) + REFL_LOSS_DB
+    return -10 * math.log10(10 ** (-direct / 10) + 10 ** (-refl / 10))
+
+
+def wifi_min_dist_m(need_db, direction, ftb=FTB_DB):
+    """Closest a Wi-Fi device may be to a rack antenna (Q3: 20 dBm, pack at 10 m) for need_db + MARGIN_DB."""
+    return 2.0 * 10 ** (max(0.0, need_db + MARGIN_DB - rejection_db(direction, ftb)) / 20)
+
+
+if __name__ == "__main__":
+    bm = _bsim_modem()
+    print("\n== Audit 4: R1 under UK rules, receive-side isolation (#89) ==")
+    wanted = REGIONS["UK"]["eirp_dbm"] - (40.2 + 20)          # 9 dBm pack at 10 m, isotropic rack antenna
+    wifi = 20.0 - (40.2 + 20 * math.log10(2.0))               # Q3 Wi-Fi 20 dBm at 2 m
+    W = REGIONS["UK"]["wifi"]
+    r1plan = yaml.safe_load((pathlib.Path(__file__).resolve().parent / R1_PLAN).read_text())["packs"]
+    gapc = {k: next(f for f in (ab["fA"], ab["fB"]) if min(abs(f - w) for w in W) >= 11) for k, ab in r1plan.items()}
+    need = {f: bm.isolation_needed_db(f, W, wanted, wifi, TD_BITS) for f in sorted(set(gapc.values()) | {2402})}
+    print(f"  twin (bsim modem): pack {wanted:.1f} dBm, each Wi-Fi {wifi:.1f} dBm at the rx antenna. Isolation needed"
+          f" for a TD-length copy to have PER <= 0.1 % while Wi-Fi is on air:")
+    print("   " + "  ".join(f"{f}: {need[f]:.1f}" for f in need) + " dB  (2402: lower band edge)")
+    worst = max(need[f] for f in gapc.values())
+    assert 12 <= worst <= 13.5, "11 MHz gap carriers need ~12.7 dB (ADR-0015: ~11 dB)"
+    assert need[2402] > worst + 4, "the 2402 band-edge carrier (10 MHz from Wi-Fi 1) is worse than any gap carrier"
+
+    print(f"  lever 1, directional rack antennas (patch est. {PATCH_DBI:.0f} dBi, FtB {FTB_DB:.0f} dB;"
+          f" reflection caps rejection at {rejection_db('behind', 99):.1f} dB):")
+    for d in ("behind", "beside", "front"):
+        rj = rejection_db(d)
+        ok = sum(rj >= need[f] - 1e-9 for f in gapc.values())
+        print(f"    Wi-Fi {d:<6} at 2 m: rejection {rj:4.1f} dB -> {ok}/8 gap carriers hold;"
+              f" with {MARGIN_DB:.0f} dB margin Wi-Fi must be >= {wifi_min_dist_m(worst, d):4.1f} m from the antenna")
+    assert rejection_db("behind") >= worst and rejection_db("beside") < worst
+    assert wifi_min_dist_m(worst, "behind") <= 3.0 and wifi_min_dist_m(worst, "beside") <= 4.0  # install rule
+    assert 10 <= wifi_min_dist_m(worst, "front") <= 15, "AP in the antenna's view: keep it >= ~12 m away"
+    for name, dbm in COAX_DB_M.items():
+        print(f"    coax {name}: <= {(6 - CONN_DB) / dbm:4.1f} m inside the RK-2 6 dB budget")
+    nf = cascade_nf_db([(-6, 6), (20, 2), (-10.5, 10.5), (0, 7)])   # Audit 3 chain, BT40E modules (no module LNA)
+    rng = link_range_m(REGIONS["UK"]["eirp_dbm"], 3.0, nf, g_rx=PATCH_DBI)
+    print(f"    link: system NF {nf:.1f} dB, indoor n=3 range {rng:.0f} m with the patch (Audit 3 used 6 dBi)."
+          f" Coax, LNA and splitter scale pack and Wi-Fi alike, so C/I is unchanged")
+    assert rng > 20
+    lna_in = wifi + PATCH_DBI - CONN_DB      # worst case: Wi-Fi in front at 2 m, before any coax loss
+    im3 = 3 * lna_in - 2 * 0.0 - 10 * math.log10(60 / 2)   # IIP3 0 dBm; 1/6/11 products spread over ~60 MHz
+    print(f"    rack LNA input, Wi-Fi in front at 2 m: {lna_in:.1f} dBm per channel -> LNA input P1dB >= -10 dBm;"
+          f" IM3 at IIP3 0 dBm {im3:.0f} dBm per 2 MHz vs pack {wanted + PATCH_DBI:.0f} dBm")
+    assert im3 < wanted + PATCH_DBI - 20, "rack LNA spec for #32: IIP3 >= 0 dBm"
+
+    print("  lever 2, receive selectivity (nRF5340 RADIO: the channel filter is fixed per MODE, so only 1M vs 2M):")
+    for off in (10, 11, 12, 13):
+        print(f"    Wi-Fi centre {off} MHz away: 2M filter passes {bm.wifi_through_filter_db(off):6.1f} dB,"
+              f" 1M {bm.wifi_through_filter_db(off, '1M'):6.1f} dB")
+    g1 = need[2423] - bm.isolation_needed_db(2423, W, wanted, wifi, TD_BITS, phy="1M")
+    td_1m = RAMP_US + 2 * pkt_air_us(True, 1e6) + 100
+    hyb = RAMP_US + pkt_air_us(True) + 100 + pkt_air_us(False, 1e6)
+    print(f"    1M on the gap copy gains {g1:.1f} dB at 11 MHz. TD at 1M: {td_1m:.0f} us/frame (does not fit 1000);"
+          f" hybrid (copy A 2M with td_audio, copy B 1M v1): {hyb:.0f} us, copy B ends"
+          f" {pkt_air_us(False, 1e6) - pkt_air_us(True):+.0f} us later (SYS-2)")
+    assert g1 < worst and td_1m > 1000 and hyb < 1000
+
+    psd_cap = 10 - 10 * math.log10(psd_stats()[0])
+    gain3 = psd_cap - REGIONS["UK"]["eirp_dbm"]
+    print(f"  lever 3, adaptive (LBT/DAA) at the PSD cap {psd_cap:.1f} dBm: +{gain3:.1f} dB, {worst - gain3:.1f} dB short"
+          f" of what the 11 MHz carriers need")
+    assert gain3 < worst / 4
+
+    print(f"  lever 4, an 8th gap carrier ({R1_PLAN}: pack 1 2414/2482):")
+    fr, p = gfsk_spectrum()
+    above = lambda c, k: float(p[(fr >= (2483.5 - c + k) * 1e6) & (fr < (2484.5 - c + k) * 1e6)].sum())
+    oob = [REGIONS["UK"]["eirp_dbm"] + 10 * math.log10(above(2482, k)) for k in range(2)]
+    us_rb = REGIONS["US"]["eirp_dbm"] + 10 * math.log10(float(p[fr >= 1.5e6].sum()))
+    print(f"    2482 skirt above 2483.5: {oob[0]:.1f} / {oob[1]:.1f} dBm/MHz (ideal GFSK, 9 dBm) vs EN 300 328 4.3.2.8"
+          f" -10 / -20. US at 20 dBm puts {us_rb:.0f} dBm into the 2483.5-2500 restricted band (15.205, ~-41): UK only")
+    assert oob[0] <= -20 and oob[1] <= -30 and us_rb > -41
+    fs = sorted(f for ab in r1plan.values() for f in (ab["fA"], ab["fB"]))
+    assert len(r1plan) == 8 and len(set(gapc.values())) == 8, "all 8 packs have their own gap carrier"
+    assert min(b - a for a, b in zip(fs, fs[1:])) >= 3 and all(ab["fB"] >= ab["fA"] + 40 for ab in r1plan.values())
+    adj3 = bm.through_filter_db(3, "2M", bm.TX2M)
+    sinr_req = next(x / 10 for x in range(400) if bm.per(x / 10, TD_BITS) <= 1e-3)
+    hot = -adj3 - sinr_req
+    d_near = 10 * 10 ** (-hot / 20)
+    print(f"    near-far: a pack 3 MHz away passes {adj3:.1f} dB into the filter and a copy needs SINR {sinr_req:.1f} dB,"
+          f" so a gap copy holds while its neighbour is <= {hot:.1f} dB hotter: for packs at 10 m, no pack closer"
+          f" than {d_near:.1f} m to an antenna")
+    assert 3 <= d_near <= 4.5
