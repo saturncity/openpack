@@ -17,16 +17,16 @@ jobs:
     if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
-      - run: echo "twister: skipped until phase 2"
+      - run: echo "twister skipped until phase 2"
   # enabled in phase 2
   bsim:
     if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
-      - run: echo "bsim: skipped until phase 2"
+      - run: echo "bsim skipped until phase 2"
   # enabled in phase 4
   kibot:
     if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
-      - run: echo "kibot: skipped until phase 4"
+      - run: echo "kibot skipped until phase 4"
