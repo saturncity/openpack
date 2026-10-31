@@ -1,7 +1,5 @@
 common:
   tags: openpack
-  integration_platforms:
-    - native_sim
 tests:
   # Runs: the role log line, on the host.
   fw.role.pack:

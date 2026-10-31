@@ -1,5 +1,5 @@
 # One app, two images on nRF5340 (FW-1): the same source builds for cpuapp and cpunet.
-if(NOT "${SB_CONFIG_NET_CORE_BOARD}" STREQUAL "")
+if(NOT "${SB_CONFIG_NET_CORE_BOARD}" STREQUAL "" AND NOT TARGET fw_net)
   ExternalZephyrProject_Add(
     APPLICATION fw_net
     SOURCE_DIR  ${APP_DIR}
