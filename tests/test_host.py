@@ -56,6 +56,8 @@ def client():
 
 def test_plan_file_valid():
     assert len(channel_plan.load()) == 8
+    assert channel_plan.region() == "UK"
+    assert channel_plan.gap_lost_to_wifi13(channel_plan.load()) == [6, 7, 8]  # ADR-0014: UK Wi-Fi 13 caveat
 
 
 @pytest.mark.parametrize("edit", [
@@ -63,9 +65,13 @@ def test_plan_file_valid():
     lambda p: p[1].update(fA=2445),                      # fA > 2440
     lambda p: p[1].update(fB=p[1]["fA"] + 20),           # fB too close
     lambda p: p[3].update(fB=p[4]["fB"]),                # duplicate carrier
-    lambda p: p[3].update(fB=2460),                      # no gap carrier
-    lambda p: p[3].update(fA=2423, fB=2448),             # two gap carriers
-    lambda p: [p[i].update(fA=a) for i, a in ((5, 2414), (6, 2418), (7, 2402))],                   # 5 in-band carriers under Wi-Fi 1
+    lambda p: p[4].update(fB=2460),                      # a second pack without a gap carrier
+    lambda p: p[1].update(fB=2448),                      # pack 1 takes pack 4's gap carrier (duplicate)
+    lambda p: p[7].update(fA=2437),                      # 2 MHz from pack 8's 2439: collides at 2 Mbit (#76)
+    lambda p: p[7].update(fA=2432),                      # pack 6 near: pack 7 loses 2432 and 2476 (near-far)
+    lambda p: p[1].update(fB=2459),                      # no-gap pack 1 within 5 MHz of pack 2's 2463
+    lambda p: p[3].update(fB=2466),                      # pack 2 near: pack 3 loses 2426 and 2466 (near-far)
+    lambda p: [p[i].update(fA=a) for i, a in ((6, 2417), (7, 2420))],   # 5 in-band carriers under Wi-Fi 1
 ])
 def test_bad_plans_rejected(edit):
     plan = yaml.safe_load(channel_plan.PATH.read_text())
@@ -74,20 +80,27 @@ def test_bad_plans_rejected(edit):
         channel_plan.validate(plan)
 
 
+def test_bad_region_rejected():
+    plan = yaml.safe_load(channel_plan.PATH.read_text())
+    plan["region"] = "EU"
+    with pytest.raises(ValueError):
+        channel_plan.validate(plan)
+
+
 def test_api(client):
     c, mods = client
     assert c.get("/health").json() == {"ok": True}
     p = c.get("/packs").json()
-    assert len(p) == 8 and p[0]["fA"] == 2423 and p[0]["status"]["locked"] == "1"
-    assert c.get("/packs/3").json()["fB"] == 2448
+    assert len(p) == 8 and p[0]["fA"] == 2414 and p[0]["status"]["locked"] == "1"
+    assert c.get("/packs/3").json()["fB"] == 2468
     assert c.get("/packs/9").status_code == 404
     assert c.put("/packs/2/trim", json={"gain_db": 3.5}).status_code == 200
     assert "trim 3.5" in mods[1][1]
     assert c.put("/packs/2/trim", json={"gain_db": 99}).status_code == 422
     assert c.get("/rx").json()[0] == {"n": 1, "fw": "0.1"}
-    assert c.put("/rx/3/pair", json={"pack": 3, "fA": 2406, "fB": 2448}).status_code == 200
-    assert "pair 3 2406 2448" in mods[2][1]
-    assert c.put("/rx/3/pair", json={"pack": 3, "fA": 2406, "fB": 2450}).status_code == 422
+    assert c.put("/rx/3/pair", json={"pack": 3, "fA": 2426, "fB": 2468}).status_code == 200
+    assert "pair 3 2426 2468" in mods[2][1]
+    assert c.put("/rx/3/pair", json={"pack": 3, "fA": 2426, "fB": 2463}).status_code == 422
     assert c.post("/rx/4/firmware", content=b"\x00\x01\x02\n\x03").status_code == 200
     assert mods[3][1][-1] == b"\x00\x01\x02\n\x03"
     assert c.get("/openapi.json").json()["openapi"].startswith("3.1")
