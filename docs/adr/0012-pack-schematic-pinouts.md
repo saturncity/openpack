@@ -21,9 +21,9 @@ Status: accepted. 2026-10-31. Issue #31, PR #75 (amended after review). Schemati
     - The single-ended pin swings at most about VREF/2 = 1.375 V peak, i.e. −6.3 dBFS of the 2.83 V-peak differential full scale. The PK-2 max (0.6 Vrms) reads −7.7 dBFS on path 1.
     - So amber "peak" at ≥ −10 dBFS and red "clip" at ≥ −7 dBFS. Red means past the design maximum, within 0.7 dB of the analog clip.
 - **Numbers (`tests/test_spice_preamp.py`, ngspice in CI with `-rP` printing them; independent MNA cross-check):**
-  - Noise: **0.96 µV A-wtd** (0.94 before R20).
+  - Noise: **0.967 µV A-wtd** in ngspice (MNA cross-check 0.961; 0.94 before R20).
   - 5 V rail → preamp output: −33.6 dB at 1 kHz; asserted ≤ −30 dB.
-  - ADC pin: 1.16 V peak, below 1.375 V.
+  - ADC pin: 1.17 V peak, below 1.375 V. Op-amp +IN: 1.21–2.37 V (asserted 0.2–2.50 V).
   - OPA1656 +IN: ≤ 2.50 V, asserted.
   - BOM: **$34.46** at qty 100 excluding the cell, with BT40NE at Fanstel direct ($13.47). It is $37.75 at the Digi-Key module price; `audit.py` prints both. PCB assembly and conformal coating are excluded.
 - **Consequences / Phase 4 signoff items:**
@@ -41,7 +41,7 @@ Status: accepted. 2026-10-31. Issue #31, PR #75 (amended after review). Schemati
 | R-id | Result | Basis |
 |---|---|---|
 | R6 | ✓ | Pinout from the manual; 5 V/2.2 kΩ bias; DPA via DAD6034, bench-unverified |
-| R5 | ✓ | 0.96 µV; rail filtered |
+| R5 | ✓ | 0.967 µV; rail filtered |
 | R2 | ✓ | No clip at 0.6 Vrms in op-amp CM, output swing, or ADC pin |
 | R12 | ✓ | $34.46 (Fanstel price) |
 | R7 | ✓ | Removable protected 18650, reverse FET, no charger |
