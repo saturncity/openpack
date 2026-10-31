@@ -1,0 +1,41 @@
+# WLAN interference parameters for the bsim twin (issue #16, ADR-0003).
+# Used until a venue scan exists. Each param: value, unit, source, estimate (true = engineering estimate,
+# not a literature number). Maps to BabbleSim 2G4_device_WLAN_actmod options AND audit.py burst_loss().
+# Honest limit: no primary source gives one "busy fraction for a packed auditorium"; busy values are
+# estimates bracketed by the sources in `sources`. Replace from a venue scan (Phase 1+).
+sources:
+  actmod: https://github.com/BabbleSim/ext_2G4_device_WLAN_actmod   # options: src/WLAN_actmod_argparse.c, docs/Description.pdf
+  hou2021: https://doi.org/10.1109/ACCESS.2021.3088123   # Hou et al., IEEE Access 9, railway-station 2.4/5 GHz busy/idle durations, heavy WLAN traffic
+  ieee80211: https://standards.ieee.org/ieee/802.11/7028/   # IEEE 802.11-2020: aPPDUMaxTime 5.484 ms, channels 1/6/11 non-overlapping
+  fcc: https://www.ecfr.gov/current/title-47/section-15.247   # 47 CFR 15.247: max 30 dBm conducted in 2.4 GHz
+  audit: audit.py   # burst_loss() Gilbert-Elliott: busy 0.10 "clear", 0.40 "worst case", mean burst 2-4 frames
+scenario:   # ADR-0003
+  interferers: 3            # laptop + 2 phones, iperf
+  wifi_channels: [1, 6, 11] # one interferer device per channel
+  interferer_distance_m: 2  # to receiver antenna
+  pack_distance_m: 10
+  source: docs/adr/0003-pass-numbers.md
+  estimate: false
+sets:
+  typical_crowded_venue:
+    gilbert_elliott:        # audit.py burst_loss(busy, mean_burst_frames)
+      busy_fraction:      {value: 0.10, unit: fraction of time per BLE channel, source: "audit.py clear-channel case; bracketed by hou2021 (heavy-traffic 2.4 GHz channels, non-rush)", estimate: true}
+      mean_burst_frames:  {value: 2, unit: audio frames, source: "ieee80211 (typical aggregate PPDU <= 5.484 ms) vs audit.py", estimate: true}
+    actmod:                 # per interferer device, one per Wi-Fi channel
+      ConfigSet:          {value: 10, unit: "% of WLAN capacity (-ConfigSet=10)", source: actmod, estimate: true}
+      DataRate:           {value: 54, unit: Mbit/s, source: "actmod default", estimate: false}
+      pr:                 {value: 0.2, unit: probability, source: "actmod default (new packet right after tx)", estimate: false}
+      sigma:              {value: 6.5, unit: ms, source: "actmod default, generalized-Pareto scale", estimate: false}
+      kappa:              {value: 0, unit: shape, source: "actmod default", estimate: false}
+      power:              {value: 15, unit: dBm, source: "phone/laptop typical 14-20 dBm EIRP, under fcc 30 dBm cap", estimate: true}
+  worst_case_iperf:
+    gilbert_elliott:
+      busy_fraction:      {value: 0.40, unit: fraction of time per BLE channel, source: "audit.py worst case; ADR-0003 phase-1 busy fraction", estimate: true}
+      mean_burst_frames:  {value: 4, unit: audio frames, source: "ieee80211 aPPDUMaxTime 5.484 ms A-MPDU; audit.py 4 ms case", estimate: false}
+    actmod:
+      ConfigSet:          {value: 50, unit: "% of WLAN capacity; calibrate in sim to measured 0.40, use 100 as hard stress", source: actmod, estimate: true}
+      DataRate:           {value: 54, unit: Mbit/s, source: "actmod default", estimate: false}
+      pr:                 {value: 0.2, unit: probability, source: "actmod default", estimate: false}
+      sigma:              {value: 6.5, unit: ms, source: "actmod default, generalized-Pareto scale", estimate: false}
+      kappa:              {value: 0, unit: shape, source: "actmod default", estimate: false}
+      power:              {value: 20, unit: dBm, source: "actmod default 20 dBm; within fcc 30 dBm cap", estimate: false}
