@@ -70,3 +70,39 @@ jobs:
         timeout-minutes: 30
         run: |
           for c in 5 10 25 50 100; do openpack/tests/bsim/probe/run.sh "$c"; done
+
+  twister:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci-repo-cache:v0.29.4.20260912
+      options: --entrypoint /bin/bash
+    env:
+      ZEPHYR_TOOLCHAIN_VARIANT: zephyr
+      BSIM_OUT_PATH: ${{ github.workspace }}/tools/bsim
+      BSIM_COMPONENTS_PATH: ${{ github.workspace }}/tools/bsim/components
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: openpack
+      - uses: actions/cache@v4
+        with:
+          path: |
+            zephyr
+            modules
+            bootloader
+            tools
+          key: west-${{ hashFiles('openpack/west.yml') }}
+      - name: west update
+        run: |
+          git config --global --add safe.directory '*'
+          [ -d .west ] || west init -l openpack
+          west update --narrow -o=--depth=1
+      - name: build BabbleSim
+        working-directory: tools/bsim
+        run: make everything -s -j4
+      - name: twister fw/
+        run: |
+          export ZEPHYR_SDK_INSTALL_DIR="${ZEPHYR_SDK_INSTALL_DIR:-$(find /opt/toolchains -maxdepth 1 -name 'zephyr-sdk-*' | head -1)}"
+          west twister -T openpack/fw -p native_sim -p nrf5340bsim/nrf5340/cpuapp -p nrf5340dk/nrf5340/cpuapp \
+            -v --inline-logs --outdir twister-out
