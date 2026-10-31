@@ -63,6 +63,7 @@ def test_plan_file_valid():
     lambda p: p[3].update(fB=p[4]["fB"]),                # duplicate carrier
     lambda p: p[3].update(fB=2460),                      # no gap carrier
     lambda p: p[3].update(fA=2423, fB=2448),             # two gap carriers
+    lambda p: [p[i].update(fA=a) for i, a in ((5, 2414), (6, 2418), (7, 2402))],                   # 5 in-band carriers under Wi-Fi 1
 ])
 def test_bad_plans_rejected(edit):
     plan = yaml.safe_load(channel_plan.PATH.read_text())

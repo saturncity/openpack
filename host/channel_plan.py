@@ -15,7 +15,7 @@ def validate(plan):
     packs = plan.get("packs") if isinstance(plan, dict) else None
     if not isinstance(packs, dict) or sorted(packs) != list(range(1, 9)):
         raise ValueError("plan must define packs 1..8")
-    freqs = []
+    freqs, load = [], {}
     for pid, p in packs.items():
         a, b = p["fA"], p["fB"]
         if not (2402 <= a <= 2440):
@@ -25,6 +25,12 @@ def validate(plan):
         if _gap(a) + _gap(b) != 1:
             raise ValueError(f"pack {pid}: needs exactly one gap carrier")
         freqs += [a, b]
+        for f in (a, b):
+            if not _gap(f):
+                ch = min((2412, 2437, 2462), key=lambda c: abs(f - c))  # nearest Wi-Fi 1/6/11
+                load[ch] = load.get(ch, 0) + 1
+    if max(load.values()) > 4:
+        raise ValueError(f"more than 4 in-band carriers under one Wi-Fi channel: {load}")
     freqs.sort()
     if any(y - x < 2 for x, y in zip(freqs, freqs[1:])):
         raise ValueError("carriers must be distinct and >= 2 MHz apart")
