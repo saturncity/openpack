@@ -1,0 +1,10 @@
+mainmenu "bsim radio probe"
+
+config PROBE_ROLE_TX
+	bool "Transmit (else receive)"
+
+config PROBE_PACKETS
+	int "Packets per carrier block, one per 1 ms"
+	default 3000
+
+source "Kconfig.zephyr"

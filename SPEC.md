@@ -34,7 +34,7 @@
 | ID | Requirement |
 |---|---|
 | AIR-1 | PHY: nRF RADIO `MODE=Ble_2Mbit`, GFSK 2 Mbps, 2 MHz channel spacing, raw packet config (not BLE link layer). Rationale: identical on silicon and in BabbleSim |
-| AIR-2 | Packet: 2 B preamble, 4 B access address = `0x8E89BED6 ^ (pack_id * 0x9E3779B1)`, 1 B length, payload, 3 B CRC-24 (poly 0x00065B), whitening on |
+| AIR-2 | Packet: 2 B preamble, 4 B access address = `0x8E89BED6 ^ (pack_id * 0x9E3779B1)`, 1 B header (RADIO S0: format version, 0 in v1), 1 B length, payload, 3 B CRC-24 (poly 0x00065B, address skipped), whitening on. This is the BLE 2M PDU layout, the only one the bsim RADIO model accepts (ADR-0009) |
 | AIR-3 | Payload (v1, ADPCM-6 shown; codec per ADR-0005): `seq u8` · `status u16` (bat 7 b, peak 6 b, flags 3 b: clip/lowbat/temp) · `codec_state` 3 B · `audio` 36 B · optional `td_audio` 39 B (frame n−2, Kconfig `OP_TIME_DIVERSITY`). Max 85 B |
 | AIR-4 | Frame period 1000 µs ±20 ppm (pack crystal). Schedule from frame start t0: copy A TX at t0, copy B TX at t0+T_A+T_GAP on channel B, RX slot at t0+700 µs for 300 µs (idle in v1) |
 | AIR-5 | Channel pair per pack from `host/channel_plan.yaml`: fA ∈ 2402–2440 MHz, fB = fA + ≥ 40 MHz, 16 distinct carriers for 8 packs, gap carriers (2423–2426, 2448–2451, 2473–2482) assigned first |

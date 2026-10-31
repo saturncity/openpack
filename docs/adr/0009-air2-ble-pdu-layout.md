@@ -1,0 +1,6 @@
+# ADR-0009: AIR-2 uses the BLE 2M PDU layout (1 B header + 1 B length)
+Status: accepted. 2026-10-31. Issue #18.
+- **Context:** #18 confirmed AIR-1 (raw `Ble_2Mbit`, no link layer) end to end in BabbleSim: 15 000/15 000 packets on 5 carriers with no Wi-Fi (`tests/bsim/probe`). The nRF RADIO model only accepts the BLE packet layout at 2 Mbit (`NHW_RADIO_utils.c`: S0 = 1 B, LENGTH = 8 bit, 16-bit preamble, 4 B address, little-endian, whitening on, 3 B CRC) and aborts otherwise. SPEC AIR-2 had no S0 byte; `audit.py` already budgeted 2 B header (`PKT_OVH_B = 11`).
+- **Decision:** AIR-2 gains a 1 B header (RADIO S0) before the length byte: `hdr u8` = format version (bits 0-3, 0 in v1), rest reserved 0. CRC skips the address (BLE style). Everything else unchanged. Fallback (second nRF device faking Wi-Fi) not needed.
+- **Consequences:** +4 µs per packet at 2 Mbit, already inside `audit.py` numbers (no change). The header gives a free format-version field for later codecs. Firmware must use the nrfx HAL for every RADIO/TIMER access (the bsim models only see HAL writes).
+- **Requirements check:** R1 ✓ (no airtime change) · R13 ✓ (same packet on silicon and in bsim). Option "keep S0 = 0 and patch the model" ✗ R13 (sim diverges from upstream).
