@@ -88,6 +88,21 @@ case ADR-0002 avoids by assigning gap carriers first.
 `sim/loss/plc.py`: repeat last good frame for 10 ms, the 11th lost frame fades it 1 -> 0 over 1 ms, then mute.
 (Reading of "1 ms linear fade; mute after 10 ms": the fade is the last repeat before the mute.)
 
-`python3 sim/loss/curve.py` runs codec + trace + PLC on two `say` speech clips and scores with
-`sim/quality.visqol` (issue #13). ViSQOL curve: pending until `sim/quality.py` is on main; the script
-already writes the degraded WAVs to `sim/loss/out/` (gitignored). ADPCM-6 is the only codec that fits with TD.
+`python3 sim/loss/curve.py` runs codec + trace + PLC on two macOS `say` speech clips (48 kHz) and scores with
+`sim/quality.visqol` (ViSQOL v3.3.3 audio mode, built locally per sim/codec/RESULTS.md; ~2 min).
+
+### ViSQOL vs busy fraction (worst case: both copies under Wi-Fi at the same busy, §4 traces)
+
+| busy % | adpcm6 +TD | adpcm6 | adpcm8 | bf8_3 |
+|---|---|---|---|---|
+| 5% | 4.21 | 4.06 | 4.13 | 4.10 |
+| 10% | 4.18 | 3.96 | 4.03 | 4.00 |
+| 15% | 4.07 | 3.57 | 3.60 | 3.60 |
+| 20% | 4.01 | 3.32 | 3.33 | 3.36 |
+| 25% | 4.11 | 3.20 | 3.21 | 3.23 |
+| 30% | 3.95 | 3.04 | 3.04 | 3.06 |
+| 35% | 3.67 | 2.90 | 2.90 | 2.92 |
+| 40% | 3.42 | 2.80 | 2.81 | 2.81 |
+
+Reading: with TD, ViSQOL stays ≥ 4.0 (SYS-4) up to ~25 % busy even with no gap carrier; without TD only up to ~10 %.
+Codec choice barely matters once loss dominates. Short clips (a few s) make each cell noisy (±0.1); the trend is the evidence for ADR-0001.
