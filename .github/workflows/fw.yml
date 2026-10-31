@@ -72,7 +72,7 @@ jobs:
           }
           check 0.10 10 -power=15
           check 0.40 50 -sigma=0.9
-      - name: pack frame schedule (AIR-4, #22), 10 s
+      - name: "pack frame schedule (AIR-4, #22), 10 s"
         if: ${{ !cancelled() }}
         timeout-minutes: 10
         run: |
