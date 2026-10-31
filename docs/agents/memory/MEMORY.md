@@ -1,0 +1,3 @@
+- [Orchestrator model](orchestrator-model.md) — user wants Opus 5.5 as master agent, not Fable
+- [Hands-off owner](hands-off-owner.md) — non-technical owner, pre-approved all in-scope work; only ask for buying/plugging in
+- [Prefer 3D-printed](prefer-3d-printed.md) — print clips/panels/brackets instead of buying; split to fit A1 mini 180 mm bed, PETG
