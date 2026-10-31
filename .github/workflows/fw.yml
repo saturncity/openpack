@@ -58,12 +58,11 @@ jobs:
           cd "$BSIM_OUT_PATH/bin"
           timeout 60 ./bs_2G4_phy_v1 -s=u -D=1 -sim_length=4000000 >/dev/null &
           timeout 60 ./bs_probe_uart -s=u -d=0 -uart0_pty -uart_pty_wait >u.log 2>&1 &
-          for _ in $(seq 20); do P=$(grep -o '/dev/pts/[0-9]*' u.log | head -1); [ -n "$P" ] && break; sleep 0.5; done
-          echo "pty=$P"; head -5 u.log
-          timeout 20 cat "$P" >pty.out || true
-          wait
-          head -3 pty.out
-          grep -q PROBE_UART_OK pty.out
+          rc=0
+          python3 "$GITHUB_WORKSPACE/openpack/tests/bsim/probe/read_pty.py" u.log PROBE_UART_OK || rc=$?
+          head -5 u.log
+          kill %1 %2 2>/dev/null || true
+          exit $rc
       - name: radio probe (no Wi-Fi)
         if: ${{ !cancelled() }}
         timeout-minutes: 8
