@@ -1,0 +1,5 @@
+tests:
+  # RX-6 PLC rule, same as sim/loss/plc.py.
+  fw.rx.plc:
+    platform_allow: native_sim
+    tags: openpack
