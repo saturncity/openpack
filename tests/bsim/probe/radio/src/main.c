@@ -27,20 +27,41 @@ static void radio_cfg(int mhz)
 	NRF_RADIO->SHORTS = RADIO_SHORTS_READY_START_Msk | RADIO_SHORTS_END_DISABLE_Msk;
 }
 
+/* TIMER0 at 1 MHz = exact us clock; k_sleep/k_usleep are tick (30 us) granular and drifted both devices apart. */
+static uint32_t now_us(void)
+{
+	NRF_TIMER0->TASKS_CAPTURE[0] = 1;
+	return NRF_TIMER0->CC[0];
+}
+
+static void sync_to(uint32_t t)
+{
+	while ((int32_t)(now_us() - t) < 0) {
+		k_busy_wait(2);
+	}
+}
+
 static bool wait(volatile uint32_t *ev, int us)
 {
-	for (int i = 0; i < us / 10; i++) {
-		if (*ev) {
-			return true;
+	uint32_t end = now_us() + us;
+
+	while (!*ev) {
+		if ((int32_t)(now_us() - end) >= 0) {
+			return false;
 		}
-		k_usleep(10);
+		k_busy_wait(2);
 	}
-	return false;
+	return true;
 }
 
 int main(void)
 {
-	int64_t t = T0_US;
+	uint32_t t = T0_US;
+
+	NRF_TIMER0->MODE = 0;
+	NRF_TIMER0->BITMODE = 3;
+	NRF_TIMER0->PRESCALER = 4;
+	NRF_TIMER0->TASKS_START = 1;
 
 	printk("PROBE role=%s mode=Ble_2Mbit raw-config\n", IS_ENABLED(CONFIG_PROBE_ROLE_TX) ? "tx" : "rx");
 	for (size_t c = 0; c < ARRAY_SIZE(carriers); c++) {
@@ -48,19 +69,16 @@ int main(void)
 
 		radio_cfg(carriers[c]);
 		for (int i = 0; i < N; i++, t += 1000) {
-			if (c == 0 && i < 3) {
-				printk("PROBE_DBG i=%d t=%lld now_us=%lld\n", i, t, k_ticks_to_us_floor64(k_uptime_ticks()));
-			}
 			NRF_RADIO->EVENTS_END = 0;
 			NRF_RADIO->EVENTS_DISABLED = 0;
 			if (IS_ENABLED(CONFIG_PROBE_ROLE_TX)) {
 				pkt[0] = 20;
 				pkt[1] = i;
-				k_sleep(K_TIMEOUT_ABS_US(t + 200));
+				sync_to(t + 200);
 				NRF_RADIO->TASKS_TXEN = 1;
 				wait(&NRF_RADIO->EVENTS_DISABLED, 700);
 			} else {
-				k_sleep(K_TIMEOUT_ABS_US(t));
+				sync_to(t);
 				NRF_RADIO->TASKS_RXEN = 1;
 				if (wait(&NRF_RADIO->EVENTS_END, 700)) {
 					if (NRF_RADIO->CRCSTATUS && pkt[0] == 20 && pkt[1] == (uint8_t)i) {
