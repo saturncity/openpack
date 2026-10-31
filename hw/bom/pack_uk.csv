@@ -1,0 +1,34 @@
+ref,mpn,qty_per_pack,distributor,url,gbp_qty4,gbp_qty100,stock,notes
+BT1,BH-18650-B1BA002,1,LCSC,https://www.lcsc.com/product-detail/C2988620.html,1.04,1.04,stock not verifiable (JS page),"USD1.36 from hw/pack/prices.py converted at 1.31; ex VAT, VAT 20% collected at LCSC checkout (<GBP135). Not found at DK UK. UK-stocked alt: Keystone 1042 SMD 18650 holder (different footprint; Farnell UK 1043P is through-hole) - FLAG, schematic unchanged"
+C1 C5 C11 C14 C21 C24 C26 C28,C_10u_0603_X5R,8,Digi-Key UK,https://www.digikey.co.uk,0.04,0.025,"generic, not checked",ESTIMATE; e.g. Samsung CL10A106KP8NNNC
+C10 C15 C16 C17 C18,C_10u_1206_X7R,5,Digi-Key UK,https://www.digikey.co.uk,0.1,0.06,"generic, not checked",ESTIMATE; e.g. Samsung CL31B106KOHNNNE (verify 16V)
+C12,GRM31CR60J107ME39L,1,Digi-Key UK,https://www.digikey.co.uk/en/products/result?keywords=GRM31CR60J107ME39L,0.5,0.3,Murata part DISCONTINUED at DK UK (0 stock),FLAG: swap to Samsung CL31A107MQHNNNE (100uF 1206 6.3V X5R) GBP0.50 @1 at DK UK; qty100 ESTIMATE; check DC-bias derating and Samsung datasheet before adopting. Schematic NOT changed
+C13 C20 C22 C25 C27 C29 C32,C_100n_0402,7,Digi-Key UK,https://www.digikey.co.uk,0.012,0.006,"generic, not checked",ESTIMATE; e.g. CL05B104KO5NNNC
+C4 C6 C7 C19 C23 C31,C_1u_0402,6,Digi-Key UK,https://www.digikey.co.uk,0.02,0.01,"generic, not checked",ESTIMATE; e.g. CL05A105KA5NQNC
+C2 C3,GRM21BR61A226ME51L,2,Digi-Key UK,https://www.digikey.co.uk/en/products/result?keywords=GRM21BR61A226ME51L,0.15,0.0523,exact-MPN stock not shown (17 wk lead),"ex VAT; GRM188R61A226ME15D (0603, 104k stock) is NOT same footprint"
+C8,GRM31CR61A476ME15L,1,Digi-Key UK,https://www.digikey.co.uk/en/products/result?keywords=GRM31CR61A476ME15L,0.31,0.1193,132445 in stock,ex VAT
+C9,C_22p_0402_C0G,1,Digi-Key UK,https://www.digikey.co.uk,0.015,0.008,"generic, not checked",ESTIMATE; e.g. GRM1555C1H220JA01D
+D1,LTST-C191KGKT,1,Digi-Key UK,https://www.digikey.co.uk/en/products/detail/liteon/LTST-C191KGKT/386835,0.11,0.0534,stock not shown,q4 listing; qty100 assumed = KRKT tier (same series)
+D2 D4,LTST-C191KRKT,2,Digi-Key UK,https://www.digikey.co.uk/en/products/result?keywords=LTST-C191KRKT,0.11,0.0534,stock shown ambiguous,"used twice (D2, D4); ex VAT"
+D3,LTST-C191KSKT,1,Digi-Key UK,https://www.digikey.co.uk/en/products/result?keywords=LTST-C191KSKT,0.12,0.0562,734544 in stock,ex VAT
+D5,TPD1E10B06DPYR,1,Digi-Key UK,https://www.digikey.co.uk/en/products/detail/texas-instruments/TPD1E10B06DPYR/3197744,0.31,0.2,stock not shown,q4 from DK UK listing; qty100 ESTIMATE
+D6,"BAV199,215",1,Digi-Key UK,https://www.digikey.co.uk/en/products/detail/nexperia-usa-inc/BAV199-215/763223,0.16,0.08,stock not shown,q4 from DK UK listing (VAT basis not stated); qty100 ESTIMATE
+F1,SF-1206F300-2,1,Digi-Key UK,https://www.digikey.co.uk/en/products/result?keywords=SF-1206F300-2,0.67,0.3888,3589 in stock,ex VAT
+J1,SJ1-3543,1,Digi-Key UK,https://www.digikey.co.uk/en/products/detail/same-sky-formerly-cui-devices/SJ1-3543/738704,1.67,1.2041,1753 in stock; 13 wk lead,ex VAT; bag packaging
+J2,USB4105-GF-A,1,Digi-Key UK,https://www.digikey.co.uk/en/products/detail/gct/USB4105-GF-A/11198441,0.6,0.45,stock not shown,q4 price from DK UK listing (VAT basis not stated); qty100 ESTIMATE (no UK tier read)
+J3,TC2030-pads,1,-,,0,0,-,footprint only
+L1,DFE252012F-1R0M=P2,1,Digi-Key UK,https://www.digikey.co.uk/en/products/result?keywords=DFE252012F-1R0M%3DP2,0.19,0.1278,335389 in stock,ex VAT
+Q1,DMG2305UX-7,1,Mouser UK,https://www.mouser.co.uk/ProductDetail/621-DMG2305UX-7,0.11,0.065,"Mouser UK ~558k dispatchable (search snippet, page not fetched); RS UK 827-0452 ~GBP0.063@100 limited stock","DK UK shows 0 stock/backorder. Prices from search snippets, UNVERIFIED; alt source RS UK https://uk.rs-online.com/web/p/mosfets/8270452 . DMP2305U-7 also 0 stock at DK (40 wk) so not a useful swap"
+R1 R3 R6 R8 R11 R9 R10 R12 R14 R15 R16 R17 R18 R19 R2 R4 R20 R5 R7,R_0402_1%,19,Digi-Key UK,https://www.digikey.co.uk,0.01,0.004,"generic, not checked",ESTIMATE (all values; Yageo RC0402FR-07xxxL class)
+SW1,JS102011SAQN,1,Digi-Key UK,https://www.digikey.co.uk/en/products/result?keywords=JS102011SAQN,0.67,0.4778,53695 in stock,cut tape; ex VAT
+TP1 TP2,TP-pad,2,-,,0,0,-,footprint only
+U1,BT40NE,1,Digi-Key UK,https://www.digikey.co.uk/en/products/detail/fanstel-corp/BT40NE/22107427,16.34,12.5227,"624 in stock (DK UK, read 2026-10-31); 10 wk lead",DK UK ex-VAT breaks; Fanstel direct (fanstel.com) also sells; no Farnell/RS/Mouser UK listing found
+U2,PCM1840IRTWR,1,Digi-Key UK,https://www.digikey.co.uk/en/products/result?keywords=PCM1840IRTWR,3.96,2.5151,8993 in stock,ex VAT; 296-PCM1840IRTWRCT-ND; Mouser 595-PCM1840IRTWR also lists (UK page not fetched)
+U3,OPA1656IDR,1,Digi-Key UK,https://www.digikey.co.uk/en/products/result?keywords=OPA1656IDR,2.23,1.3737,6985 in stock,ex VAT; 296-OPA1656IDRCT-ND
+U4,TPS61023DRLR,1,Digi-Key UK,https://www.digikey.co.uk/en/products/result?keywords=TPS61023DRLR,1.03,0.5998,13884 in stock,ex VAT; qty4 uses 1-pc tier
+U5 U6,TLV75533PDBVR,2,Digi-Key UK,https://www.digikey.co.uk/en/products/result?keywords=TLV75533PDBVR,0.31,0.1689,36001 in stock,ex VAT; qty4 order=8 (1-pc tier); qty100 order=200 (100 tier)
+U7,USBLC6-2SC6,1,Digi-Key UK,https://www.digikey.co.uk/en/products/detail/stmicroelectronics/USBLC6-2SC6/1040559,0.4,0.156,63012 in stock,ex VAT
+-,PCB-4L-60x90,1,JLCPCB/PCBWay (ship to UK),,2.0,1.9,n/a,ESTIMATE from audit.py v1 $2.50
+-,ENCLOSURE-PETG,1,self-print,,1.9,1.9,n/a,ESTIMATE from $2.50
+-,UFL-PIGTAIL+WHIP,1,DK UK / Farnell UK,,0.8,0.76,n/a,ESTIMATE from $1.00
+U8 (not fitted),NRF21540-QDAA-R,0,Digi-Key UK,https://www.digikey.co.uk/en/products/detail/nordic-semiconductor-asa/NRF21540-QDAA-R/13279717,2.24,1.6,stock not shown,"Informational: FEM may be dropped; qty 0 so excluded from totals; qty4 from DK UK listing, qty100 ESTIMATE"
