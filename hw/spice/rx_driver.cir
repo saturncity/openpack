@@ -1,0 +1,101 @@
+* OpenPack receiver balanced line driver (RX-8, ADR-0014). Same circuit and refs as hw/rx/rx.py "driver"/"dac".
+* PCM5102A OUTL = ideal ground-centred source, 2.1 Vrms at 0 dBFS (TI SLAS859C, Device Comparison table),
+* then its recommended 470R/2.2n filter (Figure 33). Two inverting OPA1656 stages on a single +12 V rail,
+* both + inputs at VCM = 6 V. Outputs: 22R build-out, 47u bipolar DC block (phantom), 22R, 100k bleed.
+* Op-amp = generic macromodel with OPA1656 numbers (SBOS901C 6.6; TI's model needs a login):
+*   GBW 53 MHz, en 4.3 nV/rtHz white (no 1/f), output clamp 0.5 V from each rail = the AOL test range at
+*   RL = 2 kohm ((V-)+0.5 .. (V+)-0.5), tighter than the 0.25 V headline swing.
+*   Input CM range (V-)..(V+)-2.25 V is not modelled: the test asserts it on v(vcm), v(ina), v(inb).
+* BAV99 clamps modelled as plain diodes (must not conduct in normal operation).
+.param vs=12 rl=10k
+Vsup v12 0 dc {vs} ac 0
+R1 v12 v12a 10
+C7 v12a 0 100u
+* OPA1656 quiescent, both channels (SBOS901C: 3.9 mA typ per channel)
+Iq v12a 0 7.8m
+R45 v12a vcm 100k
+R46 vcm 0 100k
+C43 vcm 0 47u
+* DAC: 0 dBFS sine at 1 kHz (2.1 Vrms = 2.9698 V pk), ac 1 = 0 dBFS-referenced gain
+Vdac dac 0 dc 0 ac 1 sin(0 2.9698 1k)
+R40 dac dacf 470
+C39 dacf 0 2.2n
+C40 cin dacf 47u
+R41 cin ina 2.0k
+R42 ina oa 3.65k
+C41 ina oa 100p
+R43 oa inb 4.99k
+R44 inb ob 4.99k
+C42 inb ob 100p
+* op-amp A (leg COLD) and B (leg HOT): en as 1.12k in series with + input, gm stage, one pole, rail clamp
+RnA vcm npa 1.12k
+GA 0 pa npa ina 1m
+RpA pa 0 100meg
+CpA pa 0 3p
+BoA oai 0 v = max(min(v(pa), v(v12a) - 0.5), 0.5)
+RoA oai oa 10
+RnB vcm npb 1.12k
+GB 0 pb npb inb 1m
+RpB pb 0 100meg
+CpB pb 0 3p
+BoB obi 0 v = max(min(v(pb), v(v12a) - 0.5), 0.5)
+RoB obi ob 10
+* output networks
+R47 oa cp 22
+D3a 0 cp dclamp
+D3b cp v12a dclamp
+C47 cp cx 47u
+R48 cx cold 22
+R49 cx 0 100k
+R50 ob hp 22
+D4a 0 hp dclamp
+D4b hp v12a dclamp
+C48 hp hx 47u
+R51 hx hot 22
+R52 hx 0 100k
+.model dclamp d(is=4n n=1.9 rs=0.7)
+* balanced load (XLR input), and a test current source for Zout (off until the Zout run)
+Rload hot cold {rl}
+Iz cold hot dc 0 ac 0
+* operating-point hint (the clamped macromodel otherwise needs gmin stepping)
+.nodeset v(vcm)=6 v(pa)=6 v(pb)=6 v(oa)=6 v(ob)=6 v(ina)=6 v(inb)=6 v(cin)=6 v(cp)=6 v(hp)=6
+.control
+set noaskquit
+* 1) frequency response into 10k balanced, 1 V (= 0 dBFS) at the DAC
+ac dec 50 10 40k
+wrdata ac10k.txt vdb(hot, cold)
+* 2) 600 ohm legacy load (reported, not asserted)
+alter rload = 600
+ac dec 50 10 40k
+wrdata ac600.txt vdb(hot, cold)
+* 3) 0 dBFS at 1 kHz, worst supply (12 V - 5 %) into 2k balanced: swing and CM vs rails
+alter rload = 2k
+alter vsup dc = 11.4
+tran 5u 4m 2m
+wrdata tran_lo.txt v(hot, cold) v(oa) v(ob) v(vcm) v(ina) v(inb) v(v12a) v(cp) v(hp)
+* 4) same at 12 V + 5 %
+alter vsup dc = 12.6
+tran 5u 4m 2m
+wrdata tran_hi.txt v(hot, cold) v(oa) v(ob) v(vcm) v(ina) v(inb) v(v12a) v(cp) v(hp)
+* 5) balanced output impedance: DAC off, load removed, 1 A ac into the output pair
+alter vsup dc = 12
+alter rload = 1e9
+alter @vdac[acmag] = 0
+alter @iz[acmag] = 1
+ac dec 50 20 20k
+wrdata zout.txt vm(hot, cold)
+* 6) supply rejection: 1 V ac on the 12 V input, signal off, 10k load
+alter @iz[acmag] = 0
+alter rload = 10k
+alter @vsup[acmag] = 1
+ac dec 50 20 20k
+wrdata rail.txt vdb(hot, cold)
+* 7) output noise, DAC source silent (DAC's own noise floor excluded)
+alter @vsup[acmag] = 0
+alter @vdac[acmag] = 1
+noise v(hot,cold) Vdac dec 50 20 20k 1
+* the current plot after .noise holds the totals; the spectrum is the one before it
+setplot previous
+wrdata noise.txt onoise_spectrum
+.endc
+.end
