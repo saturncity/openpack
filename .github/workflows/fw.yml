@@ -56,10 +56,13 @@ jobs:
         run: |
           cd "$BSIM_OUT_PATH/bin"
           ./bs_2G4_phy_v1 -s=u -D=1 -sim_length=4000000 >/dev/null &
-          ./bs_probe_uart -s=u -d=0 -uart0_pty >u.log 2>&1 &
-          sleep 2; cat u.log | head; P=$(grep -o '/dev/pts/[0-9]*' u.log | head -1)
-          echo "pty=$P"; timeout 8 cat "$P" | head -5 || true
+          ./bs_probe_uart -s=u -d=0 -uart0_pty -uart_pty_wait >u.log 2>&1 &
+          for _ in $(seq 20); do P=$(grep -o '/dev/pts/[0-9]*' u.log | head -1); [ -n "$P" ] && break; sleep 0.5; done
+          echo "pty=$P"
+          timeout 20 cat "$P" >pty.out || true
           wait
+          head -3 pty.out
+          grep -q PROBE_UART_OK pty.out
       - name: radio probe (no Wi-Fi)
         timeout-minutes: 8
         run: openpack/tests/bsim/probe/run.sh none
