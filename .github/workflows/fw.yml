@@ -1,0 +1,64 @@
+name: fw
+on: [push, pull_request]
+
+jobs:
+  bsim:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci-repo-cache:v0.29.4.20260912
+      options: --entrypoint /bin/bash
+    env:
+      ZEPHYR_TOOLCHAIN_VARIANT: zephyr
+      BSIM_OUT_PATH: ${{ github.workspace }}/tools/bsim
+      BSIM_COMPONENTS_PATH: ${{ github.workspace }}/tools/bsim/components
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: openpack
+      - uses: actions/cache@v4
+        with:
+          path: |
+            zephyr
+            modules
+            bootloader
+            tools
+          key: west-${{ hashFiles('openpack/west.yml') }}
+      - name: west update
+        run: |
+          git config --global --add safe.directory '*'
+          [ -d .west ] || west init -l openpack
+          west update --narrow -o=--depth=1
+          west list | head -40
+      - name: build BabbleSim
+        working-directory: tools/bsim
+        run: make everything -s -j4
+      - name: coverage inventory
+        run: |
+          echo "== devices"; ls "$BSIM_OUT_PATH"/bin/bs_*device* "$BSIM_OUT_PATH"/bin/bs_2G4_phy*
+          echo "== channels/modems"; ls "$BSIM_OUT_PATH/lib"
+          echo "== impl status (RADIO, UART, TIMER, DPPI, RTC, GPIOTE, IPC, I2S, CLOCK)"
+          grep -iE '^\| \*\*(RADIO|UART|UARTE|TIMER|DPPI|RTC|GPIOTE|IPC|I2S|CLOCK|PDM)' modules/bsim_hw_models/nrf_hw_models/docs/README_impl_status.md | cut -c1-140
+          echo "== nrf_hw_models revision"; west list -f '{name} {revision}' nrf_hw_models babblesim_ext_2G4_device_WLAN_actmod
+      - name: build probes
+        run: |
+          B=nrf5340bsim/nrf5340/cpunet
+          west build -p -b "$B" openpack/tests/bsim/probe/radio -d b_tx --no-sysbuild -- -DCONFIG_PROBE_ROLE_TX=y
+          west build -p -b "$B" openpack/tests/bsim/probe/radio -d b_rx --no-sysbuild
+          west build -p -b nrf5340bsim/nrf5340/cpuapp openpack/tests/bsim/probe/uart -d b_uart --no-sysbuild
+          cp b_tx/zephyr/zephyr.exe "$BSIM_OUT_PATH/bin/bs_probe_tx"
+          cp b_rx/zephyr/zephyr.exe "$BSIM_OUT_PATH/bin/bs_probe_rx"
+          cp b_uart/zephyr/zephyr.exe "$BSIM_OUT_PATH/bin/bs_probe_uart"
+      - name: uart -> pty
+        run: |
+          cd "$BSIM_OUT_PATH/bin"
+          ./bs_2G4_phy_v1 -s=u -D=1 -sim_length=4000000 >/dev/null &
+          ./bs_probe_uart -s=u -d=0 -uart0_pty >u.log 2>&1 &
+          sleep 2; cat u.log | head; P=$(grep -o '/dev/pts/[0-9]*' u.log | head -1)
+          echo "pty=$P"; timeout 8 cat "$P" | head -5 || true
+          wait
+      - name: radio probe (no Wi-Fi)
+        run: openpack/tests/bsim/probe/run.sh none
+      - name: radio probe (Wi-Fi 1/6/11 at ConfigSet X)
+        run: |
+          for c in 5 10 25 50 100; do openpack/tests/bsim/probe/run.sh "$c"; done
