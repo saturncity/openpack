@@ -61,7 +61,9 @@ jobs:
           echo "pty=$P"; timeout 8 cat "$P" | head -5 || true
           wait
       - name: radio probe (no Wi-Fi)
+        timeout-minutes: 8
         run: openpack/tests/bsim/probe/run.sh none
       - name: radio probe (Wi-Fi 1/6/11 at ConfigSet X)
+        timeout-minutes: 30
         run: |
           for c in 5 10 25 50 100; do openpack/tests/bsim/probe/run.sh "$c"; done

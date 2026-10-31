@@ -1,14 +1,23 @@
 /* AIR-1 probe: RADIO MODE=Ble_2Mbit, raw packet config (not BLE link layer), 1 packet/ms.
- * Steps through carriers; each block prints ok/crcerr/timeout on the RX side. Loss = 1 - ok/n. */
+ * Event driven (TIMER0 -> DPPI -> RADIO tasks, DISABLED interrupt): CPU polling made the sim 200x slower.
+ * Steps through carriers; the RX side prints ok/crcerr/timeout per carrier. Loss = 1 - ok/n.
+ * Frame (1 ms, TIMER0 period): TX starts at +200 us, RX opens at +0 and is forced off at +700 us. */
 #include <zephyr/kernel.h>
+#include <zephyr/irq.h>
 #include <nrfx.h>
 
 static const int carriers[] = {2437, 2442, 2424, 2449, 2473}; /* in-band, in-band edge, gap, gap, gap */
+#define NB ARRAY_SIZE(carriers)
 #define N CONFIG_PROBE_PACKETS
-#define T0_US 10000
-static uint8_t pkt[1 + 20];
+#define TX IS_ENABLED(CONFIG_PROBE_ROLE_TX)
+#define EN (1u << 31)
 
-static void radio_cfg(int mhz)
+static uint8_t pkt[1 + 20];
+static int blk, cnt;
+static int ok[NB], crcerr[NB], timeout[NB];
+static K_SEM_DEFINE(done, 0, 1);
+
+static void radio_init(void)
 {
 	NRF_RADIO->MODE = RADIO_MODE_MODE_Ble_2Mbit << RADIO_MODE_MODE_Pos;
 	NRF_RADIO->PCNF0 = (8 << RADIO_PCNF0_LFLEN_Pos) | (RADIO_PCNF0_PLEN_16bit << RADIO_PCNF0_PLEN_Pos);
@@ -22,80 +31,74 @@ static void radio_cfg(int mhz)
 	NRF_RADIO->CRCPOLY = 0x00065B;
 	NRF_RADIO->CRCINIT = 0x555555;
 	NRF_RADIO->TXPOWER = RADIO_TXPOWER_TXPOWER_0dBm;
-	NRF_RADIO->FREQUENCY = mhz - 2400;
 	NRF_RADIO->PACKETPTR = (uint32_t)(uintptr_t)pkt;
 	NRF_RADIO->SHORTS = RADIO_SHORTS_READY_START_Msk | RADIO_SHORTS_END_DISABLE_Msk;
+	NRF_RADIO->INTENSET = RADIO_INTENSET_DISABLED_Msk;
+	NRF_RADIO->FREQUENCY = carriers[0] - 2400;
 }
 
-/* TIMER0 at 1 MHz = exact us clock; k_sleep/k_usleep are tick (30 us) granular and drifted both devices apart. */
-static uint32_t now_us(void)
+static void isr(const void *arg)
 {
-	NRF_TIMER0->TASKS_CAPTURE[0] = 1;
-	return NRF_TIMER0->CC[0];
-}
+	int end = NRF_RADIO->EVENTS_END;
 
-static void sync_to(uint32_t t)
-{
-	while ((int32_t)(now_us() - t) < 0) {
-		k_busy_wait(2);
-	}
-}
+	NRF_RADIO->EVENTS_DISABLED = 0;
+	NRF_RADIO->EVENTS_END = 0;
+	/* TX: packet 0 has no RX window, so block 0 is N + 1 packets, later blocks N. RX: N windows per block. */
+	int limit = (TX && blk == 0) ? N + 1 : N;
 
-static bool wait(volatile uint32_t *ev, int us)
-{
-	uint32_t end = now_us() + us;
-
-	while (!*ev) {
-		if ((int32_t)(now_us() - end) >= 0) {
-			return false;
+	if (!TX) {
+		if (end && NRF_RADIO->CRCSTATUS && pkt[0] == 20 && pkt[1] == 0xA5) {
+			ok[blk]++;
+		} else if (end) {
+			crcerr[blk]++;
+		} else {
+			timeout[blk]++;
 		}
-		k_busy_wait(2);
 	}
-	return true;
+	if (++cnt >= limit) {
+		cnt = 0;
+		if (++blk == NB) {
+			NRF_TIMER0->TASKS_STOP = 1;
+			k_sem_give(&done);
+		} else {
+			NRF_RADIO->FREQUENCY = carriers[blk] - 2400;
+		}
+	}
 }
 
 int main(void)
 {
-	uint32_t t = T0_US;
+	pkt[0] = 20;
+	pkt[1] = 0xA5;
+	printk("PROBE role=%s mode=Ble_2Mbit raw-config\n", TX ? "tx" : "rx");
+	radio_init();
+	IRQ_CONNECT(RADIO_IRQn, 0, isr, NULL, 0);
+	irq_enable(RADIO_IRQn);
 
 	NRF_TIMER0->MODE = 0;
 	NRF_TIMER0->BITMODE = 3;
-	NRF_TIMER0->PRESCALER = 4;
+	NRF_TIMER0->PRESCALER = 4; /* 16 MHz / 2^4 = 1 MHz */
+	NRF_TIMER0->CC[0] = 1000;
+	NRF_TIMER0->CC[1] = 200;
+	NRF_TIMER0->CC[2] = 700;
+	NRF_TIMER0->SHORTS = TIMER_SHORTS_COMPARE0_CLEAR_Msk;
+	NRF_TIMER0->PUBLISH_COMPARE[0] = 0 | EN;
+	NRF_TIMER0->PUBLISH_COMPARE[1] = 1 | EN;
+	NRF_TIMER0->PUBLISH_COMPARE[2] = 2 | EN;
+	if (TX) {
+		NRF_RADIO->SUBSCRIBE_TXEN = 1 | EN;
+	} else {
+		NRF_RADIO->SUBSCRIBE_RXEN = 0 | EN;
+		NRF_RADIO->SUBSCRIBE_DISABLE = 2 | EN;
+	}
+	NRF_DPPIC->CHENSET = 0x7;
 	NRF_TIMER0->TASKS_START = 1;
 
-	printk("PROBE role=%s mode=Ble_2Mbit raw-config\n", IS_ENABLED(CONFIG_PROBE_ROLE_TX) ? "tx" : "rx");
-	for (size_t c = 0; c < ARRAY_SIZE(carriers); c++) {
-		int ok = 0, crcerr = 0, timeout = 0;
-
-		radio_cfg(carriers[c]);
-		for (int i = 0; i < N; i++, t += 1000) {
-			NRF_RADIO->EVENTS_END = 0;
-			NRF_RADIO->EVENTS_DISABLED = 0;
-			if (IS_ENABLED(CONFIG_PROBE_ROLE_TX)) {
-				pkt[0] = 20;
-				pkt[1] = i;
-				sync_to(t + 200);
-				NRF_RADIO->TASKS_TXEN = 1;
-				wait(&NRF_RADIO->EVENTS_DISABLED, 700);
-			} else {
-				sync_to(t);
-				NRF_RADIO->TASKS_RXEN = 1;
-				if (wait(&NRF_RADIO->EVENTS_END, 700)) {
-					if (NRF_RADIO->CRCSTATUS && pkt[0] == 20 && pkt[1] == (uint8_t)i) {
-						ok++;
-					} else {
-						crcerr++;
-					}
-				} else {
-					timeout++;
-					NRF_RADIO->TASKS_DISABLE = 1;
-				}
-				wait(&NRF_RADIO->EVENTS_DISABLED, 300);
-			}
-		}
-		if (!IS_ENABLED(CONFIG_PROBE_ROLE_TX)) {
-			printk("PROBE_RESULT freq=%d n=%d ok=%d crcerr=%d timeout=%d\n", carriers[c], N, ok,
-			       crcerr, timeout);
+	k_sem_take(&done, K_FOREVER);
+	if (!TX) {
+		for (size_t c = 0; c < NB; c++) {
+			printk("PROBE_RESULT freq=%d n=%d ok=%d crcerr=%d timeout=%d\n", carriers[c], N, ok[c],
+			       crcerr[c], timeout[c]);
 		}
 	}
 	printk("PROBE_DONE\n");
