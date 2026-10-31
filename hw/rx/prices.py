@@ -4,7 +4,7 @@
 
 The owner is UK-based (coordinator, 2026-10-31): every line names a distributor that sells into the UK
 (Farnell UK, RS UK, Mouser UK, DigiKey UK or LCSC) and carries a GBP figure. GBP is the USD figure converted at
-GBP_PER_USD, ex VAT. It is NOT a UK quote, and UK stock was not checked line by line (open item, ADR in hw/rx/README.md).
+GBP_PER_USD, ex VAT. It is NOT a UK quote, and UK stock was not checked line by line (open item 6, ADR-0014).
 """
 DK = "Digi-Key qty-100 cut tape, 2026-10-31"
 GBP_PER_USD = 0.76   # assumed (1 GBP = 1.32 USD); replace with live UK quotes before ordering (#40)

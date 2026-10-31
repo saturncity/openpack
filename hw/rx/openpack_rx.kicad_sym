@@ -292,14 +292,14 @@
   (symbol "L_1_1"
     (pin passive line (at 0.00 5.08 270) (length 2.54) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
     (pin passive line (at 0.00 -5.08 90) (length 2.54) (name "~" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))))
-(symbol "Polyfuse" (pin_names (offset 0.508)) (exclude_from_sim no) (in_bom yes) (on_board yes)
+(symbol "Fuse" (pin_names (offset 0.508)) (exclude_from_sim no) (in_bom yes) (on_board yes)
   (property "Reference" "F" (at 0 3.81 0) (effects (font (size 1.27 1.27))))
-  (property "Value" "Polyfuse" (at 0 -3.81 0) (effects (font (size 1.27 1.27))))
+  (property "Value" "Fuse" (at 0 -3.81 0) (effects (font (size 1.27 1.27))))
   (property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
   (property "Datasheet" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
-  (property "Description" "PTC resettable fuse" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
-  (symbol "Polyfuse_0_1" (rectangle (start -2.54 2.54) (end 2.54 -2.54) (stroke (width 0.254) (type default)) (fill (type background))))
-  (symbol "Polyfuse_1_1"
+  (property "Description" "Chip fuse" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+  (symbol "Fuse_0_1" (rectangle (start -2.54 2.54) (end 2.54 -2.54) (stroke (width 0.254) (type default)) (fill (type background))))
+  (symbol "Fuse_1_1"
     (pin passive line (at 0.00 5.08 270) (length 2.54) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
     (pin passive line (at 0.00 -5.08 90) (length 2.54) (name "~" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))))
 (symbol "LED" (pin_names (offset 0.508)) (exclude_from_sim no) (in_bom yes) (on_board yes)

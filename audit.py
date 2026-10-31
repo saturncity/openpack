@@ -164,3 +164,24 @@ if __name__ == "__main__":
     # Stopping at 3.2 V under load leaves ~10 % of a protected cell unused; runtime at 0.55 W with 90 % of 3.5 Ah:
     print(f"  runtime with 90 % of the cell usable: {0.9 * wh / 0.55:.1f} h (PK-7 >= 16 h)")
     assert 0.9 * wh / 0.55 >= 16
+
+
+# ---- Receiver sub-board BOM (#32, ADR-0014). Written by hw/rx/rx.py from the SKiDL netlist + hw/rx/prices.py ----
+def bom_rx():
+    """Per-receiver sub-board BOM at qty 100 (USD and GBP, UK distributor per line) from hw/rx/out/bom.csv."""
+    import csv, pathlib
+    with open(pathlib.Path(__file__).resolve().parent / "hw/rx/out/bom.csv") as f:
+        return list(csv.DictReader(f))
+
+
+if __name__ == "__main__":
+    print("\n== Receiver sub-board BOM (qty 100; GBP converted, ex VAT, not a UK quote) ==")
+    rx = bom_rx()
+    usd, gbp = sum(float(r["ext_usd"]) for r in rx), sum(float(r["ext_gbp"]) for r in rx)
+    for r in rx:
+        print(f"  {r['value'][:30]:<30} x{r['qty']:<3} {r['refs'][:22]:<22} ${float(r['ext_usd']):5.2f}"
+              f"  GBP {float(r['ext_gbp']):5.2f}  {r['uk_distributor']}")
+    print(f"  {'TOTAL per sub-board (hw/rx/out/bom.csv)':<58} ${usd:5.2f}  GBP {gbp:5.2f}")
+    print(f"  x8 sub-boards ${8 * usd:.0f} (GBP {8 * gbp:.0f}) before main board, splitters, CM4, panel;"
+          f" no per-receiver cap in SPEC/AUDIT, so none asserted (QUESTIONS.md Q14 guessed ~$150-250 for the rack)")
+    assert all(r["uk_distributor"] for r in rx), "every rx BOM line needs a UK-reachable distributor"

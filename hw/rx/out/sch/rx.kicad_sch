@@ -1,0 +1,145 @@
+(kicad_sch
+  (version 20250114)
+  (generator "skidl")
+  (generator_version "0.2.0")
+  (uuid 8878aaa4-1022-4617-885d-0fcaaa104bd8)
+  (paper "A4")
+  (title_block
+    (title "OpenPack receiver sub-board")
+    (date "2026-10-31")
+    (company "")
+    (comment 1 "Generated with SKiDL")
+    (comment 2 "")
+    (comment 3 "")
+    (comment 4 ""))
+  (lib_symbols)
+  (sheet
+    (at 150.88 107.95)
+    (size 18.29 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid 818fbebb-2eeb-5f44-8419-8ff160c87ce5)
+    (property "Sheetname" "power1"
+      (at 150.88 107.24 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "rx_power1.kicad_sch"
+      (at 150.88 126.31 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top))))
+  (sheet
+    (at 151.13 130.81)
+    (size 17.78 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid c7ab11de-16e8-5383-9c0b-f71038184bd8)
+    (property "Sheetname" "mcu1"
+      (at 151.13 130.1 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "rx_mcu1.kicad_sch"
+      (at 151.13 149.17 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top))))
+  (sheet
+    (at 128.27 100.33)
+    (size 17.78 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid 39453a1b-d097-5c39-8ed3-629107628224)
+    (property "Sheetname" "rf1"
+      (at 128.27 99.62 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "rx_rf1.kicad_sch"
+      (at 128.27 118.69 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top))))
+  (sheet
+    (at 151.13 85.09)
+    (size 17.78 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid 35c9c436-70b3-5350-93c8-31fc2ce87e7e)
+    (property "Sheetname" "dac1"
+      (at 151.13 84.38 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "rx_dac1.kicad_sch"
+      (at 151.13 103.45 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top))))
+  (sheet
+    (at 145.29 62.23)
+    (size 19.3 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid d8927df6-ec32-5990-a575-a86ff084286e)
+    (property "Sheetname" "driver1"
+      (at 145.29 61.52 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "rx_driver1.kicad_sch"
+      (at 145.29 80.59 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top)))))

@@ -9,11 +9,20 @@ Blocks: BT40NE module (ADR-0007), PE4259 antenna A/B switch into the module u.FL
 PCM5102A DAC (I2S), OPA1656 balanced line driver on +12 V (RX-8, hw/spice/rx_driver.cir is the
 same circuit), backplane connector (power, UART, I2S, balanced audio; pinout in ADR-0014).
 """
-import csv, pathlib, sys
+import csv, importlib.util, pathlib, sys
 
 HERE = pathlib.Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE))
-import symbols_rx, prices  # noqa: E402
+
+
+def _load(name, path):  # by path, under unique names: hw/pack/pack.py imports its own "prices"/"symbols"
+    spec = importlib.util.spec_from_file_location(name, path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+symbols_rx = _load("hw_rx_symbols", HERE / "symbols_rx.py")
+prices = _load("hw_rx_prices", HERE / "prices.py")
 
 OUT = HERE / "out"
 LIB = HERE / "openpack_rx.kicad_sym"

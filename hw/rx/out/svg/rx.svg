@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="90.000mm" height="127.760mm" viewBox="0 0 90.000 127.760">
+<style>
+  text { font-family: "DejaVu Sans", Verdana, Arial, sans-serif; }
+  a { cursor: pointer; }
+  g.sheet:hover rect { stroke-width: 0.6; }
+</style>
+<rect width="90.000" height="127.760" style="fill:#FFFFFF" />
+<g class="frame">
+<rect x="5.0" y="5.000" width="80.000" height="117.760" style="stroke:#840000; stroke-width:0.3; fill:none" />
+<rect x="5.000" y="102.760" width="80.0" height="20.0" style="stroke:#840000; stroke-width:0.3; fill:none" />
+<text x="7.000" y="108.760" style="font-size:3.5px; fill:#840000">OpenPack receiver sub-board</text>
+<text x="7.000" y="114.760" style="font-size:2.5px; fill:#840000">Sheet: /</text>
+<text x="7.000" y="119.760" style="font-size:2.5px; fill:#840000">File: rx.svg</text>
+</g>
+<g transform="translate(-103.590 -54.230)">
+<a href="rx_power1.svg" target="_top">
+<g class="sheet">
+<rect x="143.260" y="130.810" width="18.290" height="17.780" style="stroke:#840084; stroke-width:0.3; fill:#FFFFFF" />
+<text x="143.260" y="129.810" style="font-size:2.0px; fill:#840084; font-weight:bold" text-anchor="start">power1</text>
+<text x="143.260" y="150.990" style="font-size:1.4px; fill:#840084" text-anchor="start">rx_power1.svg</text>
+</g>
+</a>
+<a href="rx_mcu1.svg" target="_top">
+<g class="sheet">
+<rect x="151.130" y="107.950" width="17.780" height="17.780" style="stroke:#840084; stroke-width:0.3; fill:#FFFFFF" />
+<text x="151.130" y="106.950" style="font-size:2.0px; fill:#840084; font-weight:bold" text-anchor="start">mcu1</text>
+<text x="151.130" y="128.130" style="font-size:1.4px; fill:#840084" text-anchor="start">rx_mcu1.svg</text>
+</g>
+</a>
+<a href="rx_rf1.svg" target="_top">
+<g class="sheet">
+<rect x="151.130" y="85.090" width="17.780" height="17.780" style="stroke:#840084; stroke-width:0.3; fill:#FFFFFF" />
+<text x="151.130" y="84.090" style="font-size:2.0px; fill:#840084; font-weight:bold" text-anchor="start">rf1</text>
+<text x="151.130" y="105.270" style="font-size:1.4px; fill:#840084" text-anchor="start">rx_rf1.svg</text>
+</g>
+</a>
+<a href="rx_dac1.svg" target="_top">
+<g class="sheet">
+<rect x="128.270" y="96.520" width="17.780" height="17.780" style="stroke:#840084; stroke-width:0.3; fill:#FFFFFF" />
+<text x="128.270" y="95.520" style="font-size:2.0px; fill:#840084; font-weight:bold" text-anchor="start">dac1</text>
+<text x="128.270" y="116.700" style="font-size:1.4px; fill:#840084" text-anchor="start">rx_dac1.svg</text>
+</g>
+</a>
+<a href="rx_driver1.svg" target="_top">
+<g class="sheet">
+<rect x="142.750" y="62.230" width="19.300" height="17.780" style="stroke:#840084; stroke-width:0.3; fill:#FFFFFF" />
+<text x="142.750" y="61.230" style="font-size:2.0px; fill:#840084; font-weight:bold" text-anchor="start">driver1</text>
+<text x="142.750" y="82.410" style="font-size:1.4px; fill:#840084" text-anchor="start">rx_driver1.svg</text>
+</g>
+</a>
+</g>
+</svg>
