@@ -105,13 +105,15 @@ def burst_loss(busy=0.40, mean_burst_frames=2.0, p_bad=0.9, p_good=0.001, frames
     return lost / frames, maxrun, long_runs
 
 
-BOM_PACK_USD = {  # qty ~100, 2026 distributor prices, ponytail: rough, re-quote in Step 2
-    "BT40NE module (nRF5340 + nRF21540 FEM, u.FL; ADR-0007)": 13.47,
-    "PCM1840 ADC": 3.5, "preamp op-amp (OPA1656, not OPA1612)": 1.5, "5 V boost + LDOs": 1.5,
-    "18650 holder + protection + reverse-polarity": 2.0, "locking 3.5 mm TRS jack": 3.0,
-    "USB-C (DFU/config only)": 0.4, "PCB 4-layer": 2.5, "passives/LEDs/switch/whip": 2.5,
-    "3D-printed enclosure + clip": 2.5,
-}
+def bom_pack():
+    """PK-12: pack BOM at qty 100 from hw/pack/out/bom.csv, written by hw/pack/pack.py from the SKiDL
+    netlist + hw/pack/prices.py (every price carries its source). Excludes the 18650 cell (~$5)."""
+    import csv, pathlib
+    with open(pathlib.Path(__file__).resolve().parent / "hw/pack/out/bom.csv") as f:
+        return [(r["refs"], r["value"], int(r["qty"]), float(r["ext_usd"])) for r in csv.DictReader(f)]
+
+
+BOM_PACK_MAX_USD = 35.0  # SPEC PK-12 / REQUIREMENTS R12
 
 if __name__ == "__main__":
     print("\n== Audit 2: channel plan ==")
@@ -134,7 +136,9 @@ if __name__ == "__main__":
         print(f"{note:<32} busy {busy:.0%}  residual {r:5.2%}  max run {mx:2d} frames  audible events/min {lr / 1:4.0f}")
 
     print("\n== Audit 2: pack BOM (ex. 18650 cell ~$5) ==")
-    tot = sum(BOM_PACK_USD.values())
-    for k, v in BOM_PACK_USD.items():
-        print(f"  {k:<48}${v:5.2f}")
-    print(f"  {'TOTAL':<48}${tot:5.2f}   target $30 -> {'tight' if tot > 28 else 'OK'}")
+    bom = bom_pack()
+    tot = sum(r[3] for r in bom)
+    for refs, val, qty, ext in bom:
+        print(f"  {val[:30]:<30} x{qty:<3} {refs[:22]:<22} ${ext:5.2f}")
+    print(f"  {'TOTAL (hw/pack/out/bom.csv)':<58} ${tot:5.2f}   PK-12 limit ${BOM_PACK_MAX_USD:.0f}")
+    assert tot <= BOM_PACK_MAX_USD, f"PK-12 fails: pack BOM ${tot:.2f} > ${BOM_PACK_MAX_USD:.0f}"

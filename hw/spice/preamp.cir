@@ -1,16 +1,20 @@
-* OpenPack preamp + mic bias (PK-2, PK-3, ADR-0006). Single 5 V supply, gain +6 dB.
+* OpenPack preamp + mic bias (PK-2, PK-3, ADR-0006, ADR-0012). Single 5 V supply, gain +6 dB.
+* Matches hw/pack/pack.py: R4/C8 bias filter, R5 bias, C10/R6 coupling, R9/R10/C12 gain, C15 + PCM1840 2.5k input.
 * Op-amp = generic macromodel with OPA1656 datasheet numbers (TI SPICE model needs a login):
 *   GBW 53 MHz, en 4.3 nV/rtHz white (no 1/f, corner < 20 Hz), in negligible (1 fA), swing 50 mV from rails.
 .param tdb=0
-Vdd vdd 0 5
+Vdd vdd 0 dc 5 ac 0
+* mic bias rail: 100R + 47u RC filter off the boost output (#31 review; fc 34 Hz)
+Rbf vdd vbias 100
+Cbf vbias 0 47u
 * mid-rail reference, 2x100k + 10u
 Rv1 vdd vcm 100k
 Rv2 vcm 0 100k
 Cv vcm 0 10u
-* mic: EMF Vs, 1k source, 5 V bias through 2.2k, AC-coupled
+* mic: EMF Vs, 1k source, filtered 5 V bias through 2.2k, AC-coupled
 Vs src 0 dc 0 ac 1 sin(0 0.84853 1k)
 Rs src mic 1k
-Rb vdd mic 2.2k
+Rb vbias mic 2.2k
 C1 mic np 10u
 Rin np vcm 100k
 * op-amp: en as 1.12k resistor (4.3 nV/rtHz) in series with + input, gm stage, one pole, rail clamp
@@ -23,10 +27,10 @@ Ro outi out 10
 * non-inverting, gain 2 (330/330 keeps Rf||Rg thermal noise low); noiseless 'ideal' feedback would hide Rf/Rg noise, so keep them real
 Rf out inm 330
 Rg inm cg 330
-Cg cg 0 220u
-* PCM1840 input: AC-coupled, 10k to its own mid-rail (INM tied to vcm)
+Cg cg 0 100u
+* PCM1840 input: AC-coupled, 2.5k input impedance per pin (SBAS989 6.5) to its internal common mode (INM AC-grounded)
 Co out adc 10u
-Radc adc vcm 10k
+Radc adc 0 2.5k
 .control
 set noaskquit
 ac dec 50 20 40k
@@ -36,5 +40,10 @@ setplot noise1
 wrdata noise.txt inoise_spectrum
 tran 5u 5m
 wrdata tran.txt v(out) v(adc)
+* supply rejection: 1 V AC on the 5 V rail, signal source off
+alter @vs[acmag] = 0
+alter @vdd[acmag] = 1
+ac dec 50 20 20k
+wrdata rail.txt vdb(out)
 .endc
 .end
