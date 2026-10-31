@@ -64,5 +64,27 @@ config OP_NRF5340
 	select MBOX
 
 rsource "src/rx/Kconfig"
+choice OP_AUDIO_BACKEND
+	prompt "Audio I/O backend (FW-3)"
+	default OP_AUDIO_I2S if BOARD_NRF5340DK
+	default OP_AUDIO_WAV
+
+config OP_AUDIO_WAV
+	bool "WAV files on the host (native_sim, nrf5340bsim)"
+
+config OP_AUDIO_I2S
+	bool "I2S hardware (stub until Phase 5)"
+
+endchoice
+
+config OP_AUDIO_WAV_IN
+	string "Input WAV (48 kHz mono 16-bit); env OP_AUDIO_IN overrides"
+	default "op_in.wav"
+	depends on OP_AUDIO_WAV
+
+config OP_AUDIO_WAV_OUT
+	string "Output WAV; env OP_AUDIO_OUT overrides"
+	default "op_out.wav"
+	depends on OP_AUDIO_WAV
 
 source "Kconfig.zephyr"
