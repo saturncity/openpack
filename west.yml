@@ -1,0 +1,31 @@
+# West manifest (issues #18/#19). Zephyr 4.5.0 upstream: has nrf5340bsim + BabbleSim modules.
+# Only the modules fw/ and the bsim twin need; widen name-allowlist if a build asks for more.
+manifest:
+  group-filter: [+babblesim]
+  projects:
+    - name: zephyr
+      url: https://github.com/zephyrproject-rtos/zephyr
+      revision: v4.5.0
+      import:
+        name-allowlist:
+          - babblesim_base
+          - babblesim_ext_2G4_channel_multiatt
+          - babblesim_ext_2G4_channel_NtNcable
+          - babblesim_ext_2G4_device_WLAN_actmod
+          - babblesim_ext_2G4_device_burst_interferer
+          - babblesim_ext_2G4_device_playback
+          - babblesim_ext_2G4_libPhyComv1
+          - babblesim_ext_2G4_modem_BLE_simple
+          - babblesim_ext_2G4_modem_magic
+          - babblesim_ext_2G4_phy_v1
+          - babblesim_ext_libCryptov1
+          - bsim
+          - nrf_hw_models
+          - cmsis
+          - cmsis_6
+          - hal_nordic
+          - mcuboot
+          - mbedtls
+          - segger
+          - zcbor
+          - picolibc
