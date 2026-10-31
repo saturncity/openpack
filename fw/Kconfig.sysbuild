@@ -1,0 +1,9 @@
+source "share/sysbuild/Kconfig"
+
+config OP_ROLE_RX
+	bool "Build the receiver role (default: pack); applied to app and net core images"
+
+config NET_CORE_BOARD
+	string
+	default "nrf5340dk/nrf5340/cpunet" if $(BOARD) = "nrf5340dk"
+	default "nrf5340bsim/nrf5340/cpunet" if $(BOARD_TARGET_STRING) = "NRF5340BSIM_NRF5340_CPUAPP"
