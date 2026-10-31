@@ -55,7 +55,7 @@
 | PK-8 | Controls: recessed slide power switch only (R4). LEDs: power/battery (green, red < 3.4 V), peak/clip (amber at −3 dBFS, red at clip). No "link" LED (one-way link cannot know) (R14) | Inspection |
 | PK-9 | Config/DFU: recessed USB-C, USB CDC text protocol (`id`, `chan`, `power`, `region`, `save`, `info`), MCUboot serial DFU. Not a charging port | pytest over pty / DK |
 | PK-10 | Telemetry in every frame: battery, peak, clip flag, temperature flag (AIR-3) | bsim |
-| PK-11 | Enclosure ≤ 100 × 65 × 25 mm, PETG, belt clip, battery door without tools, conformal-coated PCB (R15) | CadQuery tests |
+| PK-11 | Enclosure body ≤ 100 × 65 × 25 mm (clip excluded), PETG, printed belt clip, battery door without tools, conformal-coated PCB (R15) | CadQuery tests |
 | PK-12 | BOM ≤ $35 ex. cell at qty 100 (R12) | `audit.py` |
 | PK-13 | Boot to transmitting ≤ 1 s | bsim |
 
