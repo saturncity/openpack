@@ -1,7 +1,7 @@
 /* AIR-1 probe: RADIO MODE=Ble_2Mbit, raw packet config (not BLE link layer), 1 packet/ms.
  * Steps through carriers; each block prints ok/crcerr/timeout on the RX side. Loss = 1 - ok/n. */
 #include <zephyr/kernel.h>
-#include <nrf.h>
+#include <nrfx.h>
 
 static const int carriers[] = {2437, 2442, 2424, 2449, 2473}; /* in-band, in-band edge, gap, gap, gap */
 #define N CONFIG_PROBE_PACKETS
