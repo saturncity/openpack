@@ -61,8 +61,9 @@ def test_vbat_sense_divider(tmp_path, monkeypatch):
             far[p.ref] = [pin.net.name for pin in p.pins if pin.net.name != "VBAT_SENSE"]
     assert {r for r, _ in on_sense} == {"R12", "R13", "C30", "U1"}, "VBAT_SENSE: divider + cap + module pin only"
     assert far == {"R12": ["BAT+"], "R13": ["GND"], "C30": ["GND"]}
-    # nRF5340 SAADC (PS 1.x, "SAADC" electrical spec): input range = VREF/GAIN = 0.6 V / (1/6) = 3.6 V with the internal
-    # reference; the pin must also stay <= VDD + 0.3 V (absolute max). VDD here is 3.3 V, so use 3.3 V as the limit.
+    # nRF5340 Product Specification, SAADC chapter: input range = (+-0.6 V internal ref, or +-VDD/4) / gain, and
+    # "The AIN0 - AIN7 inputs cannot exceed VDD, or be lower than VSS." VDD here is 3.3 V, so that is the limit
+    # (gain 1/6 on the 0.6 V reference gives a 3.6 V range, but the pin limit of VDD is the tighter one).
     ADC_LIMIT_V = 3.3
     ratio = 1.0 / (1.0 + 1.0)  # R13 / (R12 + R13), both 1M
     vals = {p.ref: p.value for p in builtins.default_circuit.parts if p.ref in ("R12", "R13")}
