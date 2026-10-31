@@ -1,6 +1,6 @@
 # OpenPack — Plan (Step 2 onward)
 
-Written 2026-10-31. Inputs: `AUDIT.md`, `AUDIT-2.md`, `QUESTIONS.md`. Rule: **every subsystem is tested digitally with an existing, reputable tool before any hardware is bought beyond two dev kits.** Hardware appears only in Phase 5, and only to calibrate the simulators. Development is hands-off for the owner: see `docs/agents/hands-off.md`. The twin runs in GitHub Actions (Linux); the owner's Mac is not a build host for BabbleSim.
+Written 2026-10-31. Inputs: `AUDIT.md`, `AUDIT-2.md`, `QUESTIONS.md`. Rule: **every subsystem is tested digitally with an existing, reputable tool before any hardware is bought beyond two dev kits.** Hardware appears only in Phase 5, and only to calibrate the simulators. Development is hands-off for the owner: see `docs/agents/hands-off.md`. The dev host is the owner's Fedora workstation (Linux x86_64): the twin builds and runs locally there, and GitHub Actions re-runs it as the gate.
 
 ## The digital twin (what makes this possible)
 
