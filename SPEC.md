@@ -7,27 +7,31 @@
 | ID | Requirement | Verify |
 |---|---|---|
 | SYS-1 | 8 bodypacks → 1 receiver rack, 1U, 8 balanced analog outputs (R9) | Inspection |
-| SYS-2 | Mic-in to XLR-out latency: ≤ 3.0 ms target, ≤ 5.0 ms hard (R3). Design: 2.6 ms without time diversity, 4.6 ms with | bsim timestamps + logic analyzer |
+| SYS-2 | Mic-in to XLR-out latency: ≤ 3.0 ms target, ≤ 5.0 ms hard (R3). Design (§2, bsim (a) + datasheets): 2.65 ms without time diversity, 4.96 ms with (d = 2, 81 B packets). Options to reach 4.6 ms with TD: `docs/analysis/td-latency.md` (#26) | bsim timestamps + logic analyzer |
 | SYS-3 | Under the Q3 interference setup for 1 h: residual frame loss ≤ 0.1 %, ≤ 2 consecutive lost frames, ≤ 1 audible dropout event (R1) | bsim scenario (c), then Phase 5/6 |
 | SYS-4 | Audio: 48 kHz, 20 Hz–20 kHz ±0.5 dB, ViSQOL ≥ 4.0 vs 24-bit input on the Phase 1 corpus (R5) | ViSQOL |
 | SYS-5 | 2.4 GHz ISM only, FCC 15.247 DTS; EU build limited to +10 dBm EIRP | Datasheet + ADR |
 | SYS-6 | One RF carrier pair per pack (FDMA), no inter-pack sync | Design |
 | SYS-7 | No pack→rack link other than the audio uplink in v1; a 300 µs RX slot is reserved per frame (Q4) | Frame schedule test |
 
-## 2. Latency budget (design, per stage; sum = SYS-2)
+## 2. Latency budget (per stage; sum = SYS-2)
 
-| Stage | µs | Note |
-|---|---|---|
-| ADC decimation filter | 350 | PCM1840, *measured* Phase 5 |
-| Frame accumulation | 1000 | 48 samples |
-| Encode + IPC app→net core | 100 | Twister timing test |
-| Copy A on air | 200 | ~47 B at 2 Mbps |
-| Retune gap | 100 | parameter `T_GAP`, *measured* |
-| Copy B on air | 200 | |
-| Decode + jitter slot | 200 | fixed output deadline = copy B end + 200 |
-| DAC DMA block (8 samples) | 170 | parameter `DAC_BLOCK` |
-| DAC interpolation filter | 400 | PCM5102, *measured* |
-| **Total** | **2720** | time diversity adds 2000 |
+Corrected by #26 (`python3 audit.py`, `docs/analysis/td-latency.md`). The radio part (encode + IPC through output slot) is *measured* in bsim (a): 864 µs, 1176 µs at TD length. Filters are datasheet values at 48 kHz, *measured* in Phase 5.
+
+| Stage | µs (TD off) | µs (TD on) | Note |
+|---|---|---|---|
+| ADC decimation filter | 160 | 160 | PCM1840 low-latency filter, 7.7/fs (SBAS989 Table 18), MD0=1 (ADR-0012). Linear phase would be 356 |
+| Frame accumulation | 1000 | 1000 | 48 samples |
+| Encode + IPC app→net core | 100 | 100 | Twister timing test |
+| TX ramp-up, copy A | 41 | 41 | RADIO fast ramp-up (40 on silicon, 41 in bsim) |
+| Copy A on air | 212 | 368 | 53 B / 92 B on air (AIR-2 + 42 B / 81 B payload) at 2 Mbps |
+| Retune gap | 100 | 100 | parameter `T_GAP`, includes copy B ramp-up, *measured* |
+| Copy B on air | 212 | 368 | |
+| Decode + jitter slot | 200 | 200 | fixed output deadline = copy B end + 200 (ADR-0013: 125 setpoint) |
+| DAC DMA block (8 samples) | 167 | 167 | parameter `DAC_BLOCK` |
+| DAC interpolation filter | 458 | 458 | PCM5102A normal FIR, 22/fs (SLAS859C Table 4). FLT=1 low-latency IIR: 73 (3.5/fs, Table 7) |
+| Time diversity | 0 | 2000 | frame n is played after packet n+2 (AIR-3, RX-4) |
+| **Total** | **2650** | **4962** | was 2720 / 4720 in this table and 2.6 / 4.6 ms in SYS-2 |
 
 ## 3. Air interface
 

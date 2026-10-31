@@ -164,3 +164,125 @@ if __name__ == "__main__":
     # Stopping at 3.2 V under load leaves ~10 % of a protected cell unused; runtime at 0.55 W with 90 % of 3.5 Ah:
     print(f"  runtime with 90 % of the cell usable: {0.9 * wh / 0.55:.1f} h (PK-7 >= 16 h)")
     assert 0.9 * wh / 0.55 >= 16
+
+
+# ---- #26: corrected SYS-2 latency budget, TD options (docs/analysis/td-latency.md). Run: python3 audit.py ----
+FS_HZ = 48000
+V1_LEN, TD_LEN = 42, 81  # AIR-3 payload B: v1 frame; + td_audio 39 B (frame n-2)
+SYS2_TARGET_US, SYS2_HARD_US, SYS2_TD_DESIGN_US = 3000, 5000, 4600
+SIM_A_MEASURED_US = {42: 864, 63: 1032, 81: 1176}  # tests/bsim/scenarios/run.py (a) max sim latency, 2026-10-31
+SPEC_V1_US = 2720  # SPEC section 2 table before #26 (its SYS-2 line said 2.6 ms)
+ADC_GD_FS = {"linear": 17.1, "low": 7.7}  # PCM1840 at 48 kHz, 1/fs: SBAS989 Table 12 / Table 18 (MD0=1)
+DAC_GD_FS = {"normal": 22.0, "low": 3.5}  # PCM5102A, 1/fs: SLAS859C Table 4 (FLT=0) / Table 7 (FLT=1)
+
+
+def air_us(payload_b):
+    """One copy on air, AIR-2 BLE 2M layout: preamble 2 + AA 4 + S0 1 + LEN 1 + payload + CRC 3 (sched.c AIR_US)."""
+    return (2 + 4 + 1 + 1 + payload_b + 3) * 4
+
+
+def sys2_stages(payload_b=V1_LEN, td_frames=0, frame_us=1000, t_gap=100, out_slot=200, dac_block=8,
+                adc_gd=ADC_GD_FS["low"], dac_gd=DAC_GD_FS["normal"], ramp=41, enc_ipc=100, payload_b_copy_b=None):
+    """SYS-2 per stage (us). The sim part (encode + IPC .. output slot) is what run.py (a) measures."""
+    return {
+        "ADC decimation filter": adc_gd / FS_HZ * 1e6,
+        "frame accumulation": frame_us,
+        "encode + IPC": enc_ipc,
+        "TX ramp-up (copy A)": ramp,
+        "copy A on air": air_us(payload_b),
+        "T_GAP (incl. copy B ramp)": t_gap,
+        "copy B on air": air_us(payload_b if payload_b_copy_b is None else payload_b_copy_b),
+        "output slot (decode + jitter, ADR-0013)": out_slot,
+        "DAC DMA block": dac_block / FS_HZ * 1e6,
+        "DAC interpolation filter": dac_gd / FS_HZ * 1e6,
+        "time diversity (played after packet n+d)": td_frames * frame_us,
+    }
+
+
+SIM_STAGES = ("encode + IPC", "TX ramp-up (copy A)", "copy A on air", "T_GAP (incl. copy B ramp)", "copy B on air",
+              "output slot (decode + jitter, ADR-0013)")
+
+
+def sys2_us(**kw):
+    return sum(sys2_stages(**kw).values())
+
+
+def carrier_airtime(payload_b, frame_us=1000, ramp=41):
+    return (ramp + air_us(payload_b)) / frame_us
+
+
+# Candidate changes for TD on (d = 2, 81 B unless stated), each on top of the corrected baseline. R1 numbers are
+# from run.py (b), docs/analysis/td-latency.md. kwargs override sys2_stages().
+TD_OPTIONS = [
+    ("baseline TD on (corrected)", {}),
+    ("DAC low-latency filter (PCM5102A FLT=1)", {"dac_gd": DAC_GD_FS["low"]}),
+    ("TD offset d=1 (frame n-1 in packet n)", {"td_frames": 1}),
+    ("partial TD: td_audio ADPCM-3 (63 B)", {"payload_b": 63}),
+    ("T_GAP 100 -> 60 us", {"t_gap": 60}),
+    ("output slot 200 -> 150 us", {"out_slot": 150}),
+    ("DAC DMA block 8 -> 4 samples", {"dac_block": 4}),
+    ("0.75 ms frames, 63 B TD packet", {"frame_us": 750, "payload_b": 63, "off_payload_b": 33}),
+    ("PCM1840 linear phase instead (MD0=0)", {"adc_gd": ADC_GD_FS["linear"]}),
+    ("DAC FLT=1 + DMA block 4", {"dac_gd": DAC_GD_FS["low"], "dac_block": 4}),
+    ("DAC FLT=1 + TD d=1", {"dac_gd": DAC_GD_FS["low"], "td_frames": 1}),
+    ("DAC FLT=1 + partial TD 63 B", {"dac_gd": DAC_GD_FS["low"], "payload_b": 63}),
+    ("td_audio in copy A only (copy B 42 B)", {"payload_b_copy_b": V1_LEN}),
+]
+
+if __name__ == "__main__":
+    print("\n== #26: SYS-2 latency, corrected budget (datasheet filters, bsim air times) ==")
+    off = sys2_stages()
+    on = sys2_stages(payload_b=TD_LEN, td_frames=2)
+    print(f"  {'stage':<46}{'TD off':>8}{'TD on':>8}")
+    for k in off:
+        print(f"  {k:<46}{off[k]:8.0f}{on[k]:8.0f}")
+    t_off, t_on = sum(off.values()), sum(on.values())
+    print(f"  {'TOTAL':<46}{t_off:8.0f}{t_on:8.0f}   (target {SYS2_TARGET_US}, hard {SYS2_HARD_US})")
+    for n in SIM_A_MEASURED_US:  # the model reproduces the bsim (a) measurement
+        sim = sum(sys2_stages(payload_b=n)[k] for k in SIM_STAGES)
+        assert abs(sim - SIM_A_MEASURED_US[n]) <= 5, f"{n} B: model {sim:.0f} vs bsim {SIM_A_MEASURED_US[n]} us"
+    assert air_us(V1_LEN) == 212 and air_us(TD_LEN) == 368
+
+    # run.py (a) projects with the old SPEC lines (ADC 350, DAC 400, DMA 170, accumulation 1000):
+    spec_lines = {"ADC": 350, "acc": 1000, "enc": 100, "A": 200, "gap": 100, "B": 200, "slot": 200, "dma": 170, "dac": 400}
+    assert sum(spec_lines.values()) == SPEC_V1_US
+    rp_off = SIM_A_MEASURED_US[V1_LEN] + 1920
+    rp_on = SIM_A_MEASURED_US[TD_LEN] + 1920 + 2000
+    r42, r81 = SIM_A_MEASURED_US[V1_LEN] - 865, SIM_A_MEASURED_US[TD_LEN] - 1177
+    print(f"  run.py (a) projection: TD off {rp_off} us, TD on {rp_on} us; SPEC said 2600 / 4600")
+    print(f"    TD off {rp_off - 2600:+d} = SYS-2 text vs its own table {SPEC_V1_US - 2600:+d}"
+          f" + TX ramp not in the table +41 + 53 B copies (212 us, not 200) +24 + rounding {r42:+d}")
+    print(f"    TD on  {rp_on - 4600:+d} = {SPEC_V1_US - 2600:+d} + 41 + 92 B copies (368 us, not 200) "
+          f"+{2 * (368 - 200)} + rounding {r81:+d}")
+    assert rp_off - 2600 == (SPEC_V1_US - 2600) + 41 + 24 + r42
+    assert rp_on - 4600 == (SPEC_V1_US - 2600) + 41 + 336 + r81
+    print(f"    datasheet filters, not in run.py: ADC {off['ADC decimation filter'] - 350:+.0f} (MD0=1 is already "
+          f"strapped in hw/pack/pack.py), DAC {off['DAC interpolation filter'] - 400:+.0f} (22/fs, not 19/fs)")
+    assert t_off <= SYS2_TARGET_US, "TD off must meet the R3 target"
+    assert t_on <= SYS2_HARD_US, "TD on must meet the R3 hard limit"
+    assert t_on > SYS2_TD_DESIGN_US, "TD on meets 4.6 ms with no change: update docs/analysis/td-latency.md"
+
+    print("\n== #26: TD-on options (each alone unless combined) ==")
+    print(f"  {'option':<44}{'TD on':>7}{'vs 4.6':>8}{'TD off':>8}{'air/carrier':>12}")
+    res = {}
+    for name, kw in TD_OPTIONS:
+        k_on = {"payload_b": TD_LEN, "td_frames": 2, **{k: v for k, v in kw.items() if k != "off_payload_b"}}
+        k_off = {k: v for k, v in kw.items() if k not in ("payload_b", "td_frames", "off_payload_b", "payload_b_copy_b")}
+        k_off["payload_b"] = kw.get("off_payload_b", V1_LEN)
+        res[name] = (sys2_us(**k_on), sys2_us(**k_off))
+        air = carrier_airtime(k_on["payload_b"], k_on.get("frame_us", 1000))
+        print(f"  {name:<44}{res[name][0]:7.0f}{res[name][0] - SYS2_TD_DESIGN_US:+8.0f}{res[name][1]:8.0f}{air:12.0%}")
+    assert res["DAC low-latency filter (PCM5102A FLT=1)"][0] <= SYS2_TD_DESIGN_US
+    assert res["DAC low-latency filter (PCM5102A FLT=1)"][1] <= SYS2_TARGET_US
+    assert res["DAC FLT=1 + DMA block 4"][0] <= SYS2_TD_DESIGN_US - 100
+    assert res["partial TD: td_audio ADPCM-3 (63 B)"][0] > SYS2_TD_DESIGN_US, "partial TD alone does not reach 4.6"
+    assert res["PCM1840 linear phase instead (MD0=0)"][0] > SYS2_HARD_US, "keep MD0=1 (ADR-0012)"
+    assert res["DAC FLT=1 + partial TD 63 B"][0] <= SYS2_TD_DESIGN_US - 150
+    assert carrier_airtime(TD_LEN) <= 0.45, "AIR-7"
+    # AIR-4/SYS-7 RX slot: copy B must end by t0 + 700. 63 B and 81 B do not fit (TD build sets OP_RX_WINDOW_US=0).
+    for n in (V1_LEN, 57, 63, TD_LEN):
+        end = 41 + 2 * air_us(n) + 100
+        print(f"  RX slot: {n} B payload -> copy B ends t0+{end} us ({'fits' if end <= 700 else 'misses'} t0+700)")
+    assert 41 + 2 * air_us(57) + 100 <= 700 < 41 + 2 * air_us(63) + 100
+    # 0.75 ms frames: 36 samples = 27 B audio + 6 B header + 30 B td = 63 B; fits 750 us only with no RX slot.
+    assert 41 + 2 * air_us(63) + 100 <= 750
