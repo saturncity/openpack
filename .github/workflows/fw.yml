@@ -59,6 +59,16 @@ jobs:
       - name: uart -> pty
         timeout-minutes: 3
         run: openpack/tests/bsim/probe/uart.sh
+      - name: protocol over pty (PK-9, PK-10, RX-9, #25)
+        if: ${{ !cancelled() }}
+        timeout-minutes: 15
+        run: |
+          export ZEPHYR_SDK_INSTALL_DIR="${ZEPHYR_SDK_INSTALL_DIR:-$(find /opt/toolchains -maxdepth 1 -name 'zephyr-sdk-*' | head -1)}"
+          pip install pytest pyserial
+          west build -p -b nrf5340bsim/nrf5340/cpuapp openpack/fw -d b_proto_pack --sysbuild
+          west build -p -b nrf5340bsim/nrf5340/cpuapp openpack/fw -d b_proto_rx --sysbuild -- -DSB_CONFIG_OP_ROLE_RX=y
+          FW_PACK_EXE=$PWD/b_proto_pack/fw/zephyr/zephyr.exe FW_RX_EXE=$PWD/b_proto_rx/fw/zephyr/zephyr.exe \
+            pytest -q openpack/tests/bsim/proto
       - name: radio probe (no Wi-Fi), expect zero loss
         if: ${{ !cancelled() }}
         timeout-minutes: 5
