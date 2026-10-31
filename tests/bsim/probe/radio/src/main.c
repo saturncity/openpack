@@ -97,6 +97,11 @@ int main(void)
 	IRQ_CONNECT(RADIO_IRQn, 0, isr, NULL, 0);
 	irq_enable(RADIO_IRQn);
 
+	NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
+	NRF_CLOCK->TASKS_HFCLKSTART = 1; /* the bsim TIMER only counts with HFCLK running */
+	while (!NRF_CLOCK->EVENTS_HFCLKSTARTED) {
+		k_msleep(1);
+	}
 	NRF_TIMER0->MODE = 0;
 	NRF_TIMER0->BITMODE = 3;
 	NRF_TIMER0->PRESCALER = 4; /* 16 MHz / 2^4 = 1 MHz */
