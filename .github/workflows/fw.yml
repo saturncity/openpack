@@ -1,5 +1,9 @@
 name: fw
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "17 3 * * *"  # nightly: G2 (d) RX-7 for 1 simulated hour (#27)
 
 jobs:
   bsim:
@@ -97,7 +101,7 @@ jobs:
   g2:
     name: G2 scenarios
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 75
     container:
       image: ghcr.io/zephyrproject-rtos/ci-repo-cache:v0.29.4.20260912
       options: --entrypoint /bin/bash
@@ -125,12 +129,15 @@ jobs:
       - name: build BabbleSim
         working-directory: tools/bsim
         run: make everything -s -j4
-      - name: "G2 scenarios a-e (SYS-2, SYS-3, RX-2, RX-10; RX-7 pending #24), #27"
-        timeout-minutes: 15
+      - name: "G2 scenarios a-e (SYS-2, SYS-3, RX-2, RX-7, RX-10), #27; nightly: (d) 1 h"
+        timeout-minutes: 60
+        env:
+          G2_ARGS: ${{ github.event_name == 'schedule' && '--only d --d-secs 3600' || '' }}
         run: |
           export ZEPHYR_SDK_INSTALL_DIR="${ZEPHYR_SDK_INSTALL_DIR:-$(find /opt/toolchains -maxdepth 1 -name 'zephyr-sdk-*' | head -1)}"
           rc=0
-          python3 openpack/tests/bsim/scenarios/run.py --jobs 4 --build g2-build --out g2-out || rc=$?
+          # shellcheck disable=SC2086 # G2_ARGS is a word list
+          python3 openpack/tests/bsim/scenarios/run.py --jobs 4 --build g2-build --out g2-out $G2_ARGS || rc=$?
           [ -f g2-out/g2.md ] && cat g2-out/g2.md >> "$GITHUB_STEP_SUMMARY"
           exit $rc
       - uses: actions/upload-artifact@v4

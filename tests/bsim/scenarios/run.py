@@ -27,10 +27,14 @@ Asserted (exit code != 0 on failure), per ADR-0003 / ADR-0010:
   (c) 8 packs + 8 receivers, near pack at -20 dBm: no cross-pack copy loss without Wi-Fi; SYS-3 per pack
       at 40 % with TD on (loss <= 0.1 %, <= 2 consecutive lost frames). Events/h reported (ADR-0010).
   (d) +-40 ppm (pack +40, receiver -40): radio tracking holds, 0 lost, 0 seq skips, 0 re-acquire.
-      RX-7 (PI loop on HFCLKAUDIO, <= 1 sample/h) is the #24 ztest: PENDING here.
+      RX-7 (#24): tests/bsim/rx/run.sh d and dn (+-20 ppm each way, check_d.py: 0 slot slips, <= 1
+      sample/h), --d-secs long (CI 300 s per PR, 3600 s nightly).
   (e) pack reboot twice: RX-2 re-lock <= 2 s each time, 0 loss while locked (RX-10), tests/bsim/rx/check.py.
 Known failures are XFAIL with the issue that explains them (#76: channel plan); they do not fail the run
-but keep "G2 gate MET" false, as does RX-7 pending.
+but keep "G2 gate MET" false.
+Region knobs (UK EN 300 328 vs US, see --help): --eirp (pack EIRP, sets the pack -> rack path loss),
+--wifi (interferer channels, e.g. 1,5,9,13), --plan (carrier pairs), --inband. (a)/(d)/(e) use the
+Kconfig OP_CH_A_MHZ/OP_CH_B_MHZ defaults read from fw/Kconfig.
 """
 import argparse
 import bisect
@@ -49,7 +53,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 BOARD = "nrf5340bsim/nrf5340/cpuapp"
-TD = ["-DCONFIG_OP_TEST_FRAME_LEN=81", "-Dfw_net_CONFIG_OP_TEST_FRAME_LEN=81"]
+TD = ["-Dfw_net_CONFIG_OP_TEST_FRAME_LEN=81"]  # net core only: the app cores keep the v1 42 B frame (codec)
 IMAGES = {  # name: west build -- args (sysbuild; fw = app core image, fw_net = net core image)
     "pack": [],
     "rx": ["-DSB_CONFIG_OP_ROLE_RX=y"],
@@ -58,13 +62,19 @@ IMAGES = {  # name: west build -- args (sysbuild; fw = app core image, fw_net = 
     "pack_td": TD + ["-Dfw_net_CONFIG_OP_RX_WINDOW_US=0"],
     "rx_td": ["-DSB_CONFIG_OP_ROLE_RX=y"] + TD + ["-Dfw_net_CONFIG_OP_RX_TRACK_WIN_US=10"],
 }
-ATT_PACK, ATT_WLAN, ATT_NEAR, ATT_DEFAULT = 40.2, 46.2, 20.0, 60.0
+PL_10M, ATT_WLAN, ATT_NEAR, ATT_DEFAULT = 60.2, 46.2, 20.0, 60.0  # free space 2.44 GHz: 10 m, 2 m; near
+ATT_PACK = PL_10M - 20  # pack radio 0 dBm + att = EIRP - path loss; set from --eirp in main()
 WLAN = {  # busy fraction -> actmod args, tests/bsim/wlan_params.yaml
     10: ["-ConfigSet=10", "-power=15"],
     25: ["-ConfigSet=25", "-power=20"],
     40: ["-ConfigSet=50", "-sigma=0.9", "-power=20"],
 }
-WIFI_CH = (1, 6, 11)
+WIFI_CH = [1, 6, 11]  # --wifi
+
+
+def kconfig_default(sym):
+    m = re.search(rf"^config {sym}\n(?:\t.*\n)*?\tdefault (\d+)", (REPO / "fw/Kconfig").read_text(), re.M)
+    return int(m[1])
 RAMP_TX = 41  # bsim TXEN -> on air, fast ramp-up (tests/bsim/sched/check.py)
 RAMP_RX = 40  # RXEN -> RX start
 ENC_IPC_US, OUT_SLOT_US = 100, 200  # SPEC section 2: encode + IPC; output deadline = copy B end + 200
@@ -306,7 +316,7 @@ class G2:
         return out
 
     def wifi(self, sim, busy, links):
-        for j in range(3):
+        for j in range(len(WIFI_CH)):
             w = sim.wlan(busy, j)
             for *_, rdev, _, _ in links:
                 sim.att.append((w, rdev, ATT_WLAN))
@@ -338,7 +348,8 @@ class G2:
         secs = self.secs(5, 30)
         for td in (False, True):
             sim = Sim("a_td" if td else "a", secs if not td else 2, self.out)
-            links = self.packs(sim, [(2424, 2473)], td, offsets=False)
+            links = self.packs(sim, [(kconfig_default("OP_CH_A_MHZ"), kconfig_default("OP_CH_B_MHZ"))], td,
+                               offsets=False)
             assert sim.run(), "sim a failed"
             k, pid, pdev, rdev, fa, fb = links[0]
             per = self.measure(sim, links)[k]
@@ -423,7 +434,7 @@ class G2:
     def sc_b(self):
         secs = self.secs(10, 120)
         self.loss_runs("b", [8], (10, 25, 40), secs, assert_at=40)
-        self.loss_runs("b_inband", [(2437, 2462)], (10, 40) if not self.a.long else (10, 25, 40), secs)
+        self.loss_runs("b_inband", [tuple(int(x) for x in self.a.inband.split(","))], (10, 40) if not self.a.long else (10, 25, 40), secs)
 
     # (c) 8 packs + 8 receivers, Wi-Fi 1/6/11, one pack near the rack at -20 dBm.
     def sc_c(self):
@@ -431,7 +442,7 @@ class G2:
         self.loss_runs("c", list(range(1, 9)), (0,), self.secs(3, 10), near=near)
         self.loss_runs("c", list(range(1, 9)), self.secs((40,), (10, 25, 40)), self.secs(5, 60), near=near, assert_at=40)
 
-    # (d) +-40 ppm tracking; RX-7 pending #24.
+    # (d) +-40 ppm radio tracking here; RX-7 clock recovery via tests/bsim/rx/run.sh d / dn (#24).
     def sc_d(self):
         secs = self.secs(20, 600)
         sim = Sim("d", secs, self.out)
@@ -445,10 +456,22 @@ class G2:
         self.check("d", "pack +40 ppm / receiver -40 ppm: 0 lost, 0 seq skips, 0 re-acquire",
                    locks and tot["frames"] > 0 and tot["lost"] == 0 and tot["skips"] == 0 and reacq == 0,
                    f"{tot['frames']} frames over {secs} s, lost {tot['lost']}, skips {tot['skips']}, reacquire {reacq}")
-        self.report("d", "RX-7", "PENDING: PI loop on HFCLKAUDIO and <= 1 sample/h are the #24 ztest")
-        self.gate = False  # G2 needs (d) RX-7
-        print("  [PENDING] d: RX-7 output clock (<= 1 sample/h, no slips at +-40 ppm): #24 ztest")
         sim.cleanup(self.a.keep)
+        ds = self.a.d_secs or self.secs(300, 3600)
+        t = time.time()
+        procs = {v: subprocess.Popen(["timeout", str(int(120 + ds)), str(REPO / "tests/bsim/rx/run.sh"),
+                                      str(self.exes["pack"]), str(self.exes["rx"]), v, str(ds)],
+                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+                 for v in ("d", "dn")}
+        for v, p in procs.items():
+            out = p.communicate()[0]
+            m = re.search(r"RX_CLOCK_CHECK.*", out)
+            line = m[0] if m else out.strip().splitlines()[-1:] or ["no output"]
+            self.report("d", f"RX-7_{v}", line)
+            self.check("d", f"RX-7 {v} ({'pack +20/rx -20' if v == 'd' else 'pack -20/rx +20'} ppm, {ds} s): "
+                       "0 slot slips, rate error <= 1 sample/h", p.returncode == 0 and m and "PASS" in m[0],
+                       line if isinstance(line, str) else line[0])
+        print(f"  RX-7 runs: {ds} s simulated each, {time.time() - t:.0f} s wall", flush=True)
 
     # (e) pack reboot mid-show, as tests/bsim/rx/run.sh e.
     def sc_e(self):
@@ -480,9 +503,17 @@ def main():
     ap.add_argument("--out", default="g2-out", help="logs, g2.json, g2.md")
     ap.add_argument("--jobs", type=int, default=max(1, min(4, (os.cpu_count() or 2) // 2)))
     ap.add_argument("--near", type=int, default=1, help="(c) pack id at -20 dBm at the rack")
+    ap.add_argument("--eirp", type=float, default=20.0,
+                    help="pack EIRP dBm (AIR-6: US max ~+20; UK/EU EN 300 328 +10); 10 m path loss 60.2 dB")
+    ap.add_argument("--wifi", default="1,6,11", help="Wi-Fi interferer channels (one actmod each), e.g. 1,5,9,13")
+    ap.add_argument("--inband", default="2437,2462", help="(b) carrier pair with both copies under Wi-Fi")
+    ap.add_argument("--d-secs", type=int, default=0, help="(d) RX-7 sim seconds (default 300, --long 3600)")
     ap.add_argument("--keep", action="store_true", help="keep the phy dumps")
     ap.add_argument("--plan", default=str(REPO / "host/channel_plan.yaml"), help="channel plan for (b) and (c)")
     a = ap.parse_args()
+    global ATT_PACK
+    ATT_PACK = PL_10M - a.eirp
+    WIFI_CH[:] = [int(x) for x in a.wifi.split(",")]
     need = set()
     for sc in a.only:
         need |= {"a": {"pack", "rx", "pack_td", "rx_td"}, "b": {"pack", "rx", "pack_td", "rx_td"},
@@ -499,7 +530,7 @@ def main():
             f"{' ' + c['xfail'] if c['xfail'] else ''} | {c['value']} |"
             for sc, r in g.results.items() for c in r.get("checks", [])]
     (g.out / "g2.md").write_text("### G2 bsim scenarios\n\n| sc | check | result | value |\n|---|---|---|---|\n" +
-                                 "\n".join(rows) + f"\n\n(d) RX-7: PENDING #24. G2 gate met: {g.gate}\n")
+                                 "\n".join(rows) + f"\n\nPack EIRP {a.eirp:g} dBm, Wi-Fi channels {a.wifi}. G2 gate met: {g.gate}\n")
     g.results["gate_met"] = g.gate
     (g.out / "g2.json").write_text(json.dumps(g.results, indent=1, default=str))
     print(f"G2 gate {'MET' if g.gate else 'NOT MET (see XFAIL)'}; run {'PASS' if g.ok else 'FAIL'} "
