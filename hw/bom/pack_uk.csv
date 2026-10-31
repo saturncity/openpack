@@ -3,7 +3,7 @@ BT1,BH-18650-B1BA002,1,LCSC,https://www.lcsc.com/product-detail/C2988620.html,1.
 C1 C5 C11 C14 C21 C24 C26 C28,C_10u_0603_X5R,8,Digi-Key UK,https://www.digikey.co.uk,0.04,0.025,"generic, not checked",ESTIMATE; e.g. Samsung CL10A106KP8NNNC
 C10 C15 C16 C17 C18,C_10u_1206_X7R,5,Digi-Key UK,https://www.digikey.co.uk,0.1,0.06,"generic, not checked",ESTIMATE; e.g. Samsung CL31B106KOHNNNE (verify 16V)
 C12,GRM31CR60J107ME39L,1,Digi-Key UK,https://www.digikey.co.uk/en/products/result?keywords=GRM31CR60J107ME39L,0.5,0.3,Murata part DISCONTINUED at DK UK (0 stock),FLAG: swap to Samsung CL31A107MQHNNNE (100uF 1206 6.3V X5R) GBP0.50 @1 at DK UK; qty100 ESTIMATE; check DC-bias derating and Samsung datasheet before adopting. Schematic NOT changed
-C13 C20 C22 C25 C27 C29 C32,C_100n_0402,7,Digi-Key UK,https://www.digikey.co.uk,0.012,0.006,"generic, not checked",ESTIMATE; e.g. CL05B104KO5NNNC
+C13 C20 C22 C25 C27 C29 C30 C32,C_100n_0402,8,Digi-Key UK,https://www.digikey.co.uk,0.012,0.006,"generic, not checked",ESTIMATE; e.g. CL05B104KO5NNNC
 C4 C6 C7 C19 C23 C31,C_1u_0402,6,Digi-Key UK,https://www.digikey.co.uk,0.02,0.01,"generic, not checked",ESTIMATE; e.g. CL05A105KA5NQNC
 C2 C3,GRM21BR61A226ME51L,2,Digi-Key UK,https://www.digikey.co.uk/en/products/result?keywords=GRM21BR61A226ME51L,0.15,0.0523,exact-MPN stock not shown (17 wk lead),"ex VAT; GRM188R61A226ME15D (0603, 104k stock) is NOT same footprint"
 C8,GRM31CR61A476ME15L,1,Digi-Key UK,https://www.digikey.co.uk/en/products/result?keywords=GRM31CR61A476ME15L,0.31,0.1193,132445 in stock,ex VAT
@@ -19,7 +19,7 @@ J2,USB4105-GF-A,1,Digi-Key UK,https://www.digikey.co.uk/en/products/detail/gct/U
 J3,TC2030-pads,1,-,,0,0,-,footprint only
 L1,DFE252012F-1R0M=P2,1,Digi-Key UK,https://www.digikey.co.uk/en/products/result?keywords=DFE252012F-1R0M%3DP2,0.19,0.1278,335389 in stock,ex VAT
 Q1,DMG2305UX-7,1,Mouser UK,https://www.mouser.co.uk/ProductDetail/621-DMG2305UX-7,0.11,0.065,"Mouser UK ~558k dispatchable (search snippet, page not fetched); RS UK 827-0452 ~GBP0.063@100 limited stock","DK UK shows 0 stock/backorder. Prices from search snippets, UNVERIFIED; alt source RS UK https://uk.rs-online.com/web/p/mosfets/8270452 . DMP2305U-7 also 0 stock at DK (40 wk) so not a useful swap"
-R1 R3 R6 R8 R11 R9 R10 R12 R14 R15 R16 R17 R18 R19 R2 R4 R20 R5 R7,R_0402_1%,19,Digi-Key UK,https://www.digikey.co.uk,0.01,0.004,"generic, not checked",ESTIMATE (all values; Yageo RC0402FR-07xxxL class)
+R1 R3 R6 R8 R11 R9 R10 R12 R13 R14 R15 R16 R17 R18 R19 R2 R4 R20 R5 R7,R_0402_1%,20,Digi-Key UK,https://www.digikey.co.uk,0.01,0.004,"generic, not checked",ESTIMATE (all values; Yageo RC0402FR-07xxxL class)
 SW1,JS102011SAQN,1,Digi-Key UK,https://www.digikey.co.uk/en/products/result?keywords=JS102011SAQN,0.67,0.4778,53695 in stock,cut tape; ex VAT
 TP1 TP2,TP-pad,2,-,,0,0,-,footprint only
 U1,BT40NE,1,Digi-Key UK,https://www.digikey.co.uk/en/products/detail/fanstel-corp/BT40NE/22107427,16.34,12.5227,"624 in stock (DK UK, read 2026-10-31); 10 wk lead",DK UK ex-VAT breaks; Fanstel direct (fanstel.com) also sells; no Farnell/RS/Mouser UK listing found
