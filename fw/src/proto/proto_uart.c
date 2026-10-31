@@ -67,7 +67,7 @@ static void proto_thread(void *a, void *b, void *c)
 	uart_irq_rx_enable(d);
 	for (;;) {
 		if (ring_buf_get(&rxrb, &ch, 1) == 0) {
-			k_sem_take(&rxsem, K_MSEC(50));
+			k_sem_take(&rxsem, K_FOREVER);
 			continue;
 		}
 		if (ch == '\r') {
