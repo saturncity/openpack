@@ -1,0 +1,6 @@
+# ADR-0007: SoC module — Fanstel BT40NE (nRF5340 + nRF21540 FEM, u.FL)
+Status: accepted. 2026-10-31.
+- **Context:** Q6 default is nRF5340 (dual core, tunable HFCLKAUDIO for RX-7, mature Zephyr/bsim). Bare nRF5340 tops out at +3 dBm; stage range needs +20 dBm (AIR-6), and a discrete FEM would mean RF layout and break modular certification. The module must carry the FEM and a u.FL for the whip (PK-5) and the rack splitter (RX-1).
+- **Decision:** Fanstel **BT40NE** (nRF5340 + nRF21540 PA/LNA, PCB antenna + u.FL) on both the pack and the receiver sub-board. Fallback with the same SoC+FEM if BT40NE fails a check: Fanstel BT40N fitted with an external u.FL pad, or a Raytac nRF5340+nRF21540 module.
+- **Consequences:** Firmware drives the nRF21540 via Zephyr's FEM driver (`nordic,nrf21540-fem`); the bsim target ignores it. `audit.py` BOM line "module + FEM" becomes one part (#31). Phase 4 must confirm from Fanstel's datasheet/FCC grant: modular FCC ID covering u.FL + whip, +20 dBm conducted, price at qty 100 ≤ $11 (else PK-12 re-check). Lead time ~10 weeks: flag before Phase 6 ordering.
+- **Requirements check:** R1 ✓ (+20 dBm) · R10 ✓ (u.FL to whip / splitter) · R12 partial (price unverified) · R13 ✓ (nRF5340 runs in bsim).
