@@ -15,6 +15,8 @@ def ge_channel(busy, frames, rng, mean_burst=_D["mean_burst_frames"], p_bad=_D["
     """bool[frames]: copy lost. Same transition probabilities as audit.burst_loss."""
     b2g = 1 / mean_burst
     g2b = b2g * busy / (1 - busy)
+    if g2b > 1:                              # very busy: bursts get longer so time-in-bad stays = busy
+        g2b, b2g = 1.0, (1 - busy) / busy
     n = frames // 2 + 2                      # every good+bad cycle lasts >= 2 frames
     lens = np.empty(2 * n, np.int64)
     lens[0::2], lens[1::2] = rng.geometric(g2b, n), rng.geometric(b2g, n)
@@ -37,10 +39,32 @@ def metrics(lost, frames_per_h=FRAMES_1H):
     return 100 * lost.mean(), int(runs.max(initial=0)), (runs >= 3).sum() * frames_per_h / lost.size
 
 
-def trace(busy, frames=FRAMES_1H, seed=1):
-    """(lostA, lostB) for one busy fraction; fixed seed -> reproducible."""
-    rng = np.random.default_rng([seed, int(round(busy * 1000))])
-    return ge_channel(busy, frames, rng), ge_channel(busy, frames, rng)
+def trace(busy_a, busy_b=None, frames=FRAMES_1H, seed=1):
+    """(lostA, lostB): per-copy busy fractions (busy_b defaults to busy_a); fixed seed -> reproducible."""
+    key = [seed, round(busy_a * 1000)] + ([round(busy_b * 1000)] if busy_b is not None else [])
+    rng = np.random.default_rng(key)
+    return ge_channel(busy_a, frames, rng), ge_channel(busy_a if busy_b is None else busy_b, frames, rng)
+
+
+GAP = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05]
+INBAND = [0.10, 0.40, 0.70, 0.90]
+
+
+def passes(m):
+    return m[0] <= 0.1 and m[1] <= 2 and m[2] <= 1
+
+
+def _cell(m):
+    return f"{m[0]:.3f}/{m[1]}/{m[2]:.0f} {'PASS' if passes(m) else 'fail'}"
+
+
+def gap_table():
+    rows = ["| gap busy A | in-band busy B | TD off (resid %/max run/events/h) | TD on |", "|---|---|---|---|"]
+    for a in GAP:
+        for b in INBAND:
+            la, lb = trace(a, b)
+            rows.append(f"| {a:.1%} | {b:.0%} | {_cell(metrics(frame_lost(la, lb, False)))} | {_cell(metrics(frame_lost(la, lb, True)))} |")
+    return "\n".join(rows)
 
 
 def table():
@@ -55,3 +79,5 @@ def table():
 
 if __name__ == "__main__":
     print(table())
+    print()
+    print(gap_table())

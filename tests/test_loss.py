@@ -42,3 +42,8 @@ def test_plc():
     out = plc.apply_plc(g, np.r_[lost, True, False])
     assert not out[12].any() and (out[13] == 7).all()                    # mute after fade, then recover
     assert not plc.apply_plc(f, np.ones(12, bool)).any()                 # nothing heard yet -> silence
+
+
+def test_per_copy_busy():
+    la, lb = traces.trace(0.01, 0.9, frames=300_000)
+    assert la.mean() < 0.02 and 0.7 < lb.mean() < 0.9
