@@ -10,7 +10,7 @@
 | SYS-2 | Mic-in to XLR-out latency: ≤ 3.0 ms target, ≤ 5.0 ms hard (R3). Design: 2.6 ms without time diversity, 4.6 ms with | bsim timestamps + logic analyzer |
 | SYS-3 | Under the Q3 interference setup for 1 h: residual frame loss ≤ 0.1 %, ≤ 2 consecutive lost frames, ≤ 1 audible dropout event (R1) | bsim scenario (c), then Phase 5/6 |
 | SYS-4 | Audio: 48 kHz, 20 Hz–20 kHz ±0.5 dB, ViSQOL ≥ 4.0 vs 24-bit input on the Phase 1 corpus (R5) | ViSQOL |
-| SYS-5 | 2.4 GHz ISM only, FCC 15.247 DTS; EU build limited to +10 dBm EIRP | Datasheet + ADR |
+| SYS-5 | 2.4 GHz ISM only. Region from `host/channel_plan.yaml` `region` (ADR-0015). **UK (default):** Ofcom IR2030/7/1, ETSI EN 300 328 V2.2.2 non-adaptive non-FHSS, declared max **9 dBm EIRP** (below 10 dBm, so the Tx-gap/MU/adaptivity clauses 4.3.2.4–4.3.2.6 do not apply), PSD ≤ 10 dBm/MHz, 99 % OBW inside 2400–2483.5 MHz. **US:** FCC 15.247 DTS, ≤ 20 dBm EIRP | `audit.py` Audit 3 + ADR-0015 |
 | SYS-6 | One RF carrier pair per pack (FDMA), no inter-pack sync | Design |
 | SYS-7 | No pack→rack link other than the audio uplink in v1; a 300 µs RX slot is reserved per frame (Q4) | Frame schedule test |
 
@@ -37,8 +37,8 @@
 | AIR-2 | Packet: 2 B preamble, 4 B access address = `0x8E89BED6 ^ (pack_id * 0x9E3779B1)`, 1 B header (RADIO S0: format version, 0 in v1), 1 B length, payload, 3 B CRC-24 (poly 0x00065B, address skipped), whitening on. This is the BLE 2M PDU layout, the only one the bsim RADIO model accepts (ADR-0009) |
 | AIR-3 | Payload (v1, ADPCM-6 shown; codec per ADR-0005): `seq u8` · `status u16` (bat 7 b, peak 6 b, flags 3 b: clip/lowbat/temp) · `codec_state` 3 B · `audio` 36 B · optional `td_audio` 39 B (frame n−2, Kconfig `OP_TIME_DIVERSITY`). Max 85 B |
 | AIR-4 | Frame period 1000 µs ±20 ppm (pack crystal). Schedule from frame start t0: copy A TX at t0, copy B TX at t0+T_A+T_GAP on channel B, RX slot at t0+700 µs for 300 µs (idle in v1) |
-| AIR-5 | Channel pair per pack from `host/channel_plan.yaml`: fA ∈ 2402–2440 MHz, fB = fA + ≥ 40 MHz, 16 distinct carriers for 8 packs, gap carriers (2423–2426, 2448–2451, 2473–2482) assigned first |
-| AIR-6 | TX power: software-set 0 to +19 dBm (FEM; BT40NE max +19.1 dBm, ADR-0007), default max US, +10 dBm EU |
+| AIR-5 | Channel pair per pack from `host/channel_plan.yaml` (ADR-0015, #76): fA ∈ 2402–2440 MHz, fB ∈ [fA + 40, 2480]; 16 carriers, every one ≥ 3 MHz from every other; the 7 gap carriers that fit at 3 MHz (2423, 2426, 2448, 2451, 2473, 2476, 2479, clear of Wi-Fi 1/6/11) go one each to packs 2–8; pack 1 has two in-band carriers, each ≥ 5 MHz from all others; whichever pack stands next to an antenna, every other pack keeps one carrier ≥ 5 MHz from it. UK: where a venue runs Wi-Fi 13, 2473/2476/2479 are in-band (packs 6–8 lose their gap copy) |
+| AIR-6 | TX power: software-set; region maximum enforced in firmware: **UK +7 dBm conducted** (9 dBm EIRP with the 2 dBi whip; nRF21540 at low gain, nRF5340 alone tops out at +3 dBm), **US +18 dBm** (20 dBm EIRP; BT40NE max +19.1 dBm, ADR-0007). Default region UK (ADR-0015) |
 | AIR-7 | Airtime per carrier ≤ 45 % of frame (two copies, time diversity on, at 2 Mbps) |
 
 ## 4. Bodypack
@@ -116,4 +116,4 @@
 | G6 Phase 6 | SYS-3 with 4 packs, then in a real sold-out house |
 
 ## 10. Out of scope (v1)
-Downlink implementation, adaptive channel hopping, encryption, Dante/AES67, in-pack charging, e-ink, sub-GHz, 5 GHz, FCC certification filing.
+Downlink implementation, adaptive channel hopping, encryption, Dante/AES67, in-pack charging, e-ink, sub-GHz, 5 GHz, FCC certification filing, UKCA conformity assessment (selling or certifying is a stop-and-ask, hands-off.md reason 4), adaptive (LBT/DAA) or FHSS operation under EN 300 328 (ADR-0015).

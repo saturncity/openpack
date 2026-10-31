@@ -1,10 +1,10 @@
-"""Load and validate host/channel_plan.yaml (API-3, AIR-5, ADR-0014)."""
+"""Load and validate host/channel_plan.yaml (API-3, AIR-5, ADR-0015)."""
 from pathlib import Path
 
 import yaml
 
 PATH = Path(__file__).with_name("channel_plan.yaml")
-REGIONS = ("UK", "US")  # SYS-5 / AIR-6 power limit; ADR-0014
+REGIONS = ("UK", "US")  # SYS-5 / AIR-6 power limit; ADR-0015
 GAPS = [(2423, 2426), (2448, 2451), (2473, 2480)]  # carriers clear of Wi-Fi 1/6/11 (sim/loss/RESULTS.md s2)
 WIFI = (2412, 2437, 2462)                            # Wi-Fi 1/6/11 centres
 WIFI_13 = 2472                                       # UK only: Wi-Fi 13, occupied ~2463-2481

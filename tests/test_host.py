@@ -57,7 +57,7 @@ def client():
 def test_plan_file_valid():
     assert len(channel_plan.load()) == 8
     assert channel_plan.region() == "UK"
-    assert channel_plan.gap_lost_to_wifi13(channel_plan.load()) == [6, 7, 8]  # ADR-0014: UK Wi-Fi 13 caveat
+    assert channel_plan.gap_lost_to_wifi13(channel_plan.load()) == [6, 7, 8]  # ADR-0015: UK Wi-Fi 13 caveat
 
 
 @pytest.mark.parametrize("edit", [

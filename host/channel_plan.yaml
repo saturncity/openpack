@@ -1,4 +1,4 @@
-# Single source of pack id -> carrier pair (API-3, SYS-6, AIR-5). MHz. ADR-0014 (#80, #76).
+# Single source of pack id -> carrier pair (API-3, SYS-6, AIR-5). MHz. ADR-0015 (#80, #76).
 # region sets the pack power limit (SYS-5, AIR-6): UK = EN 300 328 non-adaptive, < 10 dBm EIRP; US = FCC 15.247.
 # Rules (host/channel_plan.py): every carrier >= 3 MHz from every other (2 Mbit GFSK, bsim #76); fB >= fA + 40;
 # 7 gap carriers clear of Wi-Fi 1/6/11 (2423 2426 | 2448 2451 | 2473 2476 2479), one per pack for packs 2-8;

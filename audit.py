@@ -166,8 +166,8 @@ if __name__ == "__main__":
     assert 0.9 * wh / 0.55 >= 16
 
 
-# ---- Audit 3: region (UK vs US), 2026-10-31, issue #80, ADR-0014. Run: python3 audit.py ----
-# Sources (clause numbers quoted in ADR-0014):
+# ---- Audit 3: region (UK vs US), 2026-10-31, issue #80, ADR-0015. Run: python3 audit.py ----
+# Sources (clause numbers quoted in ADR-0015):
 #   ETSI EN 300 328 V2.2.2 (2019-07), UK designated standard under the Radio Equipment Regulations 2017:
 #     4.3.2.2 EIRP <= 20 dBm; 4.3.2.3 PSD <= 10 dBm/MHz EIRP; 4.3.2.4 (non-adaptive, >= 10 dBm) Tx-sequence <= 10 ms,
 #     Tx-gap >= that sequence and >= 3.5 ms; 4.3.2.5 MU = Pout/100 mW x DC <= 10 %; 4.3.2.4/5/6 do not apply below
@@ -192,10 +192,10 @@ REGIONS = {  # max pack EIRP the design may declare, the Wi-Fi channels a venue 
 }
 
 
-def pkt_air_us(time_div):
-    """AIR-3 packet on air at 2 Mbps (no ramp): 42 B payload without time diversity, 81 B with, + 11 B overhead."""
+def pkt_air_us(time_div, phy_bps=PHY_BPS):
+    """AIR-3 packet on air (no ramp): 42 B payload without time diversity, 81 B with, + 11 B overhead."""
     pay = 1 + 2 + 3 + 36 + (39 if time_div else 0)
-    return (pay + PKT_OVH_B) * 8 / PHY_BPS * 1e6
+    return (pay + PKT_OVH_B) * 8 / phy_bps * 1e6
 
 
 def duty_cycle(time_div):
@@ -282,7 +282,7 @@ def _traces():
 
 
 if __name__ == "__main__":
-    print("\n== Audit 3: region rules (EN 300 328 V2.2.2 + IR 2030 vs FCC 15.247), ADR-0014 ==")
+    print("\n== Audit 3: region rules (EN 300 328 V2.2.2 + IR 2030 vs FCC 15.247), ADR-0015 ==")
     for td in (False, True):
         dc = duty_cycle(td)
         p10 = 10 * math.log10(0.10 / dc * 100)
@@ -290,6 +290,11 @@ if __name__ == "__main__":
               f" {medium_utilisation(20, dc):.1%} (limit 10 %, 4.3.2.5.3); MU 10 % at {p10:.1f} dBm;"
               f" longest Tx-gap {max_tx_gap_us(td):.0f} us vs >= 3500 us (4.3.2.4.3)")
     assert abs(pkt_air_us(False) - 212) < 1 and abs(duty_cycle(False) - 0.424) < 0.001
+    for td in (False, True):  # narrower PHY option (#76): 1 Mbit halves the bandwidth, doubles the air time
+        fr1 = RAMP_US + 2 * pkt_air_us(td, 1e6) + 100
+        print(f"  1 Mbit PHY, TD {'on ' if td else 'off'}: ramp + 2 copies + T_GAP = {fr1:.0f} us of a 1000 us frame"
+              f" ({'no room for the 300 us RX slot' if fr1 > 700 else 'fits'}{', does not fit' if fr1 > 1000 else ''});"
+              f" latency +{2 * (pkt_air_us(td, 1e6) - pkt_air_us(td)) / 1e3:.2f} ms")
     assert max(max_tx_gap_us(True), max_tx_gap_us(False)) < 3500, "non-adaptive >= 10 dBm: impossible for a 1 ms stream"
     frac, obw = psd_stats()
     psd_cap = 10 - 10 * math.log10(frac)
