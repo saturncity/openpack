@@ -26,6 +26,8 @@ manifest:
           - hal_nordic
           - mcuboot
           - mbedtls
+          - tf-psa-crypto
+          - tf-psa-crypto-drivers
           - segger
           - zcbor
           - picolibc
