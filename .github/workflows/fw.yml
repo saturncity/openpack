@@ -72,6 +72,13 @@ jobs:
           }
           check 0.10 10 -power=15
           check 0.40 50 -sigma=0.9
+      - name: pack frame schedule (AIR-4, #22), 10 s
+        if: ${{ !cancelled() }}
+        timeout-minutes: 10
+        run: |
+          west build -p -b nrf5340bsim/nrf5340/cpuapp openpack/fw -d b_fw --sysbuild
+          openpack/tests/bsim/sched/run.sh b_fw/fw/zephyr/zephyr.exe 10 | tee sched.txt
+          grep -q 'SCHED_CHECK.*PASS' sched.txt
 
   twister:
     runs-on: ubuntu-24.04

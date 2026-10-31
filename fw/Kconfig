@@ -25,4 +25,24 @@ config OP_RX_WINDOW_US
 	int "Reserved RX window at the end of each frame (us)"
 	default 300
 
+config OP_PACK_ID
+	int "Pack ID (AIR-2 access address), set from host/channel_plan.yaml"
+	default 0
+	range 0 7
+
+config OP_CH_A_MHZ
+	int "Copy A carrier (MHz, AIR-5)"
+	default 2424
+
+config OP_CH_B_MHZ
+	int "Copy B carrier (MHz, AIR-5: >= copy A + 40)"
+	default 2473
+
+# FW-2: the nRF5340 builds split work across cores over ipc0.
+config OP_NRF5340
+	bool
+	default y if SOC_COMPATIBLE_NRF5340_CPUAPP || SOC_COMPATIBLE_NRF5340_CPUNET
+	select IPC_SERVICE
+	select MBOX
+
 source "Kconfig.zephyr"

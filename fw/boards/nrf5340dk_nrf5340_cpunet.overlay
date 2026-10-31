@@ -1,0 +1,34 @@
+/* FW-2: ipc0 as icmsg (no OpenAMP), from zephyr samples/subsys/ipc/ipc_service/icmsg. */
+/delete-node/ &sram0_shared;
+
+/ {
+	chosen {
+		/delete-property/ zephyr,ipc_shm;
+	};
+
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		sram_rx: memory@20070000 {
+			reg = <0x20070000 0x0800>;
+		};
+
+		sram_tx: memory@20078000 {
+			reg = <0x20078000 0x0800>;
+		};
+	};
+
+	ipc {
+		/delete-node/ ipc0;
+
+		ipc0: ipc0 {
+			compatible = "zephyr,ipc-icmsg";
+			tx-region = <&sram_tx>;
+			rx-region = <&sram_rx>;
+			mboxes = <&mbox 0>, <&mbox 1>;
+			mbox-names = "rx", "tx";
+			status = "okay";
+		};
+	};
+};
