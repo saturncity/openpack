@@ -2,7 +2,7 @@
   (version 20250114)
   (generator "skidl")
   (generator_version "0.2.0")
-  (uuid 90d99ac7-1cac-43c0-8a01-a7bd424f56df)
+  (uuid 8f4607cb-ee45-4e78-b541-6b4e91d3a29d)
   (paper "A4")
   (title_block
     (title "OpenPack body-pack")
@@ -14,7 +14,7 @@
     (comment 4 ""))
   (lib_symbols)
   (sheet
-    (at 139.45 107.95)
+    (at 139.45 85.09)
     (size 18.29 17.78)
     (exclude_from_sim no)
     (in_bom yes)
@@ -28,19 +28,19 @@
       (color 0 0 0 0.0))
     (uuid 818fbebb-2eeb-5f44-8419-8ff160c87ce5)
     (property "Sheetname" "power1"
-      (at 139.45 107.24 0)
+      (at 139.45 84.38 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left bottom)))
     (property "Sheetfile" "pack_power1.kicad_sch"
-      (at 139.45 126.31 0)
+      (at 139.45 103.45 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left top))))
   (sheet
-    (at 137.41 85.09)
+    (at 137.41 107.95)
     (size 22.35 17.78)
     (exclude_from_sim no)
     (in_bom yes)
@@ -54,13 +54,13 @@
       (color 0 0 0 0.0))
     (uuid 8cd18c6f-5a34-578b-be21-29b4c5eade79)
     (property "Sheetname" "front_end1"
-      (at 137.41 84.38 0)
+      (at 137.41 107.24 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left bottom)))
     (property "Sheetfile" "pack_front_end1.kicad_sch"
-      (at 137.41 103.45 0)
+      (at 137.41 126.31 0)
       (effects
         (font
           (size 1.27 1.27))

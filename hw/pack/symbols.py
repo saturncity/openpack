@@ -86,6 +86,9 @@ SYMBOLS = {
     "SW_SPDT": ("SW", [("2", "COM", P, "L"), ("1", "A", P, "R"), ("3", "B", P, "R")], "SPDT slide switch"),
     # SOT-23 P-MOSFET (DMG2305UX): 1 G, 2 S, 3 D
     "PMOS": ("Q", [("1", "G", I, "L"), ("2", "S", P, "R"), ("3", "D", P, "R")], "P-channel MOSFET"),
+    # BAV199 SOT-23 (Nexperia): 1 = anode D1, 2 = cathode D2, 3 = common (cathode D1 / anode D2)
+    "BAV199": ("D", [("3", "COM", P, "L"), ("1", "A1", P, "R"), ("2", "K2", P, "R")], "Low-leakage dual series diode"),
+    "ESD_Bidir": ("D", two_pin(), "Bidirectional TVS/ESD diode"),
     "R": ("R", two_pin(), "Resistor"),
     "C": ("C", two_pin(), "Capacitor"),
     "L": ("L", two_pin(), "Inductor"),

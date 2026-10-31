@@ -6,7 +6,7 @@ read; a class price for a generic passive, deliberately on the high side.
 DK = "Digi-Key qty-100 cut tape, 2026-10-31"
 
 PRICES = {  # mpn: (usd_each_at_100, source)
-    "BT40NE": (13.47, "Fanstel direct q100 (fanstel.com/bt40f-nrf5340, #31 comment); DK q100 $16.76"),
+    "BT40NE": (13.47, "Fanstel direct, qty-100 break on fanstel.com/bt40f-nrf5340 (read 2026-10-31, #31 comment)"),
     "PCM1840IRTWR": (3.37, DK),
     "OPA1656IDR": (1.84, DK),
     "TPS61023DRLR": (0.80, DK),
@@ -17,7 +17,8 @@ PRICES = {  # mpn: (usd_each_at_100, source)
     "BH-18650-B1BA002": (1.36, "LCSC C2988620 q1 (via Flux part page); retention from battery door"),
     "JS102011SAQN": (0.64, DK),
     "DMG2305UX-7": (0.10, "est."),
-    "MF-PSMF050X-2": (0.20, "est."),
+    "TPD1E10B06DPYR": (0.41, "Digi-Key listing price (tier not shown; q1 assumed)"),
+    "BAV199,215": (0.21, "Digi-Key listing price (tier not shown; q1 assumed)"),
     "DFE252012F-1R0M=P2": (0.17, DK),
     "GRM31CR60J107ME39L": (0.35, "est. (100 uF 6.3 V 1206)"),
     "GRM31CR61A476ME15L": (0.25, "est. (47 uF 10 V 1206)"),
@@ -26,9 +27,11 @@ PRICES = {  # mpn: (usd_each_at_100, source)
     "C_10u_0603_X5R": (0.06, "est. (10 uF 10 V 0603 X5R)"),
     "C_1u_0402": (0.03, "est."),
     "C_100n_0402": (0.02, "est."),
-    "C_100p_0402_C0G": (0.02, "est."),
+    "C_22p_0402_C0G": (0.02, "est."),
     "R_0402_1%": (0.02, "est."),
-    "LED_0603": (0.05, "est."),
+    "LTST-C191KGKT": (0.15, "Digi-Key listing price (q1 assumed); AlInGaP green, Vf ~2.0 V"),
+    "LTST-C191KRKT": (0.15, "est. = KGKT price (same Lite-On series)"),
+    "LTST-C191KSKT": (0.15, "est. = KGKT price (same Lite-On series)"),
     "TC2030-pads": (0.0, "footprint only"),
     "TP-pad": (0.0, "footprint only"),
 }
@@ -39,3 +42,6 @@ EXTRAS = [  # (item, qty, usd_each, source)
     ("3D-printed PETG enclosure + clip (mech/)", 1, 2.50, "est. (audit.py v1 figure)"),
     ("u.FL to wire pigtail + 31 mm whip (PK-5)", 1, 1.00, "est."),
 ]
+
+# Informational: the same module bought from Digi-Key (qty-100 cut tape, 2026-10-31, part 22107427).
+BT40NE_DIGIKEY_Q100 = 16.76

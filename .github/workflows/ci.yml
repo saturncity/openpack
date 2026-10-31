@@ -9,10 +9,12 @@ jobs:
         with:
           python-version: "3.12"
       - run: sudo apt-get install -y ngspice
-      - run: pip install pytest numpy pyyaml -r host/requirements.txt cadquery trimesh rtree
+      - run: pip install pytest numpy pyyaml -r host/requirements.txt cadquery trimesh rtree skidl==3.0.0
       - run: python3 audit.py
       - run: |
-          pytest -q || [ $? -eq 5 ]
+          pytest -q -rP || [ $? -eq 5 ]
+      # hw/pack/pack.py build() regenerates these; a diff means the committed copies are stale
+      - run: git diff --exit-code hw/pack/openpack.kicad_sym hw/pack/out/bom.csv
   # enabled in phase 2
   twister:
     if: ${{ false }}

@@ -40,7 +40,7 @@ def build():
         r = part("R", ref, val, R0402, "R_0402_1%"); r[1] += a; r[2] += b; return r
 
     def C(ref, val, a, b, fp=C0402, mpn=None):
-        mpn = mpn or {"100n": "C_100n_0402", "1u": "C_1u_0402", "100p": "C_100p_0402_C0G",
+        mpn = mpn or {"100n": "C_100n_0402", "1u": "C_1u_0402", "22p": "C_22p_0402_C0G",
                       "10u": "C_10u_0603_X5R"}[val]
         if mpn == "C_10u_0603_X5R":
             fp = "Capacitor_SMD:C_0603_1608Metric"
@@ -48,17 +48,17 @@ def build():
 
     gnd = Net("GND"); gnd.drive = POWER
     v5, v5b, v3, v3a = Net("+5V"), Net("+5V_BIAS"), Net("+3V3"), Net("+3V3A")
-    vbat, vbatf, vrp, vsys = Net("BAT+"), Net("BAT_F"), Net("VBAT_RP"), Net("VSYS")
+    vbat, vrp, vsys = Net("BAT+"), Net("VBAT_RP"), Net("VSYS")
     for n in (vbat, vsys, v5b):
         n.drive = POWER  # battery and switched/filtered rails are sources (PWR_FLAG equivalent)
 
     with Group("power"):  # one schematic sheet
-        # ---- PK-6 power: 18650 -> PTC -> P-FET reverse-polarity -> slide switch -> VSYS ----
+        # ---- PK-6 power: protected 18650 -> P-FET reverse-polarity -> slide switch -> VSYS ----
+        # No PTC: the protected cell carries its own; a 0.5 A PTC (~1 Ohm) would cost ~0.2 V of LDO headroom (ADR-0012).
         bt = part("Battery_18650", "BT1", "18650 holder", "openpack:BH-18650-B1BA002", "BH-18650-B1BA002")
         bt["+"] += vbat; bt["-"] += gnd
-        f1 = part("Polyfuse", "F1", "0.5A hold", "Fuse:Fuse_1206_3216Metric", "MF-PSMF050X-2"); f1[1] += vbat; f1[2] += vbatf
         q1 = part("PMOS", "Q1", "DMG2305UX", "Package_TO_SOT_SMD:SOT-23", "DMG2305UX-7")
-        q1["D"] += vbatf; q1["S"] += vrp          # body diode conducts only with the cell the right way round
+        q1["D"] += vbat; q1["S"] += vrp          # body diode conducts only with the cell the right way round
         qg = Net("Q1_G"); q1["G"] += qg; R("R1", "100k", qg, gnd)
         sw = part("SW_SPDT", "SW1", "recessed slide", "Button_Switch_SMD:SW_SPDT_CK_JS102011SAQN", "JS102011SAQN")
         sw["COM"] += vrp; sw["A"] += vsys; sw["B"] += NC
@@ -88,19 +88,27 @@ def build():
     with Group("front_end"):  # one schematic sheet
         # ---- PK-1/PK-2/PK-3 front end (hw/spice/preamp.cir is the same circuit) ----
         j1 = part("Jack_TRS_Locking", "J1", "3.5mm locking", "openpack:SameSky_SJ1-3543", "SJ1-3543")
-        mic, np_, vcm, inm, cg = Net("MIC"), Net("PRE_NP"), Net("VCM_2V5"), Net("PRE_INM"), Net("PRE_CG")
+        mic, np_, inp, vcm, inm, cg = Net("MIC"), Net("PRE_NP"), Net("PRE_INP"), Net("VCM"), Net("PRE_INM"), Net("PRE_CG")
         j1["TIP"] += mic; j1["RING"] += gnd; j1["SLEEVE"] += gnd   # Sennheiser SK mic plug: tip = mic+, ring+sleeve = gnd
-        C("C9", "100p", mic, gnd)                                 # 2.4 GHz rejection at the jack, C0G
+        C("C9", "22p", mic, gnd)                                  # 2.4 GHz shunt at the jack, C0G (near self-resonance)
+        esd = part("ESD_Bidir", "D5", "TPD1E10B06", "Diode_SMD:D_0402_1005Metric", "TPD1E10B06DPYR")
+        esd[1] += mic; esd[2] += gnd                              # tip ESD, 5.5 V working, bidirectional
         R("R5", "2.2k", v5b, mic)                                 # PK-1 bias 5 V via 2.2 kOhm
         C("C10", "10u", mic, np_, *AUD)
         R("R6", "100k", np_, vcm)
-        R("R7", "100k", v5, vcm); R("R8", "100k", vcm, gnd); C("C11", "10u", vcm, gnd)
+        # hot-plug: inserting a plug shorts the tip, so C10 kicks PRE_NP ~3.2 V below ground. BAV199 (low leakage)
+        # clamps PRE_NP to the rails and R20 limits op-amp input-diode current (SBOS901 abs max 10 mA).
+        dcl = part("BAV199", "D6", "BAV199", "Package_TO_SOT_SMD:SOT-23", "BAV199,215")
+        dcl["1"] += gnd; dcl["2"] += v5; dcl["3"] += np_
+        R("R20", "100", np_, inp)
+        # VCM = 4.95 V * 100k / 280k = 1.77 V: OPA1656 input CM must stay <= V+ - 2.25 V = 2.70 V (SBOS901 6.5)
+        R("R7", "180k", v5, vcm); R("R8", "100k", vcm, gnd); C("C11", "10u", vcm, gnd)
         u3 = part("OPA1656", "U3", "OPA1656", "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm", "OPA1656IDR")
         outa, outb = Net("PRE_OUTA"), Net("PRE_OUTB")
-        u3["+INA"] += np_; u3["-INA"] += inm; u3["OUTA"] += outa          # path 1: x2 (+6 dB), ADR-0006
+        u3["+INA"] += inp; u3["-INA"] += inm; u3["OUTA"] += outa          # path 1: x2 (+6 dB), ADR-0006
         R("R9", "330", outa, inm); R("R10", "330", inm, cg)
         C("C12", "100u", cg, gnd, C1206, "GRM31CR60J107ME39L")
-        u3["+INB"] += np_; u3["-INB"] += outb; u3["OUTB"] += outb          # path 2: x1 (0 dB), Q7, unused in v1 fw
+        u3["+INB"] += inp; u3["-INB"] += outb; u3["OUTB"] += outb          # path 2: x1 (0 dB), Q7, unused in v1 fw
         u3["V+"] += v5; u3["V-"] += gnd
         C("C13", "100n", v5, gnd); C("C14", "10u", v5, gnd)
 
@@ -134,18 +142,19 @@ def build():
         u1["9"] += v3; u1["F4"] += v3
         for p in ("10", "A0", "B0", "C0", "D0", "H0", "H1", "H2", "H3"):
             u1[p] += gnd
-        C("C28", "10u", v3, gnd); C("C29", "100n", v3, gnd)
+        C("C28", "10u", v3, gnd); C("C29", "100n", v3, gnd); C("C32", "100n", v3, gnd)   # C32 at pad F4 (VDDH)
         pins = {"C3": i2s_sck, "C4": i2s_lrck, "C5": i2s_sdin, "D5": shdnz}   # I2S on free GPIO (nRF5340 PSEL)
         vsense = Net("VBAT_SENSE")
-        R("R12", "1M", vsys, vsense); R("R13", "1M", vsense, gnd); C("C30", "100n", vsense, gnd)
-        pins["5"] = vsense                                        # P0.04/AIN0: battery voltage (PK-8, PK-10)
-        leds = [("D1", "Z0", "green BAT", "LED_BAT_OK"), ("D2", "Z1", "red BAT LOW", "LED_BAT_LOW"),
-                ("D3", "Z2", "amber PEAK", "LED_PEAK"), ("D4", "Z3", "red CLIP", "LED_CLIP")]
-        for i, (ref, pad, val, name) in enumerate(leds):          # PK-8: GPIO -> 1k -> LED -> GND
+        R("R12", "1M", vbat, vsense);   # tapped at the cell: no FET/switch drop in the reading; R("R13", "1M", vsense, gnd); C("C30", "100n", vsense, gnd)
+        pins["5"] = vsense      # P0.04/AIN0: cell voltage (PK-8, PK-10, cutoff in audit.py); 2 uA standby drain
+        # AlInGaP LEDs (Vf ~2.0 V): 1k from a 3.0-3.3 V GPIO gives 1.0-1.3 mA, within standard drive
+        leds = [("D1", "Z0", "green BAT", "LED_BAT_OK", "LTST-C191KGKT"), ("D2", "Z1", "red BAT LOW", "LED_BAT_LOW", "LTST-C191KRKT"),
+                ("D3", "Z2", "amber PEAK", "LED_PEAK", "LTST-C191KSKT"), ("D4", "Z3", "red CLIP", "LED_CLIP", "LTST-C191KRKT")]
+        for i, (ref, pad, val, name, mpn) in enumerate(leds):     # PK-8: GPIO -> 1k -> LED -> GND
             g, a = Net(name), Net(name + "_A")
             pins[pad] = g
             R(f"R{14 + i}", "1k", g, a)
-            d = part("LED", ref, val, "LED_SMD:LED_0603_1608Metric", "LED_0603"); d["A"] += a; d["K"] += gnd
+            d = part("LED", ref, val, "LED_SMD:LED_0603_1608Metric", mpn); d["A"] += a; d["K"] += gnd
         # PK-9 USB-C: config + MCUboot serial DFU over the module's USB (not a charging port)
         j2 = part("USB_C_2.0", "J2", "USB-C", "Connector_USB:USB_C_Receptacle_GCT_USB4105-xx-A_16P_TopMnt_Horizontal", "USB4105-GF-A")
         vbus, dp, dn, cc1, cc2 = Net("USB_VBUS"), Net("USB_D+"), Net("USB_D-"), Net("USB_CC1"), Net("USB_CC2")

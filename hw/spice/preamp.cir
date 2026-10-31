@@ -1,14 +1,16 @@
 * OpenPack preamp + mic bias (PK-2, PK-3, ADR-0006, ADR-0012). Single 5 V supply, gain +6 dB.
-* Matches hw/pack/pack.py: R4/C8 bias filter, R5 bias, C10/R6 coupling, R9/R10/C12 gain, C15 + PCM1840 2.5k input.
+* Matches hw/pack/pack.py: R4/C8 bias filter, R5 bias, C10/R6 coupling, R20 input protection, R7/R8 VCM,
+* R9/R10/C12 gain, C15 + PCM1840 2.5k input. BAV199/TPD1E10B06 leakage (nA, pF) not modelled.
 * Op-amp = generic macromodel with OPA1656 datasheet numbers (TI SPICE model needs a login):
-*   GBW 53 MHz, en 4.3 nV/rtHz white (no 1/f, corner < 20 Hz), in negligible (1 fA), swing 50 mV from rails.
+*   GBW 53 MHz, en 4.3 nV/rtHz white (no 1/f, corner < 20 Hz), in negligible (1 fA), output swing 0.25..4.70 V,
+*   input CM range 0..V+ - 2.25 V (not modelled: the test asserts it on v(np)).
 .param tdb=0
 Vdd vdd 0 dc 5 ac 0
 * mic bias rail: 100R + 47u RC filter off the boost output (#31 review; fc 34 Hz)
 Rbf vdd vbias 100
 Cbf vbias 0 47u
-* mid-rail reference, 2x100k + 10u
-Rv1 vdd vcm 100k
+* op-amp bias reference 1.79 V (180k/100k + 10u), inside the OPA1656 CM range (ADR-0012)
+Rv1 vdd vcm 180k
 Rv2 vcm 0 100k
 Cv vcm 0 10u
 * mic: EMF Vs, 1k source, filtered 5 V bias through 2.2k, AC-coupled
@@ -18,11 +20,13 @@ Rb vbias mic 2.2k
 C1 mic np 10u
 Rin np vcm 100k
 * op-amp: en as 1.12k resistor (4.3 nV/rtHz) in series with + input, gm stage, one pole, rail clamp
-Rn np npi 1.12k
+* 100R hot-plug current limit in front of the op-amp inputs (R20)
+Rprot np npp 100
+Rn npp npi 1.12k
 G1 0 p1 npi inm 1m
 Rp p1 0 100meg
 Cp p1 0 3p
-Bo outi 0 v = v(p1) > 4.95 ? 4.95 : (v(p1) < 0.05 ? 0.05 : v(p1))
+Bo outi 0 v = v(p1) > 4.70 ? 4.70 : (v(p1) < 0.25 ? 0.25 : v(p1))
 Ro outi out 10
 * non-inverting, gain 2 (330/330 keeps Rf||Rg thermal noise low); noiseless 'ideal' feedback would hide Rf/Rg noise, so keep them real
 Rf out inm 330
@@ -39,7 +43,7 @@ noise v(out) Vs dec 50 20 20k 1
 setplot noise1
 wrdata noise.txt inoise_spectrum
 tran 5u 5m
-wrdata tran.txt v(out) v(adc)
+wrdata tran.txt v(out) v(adc) v(np)
 * supply rejection: 1 V AC on the 5 V rail, signal source off
 alter @vs[acmag] = 0
 alter @vdd[acmag] = 1

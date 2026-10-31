@@ -2,47 +2,10 @@
   (version "D")
   (design
     (source "pack.py")
-    (date "10/31/2026 10:06 PM")
+    (date "10/31/2026 10:26 PM")
     (tool "SKiDL (3.0.0)")
     (sheet
       (number 1)
-      (name "/front_end1/")
-      (tstamps "/8d458167-a4a2-545c-9c81-b5f4bde18935/")
-      (title_block
-        (title)
-        (company)
-        (rev)
-        (date)
-        (source "out/pack.py")
-        (comment
-          (number "1")
-          (value ""))
-        (comment
-          (number "2")
-          (value ""))
-        (comment
-          (number "3")
-          (value ""))
-        (comment
-          (number "4")
-          (value ""))
-        (comment
-          (number "5")
-          (value ""))
-        (comment
-          (number "6")
-          (value ""))
-        (comment
-          (number "7")
-          (value ""))
-        (comment
-          (number "8")
-          (value ""))
-        (comment
-          (number "9")
-          (value ""))))
-    (sheet
-      (number 2)
       (name "/")
       (tstamps "/")
       (title_block
@@ -79,7 +42,7 @@
           (number "9")
           (value ""))))
     (sheet
-      (number 3)
+      (number 2)
       (name "/adc1/")
       (tstamps "/ca570d45-6888-5db3-a2e2-6ac096a64ee4/")
       (title_block
@@ -116,9 +79,46 @@
           (number "9")
           (value ""))))
     (sheet
+      (number 3)
+      (name "/power1/")
+      (tstamps "/1c71258b-4a63-53c3-96a6-ba5ec56f90dd/")
+      (title_block
+        (title)
+        (company)
+        (rev)
+        (date)
+        (source "out/pack.py")
+        (comment
+          (number "1")
+          (value ""))
+        (comment
+          (number "2")
+          (value ""))
+        (comment
+          (number "3")
+          (value ""))
+        (comment
+          (number "4")
+          (value ""))
+        (comment
+          (number "5")
+          (value ""))
+        (comment
+          (number "6")
+          (value ""))
+        (comment
+          (number "7")
+          (value ""))
+        (comment
+          (number "8")
+          (value ""))
+        (comment
+          (number "9")
+          (value ""))))
+    (sheet
       (number 4)
-      (name "/mcu_usb1/")
-      (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/")
+      (name "/front_end1/")
+      (tstamps "/8d458167-a4a2-545c-9c81-b5f4bde18935/")
       (title_block
         (title)
         (company)
@@ -154,8 +154,8 @@
           (value ""))))
     (sheet
       (number 5)
-      (name "/power1/")
-      (tstamps "/1c71258b-4a63-53c3-96a6-ba5ec56f90dd/")
+      (name "/mcu_usb1/")
+      (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/")
       (title_block
         (title)
         (company)
@@ -815,32 +815,6 @@
       (component_classes)
       (tstamps "2d1f360b-2b20-5a86-83fb-77ec3c1baccd"))
     (comp
-      (ref "C30")
-      (value "100n")
-      (description "Capacitor")
-      (footprint "Capacitor_SMD:C_0402_1005Metric")
-      (fields
-        (field
-          (name "MPN") "C_100n_0402")
-        (field
-          (name "Description") "Capacitor")
-        (field
-          (name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
-        (field
-          (name "Datasheet"))
-        (field
-          (name "SKiDL Tag") "C30")
-        (field
-          (name "SKiDL Line") "pack.py:31"))
-      (libsource
-        (lib "openpack")
-        (part "C"))
-      (sheetpath
-        (names "/mcu_usb1/")
-        (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/"))
-      (component_classes)
-      (tstamps "057ec9d1-00e1-562d-866f-45011d9fe993"))
-    (comp
       (ref "C31")
       (value "1u")
       (description "Capacitor")
@@ -866,6 +840,32 @@
         (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/"))
       (component_classes)
       (tstamps "532f31bd-0675-5ccd-88fb-c187f041a65c"))
+    (comp
+      (ref "C32")
+      (value "100n")
+      (description "Capacitor")
+      (footprint "Capacitor_SMD:C_0402_1005Metric")
+      (fields
+        (field
+          (name "MPN") "C_100n_0402")
+        (field
+          (name "Description") "Capacitor")
+        (field
+          (name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "C32")
+        (field
+          (name "SKiDL Line") "pack.py:31"))
+      (libsource
+        (lib "openpack")
+        (part "C"))
+      (sheetpath
+        (names "/mcu_usb1/")
+        (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/"))
+      (component_classes)
+      (tstamps "c47b8c16-2665-5ed0-92dd-c9fbb28bd779"))
     (comp
       (ref "C4")
       (value "1u")
@@ -998,12 +998,12 @@
       (tstamps "42113e14-58d6-5df6-9102-7b2e0350aff6"))
     (comp
       (ref "C9")
-      (value "100p")
+      (value "22p")
       (description "Capacitor")
       (footprint "Capacitor_SMD:C_0402_1005Metric")
       (fields
         (field
-          (name "MPN") "C_100p_0402_C0G")
+          (name "MPN") "C_22p_0402_C0G")
         (field
           (name "Description") "Capacitor")
         (field
@@ -1029,7 +1029,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603")
+          (name "MPN") "LTST-C191KGKT")
         (field
           (name "Description") "LED")
         (field
@@ -1055,7 +1055,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603")
+          (name "MPN") "LTST-C191KRKT")
         (field
           (name "Description") "LED")
         (field
@@ -1081,7 +1081,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603")
+          (name "MPN") "LTST-C191KSKT")
         (field
           (name "Description") "LED")
         (field
@@ -1107,7 +1107,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603")
+          (name "MPN") "LTST-C191KRKT")
         (field
           (name "Description") "LED")
         (field
@@ -1127,31 +1127,57 @@
       (component_classes)
       (tstamps "a64bfd5a-28d2-5a8c-ba2d-6ef9af71c17d"))
     (comp
-      (ref "F1")
-      (value "0.5A hold")
-      (description "PTC resettable fuse")
-      (footprint "Fuse:Fuse_1206_3216Metric")
+      (ref "D5")
+      (value "TPD1E10B06")
+      (description "Bidirectional TVS/ESD diode")
+      (footprint "Diode_SMD:D_0402_1005Metric")
       (fields
         (field
-          (name "MPN") "MF-PSMF050X-2")
+          (name "MPN") "TPD1E10B06DPYR")
         (field
-          (name "Description") "PTC resettable fuse")
+          (name "Description") "Bidirectional TVS/ESD diode")
         (field
-          (name "Footprint") "Fuse:Fuse_1206_3216Metric")
+          (name "Footprint") "Diode_SMD:D_0402_1005Metric")
         (field
           (name "Datasheet"))
         (field
-          (name "SKiDL Tag") "F1")
+          (name "SKiDL Tag") "D5")
         (field
           (name "SKiDL Line") "pack.py:31"))
       (libsource
         (lib "openpack")
-        (part "Polyfuse"))
+        (part "ESD_Bidir"))
       (sheetpath
-        (names "/power1/")
-        (tstamps "/1c71258b-4a63-53c3-96a6-ba5ec56f90dd/"))
+        (names "/front_end1/")
+        (tstamps "/8d458167-a4a2-545c-9c81-b5f4bde18935/"))
       (component_classes)
-      (tstamps "af8a4084-94ea-53b2-87ad-b47689031995"))
+      (tstamps "6a67090b-20f8-5fed-9a4f-2f1a0b8c7922"))
+    (comp
+      (ref "D6")
+      (value "BAV199")
+      (description "Low-leakage dual series diode")
+      (footprint "Package_TO_SOT_SMD:SOT-23")
+      (fields
+        (field
+          (name "MPN") "BAV199,215")
+        (field
+          (name "Description") "Low-leakage dual series diode")
+        (field
+          (name "Footprint") "Package_TO_SOT_SMD:SOT-23")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "D6")
+        (field
+          (name "SKiDL Line") "pack.py:31"))
+      (libsource
+        (lib "openpack")
+        (part "BAV199"))
+      (sheetpath
+        (names "/front_end1/")
+        (tstamps "/8d458167-a4a2-545c-9c81-b5f4bde18935/"))
+      (component_classes)
+      (tstamps "25d4fa3d-7312-5bbd-af7b-f3c155091792"))
     (comp
       (ref "J1")
       (value "3.5mm locking")
@@ -1387,32 +1413,6 @@
       (component_classes)
       (tstamps "f9ffe0d9-a870-54ee-b080-23cd16dc1ed5"))
     (comp
-      (ref "R13")
-      (value "1M")
-      (description "Resistor")
-      (footprint "Resistor_SMD:R_0402_1005Metric")
-      (fields
-        (field
-          (name "MPN") "R_0402_1%")
-        (field
-          (name "Description") "Resistor")
-        (field
-          (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
-        (field
-          (name "Datasheet"))
-        (field
-          (name "SKiDL Tag") "R13")
-        (field
-          (name "SKiDL Line") "pack.py:31"))
-      (libsource
-        (lib "openpack")
-        (part "R"))
-      (sheetpath
-        (names "/mcu_usb1/")
-        (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/"))
-      (component_classes)
-      (tstamps "ee8ecfdc-33aa-5414-a71a-145caef1c9cb"))
-    (comp
       (ref "R14")
       (value "1k")
       (description "Resistor")
@@ -1595,6 +1595,32 @@
       (component_classes)
       (tstamps "98f84d1e-528c-5017-9bf9-62cec3f208ae"))
     (comp
+      (ref "R20")
+      (value "100")
+      (description "Resistor")
+      (footprint "Resistor_SMD:R_0402_1005Metric")
+      (fields
+        (field
+          (name "MPN") "R_0402_1%")
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "R20")
+        (field
+          (name "SKiDL Line") "pack.py:31"))
+      (libsource
+        (lib "openpack")
+        (part "R"))
+      (sheetpath
+        (names "/front_end1/")
+        (tstamps "/8d458167-a4a2-545c-9c81-b5f4bde18935/"))
+      (component_classes)
+      (tstamps "ae22b03e-01ba-5c2e-ab64-035fc4e9b25b"))
+    (comp
       (ref "R3")
       (value "100k")
       (description "Resistor")
@@ -1700,7 +1726,7 @@
       (tstamps "1a8a6feb-e0d9-5cd6-a7b6-dbb0ab25b560"))
     (comp
       (ref "R7")
-      (value "100k")
+      (value "180k")
       (description "Resistor")
       (footprint "Resistor_SMD:R_0402_1005Metric")
       (fields
@@ -2058,6 +2084,10 @@
         (pin "1")
         (pintype "PASSIVE"))
       (node
+        (ref "C32")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
         (ref "C5")
         (pin "1")
         (pintype "PASSIVE"))
@@ -2144,6 +2174,10 @@
       (node
         (ref "C6")
         (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "D6")
+        (pin "2")
         (pintype "PASSIVE"))
       (node
         (ref "R2")
@@ -2306,23 +2340,15 @@
         (pin "1")
         (pintype "PASSIVE"))
       (node
-        (ref "F1")
+        (ref "Q1")
+        (pin "3")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R12")
         (pin "1")
         (pintype "PASSIVE")))
     (net
       (code 14)
-      (name "BAT_F")
-      (class "Default")
-      (node
-        (ref "F1")
-        (pin "2")
-        (pintype "PASSIVE"))
-      (node
-        (ref "Q1")
-        (pin "3")
-        (pintype "PASSIVE")))
-    (net
-      (code 15)
       (name "BOOST_FB")
       (class "Default")
       (node
@@ -2338,7 +2364,7 @@
         (pin "1")
         (pintype "INPUT")))
     (net
-      (code 16)
+      (code 15)
       (name "BOOST_SW")
       (class "Default")
       (node
@@ -2350,7 +2376,7 @@
         (pin "5")
         (pintype "PASSIVE")))
     (net
-      (code 17)
+      (code 16)
       (name "GND")
       (class "Default")
       (node
@@ -2438,11 +2464,11 @@
         (pin "2")
         (pintype "PASSIVE"))
       (node
-        (ref "C30")
+        (ref "C31")
         (pin "2")
         (pintype "PASSIVE"))
       (node
-        (ref "C31")
+        (ref "C32")
         (pin "2")
         (pintype "PASSIVE"))
       (node
@@ -2486,6 +2512,14 @@
         (pin "1")
         (pintype "PASSIVE"))
       (node
+        (ref "D5")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "D6")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
         (ref "J1")
         (pin "R")
         (pintype "PASSIVE"))
@@ -2515,10 +2549,6 @@
         (pintype "PASSIVE"))
       (node
         (ref "R11")
-        (pin "2")
-        (pintype "PASSIVE"))
-      (node
-        (ref "R13")
         (pin "2")
         (pintype "PASSIVE"))
       (node
@@ -2606,7 +2636,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 18)
+      (code 17)
       (name "I2S_BCLK")
       (class "Default")
       (node
@@ -2618,7 +2648,7 @@
         (pin "22")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 19)
+      (code 18)
       (name "I2S_FSYNC")
       (class "Default")
       (node
@@ -2630,7 +2660,7 @@
         (pin "23")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 20)
+      (code 19)
       (name "I2S_SDOUT")
       (class "Default")
       (node
@@ -2642,7 +2672,7 @@
         (pin "21")
         (pintype "OUTPUT")))
     (net
-      (code 21)
+      (code 20)
       (name "LED_BAT_LOW")
       (class "Default")
       (node
@@ -2654,7 +2684,7 @@
         (pin "Z1")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 22)
+      (code 21)
       (name "LED_BAT_LOW_A")
       (class "Default")
       (node
@@ -2666,7 +2696,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 23)
+      (code 22)
       (name "LED_BAT_OK")
       (class "Default")
       (node
@@ -2678,7 +2708,7 @@
         (pin "Z0")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 24)
+      (code 23)
       (name "LED_BAT_OK_A")
       (class "Default")
       (node
@@ -2690,7 +2720,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 25)
+      (code 24)
       (name "LED_CLIP")
       (class "Default")
       (node
@@ -2702,7 +2732,7 @@
         (pin "Z3")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 26)
+      (code 25)
       (name "LED_CLIP_A")
       (class "Default")
       (node
@@ -2714,7 +2744,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 27)
+      (code 26)
       (name "LED_PEAK")
       (class "Default")
       (node
@@ -2726,7 +2756,7 @@
         (pin "Z2")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 28)
+      (code 27)
       (name "LED_PEAK_A")
       (class "Default")
       (node
@@ -2738,7 +2768,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 29)
+      (code 28)
       (name "MIC")
       (class "Default")
       (node
@@ -2750,6 +2780,10 @@
         (pin "1")
         (pintype "PASSIVE"))
       (node
+        (ref "D5")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
         (ref "J1")
         (pin "T")
         (pintype "PASSIVE"))
@@ -2758,7 +2792,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 30)
+      (code 29)
       (name "PRE_CG")
       (class "Default")
       (node
@@ -2770,7 +2804,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 31)
+      (code 30)
       (name "PRE_INM")
       (class "Default")
       (node
@@ -2786,16 +2820,12 @@
         (pin "2")
         (pintype "INPUT")))
     (net
-      (code 32)
-      (name "PRE_NP")
+      (code 31)
+      (name "PRE_INP")
       (class "Default")
       (node
-        (ref "C10")
+        (ref "R20")
         (pin "2")
-        (pintype "PASSIVE"))
-      (node
-        (ref "R6")
-        (pin "1")
         (pintype "PASSIVE"))
       (node
         (ref "U3")
@@ -2805,6 +2835,26 @@
         (ref "U3")
         (pin "5")
         (pintype "INPUT")))
+    (net
+      (code 32)
+      (name "PRE_NP")
+      (class "Default")
+      (node
+        (ref "C10")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "D6")
+        (pin "3")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R20")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R6")
+        (pin "1")
+        (pintype "PASSIVE")))
     (net
       (code 33)
       (name "PRE_OUTA")
@@ -3010,16 +3060,8 @@
       (name "VBAT_SENSE")
       (class "Default")
       (node
-        (ref "C30")
-        (pin "1")
-        (pintype "PASSIVE"))
-      (node
         (ref "R12")
         (pin "2")
-        (pintype "PASSIVE"))
-      (node
-        (ref "R13")
-        (pin "1")
         (pintype "PASSIVE"))
       (node
         (ref "U1")
@@ -3027,7 +3069,7 @@
         (pintype "BIDIRECTIONAL")))
     (net
       (code 47)
-      (name "VCM_2V5")
+      (name "VCM")
       (class "Default")
       (node
         (ref "C11")
@@ -3059,10 +3101,6 @@
         (pintype "PASSIVE"))
       (node
         (ref "L1")
-        (pin "1")
-        (pintype "PASSIVE"))
-      (node
-        (ref "R12")
         (pin "1")
         (pintype "PASSIVE"))
       (node
