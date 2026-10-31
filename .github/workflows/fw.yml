@@ -53,20 +53,23 @@ jobs:
           cp b_rx/zephyr/zephyr.exe "$BSIM_OUT_PATH/bin/bs_probe_rx"
           cp b_uart/zephyr/zephyr.exe "$BSIM_OUT_PATH/bin/bs_probe_uart"
       - name: uart -> pty
+        timeout-minutes: 3
         run: |
           cd "$BSIM_OUT_PATH/bin"
-          ./bs_2G4_phy_v1 -s=u -D=1 -sim_length=4000000 >/dev/null &
-          ./bs_probe_uart -s=u -d=0 -uart0_pty -uart_pty_wait >u.log 2>&1 &
+          timeout 60 ./bs_2G4_phy_v1 -s=u -D=1 -sim_length=4000000 >/dev/null &
+          timeout 60 ./bs_probe_uart -s=u -d=0 -uart0_pty -uart_pty_wait >u.log 2>&1 &
           for _ in $(seq 20); do P=$(grep -o '/dev/pts/[0-9]*' u.log | head -1); [ -n "$P" ] && break; sleep 0.5; done
-          echo "pty=$P"
+          echo "pty=$P"; head -5 u.log
           timeout 20 cat "$P" >pty.out || true
           wait
           head -3 pty.out
           grep -q PROBE_UART_OK pty.out
       - name: radio probe (no Wi-Fi)
+        if: ${{ !cancelled() }}
         timeout-minutes: 8
         run: openpack/tests/bsim/probe/run.sh none
       - name: radio probe (Wi-Fi 1/6/11 at ConfigSet X)
+        if: ${{ !cancelled() }}
         timeout-minutes: 30
         run: |
           for c in 5 10 25 50 100; do openpack/tests/bsim/probe/run.sh "$c"; done
