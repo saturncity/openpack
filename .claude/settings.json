@@ -42,7 +42,10 @@
       "Bash(mv *)",
       "Bash(jq *)",
       "WebSearch",
-      "WebFetch"
+      "WebFetch",
+      "Bash(bazelisk *)",
+      "Bash(bazel *)",
+      "Bash(curl *)"
     ],
     "deny": [
       "Bash(rm -rf /*)",
