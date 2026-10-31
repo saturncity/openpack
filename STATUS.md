@@ -1,5 +1,5 @@
-Phase: 1 of 6 (computer models: sound quality, radio losses, microphone amplifier)
-Done since last update: sound compression options built (#12); microphone amplifier simulated and meets its noise and loudness limits (#15); Wi-Fi crowding numbers written down, mostly estimates because nobody has published measurements of a packed theater (#16); first dropout model (#14).
-Next: the sound-quality contest picks the compression (#13, running), then the sound-quality-vs-Wi-Fi curve finishes #14. Then Phase 2 (firmware in the simulator).
+Phase: 2 of 6 (firmware in the simulator)
+Done since last update: Phase 1 finished. Sound compression picked (ADPCM-6): it scores 4.2–4.6 out of 5 on an automatic listening scale, above the 4.0 bar on every speech and singing clip. Microphone amplifier circuit meets its noise and loudness limits. Rack's control software started early (#28), with the channel plan for 8 packs spread across the three Wi-Fi channels.
+Next: check the radio simulator covers what we need (#18), empty firmware app (#19), then the codec in C (#21) and the real radio timing (#22).
 Waiting on human: nothing
-Risks: "No audible dropouts in a packed house" (R1) is borderline in the model. It passes only if the spare radio channel between Wi-Fi channels stays almost perfectly clean. The resend-each-sound-packet-later option (time diversity, about 2 ms extra delay) looks necessary. Phase 2 simulation decides; if it still fails there, I will ask you here with the closest achievable number.
+Risks: "No audible dropouts in a packed house" (R1) is still borderline in the model. Time diversity (resending each sound packet a moment later, about 2 ms extra delay) clearly helps: with it, sound stays good up to about 25 % Wi-Fi load even in the worst case, versus 10 % without. The full simulation in Phase 2 decides; if it fails there, I will ask you here with the closest achievable number.
