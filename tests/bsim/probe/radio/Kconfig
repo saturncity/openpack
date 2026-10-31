@@ -5,6 +5,6 @@ config PROBE_ROLE_TX
 
 config PROBE_PACKETS
 	int "Packets per carrier block, one per 1 ms"
-	default 3000
+	default 300
 
 source "Kconfig.zephyr"

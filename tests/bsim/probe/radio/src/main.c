@@ -48,6 +48,9 @@ int main(void)
 
 		radio_cfg(carriers[c]);
 		for (int i = 0; i < N; i++, t += 1000) {
+			if (c == 0 && i < 3) {
+				printk("PROBE_DBG i=%d t=%lld now_us=%lld\n", i, t, k_ticks_to_us_floor64(k_uptime_ticks()));
+			}
 			NRF_RADIO->EVENTS_END = 0;
 			NRF_RADIO->EVENTS_DISABLED = 0;
 			if (IS_ENABLED(CONFIG_PROBE_ROLE_TX)) {

@@ -13,7 +13,7 @@ nw=3
 [ "$cfg" = none ] && nw=0
 ./bs_2G4_phy_v1 -s="$sim" -D=$((2 + nw)) -sim_length=15100000 -channel=multiatt -defmodem=BLE_simple \
 	-argschannel -file="$m" >/dev/null &
-./bs_probe_tx -s="$sim" -d=0 >/dev/null &
+./bs_probe_tx -s="$sim" -d=0 | sed "s/^/cfg=$cfg /" &
 ./bs_probe_rx -s="$sim" -d=1 | sed "s/^/cfg=$cfg /" &
 if [ $nw -gt 0 ]; then
 	i=2
