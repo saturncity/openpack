@@ -198,10 +198,10 @@ def bom_rows(circuit):
     for (mpn, val), refs in sorted(groups.items(), key=lambda kv: sorted(kv[1])[0]):
         unit, src = prices.PRICES[mpn]
         rows.append({"refs": " ".join(sorted(refs, key=lambda r: (r.rstrip("0123456789"), int("0" + r.lstrip("ABCDEFGHIJKLMNOPQRSTUVWXYZ"))))),
-                     "qty": len(refs), "value": val, "mpn": mpn, "unit_usd": f"{unit:.2f}",
+                     "qty": len(refs), "value": val, "mpn": mpn, "unit_usd": f"{unit:.4f}",
                      "ext_usd": f"{unit * len(refs):.2f}", "source": src})
     for item, qty, unit, src in prices.EXTRAS:
-        rows.append({"refs": "-", "qty": qty, "value": item, "mpn": "-", "unit_usd": f"{unit:.2f}",
+        rows.append({"refs": "-", "qty": qty, "value": item, "mpn": "-", "unit_usd": f"{unit:.4f}",
                      "ext_usd": f"{unit * qty:.2f}", "source": src})
     return rows
 

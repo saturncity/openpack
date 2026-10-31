@@ -27,9 +27,12 @@ PRICES = {  # mpn: (usd_each_at_100, source)
     "C_10u_1206_X7R": (0.12, "est. (10 uF 16 V 1206 X7R)"),
     "C_10u_0603_X5R": (0.06, "est. (10 uF 10 V 0603 X5R)"),
     "C_1u_0402": (0.03, "est."),
-    "C_100n_0402": (0.02, "est."),
+    "C_100n_0402": (0.0013, "LCSC C1525 (Samsung CL05B104KO5NNNC, 100 nF 16 V X7R 0402), qty 100, 2026-10-31"),
     "C_22p_0402_C0G": (0.02, "est."),
-    "R_0402_1%": (0.02, "est."),
+    # UniOhm 0402WGF series 1 %: qty-100 prices seen on LCSC pages: 1k C11702 $0.0013, 100R C25076 $0.0013,
+    # 100k C25741 $0.0013, 1M C26083 $0.0015, 5.1k C25905 $0.0023, 330R C407692 $0.0064. 2.2k, 180k, 732k not
+    # looked up; every 0402 resistor is priced at the highest seen (330R).
+    "R_0402_1%": (0.0064, "LCSC C407692 (and C11702, C25076, C25741, C26083, C25905), qty 100, 2026-10-31; highest of the six used for all"),
     "LTST-C191KGKT": (0.15, "Digi-Key listing price (q1 assumed); AlInGaP green, Vf ~2.0 V"),
     "LTST-C191KRKT": (0.15, "est. = KGKT price (same Lite-On series)"),
     "LTST-C191KSKT": (0.15, "est. = KGKT price (same Lite-On series)"),
