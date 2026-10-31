@@ -1,0 +1,5 @@
+tests:
+  # RX-5 antenna decision logic (fw/src/rx/ant.c, ADR-0011), pure C on the host.
+  fw.rx.ant:
+    platform_allow: native_sim
+    tags: openpack
