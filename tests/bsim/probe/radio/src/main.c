@@ -1,75 +1,94 @@
 /* AIR-1 probe: RADIO MODE=Ble_2Mbit, raw packet config (not BLE link layer), 1 packet/ms.
- * Event driven (TIMER0 -> DPPI -> RADIO tasks, DISABLED interrupt): CPU polling made the sim 200x slower.
- * Steps through carriers; the RX side prints ok/crcerr/timeout per carrier. Loss = 1 - ok/n.
- * Frame (1 ms, TIMER0 period): TX starts at +200 us, RX opens at +0 and is forced off at +700 us. */
+ * Event driven (TIMER0 compare IRQs trigger RADIO tasks, DISABLED interrupt): CPU polling made the sim
+ * 200x slower. Steps through carriers; the RX side prints ok/crcerr/timeout per carrier. Loss = 1 - ok/n.
+ * Frame (1 ms, TIMER0 period): TX starts at +200 us, RX opens at +0 and is forced off at +700 us.
+ *
+ * All peripheral access goes through the nrfx HAL: on nrf*bsim the HAL replacement calls the HW model's
+ * register side effects (tasks, event clears). Plain NRF_X->TASKS_Y = 1 writes do nothing in the sim.
+ */
 #include <zephyr/kernel.h>
 #include <zephyr/irq.h>
-#include <nrfx.h>
+#include <zephyr/drivers/clock_control/nrf_clock_control.h>
+#include <hal/nrf_radio.h>
+#include <hal/nrf_timer.h>
 
-static const int carriers[] = {2437, 2442, 2424, 2449, 2473}; /* in-band, in-band edge, gap, gap, gap */
+static const uint16_t carriers[] = {2437, 2442, 2424, 2449, 2473}; /* in-band, in-band edge, gap x3 */
 #define NB ARRAY_SIZE(carriers)
-#define N CONFIG_PROBE_PACKETS
+#define N  CONFIG_PROBE_PACKETS
 #define TX IS_ENABLED(CONFIG_PROBE_ROLE_TX)
-#define EN (1u << 31)
 
-static uint8_t pkt[1 + 20];
+static uint8_t pkt[2 + 20]; /* S0, LENGTH, payload */
 static int blk, cnt;
 static int ok[NB], crcerr[NB], timeout[NB];
 static K_SEM_DEFINE(done, 0, 1);
 
 static void radio_init(void)
 {
-	NRF_RADIO->MODE = RADIO_MODE_MODE_Ble_2Mbit << RADIO_MODE_MODE_Pos;
-	NRF_RADIO->PCNF0 = (8 << RADIO_PCNF0_LFLEN_Pos) | (RADIO_PCNF0_PLEN_16bit << RADIO_PCNF0_PLEN_Pos);
-	NRF_RADIO->PCNF1 = (32 << RADIO_PCNF1_MAXLEN_Pos) | (3 << RADIO_PCNF1_BALEN_Pos) |
-			   (RADIO_PCNF1_ENDIAN_Big << RADIO_PCNF1_ENDIAN_Pos);
-	NRF_RADIO->BASE0 = 0xA5C3E100;
-	NRF_RADIO->PREFIX0 = 0x8E;
-	NRF_RADIO->TXADDRESS = 0;
-	NRF_RADIO->RXADDRESSES = 1;
-	NRF_RADIO->CRCCNF = RADIO_CRCCNF_LEN_Three << RADIO_CRCCNF_LEN_Pos;
-	NRF_RADIO->CRCPOLY = 0x00065B;
-	NRF_RADIO->CRCINIT = 0x555555;
-	NRF_RADIO->TXPOWER = RADIO_TXPOWER_TXPOWER_0dBm;
-	NRF_RADIO->PACKETPTR = (uint32_t)(uintptr_t)pkt;
-	NRF_RADIO->SHORTS = RADIO_SHORTS_READY_START_Msk | RADIO_SHORTS_END_DISABLE_Msk;
-	NRF_RADIO->INTENSET = RADIO_INTENSET_DISABLED_Msk;
-	NRF_RADIO->FREQUENCY = carriers[0] - 2400;
+	const nrf_radio_packet_conf_t conf = {
+		/* AIR-2 + ADR-0010: S0 header byte, 8-bit length, LE, whitening (the only 2 Mbit layout
+		 * the bsim RADIO model accepts; identical on silicon).
+		 */
+		.s0len = 1,
+		.lflen = 8,
+		.plen = NRF_RADIO_PREAMBLE_LENGTH_16BIT,
+		.maxlen = 32,
+		.balen = 3,
+		.whiteen = true,
+	};
+
+	nrf_radio_mode_set(NRF_RADIO, NRF_RADIO_MODE_BLE_2MBIT);
+	nrf_radio_packet_configure(NRF_RADIO, &conf);
+	nrf_radio_base0_set(NRF_RADIO, 0xA5C3E100);
+	nrf_radio_prefix0_set(NRF_RADIO, 0x8E);
+	nrf_radio_txaddress_set(NRF_RADIO, 0);
+	nrf_radio_rxaddresses_set(NRF_RADIO, 1);
+	nrf_radio_crc_configure(NRF_RADIO, 3, NRF_RADIO_CRC_ADDR_SKIP, 0x00065B);
+	nrf_radio_datawhiteiv_set(NRF_RADIO, 0x40);
+	nrf_radio_crcinit_set(NRF_RADIO, 0x555555);
+	nrf_radio_txpower_set(NRF_RADIO, NRF_RADIO_TXPOWER_0DBM);
+	nrf_radio_packetptr_set(NRF_RADIO, pkt);
+	nrf_radio_shorts_set(NRF_RADIO, NRF_RADIO_SHORT_READY_START_MASK | NRF_RADIO_SHORT_END_DISABLE_MASK);
+	nrf_radio_int_enable(NRF_RADIO, NRF_RADIO_INT_DISABLED_MASK);
+	nrf_radio_frequency_set(NRF_RADIO, carriers[0]);
+}
+
+static bool take(nrf_timer_event_t ev)
+{
+	if (!nrf_timer_event_check(NRF_TIMER0, ev)) {
+		return false;
+	}
+	nrf_timer_event_clear(NRF_TIMER0, ev);
+	return true;
 }
 
 static void tisr(const void *arg)
 {
-	if (NRF_TIMER0->EVENTS_COMPARE[0]) {
-		NRF_TIMER0->EVENTS_COMPARE[0] = 0;
-		if (!TX) {
-			NRF_RADIO->TASKS_RXEN = 1;
-		}
+	if (take(NRF_TIMER_EVENT_COMPARE0) && !TX) {
+		nrf_radio_task_trigger(NRF_RADIO, NRF_RADIO_TASK_RXEN);
 	}
-	if (NRF_TIMER0->EVENTS_COMPARE[1]) {
-		NRF_TIMER0->EVENTS_COMPARE[1] = 0;
-		if (TX) {
-			NRF_RADIO->TASKS_TXEN = 1;
-		}
+	if (take(NRF_TIMER_EVENT_COMPARE1) && TX) {
+		nrf_radio_task_trigger(NRF_RADIO, NRF_RADIO_TASK_TXEN);
 	}
-	if (NRF_TIMER0->EVENTS_COMPARE[2]) {
-		NRF_TIMER0->EVENTS_COMPARE[2] = 0;
-		if (!TX) {
-			NRF_RADIO->TASKS_DISABLE = 1;
-		}
+	/* Close the RX window only if no packet ended it: DISABLE in DISABLED state raises a second
+	 * DISABLED event, which would count the window twice.
+	 */
+	if (take(NRF_TIMER_EVENT_COMPARE2) && !TX &&
+	    nrf_radio_state_get(NRF_RADIO) != NRF_RADIO_STATE_DISABLED) {
+		nrf_radio_task_trigger(NRF_RADIO, NRF_RADIO_TASK_DISABLE);
 	}
 }
 
 static void isr(const void *arg)
 {
-	int end = NRF_RADIO->EVENTS_END;
+	bool end = nrf_radio_event_check(NRF_RADIO, NRF_RADIO_EVENT_END);
 
-	NRF_RADIO->EVENTS_DISABLED = 0;
-	NRF_RADIO->EVENTS_END = 0;
+	nrf_radio_event_clear(NRF_RADIO, NRF_RADIO_EVENT_DISABLED);
+	nrf_radio_event_clear(NRF_RADIO, NRF_RADIO_EVENT_END);
 	/* TX: packet 0 has no RX window, so block 0 is N + 1 packets, later blocks N. RX: N windows per block. */
 	int limit = (TX && blk == 0) ? N + 1 : N;
 
 	if (!TX) {
-		if (end && NRF_RADIO->CRCSTATUS && pkt[0] == 20 && pkt[1] == 0xA5) {
+		if (end && nrf_radio_crc_status_check(NRF_RADIO) && pkt[1] == 20 && pkt[2] == 0xA5) {
 			ok[blk]++;
 		} else if (end) {
 			crcerr[blk]++;
@@ -80,43 +99,44 @@ static void isr(const void *arg)
 	if (++cnt >= limit) {
 		cnt = 0;
 		if (++blk == NB) {
-			NRF_TIMER0->TASKS_STOP = 1;
+			nrf_timer_task_trigger(NRF_TIMER0, NRF_TIMER_TASK_STOP);
 			k_sem_give(&done);
 		} else {
-			NRF_RADIO->FREQUENCY = carriers[blk] - 2400;
+			nrf_radio_frequency_set(NRF_RADIO, carriers[blk]);
 		}
 	}
 }
 
 int main(void)
 {
-	pkt[0] = 20;
-	pkt[1] = 0xA5;
+	pkt[0] = 0;  /* S0 */
+	pkt[1] = 20; /* LENGTH */
+	pkt[2] = 0xA5;
 	printk("PROBE role=%s mode=Ble_2Mbit raw-config\n", TX ? "tx" : "rx");
+	/* The radio needs HFCLK; the clock driver owns the CLOCK IRQ, so request it through the driver. */
+	int err = nrf_clock_control_request_sync(DEVICE_DT_GET(DT_NODELABEL(hfclk)), NULL, K_MSEC(100));
+
+	if (err != 0) {
+		printk("PROBE_FAIL hfclk err=%d\n", err);
+		return 0;
+	}
 	radio_init();
 	IRQ_CONNECT(RADIO_IRQn, 0, isr, NULL, 0);
 	irq_enable(RADIO_IRQn);
 
-	NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
-	NRF_CLOCK->TASKS_HFCLKSTART = 1; /* the bsim TIMER only counts with HFCLK running */
-	while (!NRF_CLOCK->EVENTS_HFCLKSTARTED) {
-		k_msleep(1);
-	}
-	NRF_TIMER0->MODE = 0;
-	NRF_TIMER0->BITMODE = 3;
-	NRF_TIMER0->PRESCALER = 4; /* 16 MHz / 2^4 = 1 MHz */
-	NRF_TIMER0->CC[0] = 1000;
-	NRF_TIMER0->CC[1] = 200;
-	NRF_TIMER0->CC[2] = 700;
-	NRF_TIMER0->SHORTS = TIMER_SHORTS_COMPARE0_CLEAR_Msk;
-	NRF_TIMER0->INTENSET = TIMER_INTENSET_COMPARE0_Msk | TIMER_INTENSET_COMPARE1_Msk | TIMER_INTENSET_COMPARE2_Msk;
+	nrf_timer_mode_set(NRF_TIMER0, NRF_TIMER_MODE_TIMER);
+	nrf_timer_bit_width_set(NRF_TIMER0, NRF_TIMER_BIT_WIDTH_32);
+	nrf_timer_prescaler_set(NRF_TIMER0, 4); /* 16 MHz / 2^4 = 1 MHz */
+	nrf_timer_cc_set(NRF_TIMER0, NRF_TIMER_CC_CHANNEL0, 1000);
+	nrf_timer_cc_set(NRF_TIMER0, NRF_TIMER_CC_CHANNEL1, 200);
+	nrf_timer_cc_set(NRF_TIMER0, NRF_TIMER_CC_CHANNEL2, 700);
+	nrf_timer_shorts_enable(NRF_TIMER0, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK);
+	nrf_timer_int_enable(NRF_TIMER0, NRF_TIMER_INT_COMPARE0_MASK | NRF_TIMER_INT_COMPARE1_MASK |
+						 NRF_TIMER_INT_COMPARE2_MASK);
 	IRQ_CONNECT(TIMER0_IRQn, 0, tisr, NULL, 0);
 	irq_enable(TIMER0_IRQn);
-	NRF_TIMER0->TASKS_START = 1;
+	nrf_timer_task_trigger(NRF_TIMER0, NRF_TIMER_TASK_START);
 
-	k_msleep(5);
-	NRF_TIMER0->TASKS_CAPTURE[3] = 1;
-	printk("PROBE_DBG timer=%u\n", NRF_TIMER0->CC[3]);
 	k_sem_take(&done, K_FOREVER);
 	if (!TX) {
 		for (size_t c = 0; c < NB; c++) {
