@@ -1,0 +1,38 @@
+name: bakeoff
+on:
+  workflow_dispatch:
+  push:
+    branches: [issue-13-bakeoff]
+    paths: ["sim/codec/**", "sim/quality.py", ".github/workflows/bakeoff.yml"]
+jobs:
+  bakeoff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      VISQOL_TAG: v3.3.3
+      USE_BAZEL_VERSION: 5.1.0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install numpy scipy soundfile pesq remotezip
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/bazel
+          key: bazel-visqol-${{ env.VISQOL_TAG }}
+      - name: Build ViSQOL
+        run: |
+          git clone --depth 1 --branch "$VISQOL_TAG" https://github.com/google/visqol "$RUNNER_TEMP/visqol"
+          cd "$RUNNER_TEMP/visqol"
+          bazelisk build :visqol -c opt
+          echo "VISQOL_BIN=$PWD/bazel-bin/visqol" >> "$GITHUB_ENV"
+      - run: python3 sim/codec/bakeoff.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bakeoff
+          path: |
+            sim/codec/RESULTS.md
+            sim/.cache/results.csv
+            sim/.cache/ab/
