@@ -1,0 +1,24 @@
+# Receiver net core (RX-2..RX-5). FW-5: timing constants are Kconfig.
+
+config OP_RX_TRACK_WIN_US
+	int "RX-3 tracking window: accept a copy within +- this of its expected start (us)"
+	default 50
+
+config OP_RX_MISS_LIMIT
+	int "RX-3 consecutive frames with no valid copy before re-acquisition"
+	default 100
+
+config OP_RX_ANT_HYST_DB
+	int "RX-5 switch when the other antenna's last-valid RSSI is this much stronger (dB)"
+	default 6
+
+config OP_RX_ANT_PROBE_FRAMES
+	int "RX-5 frames between probes of the other antenna, per channel (ADR-0011), 0 = never"
+	default 100
+
+config OP_PACK_TEST_RUN_MS
+	int "Test only: the pack stops transmitting after this many ms, 0 = never (tests/bsim/rx scenario e)"
+	default 0
+	help
+	  Emulates a pack powering off for the pack-reboot scenario (RX-10); the reboot itself is a new
+	  bsim device started with -start_offset. Never set in a shipped build.

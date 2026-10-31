@@ -45,4 +45,6 @@ config OP_NRF5340
 	select IPC_SERVICE
 	select MBOX
 
+rsource "src/rx/Kconfig"
+
 source "Kconfig.zephyr"

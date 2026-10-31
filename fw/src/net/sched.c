@@ -114,6 +114,15 @@ static void radio_init(void)
 	nrf_radio_subscribe_set(NRF_RADIO, NRF_RADIO_TASK_TXEN, DPPI_CH);
 }
 
+/* Test only (CONFIG_OP_PACK_TEST_RUN_MS): the pack goes silent, as if powered off (RX-10 bsim (e)). */
+static void test_stop(struct k_timer *t)
+{
+	nrf_timer_task_trigger(NRF_TIMER0, NRF_TIMER_TASK_STOP);
+	printk("SCHED stop (test, after %d ms)\n", CONFIG_OP_PACK_TEST_RUN_MS);
+}
+
+static K_TIMER_DEFINE(test_stop_timer, test_stop, NULL);
+
 int op_sched_start(void)
 {
 	int err = nrf_clock_control_request_sync(DEVICE_DT_GET(DT_NODELABEL(hfclk)), NULL, K_MSEC(100));
@@ -140,6 +149,9 @@ int op_sched_start(void)
 	nrf_timer_publish_set(NRF_TIMER0, NRF_TIMER_EVENT_COMPARE1, DPPI_CH);
 	nrf_dppi_channels_enable(NRF_DPPIC, BIT(DPPI_CH));
 	nrf_timer_task_trigger(NRF_TIMER0, NRF_TIMER_TASK_START);
+	if (CONFIG_OP_PACK_TEST_RUN_MS > 0) {
+		k_timer_start(&test_stop_timer, K_MSEC(CONFIG_OP_PACK_TEST_RUN_MS), K_NO_WAIT);
+	}
 	printk("SCHED start pack_id=%d fA=%d fB=%d air_us=%d cc_b_us=%d\n", CONFIG_OP_PACK_ID,
 	       CONFIG_OP_CH_A_MHZ, CONFIG_OP_CH_B_MHZ, AIR_US, CC_B_US);
 	return 0;
