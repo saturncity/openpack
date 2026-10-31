@@ -48,17 +48,18 @@ def build():
 
     gnd = Net("GND"); gnd.drive = POWER
     v5, v5b, v3, v3a = Net("+5V"), Net("+5V_BIAS"), Net("+3V3"), Net("+3V3A")
-    vbat, vrp, vsys = Net("BAT+"), Net("VBAT_RP"), Net("VSYS")
+    vbat, vbatf, vrp, vsys = Net("BAT+"), Net("BAT_F"), Net("VBAT_RP"), Net("VSYS")
     for n in (vbat, vsys, v5b):
         n.drive = POWER  # battery and switched/filtered rails are sources (PWR_FLAG equivalent)
 
     with Group("power"):  # one schematic sheet
-        # ---- PK-6 power: protected 18650 -> P-FET reverse-polarity -> slide switch -> VSYS ----
-        # No PTC: the protected cell carries its own; a 0.5 A PTC (~1 Ohm) would cost ~0.2 V of LDO headroom (ADR-0012).
+        # ---- PK-6 power: 18650 -> 3 A chip fuse -> P-FET reverse-polarity -> slide switch -> VSYS ----
+        # Fuse guards against an unprotected cell; 23 mOhm cold (5 mV at 0.2 A), unlike a ~1 Ohm PTC (ADR-0012).
         bt = part("Battery_18650", "BT1", "18650 holder", "openpack:BH-18650-B1BA002", "BH-18650-B1BA002")
         bt["+"] += vbat; bt["-"] += gnd
         q1 = part("PMOS", "Q1", "DMG2305UX", "Package_TO_SOT_SMD:SOT-23", "DMG2305UX-7")
-        q1["D"] += vbat; q1["S"] += vrp          # body diode conducts only with the cell the right way round
+        f1 = part("Fuse", "F1", "3A fast", "Fuse:Fuse_1206_3216Metric", "SF-1206F300-2"); f1[1] += vbat; f1[2] += vbatf
+        q1["D"] += vbatf; q1["S"] += vrp          # body diode conducts only with the cell the right way round
         qg = Net("Q1_G"); q1["G"] += qg; R("R1", "100k", qg, gnd)
         sw = part("SW_SPDT", "SW1", "recessed slide", "Button_Switch_SMD:SW_SPDT_CK_JS102011SAQN", "JS102011SAQN")
         sw["COM"] += vrp; sw["A"] += vsys; sw["B"] += NC

@@ -2,10 +2,47 @@
   (version "D")
   (design
     (source "pack.py")
-    (date "10/31/2026 10:26 PM")
+    (date "10/31/2026 10:35 PM")
     (tool "SKiDL (3.0.0)")
     (sheet
       (number 1)
+      (name "/mcu_usb1/")
+      (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/")
+      (title_block
+        (title)
+        (company)
+        (rev)
+        (date)
+        (source "out/pack.py")
+        (comment
+          (number "1")
+          (value ""))
+        (comment
+          (number "2")
+          (value ""))
+        (comment
+          (number "3")
+          (value ""))
+        (comment
+          (number "4")
+          (value ""))
+        (comment
+          (number "5")
+          (value ""))
+        (comment
+          (number "6")
+          (value ""))
+        (comment
+          (number "7")
+          (value ""))
+        (comment
+          (number "8")
+          (value ""))
+        (comment
+          (number "9")
+          (value ""))))
+    (sheet
+      (number 2)
       (name "/")
       (tstamps "/")
       (title_block
@@ -42,7 +79,7 @@
           (number "9")
           (value ""))))
     (sheet
-      (number 2)
+      (number 3)
       (name "/adc1/")
       (tstamps "/ca570d45-6888-5db3-a2e2-6ac096a64ee4/")
       (title_block
@@ -79,7 +116,7 @@
           (number "9")
           (value ""))))
     (sheet
-      (number 3)
+      (number 4)
       (name "/power1/")
       (tstamps "/1c71258b-4a63-53c3-96a6-ba5ec56f90dd/")
       (title_block
@@ -116,46 +153,9 @@
           (number "9")
           (value ""))))
     (sheet
-      (number 4)
+      (number 5)
       (name "/front_end1/")
       (tstamps "/8d458167-a4a2-545c-9c81-b5f4bde18935/")
-      (title_block
-        (title)
-        (company)
-        (rev)
-        (date)
-        (source "out/pack.py")
-        (comment
-          (number "1")
-          (value ""))
-        (comment
-          (number "2")
-          (value ""))
-        (comment
-          (number "3")
-          (value ""))
-        (comment
-          (number "4")
-          (value ""))
-        (comment
-          (number "5")
-          (value ""))
-        (comment
-          (number "6")
-          (value ""))
-        (comment
-          (number "7")
-          (value ""))
-        (comment
-          (number "8")
-          (value ""))
-        (comment
-          (number "9")
-          (value ""))))
-    (sheet
-      (number 5)
-      (name "/mcu_usb1/")
-      (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/")
       (title_block
         (title)
         (company)
@@ -1178,6 +1178,32 @@
         (tstamps "/8d458167-a4a2-545c-9c81-b5f4bde18935/"))
       (component_classes)
       (tstamps "25d4fa3d-7312-5bbd-af7b-f3c155091792"))
+    (comp
+      (ref "F1")
+      (value "3A fast")
+      (description "Chip fuse")
+      (footprint "Fuse:Fuse_1206_3216Metric")
+      (fields
+        (field
+          (name "MPN") "SF-1206F300-2")
+        (field
+          (name "Description") "Chip fuse")
+        (field
+          (name "Footprint") "Fuse:Fuse_1206_3216Metric")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "F1")
+        (field
+          (name "SKiDL Line") "pack.py:31"))
+      (libsource
+        (lib "openpack")
+        (part "Fuse"))
+      (sheetpath
+        (names "/power1/")
+        (tstamps "/1c71258b-4a63-53c3-96a6-ba5ec56f90dd/"))
+      (component_classes)
+      (tstamps "af8a4084-94ea-53b2-87ad-b47689031995"))
     (comp
       (ref "J1")
       (value "3.5mm locking")
@@ -2340,8 +2366,8 @@
         (pin "1")
         (pintype "PASSIVE"))
       (node
-        (ref "Q1")
-        (pin "3")
+        (ref "F1")
+        (pin "1")
         (pintype "PASSIVE"))
       (node
         (ref "R12")
@@ -2349,6 +2375,18 @@
         (pintype "PASSIVE")))
     (net
       (code 14)
+      (name "BAT_F")
+      (class "Default")
+      (node
+        (ref "F1")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "Q1")
+        (pin "3")
+        (pintype "PASSIVE")))
+    (net
+      (code 15)
       (name "BOOST_FB")
       (class "Default")
       (node
@@ -2364,7 +2402,7 @@
         (pin "1")
         (pintype "INPUT")))
     (net
-      (code 15)
+      (code 16)
       (name "BOOST_SW")
       (class "Default")
       (node
@@ -2376,7 +2414,7 @@
         (pin "5")
         (pintype "PASSIVE")))
     (net
-      (code 16)
+      (code 17)
       (name "GND")
       (class "Default")
       (node
@@ -2636,7 +2674,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 17)
+      (code 18)
       (name "I2S_BCLK")
       (class "Default")
       (node
@@ -2648,7 +2686,7 @@
         (pin "22")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 18)
+      (code 19)
       (name "I2S_FSYNC")
       (class "Default")
       (node
@@ -2660,7 +2698,7 @@
         (pin "23")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 19)
+      (code 20)
       (name "I2S_SDOUT")
       (class "Default")
       (node
@@ -2672,7 +2710,7 @@
         (pin "21")
         (pintype "OUTPUT")))
     (net
-      (code 20)
+      (code 21)
       (name "LED_BAT_LOW")
       (class "Default")
       (node
@@ -2684,7 +2722,7 @@
         (pin "Z1")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 21)
+      (code 22)
       (name "LED_BAT_LOW_A")
       (class "Default")
       (node
@@ -2696,7 +2734,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 22)
+      (code 23)
       (name "LED_BAT_OK")
       (class "Default")
       (node
@@ -2708,7 +2746,7 @@
         (pin "Z0")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 23)
+      (code 24)
       (name "LED_BAT_OK_A")
       (class "Default")
       (node
@@ -2720,7 +2758,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 24)
+      (code 25)
       (name "LED_CLIP")
       (class "Default")
       (node
@@ -2732,7 +2770,7 @@
         (pin "Z3")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 25)
+      (code 26)
       (name "LED_CLIP_A")
       (class "Default")
       (node
@@ -2744,7 +2782,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 26)
+      (code 27)
       (name "LED_PEAK")
       (class "Default")
       (node
@@ -2756,7 +2794,7 @@
         (pin "Z2")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 27)
+      (code 28)
       (name "LED_PEAK_A")
       (class "Default")
       (node
@@ -2768,7 +2806,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 28)
+      (code 29)
       (name "MIC")
       (class "Default")
       (node
@@ -2792,7 +2830,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 29)
+      (code 30)
       (name "PRE_CG")
       (class "Default")
       (node
@@ -2804,7 +2842,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 30)
+      (code 31)
       (name "PRE_INM")
       (class "Default")
       (node
@@ -2820,7 +2858,7 @@
         (pin "2")
         (pintype "INPUT")))
     (net
-      (code 31)
+      (code 32)
       (name "PRE_INP")
       (class "Default")
       (node
@@ -2836,7 +2874,7 @@
         (pin "5")
         (pintype "INPUT")))
     (net
-      (code 32)
+      (code 33)
       (name "PRE_NP")
       (class "Default")
       (node
@@ -2856,7 +2894,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 33)
+      (code 34)
       (name "PRE_OUTA")
       (class "Default")
       (node
@@ -2872,7 +2910,7 @@
         (pin "1")
         (pintype "OUTPUT")))
     (net
-      (code 34)
+      (code 35)
       (name "PRE_OUTB")
       (class "Default")
       (node
@@ -2888,7 +2926,7 @@
         (pin "7")
         (pintype "OUTPUT")))
     (net
-      (code 35)
+      (code 36)
       (name "Q1_G")
       (class "Default")
       (node
@@ -2900,7 +2938,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 36)
+      (code 37)
       (name "SWDCLK")
       (class "Default")
       (node
@@ -2912,7 +2950,7 @@
         (pin "15")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 37)
+      (code 38)
       (name "SWDIO")
       (class "Default")
       (node
@@ -2924,7 +2962,7 @@
         (pin "16")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 38)
+      (code 39)
       (name "UART_RX")
       (class "Default")
       (node
@@ -2936,7 +2974,7 @@
         (pin "C1")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 39)
+      (code 40)
       (name "UART_TX")
       (class "Default")
       (node
@@ -2948,7 +2986,7 @@
         (pin "B1")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 40)
+      (code 41)
       (name "USB_CC1")
       (class "Default")
       (node
@@ -2960,7 +2998,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 41)
+      (code 42)
       (name "USB_CC2")
       (class "Default")
       (node
@@ -2972,7 +3010,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 42)
+      (code 43)
       (name "USB_D+")
       (class "Default")
       (node
@@ -2996,7 +3034,7 @@
         (pin "6")
         (pintype "PASSIVE")))
     (net
-      (code 43)
+      (code 44)
       (name "USB_D-")
       (class "Default")
       (node
@@ -3020,7 +3058,7 @@
         (pin "4")
         (pintype "PASSIVE")))
     (net
-      (code 44)
+      (code 45)
       (name "USB_VBUS")
       (class "Default")
       (node
@@ -3044,7 +3082,7 @@
         (pin "5")
         (pintype "PASSIVE")))
     (net
-      (code 45)
+      (code 46)
       (name "VBAT_RP")
       (class "Default")
       (node
@@ -3056,7 +3094,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 46)
+      (code 47)
       (name "VBAT_SENSE")
       (class "Default")
       (node
@@ -3068,7 +3106,7 @@
         (pin "5")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 47)
+      (code 48)
       (name "VCM")
       (class "Default")
       (node
@@ -3088,7 +3126,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 48)
+      (code 49)
       (name "VSYS")
       (class "Default")
       (node
@@ -3124,7 +3162,7 @@
         (pin "3")
         (pintype "INPUT")))
     (net
-      (code 49)
+      (code 50)
       (name "nRESET")
       (class "Default")
       (node

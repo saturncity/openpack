@@ -154,7 +154,7 @@ if __name__ == "__main__":
     i_3v3 = 0.140            # A: nRF21540 at +19 dBm (~115 mA) + nRF5340 + PCM1840 IOVDD, peak during TX
     r_ldo = 0.238 / 0.5      # ohm: TLV755P 3.3 V dropout max 238 mV at 500 mA, 125 C (in dropout: an Rdson)
     i_5v_in = 0.032 * 5.0 / (3.2 * 0.85)   # A from the cell into the boost: ~32 mA at 5 V (PCM1840 AVDD, OPA1656, bias)
-    r_path = 0.10 + 0.03 + 0.05            # ohm: DMG2305UX Rds(on) at -2.5 V, JS102011SAQN contact, holder/traces
+    r_path = 0.023 + 0.10 + 0.03 + 0.05    # ohm: SF-1206F300 fuse, DMG2305UX Rds(on) at -2.5 V, JS102011SAQN contact, holder/traces
     v_err = 0.08             # V: 1 % divider + nRF5340 SAADC gain error at 3.2 V
     cutoff = 3.0 + i_3v3 * r_ldo + (i_3v3 + i_5v_in) * r_path + v_err
     CELL_CUTOFF_V = round(cutoff + 0.049, 1)   # rounded up to 0.1 V

@@ -92,7 +92,7 @@ SYMBOLS = {
     "R": ("R", two_pin(), "Resistor"),
     "C": ("C", two_pin(), "Capacitor"),
     "L": ("L", two_pin(), "Inductor"),
-    "Polyfuse": ("F", two_pin(), "PTC resettable fuse"),
+    "Fuse": ("F", two_pin(), "Chip fuse"),
     "LED": ("D", two_pin("1", "2", "K", "A"), "LED"),
     "TestPoint": ("TP", [("1", "1", P, "T")], "Test point"),
 }

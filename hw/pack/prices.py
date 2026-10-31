@@ -19,6 +19,7 @@ PRICES = {  # mpn: (usd_each_at_100, source)
     "DMG2305UX-7": (0.10, "est."),
     "TPD1E10B06DPYR": (0.41, "Digi-Key listing price (tier not shown; q1 assumed)"),
     "BAV199,215": (0.21, "Digi-Key listing price (tier not shown; q1 assumed)"),
+    "SF-1206F300-2": (0.52, DK + " (Bourns 3 A 1206 fast, 23 mOhm cold)"),
     "DFE252012F-1R0M=P2": (0.17, DK),
     "GRM31CR60J107ME39L": (0.35, "est. (100 uF 6.3 V 1206)"),
     "GRM31CR61A476ME15L": (0.25, "est. (47 uF 10 V 1206)"),
