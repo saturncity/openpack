@@ -2,7 +2,7 @@
   (version 20250114)
   (generator "skidl")
   (generator_version "0.2.0")
-  (uuid 5fda53f8-b8d5-467c-8fa9-fb97f109aba9)
+  (uuid 78635028-5e00-4d94-b8e0-3a588010e4ac)
   (paper "A4")
   (title_block
     (title "OpenPack body-pack")
@@ -40,7 +40,7 @@
           (size 1.27 1.27))
         (justify left top))))
   (sheet
-    (at 137.41 130.81)
+    (at 137.41 62.23)
     (size 22.35 17.78)
     (exclude_from_sim no)
     (in_bom yes)
@@ -54,13 +54,13 @@
       (color 0 0 0 0.0))
     (uuid 8cd18c6f-5a34-578b-be21-29b4c5eade79)
     (property "Sheetname" "front_end1"
-      (at 137.41 130.1 0)
+      (at 137.41 61.52 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left bottom)))
     (property "Sheetfile" "pack_front_end1.kicad_sch"
-      (at 137.41 149.17 0)
+      (at 137.41 80.59 0)
       (effects
         (font
           (size 1.27 1.27))
@@ -92,7 +92,7 @@
           (size 1.27 1.27))
         (justify left top))))
   (sheet
-    (at 138.43 62.23)
+    (at 138.43 130.81)
     (size 20.32 17.78)
     (exclude_from_sim no)
     (in_bom yes)
@@ -106,13 +106,13 @@
       (color 0 0 0 0.0))
     (uuid ecc9282c-b34f-5ef3-80e9-8c79a5068349)
     (property "Sheetname" "mcu_usb1"
-      (at 138.43 61.52 0)
+      (at 138.43 130.1 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left bottom)))
     (property "Sheetfile" "pack_mcu_usb1.kicad_sch"
-      (at 138.43 80.59 0)
+      (at 138.43 149.17 0)
       (effects
         (font
           (size 1.27 1.27))

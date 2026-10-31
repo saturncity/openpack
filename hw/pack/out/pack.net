@@ -2,12 +2,12 @@
   (version "D")
   (design
     (source "pack.py")
-    (date "10/31/2026 10:35 PM")
+    (date "10/31/2026 10:54 PM")
     (tool "SKiDL (3.0.0)")
     (sheet
       (number 1)
-      (name "/mcu_usb1/")
-      (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/")
+      (name "/power1/")
+      (tstamps "/1c71258b-4a63-53c3-96a6-ba5ec56f90dd/")
       (title_block
         (title)
         (company)
@@ -117,8 +117,8 @@
           (value ""))))
     (sheet
       (number 4)
-      (name "/power1/")
-      (tstamps "/1c71258b-4a63-53c3-96a6-ba5ec56f90dd/")
+      (name "/mcu_usb1/")
+      (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/")
       (title_block
         (title)
         (company)
@@ -815,6 +815,32 @@
       (component_classes)
       (tstamps "2d1f360b-2b20-5a86-83fb-77ec3c1baccd"))
     (comp
+      (ref "C30")
+      (value "100n")
+      (description "Capacitor")
+      (footprint "Capacitor_SMD:C_0402_1005Metric")
+      (fields
+        (field
+          (name "MPN") "C_100n_0402")
+        (field
+          (name "Description") "Capacitor")
+        (field
+          (name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "C30")
+        (field
+          (name "SKiDL Line") "pack.py:31"))
+      (libsource
+        (lib "openpack")
+        (part "C"))
+      (sheetpath
+        (names "/mcu_usb1/")
+        (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/"))
+      (component_classes)
+      (tstamps "057ec9d1-00e1-562d-866f-45011d9fe993"))
+    (comp
       (ref "C31")
       (value "1u")
       (description "Capacitor")
@@ -1438,6 +1464,32 @@
         (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/"))
       (component_classes)
       (tstamps "f9ffe0d9-a870-54ee-b080-23cd16dc1ed5"))
+    (comp
+      (ref "R13")
+      (value "1M")
+      (description "Resistor")
+      (footprint "Resistor_SMD:R_0402_1005Metric")
+      (fields
+        (field
+          (name "MPN") "R_0402_1%")
+        (field
+          (name "Description") "Resistor")
+        (field
+          (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "R13")
+        (field
+          (name "SKiDL Line") "pack.py:31"))
+      (libsource
+        (lib "openpack")
+        (part "R"))
+      (sheetpath
+        (names "/mcu_usb1/")
+        (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/"))
+      (component_classes)
+      (tstamps "ee8ecfdc-33aa-5414-a71a-145caef1c9cb"))
     (comp
       (ref "R14")
       (value "1k")
@@ -2502,6 +2554,10 @@
         (pin "2")
         (pintype "PASSIVE"))
       (node
+        (ref "C30")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
         (ref "C31")
         (pin "2")
         (pintype "PASSIVE"))
@@ -2587,6 +2643,10 @@
         (pintype "PASSIVE"))
       (node
         (ref "R11")
+        (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R13")
         (pin "2")
         (pintype "PASSIVE"))
       (node
@@ -3098,8 +3158,16 @@
       (name "VBAT_SENSE")
       (class "Default")
       (node
+        (ref "C30")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
         (ref "R12")
         (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "R13")
+        (pin "1")
         (pintype "PASSIVE"))
       (node
         (ref "U1")

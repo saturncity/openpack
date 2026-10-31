@@ -46,3 +46,25 @@ def test_pack_erc_and_bom(tmp_path, monkeypatch):
     assert (net["R7", "1"], net["R7", "2"], net["U3", "3"], net["U3", "5"]) == ("+5V", "VCM", "PRE_INP", "PRE_INP")
     assert [net["D6", n] for n in "123"] == ["GND", "+5V", "PRE_NP"]
     assert {net["D5", "1"], net["D5", "2"]} == {"MIC", "GND"}
+
+
+def test_vbat_sense_divider(tmp_path, monkeypatch):
+    """#31: R13/C30 were once swallowed by a comment, leaving the full cell voltage on P0.04/AIN0."""
+    pack = _load_pack()
+    monkeypatch.chdir(tmp_path)
+    pack.build()
+    on_sense = {(p.ref, str(pin.num)): [q for q in pin.net.pins if q.part is not p]
+                for p in builtins.default_circuit.parts for pin in p.pins if pin.net and pin.net.name == "VBAT_SENSE"}
+    far = {}  # part ref on VBAT_SENSE -> name of the net on its other pin
+    for p in builtins.default_circuit.parts:
+        if p.ref in ("R12", "R13", "C30"):
+            far[p.ref] = [pin.net.name for pin in p.pins if pin.net.name != "VBAT_SENSE"]
+    assert {r for r, _ in on_sense} == {"R12", "R13", "C30", "U1"}, "VBAT_SENSE: divider + cap + module pin only"
+    assert far == {"R12": ["BAT+"], "R13": ["GND"], "C30": ["GND"]}
+    # nRF5340 SAADC (PS 1.x, "SAADC" electrical spec): input range = VREF/GAIN = 0.6 V / (1/6) = 3.6 V with the internal
+    # reference; the pin must also stay <= VDD + 0.3 V (absolute max). VDD here is 3.3 V, so use 3.3 V as the limit.
+    ADC_LIMIT_V = 3.3
+    ratio = 1.0 / (1.0 + 1.0)  # R13 / (R12 + R13), both 1M
+    vals = {p.ref: p.value for p in builtins.default_circuit.parts if p.ref in ("R12", "R13")}
+    assert vals == {"R12": "1M", "R13": "1M"}
+    assert ratio * 4.2 <= ADC_LIMIT_V  # 2.1 V at a full cell
