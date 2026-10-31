@@ -30,6 +30,11 @@ A command without arguments reads the value.
 
 On bsim the console is uart0 (pty). On the DK it is also the uart0 VCOM: the CDC ACM instance is not wired (needs the USB device stack and an overlay), so PK-9 over real USB is not covered yet.
 
+## Console rules
+
+- The console also carries boot and log `printk` lines. The host must ignore any line that does not start with `ok` or `err`.
+- Pack numbering: host pack N (1..8) = firmware `OP_PACK_ID` N-1 (0..7).
+
 ## AIR-3 status word (PK-10)
 
 `op_status_pack()`: bits 0-6 battery percent (0..100), bits 7-12 peak = 63 + dBFS (63 = full scale, -63..0), bits 13-15 flags clip, lowbat, temp. SPEC gives only the field widths; this order is our choice. The pack does not yet put it in frames (the frame source is #20/#21); the receiver reply carries the decoded fields.
@@ -38,6 +43,5 @@ On bsim the console is uart0 (pty). On the DK it is also the uart0 VCOM: the CDC
 
 - RX-9 asks for RSSI per channel A/B and loss counters; `status` has a single `rssi` and `loss`.
 - `status` has no `lowbat` field although AIR-3 carries it.
-- Pack ids: the host uses 1..8, firmware `OP_PACK_ID` / `id` use 0..7 (AIR-2 access address). The mapping is undefined.
 - `dfu <bytes>` has no ready/ack line before the raw bytes, and no `err` framing for a short payload.
 - `trim` unit/precision unstated (host sends a float `gain_db`).

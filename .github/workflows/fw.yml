@@ -82,13 +82,27 @@ jobs:
           }
           check 0.10 10 -power=15
           check 0.40 50 -sigma=0.9
-      - name: pack frame schedule (AIR-4, #22), 10 s
+      - name: "pack frame schedule (AIR-4, #22), 10 s"
         if: ${{ !cancelled() }}
         timeout-minutes: 10
         run: |
+          export ZEPHYR_SDK_INSTALL_DIR="${ZEPHYR_SDK_INSTALL_DIR:-$(find /opt/toolchains -maxdepth 1 -name 'zephyr-sdk-*' | head -1)}"
           west build -p -b nrf5340bsim/nrf5340/cpuapp openpack/fw -d b_fw --sysbuild
           openpack/tests/bsim/sched/run.sh b_fw/fw/zephyr/zephyr.exe 10 | tee sched.txt
           grep -q 'SCHED_CHECK.*PASS' sched.txt
+      - name: "receiver lock, tracking, merge, pack reboot (RX-2..RX-4, RX-10, #23)"
+        if: ${{ !cancelled() }}
+        timeout-minutes: 15
+        run: |
+          export ZEPHYR_SDK_INSTALL_DIR="${ZEPHYR_SDK_INSTALL_DIR:-$(find /opt/toolchains -maxdepth 1 -name 'zephyr-sdk-*' | head -1)}"
+          west build -p -b nrf5340bsim/nrf5340/cpuapp openpack/fw -d b_rx --sysbuild -- -DSB_CONFIG_OP_ROLE_RX=y
+          west build -p -b nrf5340bsim/nrf5340/cpuapp openpack/fw -d b_pack3s --sysbuild -- \
+            -Dfw_net_CONFIG_OP_PACK_TEST_RUN_MS=3000
+          [ -x b_fw/fw/zephyr/zephyr.exe ] || west build -p -b nrf5340bsim/nrf5340/cpuapp openpack/fw -d b_fw --sysbuild
+          openpack/tests/bsim/rx/run.sh b_fw/fw/zephyr/zephyr.exe b_rx/fw/zephyr/zephyr.exe a | tee rx_a.txt
+          openpack/tests/bsim/rx/run.sh b_pack3s/fw/zephyr/zephyr.exe b_rx/fw/zephyr/zephyr.exe e | tee rx_e.txt
+          grep -q 'RX_CHECK.*PASS' rx_a.txt
+          grep -q 'RX_CHECK.*PASS' rx_e.txt
 
   twister:
     runs-on: ubuntu-24.04

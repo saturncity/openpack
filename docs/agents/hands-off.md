@@ -24,7 +24,7 @@ Everything else: proceed.
 
 | Tool | Who runs it | Note |
 |---|---|---|
-| BabbleSim + Zephyr, Twister | Agents, in GitHub Actions or Docker | Linux-only; never assume it runs natively on the owner's Mac |
+| BabbleSim + Zephyr, Twister | Agents, locally on the Fedora workstation (Linux x86_64, from 2026-10-31) and in GitHub Actions | The dev host is Fedora: build and run bsim locally, iterate in seconds, push only when it passes locally. CI is the gate, never the iteration loop. If you are on macOS, stop and tell the owner to switch hosts (docs/human/fedora-setup.md) |
 | ViSQOL, PESQ, numpy/scipy | Agents | ViSQOL decides codec and PLC questions; no listening test required |
 | ngspice, `kicad-cli`, KiBot | Agents | Some TI SPICE models need a TI login: ask the human once for the file |
 | CadQuery, PrusaSlicer CLI | Agents | Render STL to PNG and review the image yourself |
@@ -68,6 +68,14 @@ The human reads `STATUS.md`, nothing else.
 - Merging your own PR (`gh pr merge --squash`) is pre-authorised by an allow rule in `.claude/settings.json`. If the classifier still refuses, use `gh pr merge --auto --squash` at PR creation; if that is refused too, put "copy settings" under Waiting on human and keep working on the next ticket.
 - You cannot edit `.claude/settings.json`. When a permission block repeats, add the missing allow rule to `docs/agents/claude-settings.json` (the template), and write under Waiting on human: `cp docs/agents/claude-settings.json .claude/settings.json` then restart. Do not add auto-mode exemptions to the template; the classifier blocks those and only the owner may add them.
 - Workflow files: run `actionlint .github/workflows/*.yml` before pushing (installed via brew). An invalid workflow shows up on GitHub only as "workflow file issue", so never diagnose CI from `gh run view` alone.
+
+## CI discipline
+
+- Never push to debug CI. Reproduce locally first. If a failure only reproduces in CI, you get three runs, then escalate in the issue with the log excerpt.
+- Never push while a run on the same branch is in flight; wait for it.
+- Cache in Actions: `~/.cache/zephyr`, the west workspace modules, the Zephyr SDK and the BabbleSim build, keyed on the hash of `west.yml` and the SDK version. A cold run may take 10 min; a warm run must take under 3.
+- Every bsim invocation sets `-sim_length` and runs under `timeout`; the harness kills device and phy processes on exit. A step that hangs is a harness bug, not a test failure.
+- Package installs: Fedora `dnf` needs sudo, which agents cannot use. Use brew (Linux), pip or west for tools; if a system package is truly required, put the exact `sudo dnf install` line under Waiting on human.
 
 ## Working rules
 
