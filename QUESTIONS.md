@@ -13,7 +13,7 @@ Context: `AUDIT-2.md`. The owner has delegated these (`docs/agents/hands-off.md`
 | Q5 codec | Decided by ViSQOL + PESQ in Phase 1; "good speech" accepted for v1 | No ears needed |
 | Q6 chip | nRF5340; nRF54L15 only if Phase 1 picks > 8 bits/sample | SDK maturity, audio clock proven |
 | Q7 front end | Schematic carries both gain paths; v1 firmware single path + PCM1840 DRE; switch only if ngspice/bench shows clipping or > 2 dB noise penalty | AUDIT-2 B6 |
-| Q8 region | US first, +20 dBm; EU is a +10 dBm build-time setting | Owner's Wi-Fi/18650 context is US |
+| Q8 region | **UK first** (changed 2026-10-31, ADR-0015): EN 300 328 non-adaptive, 9 dBm EIRP declared (+7 dBm conducted); US +20 dBm EIRP kept as a region setting in `host/channel_plan.yaml` / pack `region` command, same hardware | Owner is in the UK. The earlier "US first" default assumed a US owner; it was wrong. R1 at UK power is a stop-and-ask (ADR-0015) |
 | Q9 rx antennas | Two directional antennas at the stage wings on coax to the rack | Near-far |
 | Q10 host | Raspberry Pi CM4 on a carrier with Ethernet, Python FastAPI, modules on UART | Cheapest known-good |
 | Q11 battery | Removable protected 18650, external charger, no in-pack charging | Hot-swap |
