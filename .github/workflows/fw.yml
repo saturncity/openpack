@@ -42,6 +42,9 @@ jobs:
           echo "== nrf_hw_models revision"; west list -f '{name} {revision}' nrf_hw_models babblesim_ext_2G4_device_WLAN_actmod
       - name: build probes
         run: |
+          ls -d /opt/toolchains/* || true
+          export ZEPHYR_SDK_INSTALL_DIR="${ZEPHYR_SDK_INSTALL_DIR:-$(ls -d /opt/toolchains/zephyr-sdk-* | head -1)}"
+          echo "SDK=$ZEPHYR_SDK_INSTALL_DIR"
           B=nrf5340bsim/nrf5340/cpunet
           west build -p -b "$B" openpack/tests/bsim/probe/radio -d b_tx --no-sysbuild -- -DCONFIG_PROBE_ROLE_TX=y
           west build -p -b "$B" openpack/tests/bsim/probe/radio -d b_rx --no-sysbuild
