@@ -25,7 +25,7 @@ static K_SEM_DEFINE(done, 0, 1);
 static void radio_init(void)
 {
 	const nrf_radio_packet_conf_t conf = {
-		/* AIR-2 + ADR-0010: S0 header byte, 8-bit length, LE, whitening (the only 2 Mbit layout
+		/* AIR-2 + ADR-0009: S0 header byte, 8-bit length, LE, whitening (the only 2 Mbit layout
 		 * the bsim RADIO model accepts; identical on silicon).
 		 */
 		.s0len = 1,

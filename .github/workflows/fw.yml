@@ -54,21 +54,21 @@ jobs:
           cp b_uart/zephyr/zephyr.exe "$BSIM_OUT_PATH/bin/bs_probe_uart"
       - name: uart -> pty
         timeout-minutes: 3
-        run: |
-          cd "$BSIM_OUT_PATH/bin"
-          timeout 60 ./bs_2G4_phy_v1 -s=u -D=1 -sim_length=4000000 >/dev/null &
-          timeout 60 ./bs_probe_uart -s=u -d=0 -uart0_pty -uart_pty_wait >u.log 2>&1 &
-          rc=0
-          python3 "$GITHUB_WORKSPACE/openpack/tests/bsim/probe/read_pty.py" u.log PROBE_UART_OK || rc=$?
-          head -5 u.log
-          kill %1 %2 2>/dev/null || true
-          exit $rc
-      - name: radio probe (no Wi-Fi)
+        run: openpack/tests/bsim/probe/uart.sh
+      - name: radio probe (no Wi-Fi), expect zero loss
         if: ${{ !cancelled() }}
-        timeout-minutes: 8
-        run: openpack/tests/bsim/probe/run.sh none
-      - name: radio probe (Wi-Fi 1/6/11 at ConfigSet X)
-        if: ${{ !cancelled() }}
-        timeout-minutes: 30
+        timeout-minutes: 5
         run: |
-          for c in 5 10 25 50 100; do openpack/tests/bsim/probe/run.sh "$c"; done
+          openpack/tests/bsim/probe/run.sh none | tee none.txt
+          [ "$(grep -c 'loss=0.000' none.txt)" = 5 ]
+      - name: radio probe, Wi-Fi calibration (wlan_params.yaml)
+        if: ${{ !cancelled() }}
+        timeout-minutes: 10
+        run: |
+          check() { # target, run.sh args: in-band 2437 loss within +-0.04 of target
+            openpack/tests/bsim/probe/run.sh "${@:2}" | tee cal.txt
+            grep 'freq=2437' cal.txt | grep -o 'loss=[0-9.]*' | cut -d= -f2 |
+              awk -v t="$1" '{d=$1-t; if (d<0) d=-d; exit !(d<=0.04)}'
+          }
+          check 0.10 10 -power=15
+          check 0.40 50 -sigma=0.9
