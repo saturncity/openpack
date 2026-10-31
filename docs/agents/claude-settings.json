@@ -5,8 +5,11 @@
     "allow": [
       "Read",
       "Edit",
+      "Edit(.github/**)",
       "Bash(git *)",
       "Bash(gh *)",
+      "Bash(gh pr merge:*)",
+      "Bash(gh pr merge *)",
       "Bash(python3 *)",
       "Bash(python *)",
       "Bash(pip *)",
@@ -14,8 +17,10 @@
       "Bash(pytest *)",
       "Bash(uv *)",
       "Bash(brew install *)",
+      "Bash(brew upgrade *)",
       "Bash(brew list *)",
       "Bash(brew info *)",
+      "Bash(actionlint *)",
       "Bash(west *)",
       "Bash(cmake *)",
       "Bash(ninja *)",
@@ -51,7 +56,7 @@
       "Read(~/.ssh/**)",
       "Read(~/.aws/**)",
       "Read(~/.config/gh/**)",
-      "Read(~/.claude/**)"
+      "Read(~/.claude/.credentials.json)"
     ]
   },
   "autoContinueAtUsageLimit": true,

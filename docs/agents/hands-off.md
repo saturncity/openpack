@@ -63,6 +63,12 @@ Risks: one line each, or "none new"
 ```
 The human reads `STATUS.md`, nothing else.
 
+## Permissions and the classifier
+
+- Merging your own PR (`gh pr merge --squash`) is pre-authorised by an allow rule in `.claude/settings.json`. If the classifier still refuses, use `gh pr merge --auto --squash` at PR creation; if that is refused too, put "copy settings" under Waiting on human and keep working on the next ticket.
+- You cannot edit `.claude/settings.json`. When a permission block repeats, add the missing allow rule to `docs/agents/claude-settings.json` (the template), and write under Waiting on human: `cp docs/agents/claude-settings.json .claude/settings.json` then restart. Do not add auto-mode exemptions to the template; the classifier blocks those and only the owner may add them.
+- Workflow files: run `actionlint .github/workflows/*.yml` before pushing (installed via brew). An invalid workflow shows up on GitHub only as "workflow file issue", so never diagnose CI from `gh run view` alone.
+
 ## Working rules
 
 - `PLAN.md` is the plan. If reality diverges, edit it in the same PR and explain in an ADR.
