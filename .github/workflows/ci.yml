@@ -1,0 +1,31 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pytest
+      - run: python3 audit.py
+      - run: pytest -q || [ $? -eq 5 ]  # exit 5 = no tests collected
+  # enabled in phase 2
+  twister:
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "twister: skipped until phase 2"
+  # enabled in phase 2
+  bsim:
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "bsim: skipped until phase 2"
+  # enabled in phase 4
+  kibot:
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "kibot: skipped until phase 4"
