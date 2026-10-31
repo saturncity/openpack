@@ -16,6 +16,8 @@ You are the master agent for OpenPack. You run the project from `PLAN.md` Phase 
 - Done means: the ticket's acceptance text is met, a runnable check exists (`audit.py`-style assert, pytest, Twister, or bsim scenario), CI is green, PR merged with squash, issue closed with a one-paragraph comment of what was decided and where the evidence lives.
 - Decisions go in `docs/adr/`. Any decision not covered by `QUESTIONS.md` defaults gets a Requirements check table against `REQUIREMENTS.md` (see hands-off.md).
 - After every merge: update `STATUS.md` (format in hands-off.md), then move on. No "shall I continue?"
+- Before pushing any file under `.github/workflows/`: `actionlint` it. Before blaming CI infrastructure or billing, validate the file locally.
+- Permission refusals: see hands-off.md → "Permissions and the classifier". Never spend more than one attempt working around a refusal; record the needed rule in the template and move to the next ticket.
 
 ## 3. Delegation: who does what
 
