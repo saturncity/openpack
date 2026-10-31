@@ -80,19 +80,37 @@ def test_antenna_switch(built):
 
 
 def test_dac_and_driver(built):
-    _, _, _, net = built
+    rx, _, _, net = built
     # PCM5102A straps: SCK=GND (BCK PLL), FMT=0 (I2S), DEMP=0, FLT=1 (low latency); XSMT pulled low (muted)
     assert [net["U3", p] for p in ("12", "16", "10", "11")] == ["GND", "GND", "GND", "+3V3"]
     assert net["U3", "17"] == "DAC_XSMT" and pair(net, "R37") == {"DAC_XSMT", "GND"}
+    assert rx.PADS["XSMT_EN"] == ("B5", "P0.12") and pair(net, "R38") == {"XSMT_EN", "DAC_XSMT"}
     assert (net["U3", "8"], net["U3", "1"], net["U3", "20"]) == ("+3V3A", "+3V3A", "+3V3")
     # OPA1656 on the filtered 12 V rail; both + inputs at VCM (the CM never moves: inverting stages)
     assert (net["U6", "8"], net["U6", "4"], net["U6", "3"], net["U6", "5"]) == ("+12VA", "GND", "VCM", "VCM")
-    assert pair(net, "R1") == {"+12V", "+12VA"}
-    # polarity: leg A (OUTA, inverted) -> XLR 3 COLD, leg B (OUTB, re-inverted) -> XLR 2 HOT
-    assert pair(net, "R47") == {"DRV_OUTA", "DRV_COLD_P"} and pair(net, "R48") == {"DRV_COLD_X", "AUD_COLD"}
-    assert pair(net, "R50") == {"DRV_OUTB", "DRV_HOT_P"} and pair(net, "R51") == {"DRV_HOT_X", "AUD_HOT"}
-    for d, node in (("D3", "DRV_COLD_P"), ("D4", "DRV_HOT_P")):          # phantom/ESD clamps to the rails
-        assert [net[d, n] for n in "123"] == ["GND", "+12VA", node]
+    assert pair(net, "R1") == {"+12V", "+12V_R"} and (net["D9", "1"], net["D9", "3"]) == ("+12V_R", "+12VA")  # hold-up
+    # VCM: two poles, and D8 dumps it into +12VA at power-down (op-amp input current limit, #81 M3)
+    assert pair(net, "R53") == {"VCM1", "VCM"} and (net["D8", "1"], net["D8", "3"]) == ("VCM", "+12VA")
+    # polarity: leg A (OUTA, inverted) -> XLR 3 COLD, leg B (OUTB, re-inverted) -> XLR 2 HOT, each through K1 (NO)
+    assert pair(net, "R47") == {"DRV_OUTA", "DRV_COLD_P"} and pair(net, "R48") == {"DRV_COLD_O", "AUD_COLD"}
+    assert pair(net, "R50") == {"DRV_OUTB", "DRV_HOT_P"} and pair(net, "R51") == {"DRV_HOT_O", "AUD_HOT"}
+    assert [net["K1", n] for n in ("3", "4", "8", "7")] == ["DRV_COLD_X", "DRV_COLD_O", "DRV_HOT_X", "DRV_HOT_O"]
+    assert {net["K1", "2"], net["K1", "9"]} == {"__NOCONNECT"}         # NC contacts unused: open = muted
+    # S1J clamps (IFSM 30 A) from each output node to both rails (phantom short, #81 M2); D pad 1 = K, 2 = A
+    for lo, hi, node in (("D3", "D5", "DRV_COLD_P"), ("D4", "D6", "DRV_HOT_P")):
+        assert (net[lo, "2"], net[lo, "1"]) == ("GND", node) and (net[hi, "2"], net[hi, "1"]) == (node, "+12VA")
+    # mute: coil from +12V, BSS138 low side, flyback; gate = OUT_EN via 10k AND supervisor RESET (open drain)
+    assert (net["K1", "1"], net["K1", "10"], net["Q1", "3"], net["Q1", "1"]) == ("+12V", "RLY_COIL", "RLY_COIL", "RLY_G")
+    assert (net["D7", "1"], net["D7", "2"]) == ("+12V", "RLY_COIL")
+    assert rx.PADS["OUT_EN"] == ("12", "P0.11") and pair(net, "R62") == {"OUT_EN", "RLY_G"}
+    assert pair(net, "R63") == {"RLY_G", "GND"} and net["U7", "1"] == "RLY_G"
+    assert (net["U7", "5"], net["U7", "6"]) == ("SUP_SENSE", "+3V3") and pair(net, "R60") == {"+12V", "SUP_SENSE"}
+    assert (net["D10", "1"], net["D10", "3"]) == ("DAC_XSMT", "RLY_G")   # supervisor also mutes the DAC
+    # TPS3808G01 threshold 0.405 V (SBVS050N Table 4-1) -> trip on raw +12 V between 10.5 and 11 V
+    assert 10.5 <= 0.405 * (249e3 + 9.76e3) / 9.76e3 <= 11.0
+    # LDOs: TLV76733 (VIN abs max 18 V > SMF5.0A clamp 9.2 V), IN/EN on +5V, OUT = SNS
+    for u, out in (("U4", "+3V3"), ("U5", "+3V3A")):
+        assert (net[u, "8"], net[u, "5"], net[u, "1"], net[u, "2"]) == ("+5V", "+5V", out, out)
     # coupling cap polarity: + at the op-amp side (VCM), - at the ground-centred DAC side
     assert (net["C40", "1"], net["C40", "2"]) == ("DRV_CIN", "DAC_OUTF")
 
@@ -100,7 +118,12 @@ def test_dac_and_driver(built):
 def test_backplane_pinout(built):
     rx, _, _, net = built
     table = rx.symbols_rx.BACKPLANE
-    assert {n: net["J1", str(n)] for n in table} == table
+    assert table[14] == "KEY" and net["J1", "14"] == "__NOCONNECT"     # key pin (pulled), #81 review S3
+    assert {n: net["J1", str(n)] for n in table if n != 14} == {n: v for n, v in table.items() if n != 14}
+    # I2S to the backplane: not fitted (#81 review S4); the DAC taps the lines on the module side
+    for r in ("R33", "R34", "R35"):
+        part = next(p for p in built[2].parts if p.ref == r)
+        assert part.fields.get("DNP") == "yes" and part.fields["MPN"] == "DNP"
     adr = next((ROOT / "docs/adr").glob("*-rx-backplane-connector.md")).read_text()
     for n, name in table.items():                              # the ADR table is the same pinout
         assert re.search(rf"\|\s*{n}\s*\|\s*`{re.escape(name)}`\s*\|", adr), (n, name)

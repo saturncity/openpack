@@ -36,7 +36,8 @@ PADS = {
     "I2S_LRCK": ("C4", "P0.23"),   # I2S LRCK_M, same pad as the pack
     "I2S_SDOUT": ("B6", "P0.13"),  # I2S SDOUT (pack uses C5 for SDIN; C5 is the console TX here)
     "ANT_SEL": ("D6", "P1.01"),    # net core GPIO: op_rx_ant_select(0) -> low -> antenna A (ADR-0011/0014)
-    "DAC_XSMT": ("B5", "P0.12"),   # PCM5102A soft mute, pulled low: muted until firmware un-mutes
+    "XSMT_EN": ("B5", "P0.12"),    # PCM5102A soft mute via 10k, pulled low: muted until firmware un-mutes
+    "OUT_EN": ("12", "P0.11"),     # output mute relay K1: high = closed (only after VCM settles, ADR-0014)
     "LED_LOCK": ("Z0", "P1.09"),   # RK-4 front-panel lock LED (LED + resistor on the front board)
     "LED_PEAK": ("Z1", "P1.10"),   # RK-4 front-panel peak LED
     "BOOT": ("1", "P1.02"),        # MCUboot serial-recovery pin (FW-6 UART DFU), active low
@@ -80,26 +81,33 @@ def build():
     v12, v5, v12a, v3, v3a = Net("+12V"), Net("+5V"), Net("+12VA"), Net("+3V3"), Net("+3V3A")
     for n in (v12, v5, v12a):
         n.drive = POWER   # backplane rails and the RC-filtered driver rail are sources (PWR_FLAG equivalent)
-    bp = {name: Net(name) for name in set(symbols_rx.BACKPLANE.values()) if not name.startswith(("GND", "+"))}
+    bp = {name: Net(name) for name in set(symbols_rx.BACKPLANE.values()) if not name.startswith(("GND", "+")) and name != "KEY"}
 
     with Group("power"):
         # ---- backplane connector (ADR-0014) + rail protection ----
         j1 = part("Conn_Backplane", "J1", "backplane 2x13", "Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical_SMD",
-                  "HDR_2x13_2.54_SMD")
+                  "HDR_2x13_2.54_SMD_KEY14")
         rails = {"GND": gnd, "+12V": v12, "+5V": v5}
         for num, name in symbols_rx.BACKPLANE.items():
-            j1[str(num)] += rails.get(name) or bp[name]
-        # live insertion / backplane transients: TVS on each rail at the connector (SMF15A 15 V, SMF5.0A 5 V standoff)
+            j1[str(num)] += NC if name == "KEY" else (rails.get(name) or bp[name])
+        # backplane transients / live insertion: TVS on each rail at the connector (SMF15A clamps <= 24.4 V, SMF5.0A
+        # <= 9.2 V). Every part on +5 V survives 9.2 V: the LDOs are TLV76733 (VIN abs max 18 V, SLVSE84D 6.1), not
+        # TLV755P (6.0 V). 47 uF electrolytic (ESR ~1 ohm) damps the hot-plug ring of C1 against the backplane inductance.
         t1 = part("TVS", "D1", "SMF15A", "Diode_SMD:D_SOD-123F", "SMF15A"); t1["K"] += v12; t1["A"] += gnd
         t2 = part("TVS", "D2", "SMF5.0A", "Diode_SMD:D_SOD-123F", "SMF5.0A"); t2["K"] += v5; t2["A"] += gnd
         C("C1", "10u", v5, gnd); C("C2", "100n", v5, gnd)
-        # 3.3 V digital (module, DAC DVDD, switch) and 3.3 V analog (DAC AVDD + CPVDD) from +5 V: TLV75533P, TI SBVS320
+        CP("C9", "47u 25V", v5, gnd, "ALU_47u_25V", "Capacitor_SMD:CP_Elec_5x5.4")
+        # 3.3 V digital (module, DAC DVDD, switch, supervisor) and 3.3 V analog (DAC AVDD + CPVDD) from +5 V
         for ref, out, cin, cout in (("U4", v3, "C3", "C4"), ("U5", v3a, "C5", "C6")):
-            u = part("TLV75533P", ref, "TLV75533P", "Package_TO_SOT_SMD:SOT-23-5", "TLV75533PDBVR")
-            u["IN"] += v5; u["EN"] += v5; u["GND"] += gnd; u["OUT"] += out; u["NC"] += NC
+            u = part("TLV76733", ref, "TLV76733", "Package_SO:HVSSOP-8-1EP_3x3mm_P0.65mm_EP1.57x1.89mm", "TLV76733DGNR")
+            u["IN"] += v5; u["EN"] += v5; u["GND"] += gnd; u["PAD"] += gnd; u["OUT"] += out; u["SNS"] += out
+            u["NC"] += NC
             C(cin, "1u", v5, gnd); C(cout, "10u", out, gnd)
-        # driver rail: 10 R + 100 uF off the backplane 12 V (fc 160 Hz; op-amp PSRR does the rest)
-        R("R1", "10", v12, v12a, "Resistor_SMD:R_0603_1608Metric", "R_0603_1%")
+        # driver rail: 10 R -> BAT54 hold-up diode -> 100 uF. The diode stops C7 draining back into a collapsing
+        # backplane, so the op-amps stay linear (~30 ms) while the mute relay opens (ADR-0014, rx_driver_power.cir).
+        v12r = Net("+12V_R")
+        R("R1", "10", v12, v12r, "Resistor_SMD:R_0603_1608Metric", "R_0603_1%")
+        d9 = part("BAT54", "D9", "BAT54", "Package_TO_SOT_SMD:SOT-23", "BAT54,215"); d9["A"] += v12r; d9["K"] += v12a
         CP("C7", "100u 25V", v12a, gnd, "ALU_100u_25V", "Capacitor_SMD:CP_Elec_6.3x5.4")
         C("C8", "100n", v12a, gnd)
 
@@ -125,7 +133,10 @@ def build():
             R(f"R{25 + i}", "1k", bp[f"BP_SLOT{i}"], sig[f"SLOT{i}"]); R(f"R{28 + i}", "10k", v3, sig[f"SLOT{i}"])
         R("R31", "100", sig["LED_LOCK"], bp["BP_LED_LOCK"]); R("R32", "100", sig["LED_PEAK"], bp["BP_LED_PEAK"])
         for i, s in enumerate(("I2S_BCK", "I2S_LRCK", "I2S_SDOUT")):
-            R(f"R{33 + i}", "100", sig[s], bp["BP_" + s])     # I2S kept on the backplane (QUESTIONS.md nice-to-know)
+            # I2S kept on the backplane (QUESTIONS.md nice-to-know) but NOT FITTED: eight 3 MHz stubs next to the LNA
+            # and splitters would drive nothing until a digital add-on exists (#81 review S4). Fit 100 R for the add-on.
+            r = part("R", f"R{33 + i}", "DNP (100)", R0402, "DNP"); r[1] += sig[s]; r[2] += bp["BP_" + s]
+            r.fields["DNP"] = "yes"
         # SWD on Tag-Connect pads
         j2 = part("Tag_TC2030", "J2", "SWD", "Connector:Tag-Connect_TC2030-IDC-NL_2x03_P1.27mm_Vertical", "TC2030-pads")
         swdio, swclk = Net("SWDIO"), Net("SWDCLK")
@@ -158,8 +169,15 @@ def build():
         # ---- PCM5102A (SLAS859C): I2S (FMT=0), BCK PLL (SCK=GND, 3-wire), low-latency filter (FLT=1, R3), DEMP off ----
         u3 = part("PCM5102A", "U3", "PCM5102A", "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm", "PCM5102APWR")
         u3["BCK"] += sig["I2S_BCK"]; u3["LRCK"] += sig["I2S_LRCK"]; u3["DIN"] += sig["I2S_SDOUT"]
-        u3["SCK"] += gnd; u3["FMT"] += gnd; u3["DEMP"] += gnd; u3["FLT"] += v3
-        u3["XSMT"] += sig["DAC_XSMT"]; R("R37", "100k", sig["DAC_XSMT"], gnd)   # muted at power-up and on reset
+        u3["SCK"] += gnd; u3["FMT"] += gnd; u3["DEMP"] += gnd
+        # FLT high = IIR low-latency interpolation filter (SLAS859C Table 3). Group delay 3.5/fs = 73 us at 48 kHz
+        # (Table 7) instead of 22/fs = 458 us for the normal FIR (Table 4): -385 us, which SYS-2 needs (PR #88).
+        # Trade-off: stop band -52 dB (normal -60 dB) above 0.55 fs, non-linear phase; pass band +-0.0001 dB.
+        u3["FLT"] += v3
+        # XSMT: GPIO through 10k, 100k pull-down (muted at power-up and in reset); the +12 V supervisor also pulls it
+        # low through D10 when the brick sags (SLAS859C 11.2, Figure 38: "in parallel with a GPIO pin")
+        xsmt = Net("DAC_XSMT"); u3["XSMT"] += xsmt
+        R("R38", "10k", sig["XSMT_EN"], xsmt); R("R37", "100k", xsmt, gnd)
         u3["AVDD"] += v3a; u3["CPVDD"] += v3a; u3["DVDD"] += v3
         for p in ("AGND", "CPGND", "DGND"):
             u3[p] += gnd
@@ -181,9 +199,16 @@ def build():
         # leg B = -1 x leg A = HOT (XLR 2), so XLR pin 2 is in phase with the DAC. 0 dBFS = 2.1 Vrms (SLAS859C)
         # -> 6.21 Vrms balanced = +18.1 dBu; -20 dBFS -> -1.9 dBu (hw/spice/rx_driver.cir).
         u6 = part("OPA1656", "U6", "OPA1656", "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm", "OPA1656IDR")
-        vcm = Net("VCM")
-        R("R45", "100k", v12a, vcm); R("R46", "100k", vcm, gnd)   # fc 0.07 Hz with C43
-        CP("C43", "47u 25V", vcm, gnd, "ALU_47u_25V", "Capacitor_SMD:CP_Elec_5x5.4"); C("C44", "100n", vcm, gnd)
+        # VCM: two RC poles (22k/22k + 22 uF at 0.66 Hz, then 10k + 22 uF), because VCM ripple reaches the XLR
+        # differentially x2.96: 12 V -> out is -93 dB at 100 Hz (UK mains ripple), asserted <= -80 dB in
+        # tests/test_spice_rx_driver.py. Settles in ~3 s, before firmware closes K1 at 5 s.
+        # D8 (BAT54) dumps VCM into +12VA at power-down, ahead of the op-amp input diodes (SBOS901C 6.1: 10 mA).
+        vcm1, vcm = Net("VCM1"), Net("VCM")
+        R("R45", "22k", v12a, vcm1); R("R46", "22k", vcm1, gnd)
+        CP("C43", "22u 25V", vcm1, gnd, "ALU_22u_25V", "Capacitor_SMD:CP_Elec_5x5.4")
+        R("R53", "10k", vcm1, vcm)
+        CP("C49", "22u 25V", vcm, gnd, "ALU_22u_25V", "Capacitor_SMD:CP_Elec_5x5.4"); C("C44", "100n", vcm, gnd)
+        d8 = part("BAT54", "D8", "BAT54", "Package_TO_SOT_SMD:SOT-23", "BAT54,215"); d8["A"] += vcm; d8["K"] += v12a
         u6["+INA"] += vcm; u6["+INB"] += vcm
         u6["V+"] += v12a; u6["V-"] += gnd
         C("C45", "100n", v12a, gnd); C("C46", "10u", v12a, gnd, C1206, "C_10u_1206_25V_X7R")
@@ -196,19 +221,46 @@ def build():
         inb, ob = Net("DRV_INB"), Net("DRV_OUTB")
         R("R43", "4.99k", oa, inb); R("R44", "4.99k", inb, ob); C("C42", "100p", inb, ob)
         u6["-INB"] += inb; u6["OUTB"] += ob
-        # outputs: 22 R build-out -> clamp to the rails (BAV99) -> 47 uF 63 V bipolar (phantom: XLR side may sit
-        # at +48 V through 6.8k) -> 22 R (limits clamp current if a charged cable is shorted) -> backplane -> XLR.
-        # 100k bleeds the XLR side to 0 V. Zout = 2 x (22 + 22 + Xc) = 89 ohm balanced at 1 kHz (RX-8 <= 100).
-        for leg, o, r0, d, cc, r1, rb, aud in (("COLD", oa, "R47", "D3", "C47", "R48", "R49", bp["AUD_COLD"]),
-                                                 ("HOT", ob, "R50", "D4", "C48", "R51", "R52", bp["AUD_HOT"])):
-            pnode, xnode = Net(f"DRV_{leg}_P"), Net(f"DRV_{leg}_X")
+        # outputs: 22 R build-out -> S1J clamps to both rails -> 47 uF 63 V bipolar (phantom: the XLR side may sit at
+        # +48 V through 6.8k) -> 10k cap-side bleed -> K1 mute relay (normally open) -> 100k XLR-side bleed -> 22 R ->
+        # backplane -> XLR. Phantom short (charged cable shorted): ~0.9 A, I2t 0.4 mA2s through an S1J (IFSM 30 A,
+        # 8.3 ms: 3.7 A2s), hw/spice/rx_driver_load.cir. Zout = 2 x (22 + 22 + Xc) = 88 ohm balanced at 1 kHz.
+        k1 = part("Relay_TQ2", "K1", "TQ2SA-12V", "openpack:Panasonic_TQ2SA", "TQ2SA-12V")
+        k1["5"] += NC; k1["6"] += NC; k1["NC1"] += NC; k1["NC2"] += NC
+        legs = (("COLD", oa, "R47", "D3", "D5", "C47", "R54", "COM1", "NO1", "R49", "R48", bp["AUD_COLD"]),
+                ("HOT", ob, "R50", "D4", "D6", "C48", "R55", "COM2", "NO2", "R52", "R51", bp["AUD_HOT"]))
+        for leg, o, r0, dlo, dhi, cc, rbc, com, no, rbx, r1, aud in legs:
+            pnode, xnode, onode = Net(f"DRV_{leg}_P"), Net(f"DRV_{leg}_X"), Net(f"DRV_{leg}_O")
             R(r0, "22", o, pnode, "Resistor_SMD:R_0603_1608Metric", "R_0603_1%")
-            dd = part("BAV99", d, "BAV99", "Package_TO_SOT_SMD:SOT-23", "BAV99,215")
-            dd["A1"] += gnd; dd["K2"] += v12a; dd["COM"] += pnode
+            for ref, a, k in ((dlo, gnd, pnode), (dhi, pnode, v12a)):
+                d = part("Diode", ref, "S1J", "Diode_SMD:D_SMA", "S1J"); d["A"] += a; d["K"] += k
             c = part("C", cc, "47u 63V BP", "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm", "ALU_BP_47u_63V")
             c[1] += pnode; c[2] += xnode
-            R(r1, "22", xnode, aud, "Resistor_SMD:R_0603_1608Metric", "R_0603_1%")
-            R(rb, "100k", xnode, gnd)
+            R(rbc, "10k", xnode, gnd)                       # cap side held at 0 V: no step when K1 closes
+            k1[com] += xnode; k1[no] += onode
+            R(rbx, "100k", onode, gnd)
+            R(r1, "22", onode, aud, "Resistor_SMD:R_0603_1608Metric", "R_0603_1%")
+
+    with Group("mute"):
+        # ---- M1 output mute (#81 review): K1 closes only when firmware sets OUT_EN AND +12 V is above 10.78 V ----
+        # TPS3808G01 (SBVS050N): SENSE threshold 0.405 V; 249k/9.76k puts the trip at 10.78 V on the raw +12 V. Its
+        # open-drain RESET pulls the BSS138 gate low the moment the brick sags (K1 opens within its release time),
+        # and pulls XSMT low through D10. OUT_EN drives the gate through 10k; 100k holds K1 open through reset.
+        rly_g, sense, coil = Net("RLY_G"), Net("SUP_SENSE"), Net("RLY_COIL")
+        u7 = part("TPS3808", "U7", "TPS3808G01", "Package_TO_SOT_SMD:SOT-23-6", "TPS3808G01DBVR")
+        u7["VDD"] += v3; u7["GND"] += gnd; u7["SENSE"] += sense; u7["~{RESET}"] += rly_g
+        u7["~{MR}"] += NC; u7["CT"] += NC                   # MR: internal 90k pull-up; CT open = 20 ms delay
+        C("C61", "100n", v3, gnd)
+        R("R60", "249k", v12, sense); R("R61", "9.76k", sense, gnd); C("C60", "1n", sense, gnd, mpn="C_1n_0402")
+        R("R62", "10k", sig["OUT_EN"], rly_g); R("R63", "100k", rly_g, gnd)
+        q1 = part("NMOS", "Q1", "BSS138", "Package_TO_SOT_SMD:SOT-23", "BSS138")
+        q1["G"] += rly_g; q1["S"] += gnd; q1["D"] += coil
+        k1["COIL+"] += v12; k1["COIL-"] += coil
+        d7 = part("Diode", "D7", "S1J", "Diode_SMD:D_SMA", "S1J"); d7["K"] += v12; d7["A"] += coil   # flyback
+        d10 = part("BAT54", "D10", "BAT54", "Package_TO_SOT_SMD:SOT-23", "BAT54,215")
+        d10["A"] += xsmt; d10["K"] += rly_g                 # supervisor (or OUT_EN low) also mutes the DAC
+        for d in (d8, d9, d10):
+            d["n.c."] += NC
 
 
 def bom_rows(circuit):
