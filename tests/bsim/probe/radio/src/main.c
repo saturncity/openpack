@@ -37,6 +37,28 @@ static void radio_init(void)
 	NRF_RADIO->FREQUENCY = carriers[0] - 2400;
 }
 
+static void tisr(const void *arg)
+{
+	if (NRF_TIMER0->EVENTS_COMPARE[0]) {
+		NRF_TIMER0->EVENTS_COMPARE[0] = 0;
+		if (!TX) {
+			NRF_RADIO->TASKS_RXEN = 1;
+		}
+	}
+	if (NRF_TIMER0->EVENTS_COMPARE[1]) {
+		NRF_TIMER0->EVENTS_COMPARE[1] = 0;
+		if (TX) {
+			NRF_RADIO->TASKS_TXEN = 1;
+		}
+	}
+	if (NRF_TIMER0->EVENTS_COMPARE[2]) {
+		NRF_TIMER0->EVENTS_COMPARE[2] = 0;
+		if (!TX) {
+			NRF_RADIO->TASKS_DISABLE = 1;
+		}
+	}
+}
+
 static void isr(const void *arg)
 {
 	int end = NRF_RADIO->EVENTS_END;
@@ -82,18 +104,14 @@ int main(void)
 	NRF_TIMER0->CC[1] = 200;
 	NRF_TIMER0->CC[2] = 700;
 	NRF_TIMER0->SHORTS = TIMER_SHORTS_COMPARE0_CLEAR_Msk;
-	NRF_TIMER0->PUBLISH_COMPARE[0] = 0 | EN;
-	NRF_TIMER0->PUBLISH_COMPARE[1] = 1 | EN;
-	NRF_TIMER0->PUBLISH_COMPARE[2] = 2 | EN;
-	if (TX) {
-		NRF_RADIO->SUBSCRIBE_TXEN = 1 | EN;
-	} else {
-		NRF_RADIO->SUBSCRIBE_RXEN = 0 | EN;
-		NRF_RADIO->SUBSCRIBE_DISABLE = 2 | EN;
-	}
-	NRF_DPPIC->CHENSET = 0x7;
+	NRF_TIMER0->INTENSET = TIMER_INTENSET_COMPARE0_Msk | TIMER_INTENSET_COMPARE1_Msk | TIMER_INTENSET_COMPARE2_Msk;
+	IRQ_CONNECT(TIMER0_IRQn, 0, tisr, NULL, 0);
+	irq_enable(TIMER0_IRQn);
 	NRF_TIMER0->TASKS_START = 1;
 
+	k_msleep(5);
+	NRF_TIMER0->TASKS_CAPTURE[3] = 1;
+	printk("PROBE_DBG timer=%u\n", NRF_TIMER0->CC[3]);
 	k_sem_take(&done, K_FOREVER);
 	if (!TX) {
 		for (size_t c = 0; c < NB; c++) {
