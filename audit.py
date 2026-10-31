@@ -106,7 +106,7 @@ def burst_loss(busy=0.40, mean_burst_frames=2.0, p_bad=0.9, p_good=0.001, frames
 
 
 BOM_PACK_USD = {  # qty ~100, 2026 distributor prices, ponytail: rough, re-quote in Step 2
-    "nRF5340 module (pre-certified, u.FL)": 9.0, "FEM (nRF21540 / SKY66112)": 2.0,
+    "BT40NE module (nRF5340 + nRF21540 FEM, u.FL; ADR-0007)": 13.47,
     "PCM1840 ADC": 3.5, "preamp op-amp (OPA1656, not OPA1612)": 1.5, "5 V boost + LDOs": 1.5,
     "18650 holder + protection + reverse-polarity": 2.0, "locking 3.5 mm TRS jack": 3.0,
     "USB-C (DFU/config only)": 0.4, "PCB 4-layer": 2.5, "passives/LEDs/switch/whip": 2.5,

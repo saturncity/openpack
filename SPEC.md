@@ -38,7 +38,7 @@
 | AIR-3 | Payload (v1, ADPCM-6 shown; codec per ADR-0005): `seq u8` · `status u16` (bat 7 b, peak 6 b, flags 3 b: clip/lowbat/temp) · `codec_state` 3 B · `audio` 36 B · optional `td_audio` 39 B (frame n−2, Kconfig `OP_TIME_DIVERSITY`). Max 85 B |
 | AIR-4 | Frame period 1000 µs ±20 ppm (pack crystal). Schedule from frame start t0: copy A TX at t0, copy B TX at t0+T_A+T_GAP on channel B, RX slot at t0+700 µs for 300 µs (idle in v1) |
 | AIR-5 | Channel pair per pack from `host/channel_plan.yaml`: fA ∈ 2402–2440 MHz, fB = fA + ≥ 40 MHz, 16 distinct carriers for 8 packs, gap carriers (2423–2426, 2448–2451, 2473–2482) assigned first |
-| AIR-6 | TX power: software-set 0 to +20 dBm (FEM), default +20 dBm US, +10 dBm EU |
+| AIR-6 | TX power: software-set 0 to +19 dBm (FEM; BT40NE max +19.1 dBm, ADR-0007), default max US, +10 dBm EU |
 | AIR-7 | Airtime per carrier ≤ 45 % of frame (two copies, time diversity on, at 2 Mbps) |
 
 ## 4. Bodypack
@@ -51,7 +51,7 @@
 | PK-4 | SoC: nRF5340 pre-certified module with integrated FEM and u.FL (ADR-0007 names the part) | BOM |
 | PK-5 | Antenna: 31 mm quarter-wave wire whip, exits top face, ≥ 40 mm from the cell (R15, R10) | CAD check |
 | PK-6 | Power: one removable protected 18650 in a holder with positive retention; reverse-polarity protection; no charging circuit (R7). Boost to 5 V for preamp/bias; LDO 3.3 V | Schematic ERC |
-| PK-7 | Runtime ≥ 16 h at +20 dBm continuous (R8). Design draw ≤ 0.6 W | `audit.py`, PPK2 |
+| PK-7 | Runtime ≥ 16 h at max TX power continuous (R8). Design draw ≤ 0.6 W | `audit.py`, PPK2 |
 | PK-8 | Controls: recessed slide power switch only (R4). LEDs: power/battery (green, red < 3.4 V), peak/clip (amber at −3 dBFS, red at clip). No "link" LED (one-way link cannot know) (R14) | Inspection |
 | PK-9 | Config/DFU: recessed USB-C, USB CDC text protocol (`id`, `chan`, `power`, `region`, `save`, `info`), MCUboot serial DFU. Not a charging port | pytest over pty / DK |
 | PK-10 | Telemetry in every frame: battery, peak, clip flag, temperature flag (AIR-3) | bsim |
