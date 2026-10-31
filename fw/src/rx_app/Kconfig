@@ -1,0 +1,22 @@
+# Receiver app core (RX-6, RX-7, ADR-0013). FW-5: timing constants are Kconfig.
+
+config OP_RX_SLOT_TARGET_SAMPLES
+	int "RX-7 jitter slot fill at frame arrival (samples) = latency the slot adds"
+	default 6
+	range 1 47
+	help
+	  6 samples = 125 us, inside the SPEC section 2 line "decode + jitter slot 200 us". The slot
+	  holds one frame of headroom above this (target + 2 frames), so a frame may arrive up to
+	  target late or ~1 ms early without a slip.
+
+config OP_RX_CLK_KP_PPB
+	int "RX-7 PI loop proportional gain (ppb of DAC clock per sample of fill error)"
+	default 26000
+
+config OP_RX_CLK_KI_PPB
+	int "RX-7 PI loop integral gain (ppb per sample of fill error per frame)"
+	default 8
+
+config OP_RX_CLK_LIM_PPB
+	int "RX-7 correction limit (ppb), also the integrator clamp"
+	default 100000

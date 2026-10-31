@@ -46,6 +46,8 @@ config OP_NRF5340
 	select MBOX
 
 rsource "src/rx/Kconfig"
+rsource "src/rx_app/Kconfig"
+
 choice OP_AUDIO_BACKEND
 	prompt "Audio I/O backend (FW-3)"
 	default OP_AUDIO_I2S if BOARD_NRF5340DK
