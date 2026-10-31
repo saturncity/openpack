@@ -1,0 +1,5 @@
+tests:
+  # RX-7 PI loop + jitter slot, closed loop at +-40 ppm for 1 simulated hour per case (ADR-0013).
+  fw.rx.clk:
+    platform_allow: native_sim
+    tags: openpack
