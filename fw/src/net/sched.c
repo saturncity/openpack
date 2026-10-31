@@ -66,9 +66,9 @@ static void radio_isr(const void *arg)
 	nrf_radio_event_clear(NRF_RADIO, NRF_RADIO_EVENT_END);
 	on_b = !on_b;
 	if (on_b) {
-		nrf_radio_frequency_set(NRF_RADIO, CONFIG_OP_CH_B_MHZ);
+		nrf_radio_frequency_set(NRF_RADIO, OP_CH_B_MHZ);
 	} else {
-		nrf_radio_frequency_set(NRF_RADIO, CONFIG_OP_CH_A_MHZ);
+		nrf_radio_frequency_set(NRF_RADIO, OP_CH_A_MHZ);
 		load();
 	}
 }
@@ -95,7 +95,7 @@ static void radio_init(void)
 		.balen = 3,
 		.whiteen = true,
 	};
-	uint32_t aa = 0x8E89BED6u ^ ((uint32_t)CONFIG_OP_PACK_ID * 0x9E3779B1u);
+	uint32_t aa = 0x8E89BED6u ^ ((uint32_t)OP_PACK_ID * 0x9E3779B1u);
 
 	nrf_radio_mode_set(NRF_RADIO, NRF_RADIO_MODE_BLE_2MBIT);
 	nrf_radio_fast_ramp_up_enable_set(NRF_RADIO, true);
@@ -108,7 +108,7 @@ static void radio_init(void)
 	nrf_radio_datawhiteiv_set(NRF_RADIO, 0x40);
 	nrf_radio_txpower_set(NRF_RADIO, NRF_RADIO_TXPOWER_0DBM); /* FEM gain later (AIR-6) */
 	nrf_radio_packetptr_set(NRF_RADIO, pkt);
-	nrf_radio_frequency_set(NRF_RADIO, CONFIG_OP_CH_A_MHZ);
+	nrf_radio_frequency_set(NRF_RADIO, OP_CH_A_MHZ);
 	nrf_radio_shorts_set(NRF_RADIO, NRF_RADIO_SHORT_READY_START_MASK | NRF_RADIO_SHORT_END_DISABLE_MASK);
 	nrf_radio_int_enable(NRF_RADIO, NRF_RADIO_INT_DISABLED_MASK);
 	nrf_radio_subscribe_set(NRF_RADIO, NRF_RADIO_TASK_TXEN, DPPI_CH);
@@ -152,8 +152,8 @@ int op_sched_start(void)
 	if (CONFIG_OP_PACK_TEST_RUN_MS > 0) {
 		k_timer_start(&test_stop_timer, K_MSEC(CONFIG_OP_PACK_TEST_RUN_MS), K_NO_WAIT);
 	}
-	printk("SCHED start pack_id=%d fA=%d fB=%d air_us=%d cc_b_us=%d\n", CONFIG_OP_PACK_ID,
-	       CONFIG_OP_CH_A_MHZ, CONFIG_OP_CH_B_MHZ, AIR_US, CC_B_US);
+	printk("SCHED start pack_id=%d fA=%d fB=%d air_us=%d cc_b_us=%d\n", OP_PACK_ID,
+	       OP_CH_A_MHZ, OP_CH_B_MHZ, AIR_US, CC_B_US);
 	return 0;
 }
 

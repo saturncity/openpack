@@ -38,6 +38,24 @@ config OP_CH_B_MHZ
 	int "Copy B carrier (MHz, AIR-5: >= copy A + 40)"
 	default 2473
 
+config OP_TEST_FRAME_LEN
+	int "Test only: AIR-3 payload length override (B), 0 = v1 default (42)"
+	default 0
+	range 0 85
+	help
+	  bsim G2 scenarios (tests/bsim/scenarios, #27) set 81 (ADPCM-6 frame + 39 B td_audio, AIR-3) to
+	  measure per-copy loss at the time-diversity packet length before OP_TIME_DIVERSITY exists
+	  (ADR-0001, #26). Payload content is unchanged; recovery from packet n+2 is done offline.
+	  Needs OP_RX_WINDOW_US=0 on the pack and OP_RX_TRACK_WIN_US<=10 on the receiver to fit 1 ms.
+
+config OP_TEST_BSIM_ARGS
+	bool "Test only: pack id and carriers from the bsim command line (-op_pack_id, -op_ch_a, -op_ch_b)"
+	depends on ARCH_POSIX && SOC_COMPATIBLE_NRF5340_CPUNET
+	default y
+	help
+	  bsim net core only (never on silicon): one build serves all 8 packs and receivers of the G2
+	  scenarios (tests/bsim/scenarios, #27). Without the options the Kconfig values above apply.
+
 # FW-2: the nRF5340 builds split work across cores over ipc0.
 config OP_NRF5340
 	bool
