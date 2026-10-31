@@ -9,7 +9,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: sudo apt-get install -y ngspice
-      - run: pip install pytest
+      - run: pip install pytest numpy
       - run: python3 audit.py
       - run: |
           pytest -q || [ $? -eq 5 ]
