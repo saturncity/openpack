@@ -20,8 +20,12 @@ WHIP_XY, WHIP_D, WHIP_L = (42.5, 27.5), 0.9, 31.0   # PK-5: 31 mm quarter-wave w
 POSTS = [(-43.9, 26.9), (-30.0, 26.9), (43.9, -26.9)]  # M2 lid posts (4th corner is the whip)
 LEDS = [(8.0, 20.0), (16.0, 20.0)]; LED_D = 2.5      # power/battery, peak/clip
 SWITCH = (-5.0, 20.0, 10.0, 3.0)                     # recessed slide-switch slot x,y,len,width
-CLIP_T, CLIP_GAP, CLIP_W, CLIP_L = 1.6, 0.5, 24.0, 80.0   # belt clip (total height <= 25)
-CLIP_SCREWS = [(-25.0, 0.0), (35.0, 0.0)]
+# printed PETG belt clip (separate part), 2x M2 screws into heat-set inserts in the back wall.
+# Printed on its side (y up) so layers run along the spring arm; arm tapers 3 -> 2.4 mm, tip chamfer = lead-in lip.
+CLIP_T, CLIP_W, CLIP_OPEN, CLIP_PLATE, CLIP_ARM, CLIP_TIP_T = 3.0, 20.0, 4.0, 28.0, 28.0, 2.4
+CLIP_SCREWS = [(-32.0, -2.0), (-32.0, 12.0)]
+INSERT_D, BOSS_D, BOSS_TOP = 3.2, 7.0, 6.0   # M2 heat-set insert hole, boss, boss top z (insert sits on the floor)
+SNAP_T, SNAP_W, SNAP_LEN, BARB = 1.6, 8.0, 4.0, 0.6   # battery-door snap arms (2, on the window long sides)
 DOOR_CLR = 0.1
 OUT = Path(__file__).parent / "build"
 
@@ -90,8 +94,8 @@ def base():
     b = b.cut(house_x(14, 6, XR - RECESS, XR + 1, USB_Y, USB_Z))
     b = b.cut(house_x(USB_W + 0.6, USB_H + 0.6, XR - WALL - 1, XR + 1, USB_Y, USB_Z))
     b = b.cut(teardrop_x(JACK_D + 0.6, XR - WALL - 1, XR + 1, JACK_Y, JACK_Z))
-    for x, y in CLIP_SCREWS:  # clip is screwed on from inside
-        b = b.cut(vcyl(2.4, x, y, -1, WALL + 1))
+    for x, y in CLIP_SCREWS:  # heat-set insert boss + M2 screw hole through the back wall
+        b = b.union(vcyl(BOSS_D, x, y, WALL - 0.1, BOSS_TOP)).cut(vcyl(INSERT_D, x, y, WALL, BOSS_TOP + 1)).cut(vcyl(2.4, x, y, -1, WALL + 0.1))
     return b
 
 def _window():
@@ -107,23 +111,39 @@ def lid():
     sx, sy, sl, sw = SWITCH
     return l.cut(box(sx - sl / 2, sx + sl / 2, sy - sw / 2, sy + sw / 2, Z_TOP - 1, Z_TOP + WALL + 1))
 
-def door():  # tool-free battery door: plug in the lid window, pry out with a fingernail
-    # ponytail: friction fit; add snap arms / detent bumps after the first print
+def door():  # tool-free battery door: plug in the lid window; two snap arms click under the lid, pry out with a fingernail
     c = DOOR_CLR
-    return box(CELL_X0 - 0.25 + c, CELL_X0 + CELL_L + 0.25 - c, YC - 9.5 + c, YC + 9.5 - c, Z_TOP, Z_TOP + WALL)
+    x0, x1 = CELL_X0 - 0.25 + c, CELL_X0 + CELL_L + 0.25 - c
+    d = box(x0, x1, YC - 9.5 + c, YC + 9.5 - c, Z_TOP, Z_TOP + WALL)
+    xm = (x0 + x1) / 2   # arms on the long sides (clear of the round cell), centred along x
+    for yo, sgn in ((YC - 9.5 + c, -1), (YC + 9.5 - c, 1)):
+        arm = box(xm - SNAP_W / 2, xm + SNAP_W / 2, min(yo, yo - sgn * SNAP_T), max(yo, yo - sgn * SNAP_T), Z_TOP - SNAP_LEN, Z_TOP + 0.1)
+        zb = Z_TOP - 0.3   # retention face 50 deg, lead-in 45 deg; arm flexes inward 0.6 mm
+        prof = [(yo, zb), (yo + sgn * BARB, zb - BARB * 1.19), (yo, zb - BARB * 1.19 - BARB)]
+        barb = cq.Workplane("YZ").workplane(offset=xm - SNAP_W / 2).polyline(prof).close().extrude(SNAP_W)
+        d = d.union(arm).union(barb)
+    return d
 
-def clip():  # printed flat; two pads, M2 screws from inside the pack
-    # ponytail: 0.5 mm gap fits PK-11's 25 mm; real belt grip (spring hook) needs a fit test
-    a = box(-CLIP_L / 2 + 5, CLIP_L / 2 + 5, -CLIP_W / 2, CLIP_W / 2, -CLIP_GAP - CLIP_T, -CLIP_GAP)
-    for x, y in CLIP_SCREWS:
-        a = a.union(vcyl(6.0, x, y, -CLIP_GAP - 0.1, 0)).cut(vcyl(1.6, x, y, -CLIP_GAP, 1))
+def clip():  # plate on the back wall, riser, tapered return arm; mouth opening CLIP_OPEN
+    cx = CLIP_SCREWS[0][0]; yc = sum(y for _, y in CLIP_SCREWS) / 2
+    xa, xb = cx - CLIP_PLATE / 2, cx + CLIP_PLATE / 2
+    zt = -CLIP_T - CLIP_OPEN                  # arm top (belt side)
+    zr = zt - CLIP_T                          # arm bottom at the root
+    xt = xb - CLIP_ARM                        # arm tip
+    prof = [(xa, 0), (xb, 0), (xb, zr), (xt, zt - CLIP_TIP_T), (xt, zt - 0.4), (xt + 1.5, zt), (xb - CLIP_T, zt), (xb - CLIP_T, -CLIP_T), (xa, -CLIP_T)]
+    a = cq.Workplane("XZ").workplane(offset=-(yc + CLIP_W / 2)).polyline(prof).close().extrude(CLIP_W)
+    for x, y in CLIP_SCREWS:   # teardrop (tip towards +y = up when printed on its side)
+        r = 1.2
+        a = a.cut(vcyl(2 * r, x, y, -CLIP_T - 1, 1)).cut(cq.Workplane("XY").workplane(offset=-CLIP_T - 1).polyline(
+            [(x - 0.8 * r, y + 0.45 * r), (x - 0.766 * r, y + 0.643 * r), (x, y + 1.556 * r), (x + 0.766 * r, y + 0.643 * r), (x + 0.8 * r, y + 0.45 * r)]).close().extrude(CLIP_T + 2))
     return a
 
-ENCLOSURE = dict(base=base, lid=lid, door=door, clip=clip)
+ENCLOSURE = dict(base=base, lid=lid, door=door)   # printed body (PK-11 envelope)
+PRINTED = dict(ENCLOSURE, clip=clip)              # + the printed belt clip (excluded from PK-11)
 INTERNALS = dict(cell=cell, holder=holder, pcb=pcb, comps=comps, jack=jack, usbc=usbc, whip=whip)
 
 def parts():
-    return {k: f() for k, f in {**ENCLOSURE, **INTERNALS}.items()}
+    return {k: f() for k, f in {**PRINTED, **INTERNALS}.items()}
 
 def export():
     OUT.mkdir(exist_ok=True)
