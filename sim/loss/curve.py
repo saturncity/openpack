@@ -60,7 +60,7 @@ def main():
                 dp = os.path.join(OUT, f"{os.path.basename(p)[:-4]}_{name}_{'td' if td else 'notd'}_{round(busy * 100)}.wav")
                 write(dp, deg)
                 if quality:
-                    sc.append(quality.visqol(p, dp, FS))
+                    sc.append(quality.visqol(ref.ravel(), deg.ravel(), FS))
             cells.append(f"{np.mean(sc):.2f}" if sc else "n/a")
         rows.append(f"| {busy:.0%} | " + " | ".join(cells) + " |")
     print("\n".join(rows))
