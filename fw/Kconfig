@@ -1,0 +1,72 @@
+mainmenu "OpenPack firmware"
+
+choice OP_ROLE
+	prompt "Device role (FW-1)"
+	default OP_ROLE_PACK
+
+config OP_ROLE_PACK
+	bool "Pack: transmitter worn by the performer"
+
+config OP_ROLE_RX
+	bool "Receiver module"
+
+endchoice
+
+# FW-5: every timing constant is Kconfig. Defaults from SPEC.md section 2 / AIR-4.
+config OP_T_GAP_US
+	int "Retune gap between copy A and copy B (us)"
+	default 100
+
+config OP_DAC_BLOCK_SAMPLES
+	int "DAC DMA block (samples)"
+	default 8
+
+config OP_RX_WINDOW_US
+	int "Reserved RX window at the end of each frame (us)"
+	default 300
+
+config OP_PACK_ID
+	int "Pack ID (AIR-2 access address), set from host/channel_plan.yaml"
+	default 0
+	range 0 7
+
+config OP_CH_A_MHZ
+	int "Copy A carrier (MHz, AIR-5)"
+	default 2424
+
+config OP_CH_B_MHZ
+	int "Copy B carrier (MHz, AIR-5: >= copy A + 40)"
+	default 2473
+
+# FW-2: the nRF5340 builds split work across cores over ipc0.
+config OP_NRF5340
+	bool
+	default y if SOC_COMPATIBLE_NRF5340_CPUAPP || SOC_COMPATIBLE_NRF5340_CPUNET
+	select IPC_SERVICE
+	select MBOX
+
+rsource "src/rx/Kconfig"
+choice OP_AUDIO_BACKEND
+	prompt "Audio I/O backend (FW-3)"
+	default OP_AUDIO_I2S if BOARD_NRF5340DK
+	default OP_AUDIO_WAV
+
+config OP_AUDIO_WAV
+	bool "WAV files on the host (native_sim, nrf5340bsim)"
+
+config OP_AUDIO_I2S
+	bool "I2S hardware (stub until Phase 5)"
+
+endchoice
+
+config OP_AUDIO_WAV_IN
+	string "Input WAV (48 kHz mono 16-bit); env OP_AUDIO_IN overrides"
+	default "op_in.wav"
+	depends on OP_AUDIO_WAV
+
+config OP_AUDIO_WAV_OUT
+	string "Output WAV; env OP_AUDIO_OUT overrides"
+	default "op_out.wav"
+	depends on OP_AUDIO_WAV
+
+source "Kconfig.zephyr"

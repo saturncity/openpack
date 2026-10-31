@@ -1,0 +1,11 @@
+# Usage: cmake -DGOLDEN_DIR=<dir> -DGEN_H=<out.h> -P gen_golden.cmake
+set(out "")
+foreach(pair IN ITEMS pcm_in:pcm_in adpcm6_enc:enc adpcm6_dec:dec)
+  string(REPLACE ":" ";" p "${pair}")
+  list(GET p 0 f)
+  list(GET p 1 n)
+  file(READ ${GOLDEN_DIR}/${f}.bin hex HEX)
+  string(REGEX REPLACE "([0-9a-f][0-9a-f])" "0x\\1," arr "${hex}")
+  string(APPEND out "static const unsigned char golden_${n}[] = {${arr}};\n")
+endforeach()
+file(WRITE ${GEN_H} "${out}")

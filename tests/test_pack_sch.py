@@ -41,7 +41,7 @@ def test_pack_erc_and_bom(tmp_path, monkeypatch):
     assert (net["U1", "9"], net["U1", "F4"], net["U1", "F6"]) == ("+3V3", "+3V3", "USB_VBUS")
     assert (net["U5", "1"], net["U5", "5"], net["U6", "1"], net["U6", "5"]) == ("VSYS", "+3V3", "+5V", "+3V3A")
     # reverse-polarity FET: drain at the cell, source to the switch; cell sensed ahead of FET and switch
-    assert (net["Q1", "3"], net["Q1", "2"], net["R12", "1"]) == ("BAT+", "VBAT_RP", "BAT+")
+    assert (net["F1", "1"], net["F1", "2"], net["Q1", "3"], net["Q1", "2"], net["R12", "1"]) == ("BAT+", "BAT_F", "BAT_F", "VBAT_RP", "BAT+")
     # front end: VCM from 180k/100k (OPA1656 CM range); hot-plug clamp + 100R ahead of both + inputs
     assert (net["R7", "1"], net["R7", "2"], net["U3", "3"], net["U3", "5"]) == ("+5V", "VCM", "PRE_INP", "PRE_INP")
     assert [net["D6", n] for n in "123"] == ["GND", "+5V", "PRE_NP"]

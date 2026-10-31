@@ -16,16 +16,16 @@ Status: accepted. 2026-10-31. Issue #31, PR #75 (amended after review). Schemati
     - Cell sense AIN0 (pad 5), tapped at the cell. LEDs on Z0–Z3 (P1.09–P1.12). UART test pads B1/C1.
     - FEM pads Z6 A6 C2 C6 D1 D2 E0 E1 E2 are no-connect. Firmware's `nordic,nrf21540-fem` node must use: SCK P1.15, MOSI P1.08, MISO P0.25, CSN P1.06, TX_EN P0.21, RX_EN P0.27, PDN P0.26, MODE P1.04, ANT_SEL P1.05.
   - **PCM1840.** I2S slave (MSZ=0, FMT1=FMT0=1); low-latency filter (MD0=1, R3); DRE on (MD1=1). Path 1 (×2) on IN1, path 2 (×1, Q7) on IN2, INxM AC-grounded.
-  - **Power.** No PTC: PK-6 mandates a protected cell, and a 0.5 A PTC (~1 Ω) would cost about 0.2 V of 3.3 V headroom. Firmware **shuts down below 3.2 V cell, measured under load**. Derivation in `audit.py`: IOVDD 3.0 V + LDO 67 mV + path 36 mV + ADC error 80 mV = 3.18 V. No buck-boost.
+  - **Power.** BAT+ goes through a 3 A chip fuse (Bourns SF-1206F300, 23 mΩ, about 5 mV drop) in case someone fits an unprotected cell. A 0.5 A PTC (~1 Ω) was rejected: it costs about 0.2 V of 3.3 V headroom. Firmware **shuts down below 3.2 V cell, measured under load**. Derivation in `audit.py`: IOVDD 3.0 V + LDO 67 mV + path 40 mV + ADC error 80 mV = 3.19 V. No buck-boost.
   - **LEDs.** Lite-On LTST-C191K*KT AlInGaP parts (Vf ~2.0 V) with 1 kΩ, about 1 mA each. **PK-8 thresholds:**
     - The single-ended pin swings at most about VREF/2 = 1.375 V peak, i.e. −6.3 dBFS of the 2.83 V-peak differential full scale. The PK-2 max (0.6 Vrms) reads −7.7 dBFS on path 1.
     - So amber "peak" at ≥ −10 dBFS and red "clip" at ≥ −7 dBFS. Red means past the design maximum, within 0.7 dB of the analog clip.
 - **Numbers (`tests/test_spice_preamp.py`, ngspice in CI with `-rP` printing them; independent MNA cross-check):**
-  - Noise: **0.96 µV A-wtd** (0.94 before R20).
+  - Noise: **0.967 µV A-wtd** in ngspice (MNA cross-check 0.961; 0.94 before R20).
   - 5 V rail → preamp output: −33.6 dB at 1 kHz; asserted ≤ −30 dB.
-  - ADC pin: 1.16 V peak, below 1.375 V.
+  - ADC pin: 1.17 V peak, below 1.375 V. Op-amp +IN: 1.21–2.37 V (asserted 0.2–2.50 V).
   - OPA1656 +IN: ≤ 2.50 V, asserted.
-  - BOM: **$34.46** at qty 100 excluding the cell, with BT40NE at Fanstel direct ($13.47). It is $37.75 at the Digi-Key module price; `audit.py` prints both. PCB assembly and conformal coating are excluded.
+  - BOM: **$34.98** at qty 100 excluding the cell, with BT40NE at Fanstel direct ($13.47). It is $38.27 at the Digi-Key module price; `audit.py` prints both. PCB assembly and conformal coating are excluded.
 - **Consequences / Phase 4 signoff items:**
   1. Fit a real Sennheiser plug (spare 099112) and a DPA DAD6034 to the SJ1-3543 thread. If they don't lock, swap to the Switchcraft (+$1.68, which would exceed $35 at the current margin: re-check then).
   2. Confirm from the EV-BT40NE schematic that the nRF21540 runs from module VDD, and which ANT_SEL level routes to the u.FL. Bond the whip pigtail shield to PCB ground.
@@ -41,9 +41,9 @@ Status: accepted. 2026-10-31. Issue #31, PR #75 (amended after review). Schemati
 | R-id | Result | Basis |
 |---|---|---|
 | R6 | ✓ | Pinout from the manual; 5 V/2.2 kΩ bias; DPA via DAD6034, bench-unverified |
-| R5 | ✓ | 0.96 µV; rail filtered |
+| R5 | ✓ | 0.967 µV; rail filtered |
 | R2 | ✓ | No clip at 0.6 Vrms in op-amp CM, output swing, or ADC pin |
-| R12 | ✓ | $34.46 (Fanstel price) |
+| R12 | ✓ | $34.98 (Fanstel price) |
 | R7 | ✓ | Removable protected 18650, reverse FET, no charger |
 | R8 | ✓ | 18.6 h with the 3.2 V cutoff |
 | R4 | ✓ | Recessed switch only |
