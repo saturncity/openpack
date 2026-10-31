@@ -11,14 +11,32 @@ int op_pack_id = CONFIG_OP_PACK_ID;
 int op_ch_a_mhz = CONFIG_OP_CH_A_MHZ;
 int op_ch_b_mhz = CONFIG_OP_CH_B_MHZ;
 
+/* The bsim parser writes a default into every dest, given or not: parse into scratch, copy when found. */
+static int arg_id, arg_a, arg_b;
+
+static void found_id(char *argv, int offset)
+{
+	op_pack_id = arg_id;
+}
+
+static void found_a(char *argv, int offset)
+{
+	op_ch_a_mhz = arg_a;
+}
+
+static void found_b(char *argv, int offset)
+{
+	op_ch_b_mhz = arg_b;
+}
+
 static void op_bsim_register_args(void)
 {
 	static bs_args_struct_t args[] = {
-		{.option = "op_pack_id", .name = "id", .type = 'i', .dest = &op_pack_id,
+		{.option = "op_pack_id", .name = "id", .type = 'i', .dest = &arg_id, .call_when_found = found_id,
 		 .descript = "OpenPack pack id 0-7 (AIR-2 access address), default CONFIG_OP_PACK_ID"},
-		{.option = "op_ch_a", .name = "MHz", .type = 'i', .dest = &op_ch_a_mhz,
+		{.option = "op_ch_a", .name = "MHz", .type = 'i', .dest = &arg_a, .call_when_found = found_a,
 		 .descript = "OpenPack copy A carrier (AIR-5), default CONFIG_OP_CH_A_MHZ"},
-		{.option = "op_ch_b", .name = "MHz", .type = 'i', .dest = &op_ch_b_mhz,
+		{.option = "op_ch_b", .name = "MHz", .type = 'i', .dest = &arg_b, .call_when_found = found_b,
 		 .descript = "OpenPack copy B carrier (AIR-5), default CONFIG_OP_CH_B_MHZ"},
 		ARG_TABLE_ENDMARKER,
 	};

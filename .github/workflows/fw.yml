@@ -92,6 +92,54 @@ jobs:
           grep -q 'RX_CHECK.*PASS' rx_a.txt
           grep -q 'RX_CHECK.*PASS' rx_e.txt
 
+  g2:
+    name: G2 scenarios
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci-repo-cache:v0.29.4.20260912
+      options: --entrypoint /bin/bash
+    env:
+      ZEPHYR_TOOLCHAIN_VARIANT: zephyr
+      BSIM_OUT_PATH: ${{ github.workspace }}/tools/bsim
+      BSIM_COMPONENTS_PATH: ${{ github.workspace }}/tools/bsim/components
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: openpack
+      - uses: actions/cache@v4
+        with:
+          path: |
+            zephyr
+            modules
+            bootloader
+            tools
+          key: west-${{ hashFiles('openpack/west.yml') }}
+      - name: west update
+        run: |
+          git config --global --add safe.directory '*'
+          [ -d .west ] || west init -l openpack
+          west update --narrow -o=--depth=1
+      - name: build BabbleSim
+        working-directory: tools/bsim
+        run: make everything -s -j4
+      - name: "G2 scenarios a-e (SYS-2, SYS-3, RX-2, RX-10; RX-7 pending #24), #27"
+        timeout-minutes: 15
+        run: |
+          export ZEPHYR_SDK_INSTALL_DIR="${ZEPHYR_SDK_INSTALL_DIR:-$(find /opt/toolchains -maxdepth 1 -name 'zephyr-sdk-*' | head -1)}"
+          rc=0
+          python3 openpack/tests/bsim/scenarios/run.py --jobs 4 --build g2-build --out g2-out || rc=$?
+          [ -f g2-out/g2.md ] && cat g2-out/g2.md >> "$GITHUB_STEP_SUMMARY"
+          exit $rc
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: g2-results
+          path: |
+            g2-out/g2.json
+            g2-out/g2.md
+            g2-build/*.build.log
+
   twister:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
