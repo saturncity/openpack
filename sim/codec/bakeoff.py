@@ -84,7 +84,7 @@ def main():
                 print(lvl, c, n, res[f"{lvl}|{n}"][c], flush=True)
                 if lvl == 0 and n != "pcm16" and c in list(clips)[:2] + ["synthetic_sweep"]:
                     sf.write(os.path.join(CACHE, "ab", f"{c}.{n}.wav"), deg, 48000, subtype="PCM_16")
-    with open(os.path.join(CACHE, "results.csv"), "w") as f:
+    with open(os.path.join(HERE, "results.csv"), "w") as f:
         f.write("level_db,codec,clip,visqol,pesq_wb\n")
         for k, r in res.items():
             for c, (v, p) in r.items():
@@ -104,7 +104,7 @@ def write_md(res, clips):
             r = res[f"{lvl}|{n}"]; v = {c: a for c, (a, b) in r.items()}; p = [b for a, b in r.values()]
             w = min(v, key=v.get)
             L.append(f"| {lvl} dB | {n} | {codec.FRAME_BYTES.get(n, '-')} | {np.mean(list(v.values())):.2f} | {v[w]:.2f} ({w}) | {np.mean(p):.2f} | {min(p):.2f} |")
-    L += ["", "Per-clip scores: `results.csv` in the `bakeoff` workflow artifact. Clips used:", ""] + [f"- `{c}`" for c in clips]
+    L += ["", "Per-clip scores: `results.csv`. Clips used:", ""] + [f"- `{c}`" for c in clips]
     open(os.path.join(HERE, "RESULTS.md"), "w").write("\n".join(L) + "\n")
 
 

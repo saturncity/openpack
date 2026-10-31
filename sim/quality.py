@@ -12,6 +12,9 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 VISQOL_BIN = os.environ.get("VISQOL_BIN", os.path.join(_HERE, ".cache", "visqol_src", "bazel-bin", "visqol"))
 
 
+VISQOL_MODEL = os.environ.get("VISQOL_MODEL", os.path.join(_HERE, ".cache", "visqol_src", "model", "libsvm_nu_svr_model.txt"))
+
+
 def have_visqol():
     return os.path.exists(VISQOL_BIN)
 
@@ -28,7 +31,8 @@ def visqol(ref, deg, fs=48000):
         for n, x in (("r", ref), ("d", deg)):
             p.append(f"{d}/{n}.wav")
             wavfile.write(p[-1], fs, np.round(np.clip(_f(x), -1, 1) * 32767).astype(np.int16))  # 16-bit file I/O
-        out = subprocess.run([VISQOL_BIN, "--reference_file", p[0], "--degraded_file", p[1]],
+        out = subprocess.run([VISQOL_BIN, "--reference_file", p[0], "--degraded_file", p[1],
+                              "--similarity_to_quality_model", VISQOL_MODEL],
                              capture_output=True, text=True, check=True).stdout
     return float(re.search(r"MOS-LQO:\s*([\d.]+)", out).group(1))
 
