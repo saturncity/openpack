@@ -107,5 +107,7 @@ Status: accepted. 2026-10-31, amended after the #81 review. Issue #32. Schematic
   5. PE4259 tuning cap and its ≈18–20 dB isolation at 2.4 GHz come with layout (#34). The jumper costs about 0.3 dB.
   6. C47/C48 (10 mm radial bipolar) and K1 heights must be checked against the mezzanine stack in 1U before #33 fixes the standoffs.
   7. UK: the GBP figures are conversions. Confirm live quotes and stock before #40.
-  8. Region (UK rules, being re-decided): the receiver has no PA, and the BT40NE's nRF21540 serves only as the LNA here. No part value on this board depends on the region.
+  8. Region (UK rules, being re-decided): the receiver has no PA, and no part value on this board depends on the region.
+     - **LNA:** ADR-0015 (PR #86) finds that a per-receiver LNA adds only 0.7 dB behind the rack LNA. This board never had a discrete LNA or its bias/match parts, so nothing is removed and nothing is saved.
+     - The nRF21540 inside the BT40NE cannot be depopulated. Firmware may run it in bypass (ADR-0015).
   9. Custom footprints (BT40NE, TQ2SA) come with layout.
