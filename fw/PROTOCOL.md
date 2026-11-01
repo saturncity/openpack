@@ -34,6 +34,7 @@ On bsim the console is uart0 (pty). On the DK it is also the uart0 VCOM: the CDC
 
 ## Console rules
 
+- Switching `td` re-locks the receiver (a few frames lost), so change it between shows, not during one.
 - The console also carries boot and log `printk` lines. The host must ignore any line that does not start with `ok` or `err`.
 - Pack numbering: host pack N (1..8) = firmware `OP_PACK_ID` N-1 (0..7).
 
