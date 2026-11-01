@@ -1,6 +1,6 @@
 # mech
 
-CadQuery pack enclosure (`pack.py`) and 1U rear panel (`panel.py`), all printed. Parameters sit at the top of each file; the PCB is a placeholder envelope until #31.
+CadQuery pack enclosure (`pack.py`) and 1U rear panel (`panel.py`), all printed. Parameters sit at the top of each file; the PCB outline and height follow `hw/pack/layout.py` (#34), parts above it are a coarse envelope (`tests/mech/test_pack_fit.py` checks the real per-part boxes).
 
     pip install cadquery trimesh rtree matplotlib
     python mech/pack.py && python mech/panel.py   # STL/STEP -> mech/build/ (gitignored)

@@ -1,5 +1,6 @@
 """OpenPack bodypack enclosure (PK-5, PK-11). Run: python mech/pack.py -> mech/build/*.stl,*.step
-PCB is a placeholder envelope until #31; edit the parameters below, nothing else.
+PCB outline/height follow hw/pack/layout.py (#34); components above the board stay a coarse envelope here
+(hw/pack/out/fab/envelope.json has the per-part boxes, tests/mech/test_pack_fit.py checks them). Edit parameters only.
 Coords (mm): x length, y width, z up. Base floor at z=0; lid on top. Origin at plan-view centre."""
 import cadquery as cq
 from pathlib import Path
@@ -11,7 +12,10 @@ Z_TOP = WALL + H_IN                       # top of walls / underside of lid
 CELL_D, CELL_L = 18.5, 65.5               # 18650
 HOLD_CLR, HOLD_END, HOLD_W = 0.25, 5.0, 21.0   # holder bore clearance, end block length, width
 CELL_GAP_Z = 0.5                          # cell sits 0.5 above floor
-PCB = dict(x0=-20.0, x1=38.0, y0=-6.5, y1=27.5, z0=WALL + 2.0, t=1.6, comp_h=8.0)  # placeholder
+# board beside the holder; notch clears the (-30, 26.9) lid post; z0 raised so the BT40NE antenna (overhanging
+# x < -28) rides above the clip bosses (top z 6.0). Matches hw/pack/layout.py OUTLINE.
+PCB = dict(x0=-28.0, x1=45.4, y0=-6.5, y1=28.5, z0=WALL + 3.4, t=1.6, comp_h=8.0, notch=(-26.5, 24.0))
+ANTENNA = (-38.9, -28.0, 7.7, 22.7, 2.0)               # BT40NE antenna section past the board edge: x0,x1,y0,y1,h
 CELL_X0 = -L / 2 + WALL + 0.2 + HOLD_END  # cell start; blocks flank it
 JACK_D, JACK_Y, JACK_Z = 6.0, 0.0, PCB["z0"] + PCB["t"] + 3.0   # locking 3.5 mm TRS barrel
 USB_W, USB_H, USB_Y, USB_Z = 9.0, 3.2, 18.0, PCB["z0"] + PCB["t"] + 1.6
@@ -19,7 +23,7 @@ RECESS = 0.8                              # USB-C mouth recess depth (pad inside
 WHIP_XY, WHIP_D, WHIP_L = (42.5, 27.5), 0.9, 31.0   # PK-5: 31 mm quarter-wave wire
 POSTS = [(-43.9, 26.9), (-30.0, 26.9), (43.9, -26.9)]  # M2 lid posts (4th corner is the whip)
 LEDS = [(8.0, 20.0), (16.0, 20.0)]; LED_D = 2.5      # power/battery, peak/clip
-SWITCH = (-5.0, 20.0, 10.0, 3.0)                     # recessed slide-switch slot x,y,len,width
+SWITCH = (-3.5, 20.0, 10.0, 3.0)                     # recessed slide-switch slot x,y,len,width
 # printed PETG belt clip (separate part), 2x M2 screws into heat-set inserts in the back wall.
 # Printed on its side (y up) so layers run along the spring arm; arm tapers 3 -> 2.4 mm, tip chamfer = lead-in lip.
 CLIP_T, CLIP_W, CLIP_OPEN, CLIP_PLATE, CLIP_ARM, CLIP_TIP_T = 3.0, 20.0, 4.0, 28.0, 28.0, 2.4
@@ -67,7 +71,14 @@ def holder():
 
 def pcb():
     p = PCB
-    return box(p["x0"], p["x1"], p["y0"], p["y1"], p["z0"], p["z0"] + p["t"])
+    nx, ny = p["notch"]
+    return box(p["x0"], p["x1"], p["y0"], p["y1"], p["z0"], p["z0"] + p["t"]).cut(
+        box(p["x0"] - 1, nx, ny, p["y1"] + 1, p["z0"] - 1, p["z0"] + p["t"] + 1))
+
+def antenna():  # module antenna section, overhanging the board edge
+    x0, x1, y0, y1, h = ANTENNA
+    z = PCB["z0"] + PCB["t"]
+    return box(x0, x1, y0, y1, z, z + h)
 
 def comps():  # placeholder component envelope on top, 2 mm inset from the board edge
     p = PCB
@@ -140,7 +151,7 @@ def clip():  # plate on the back wall, riser, tapered return arm; mouth opening 
 
 ENCLOSURE = dict(base=base, lid=lid, door=door)   # printed body (PK-11 envelope)
 PRINTED = dict(ENCLOSURE, clip=clip)              # + the printed belt clip (excluded from PK-11)
-INTERNALS = dict(cell=cell, holder=holder, pcb=pcb, comps=comps, jack=jack, usbc=usbc, whip=whip)
+INTERNALS = dict(cell=cell, holder=holder, pcb=pcb, comps=comps, antenna=antenna, jack=jack, usbc=usbc, whip=whip)
 
 def parts():
     return {k: f() for k, f in {**PRINTED, **INTERNALS}.items()}

@@ -1,0 +1,101 @@
+{
+ "outline_matches_mech": {
+  "ok": true,
+  "detail": "layout (-28.0, 45.4, -6.5, 28.5) mech (-28.0, 45.4, -6.5, 28.5)"
+ },
+ "board_clear": {
+  "ok": true,
+  "detail": "[[], []]"
+ },
+ "antenna_overhang_clear": {
+  "ok": true,
+  "detail": "[]"
+ },
+ "antenna_overhang_ge_9.8mm": {
+  "ok": true,
+  "detail": "10.9 mm past the board edge (Fanstel p.20: 9.8)"
+ },
+ "parts_clear": {
+  "ok": true,
+  "detail": "{}"
+ },
+ "lid_clearance": {
+  "ok": true,
+  "detail": "tallest J1 top z 13.1, lid underside 21.2"
+ },
+ "jack_in_opening": {
+  "ok": true,
+  "detail": "jack y 0.00 vs JACK_Y 0.0; axis z 9.60 vs JACK_Z 9.60"
+ },
+ "usb_in_opening": {
+  "ok": true,
+  "detail": "usb y 18.00 vs USB_Y 18.0; mouth z 8.20 vs USB_Z 8.20"
+ },
+ "leds_under_lid_holes": {
+  "ok": true,
+  "detail": "{'D1': (7.199999999999999, 20.0), 'D2': (8.8, 20.0), 'D3': (15.2, 20.0), 'D4': (16.799999999999997, 20.0)}"
+ },
+ "switch_under_slot": {
+  "ok": true,
+  "detail": "SW1 x -3.50 vs slot x -3.5"
+ },
+ "light_pipe_mm": 15.4,
+ "switch_actuator_gap_mm": 10.8,
+ "tht_legs_clear_standoffs": {
+  "ok": true,
+  "detail": "[]"
+ },
+ "ufl_to_whip_straight_mm": 71.0,
+ "board_mm": [
+  73.4,
+  35.0
+ ],
+ "fail": [],
+ "_tht": [
+  [
+   "J2",
+   39.895,
+   13.68
+  ],
+  [
+   "J2",
+   44.075,
+   13.68
+  ],
+  [
+   "J2",
+   39.895,
+   22.32
+  ],
+  [
+   "J2",
+   44.075,
+   22.32
+  ],
+  [
+   "J1",
+   38.9,
+   -2.5
+  ],
+  [
+   "J1",
+   42.9,
+   0.0
+  ],
+  [
+   "J1",
+   34.9,
+   2.5
+  ],
+  [
+   "BT1",
+   -21.25,
+   -4.2
+  ],
+  [
+   "BT1",
+   -17.75,
+   -4.2
+  ]
+ ]
+}

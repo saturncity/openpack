@@ -121,7 +121,7 @@ def _b(dx, dy, rot):
 PLACE = {
     "U1": U1_POS,
     # --- power entry (bottom left) ---
-    "BT1": (-21.5, -4.2, 0), "F1": (-21.5, -0.4, 0), "Q1": (-17.6, -0.4, 180), "R1": (-14.8, -1.6, 0),
+    "BT1": (-19.5, -4.2, 0), "F1": (-21.5, -0.4, 0), "Q1": (-17.6, -0.4, 180), "R1": (-14.8, -1.6, 0),
     "R12": (-14.6, 5.4, 90), "R13": (-13.4, 5.4, 270), "C30": (-12.2, 5.4, 270),
     "SW1": (-3.5, 19.0, 0),
     # --- 3V3 LDO + module decoupling (top strip) ---
@@ -849,8 +849,9 @@ def main(argv):
     w = width_for(50.0)
     print(f"50 ohm microstrip L1/L2 (h 0.2104, er 4.4, t 35 um): w = {w:.3f} mm, Z0 at w=0.36: {microstrip_z0(0.36)[0]:.1f}")
     if "--no-out" not in argv:
-        import outputs
+        import outputs, fit
         outputs.run_all()
+        fit.main()
     return 1 if (errs or unconn or failed) else 0
 
 
