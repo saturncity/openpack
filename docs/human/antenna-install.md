@@ -10,8 +10,10 @@ Send back: the photos from step 13 and the result of step 14, attached to GitHub
 | Item | What it looks like | Qty |
 |---|---|---|
 | L-com **HG2409P-NF** antenna | white flat square, 114 × 114 mm, 23 mm thick, with a short black cable ending in a round screw socket (N female) | 2 |
-| L-com **CA3N050** cable | thick black coax, 15.2 m long, with the same large screw plug (N male) on both ends | 2 |
-| L-com **LCCA30301-FT1.5** jumper | short thick cable (45 cm): a large screw socket (N female) on one end, a small push-and-twist plug (BNC) on the other | 2 |
+| L-com **CA3N030** cable (near wing: the wing the rack is in) | thick black coax, 9.1 m long, with the same large screw plug (N male) on both ends | 1 |
+| L-com **CA3N075** cable (far wing: across the stage) | the same, 22.9 m long | 1 |
+| N-to-BNC adapter (Amphenol RF NF-BM-NT3G-50, RS 285-6398) | a small metal piece: a large screw socket (N female) on one end, a small push-and-twist plug (BNC) on the other | 2 |
+| Two Thor LS003 winch stands + two L-com HGX-PMT07 mast kits | only if the venue has no lighting boom: a 4 m wind-up stand and two U-bolts to hold the antenna on its top | 2 |
 | Mounting | an L-com HGX-PMT04 tilt-and-swivel bracket, **or** a theatre half-coupler with a 1/4-20 bolt (ask the lighting crew) | 2 |
 | Something 4 m tall in each wing | the venue's **lighting boom** (an upright steel pipe in the wing), or a wind-up lighting stand that reaches 4 m | 2 |
 | Safety bond | a steel safety cable for each antenna (the lighting crew has these) | 2 |
@@ -64,10 +66,10 @@ Side view of one antenna:
 6. **Aim antenna A.** Turn the white face toward the **far upstage corner of the acting area**, the corner on the other side of the stage, nearest the back wall. It must never face the audience. *Expected:* standing in that far corner and looking back, you see the white face square-on.
 7. **Tilt antenna A down 10°.** Hold your phone flat against the white face with the level app open, and tilt the bracket until the app reads 10° (face looking slightly down at the floor). Tighten the bracket. *Expected:* the app reads 5–15°, and the face looks just a little down, across the stage.
 8. **Repeat steps 2–7 for antenna B** in the stage-right wing, aimed at the far upstage corner on the stage-left side. *Expected:* the two antennas face each other diagonally across the stage, both angled a little toward the back wall and a little down.
-9. **Connect the long cables.** Screw the large plug of a CA3N050 onto the round socket on each antenna's short lead, finger-tight, no tools. *Expected:* the plug turns about 4 full turns and stops.
+9. **Connect the long cables.** Screw the large plug of the long cables onto the round socket on each antenna's short lead: the 9.1 m CA3N030 to the antenna in the rack's wing, the 22.9 m CA3N075 to the one across the stage (run it along the floor and over the stage at grid height, never across the acting area), finger-tight, no tools. *Expected:* the plug turns about 4 full turns and stops.
 10. **Run each cable to the rack** down the boom or stand and along the wing wall, cable-tied every metre, never across the actors' path. *Expected:* nothing hangs or lies where an actor walks, and the free end reaches the rack. Each cable is 15.2 m long; if it doesn't reach, stop and post the distance on issue #92.
-11. **Fit the short jumpers at the rack.** Screw each jumper's large socket onto a long cable's plug, finger-tight. *Expected:* it turns about 4 turns and stops.
-12. **Plug into the rack.** Push the stage-left jumper's small BNC plug onto the rear socket labelled **ANT A**, the stage-right one onto **ANT B**, and turn each a quarter-turn clockwise until it clicks. *Expected:* neither comes off when you tug it gently.
+11. **Fit the adapters at the rack.** Screw each N-to-BNC adapter's large socket onto a long cable's plug, finger-tight. *Expected:* it turns about 4 turns and stops.
+12. **Plug into the rack.** Push the stage-left adapter's small BNC plug onto the rear socket labelled **ANT A**, the stage-right one onto **ANT B**, and turn each a quarter-turn clockwise until it clicks. *Expected:* neither comes off when you tug it gently.
 13. **Take three photos:** (1) each antenna from the far upstage corner it points at; (2) one antenna from the side, showing the tilt and the boom; (3) the tape measure or laser reading of its height. *Expected:* three photos on your phone, attached to issue #92.
 14. **Check the no-Wi-Fi zones.** Walk both wings and the stage, then everything backstage within 6 m of either antenna. Look for Wi-Fi routers (boxes with antennas or blinking lights), hotspots and laptops. *Expected:* none in the wings or on stage, and none within 6 m of an antenna. If the stage manager's desk is in a wing, its laptop runs on a cable with Wi-Fi off. During the show, crew in the wings keep their phones in **airplane mode** (Wi-Fi off is not enough: a phone's mobile signal near an antenna also crowds the receiver). Post "zones clear", or a list of what you found, on issue #92.
 15. **Switch on the rack and all 8 packs.** *Expected:* all 8 lock lights on the front of the rack go solid within 2 seconds.

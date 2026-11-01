@@ -18,9 +18,9 @@ SMF5.0A,D2,D_SOD-123F,SMF5.0A,C193402,"LCSC/JLC record read 2026-11-01: MDD SMF5
 S1J,"D3,D4,D5,D6,D7",D_SMA,S1J,C184326,"LCSC/JLC record read 2026-11-01: onsemi S1J, SMA, IFSM 30 A"
 backplane 2x13,J1,PinHeader_2x13_P2.54mm_Key14,PZ254V-12-26P,DNP,"THT underside header, hand-solder after reflow, pin 14 cut first: XFCN PZ254V-12-26P = LCSC C22465887 (JLC record 2026-11-01)"
 SWD,J2,,TC2030-pads,DNP,pads only
-ANT_A,J3,U.FL_Hirose_U.FL-R-SMT-1_Vertical,U.FL-R-SMT-1(10),C88374,"LCSC/JLC record read 2026-11-01: Hirose U.FL-R-SMT-1(80): same part, 80-piece-reel suffix"
-ANT_B,J4,U.FL_Hirose_U.FL-R-SMT-1_Vertical,U.FL-R-SMT-1(10),C88374,"LCSC/JLC record read 2026-11-01: Hirose U.FL-R-SMT-1(80): same part, 80-piece-reel suffix"
-TO_MODULE,J5,U.FL_Hirose_U.FL-R-SMT-1_Vertical,U.FL-R-SMT-1(10),C88374,"LCSC/JLC record read 2026-11-01: Hirose U.FL-R-SMT-1(80): same part, 80-piece-reel suffix"
+ANT_A,J3,U.FL_Hirose_U.FL-R-SMT-1_Vertical,U.FL-R-SMT-1(10),C88373,"LCSC/JLC record read 2026-11-01: Hirose U.FL-R-SMT-1(10); one code project-wide (#34, the rack uses it too; C88374 is the 80-piece reel)"
+ANT_B,J4,U.FL_Hirose_U.FL-R-SMT-1_Vertical,U.FL-R-SMT-1(10),C88373,"LCSC/JLC record read 2026-11-01: Hirose U.FL-R-SMT-1(10); one code project-wide (#34, the rack uses it too; C88374 is the 80-piece reel)"
+TO_MODULE,J5,U.FL_Hirose_U.FL-R-SMT-1_Vertical,U.FL-R-SMT-1(10),C88373,"LCSC/JLC record read 2026-11-01: Hirose U.FL-R-SMT-1(10); one code project-wide (#34, the rack uses it too; C88374 is the 80-piece reel)"
 TQ2SA-12V,K1,Panasonic_TQ2SA,TQ2SA-12V,C2684447,"LCSC/JLC record read 2026-11-01: Panasonic TQ2SA-12V-Z (taped TQ2SA-12V), 2245 at JLC"
 BSS138,Q1,SOT-23,BSS138,C52895,LCSC/JLC record read 2026-11-01: onsemi BSS138
 10,R1,R_0603_1608Metric,R_0603_1%,C22859,LCSC/JLC record read 2026-11-01: UNI-ROYAL 0603WAF100JT5E (10 ohm 1 %)

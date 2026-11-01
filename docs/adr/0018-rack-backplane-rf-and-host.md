@@ -25,7 +25,7 @@ Status: accepted. 2026-11-01, amended after the #95 review, the owner's wing-ant
     - Then the TPS259541 input eFuse (3.5 A, UVLO 9.98/9.15 V), TPS62933 5 V, TLV76733 3.3 V, per-slot TPS259541 (+12 V) and TPS259531 (+5 V) at 0.49 A, and a 1.5 A CM4IO feed.
     - The NT1 tie and the BNC bulkhead bodies both bond GND to the panel.
   - **Slots:**
-    - **Harwin M20-7831346** socket with a **Harwin M20-003 polarising key in position 14** (8 per rack in the BOM).
+    - ~~Harwin M20-7831346 + M20-003 key~~ **Amended #34 (owner parts list, 2026-11-01): BOOMELE 2.54-2*13PFemale 8.5 mm (LCSC C64320)** with contact 14 pulled and the cavity plugged at assembly; the main-board footprint has no hole at 14, so the keyed receiver header (no pin 14) and the socket match (8 per rack in the BOM).
     - Slot-ID straps, LEDs (Lite-On LTST-C191KGKT and KRKT, 560 Ω), XLR NC3MAH with SMAJ58CA on pins 2/3.
   - **Host:**
     - **CM4002008 (SC0680, no wireless) from The Pi Hut UK, £79.20, qty 1.** SC0681 (16 GB) at the same price is the drop-in alternative. DigiKey UK had 0 in stock.
@@ -81,5 +81,5 @@ Status: accepted. 2026-11-01, amended after the #95 review, the owner's wing-ant
      - check that the 200 mm u.FL cables reach slots 0 and 7;
      - the QPL9057 input match;
      - follow the QPQ1907 land pattern from the datasheet.
-  6. Confirm that the M20-003 key seats in the M20-78 dual-row socket on the first unit (Harwin lists it for M20 female families).
+  6. Confirm on the first unit that contact 14 pulls out of the BOOMELE C64320 cleanly and that the plugged cavity rejects a pin (#34; was the Harwin M20-003 key check).
   7. No panel USB-C to micro-USB lead was found (£8 estimate). TPS259541 has a 20-week lead time.
