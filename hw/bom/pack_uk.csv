@@ -1,5 +1,5 @@
 ref,mpn,qty_per_pack,distributor,url,gbp_qty4,gbp_qty100,stock,notes
-BT1,BH-18650-B1BA002,1,LCSC,https://www.lcsc.com/product-detail/C2988620.html,1.04,1.04,stock not verifiable (JS page),"USD1.36 from hw/pack/prices.py converted at 1.31; ex VAT, VAT 20% collected at LCSC checkout (<GBP135). Not found at DK UK. UK-stocked alt: Keystone 1042 SMD 18650 holder (different footprint; Farnell UK 1043P is through-hole) - FLAG, schematic unchanged"
+BT1,MY-18650-04-J/05-J,1,LCSC,https://www.lcsc.com/product-detail/C19184125.html,0.2000,0.1729,1560 (+) / 2490 (-) at LCSC 2026-11-01,"MYOUNG MY-18650-04-J (C19184125, + plate) + MY-18650-05-J (C19184124, - spring) for the printed cradle; USD 0.1481+0.1084 @5, 0.1181+0.1084 @100, converted at 1.31; ex VAT, VAT at LCSC checkout"
 C1 C5 C11 C14 C21 C24 C26 C28,C_10u_0603_X5R,8,Digi-Key UK,https://www.digikey.co.uk,0.04,0.025,"generic, not checked",ESTIMATE; e.g. Samsung CL10A106KP8NNNC
 C10 C15 C16 C17 C18,C_10u_1206_X7R,5,Digi-Key UK,https://www.digikey.co.uk,0.1,0.06,"generic, not checked",ESTIMATE; e.g. Samsung CL31B106KOHNNNE (verify 16V)
 C12,GRM31CR60J107ME39L,1,Digi-Key UK,https://www.digikey.co.uk/en/products/result?keywords=GRM31CR60J107ME39L,0.5,0.3,Murata part DISCONTINUED at DK UK (0 stock),FLAG: swap to Samsung CL31A107MQHNNNE (100uF 1206 6.3V X5R) GBP0.50 @1 at DK UK; qty100 ESTIMATE; check DC-bias derating and Samsung datasheet before adopting. Schematic NOT changed
@@ -30,5 +30,7 @@ U5 U6,TLV75533PDBVR,2,Digi-Key UK,https://www.digikey.co.uk/en/products/result?k
 U7,USBLC6-2SC6,1,Digi-Key UK,https://www.digikey.co.uk/en/products/detail/stmicroelectronics/USBLC6-2SC6/1040559,0.4,0.156,63012 in stock,ex VAT
 -,PCB-4L-60x90,1,JLCPCB/PCBWay (ship to UK),,2.0,1.9,n/a,ESTIMATE from audit.py v1 $2.50
 -,ENCLOSURE-PETG,1,self-print,,1.9,1.9,n/a,ESTIMATE from $2.50
--,UFL-PIGTAIL+WHIP,1,DK UK / Farnell UK,,0.8,0.76,n/a,ESTIMATE from $1.00
+-,BWIPX1-SMA-1.13L150,1,LCSC,https://www.lcsc.com/product-detail/C784404.html,0.6247,0.4821,1908 at LCSC 2026-11-01,"BAT Wireless IPEX-SMA 1.13 mm 150 mm, SMA cut off, ~100 mm kept + 31 mm 0.9 mm wire whip (est. $0.03); qty4 uses the @10 tier $0.7883; converted at 1.31"
 U8 (not fitted),NRF21540-QDAA-R,0,Digi-Key UK,https://www.digikey.co.uk/en/products/detail/nordic-semiconductor-asa/NRF21540-QDAA-R/13279717,2.24,1.6,stock not shown,"Informational: FEM may be dropped; qty 0 so excluded from totals; qty4 from DK UK listing, qty100 ESTIMATE"
+-,M2x6-PT-PAN,2,Fastener Superstore,https://www.fastenersuperstore.com/products/585907/thread-forming-screws,0.0855,0.0855,carton 5000,"M2-0.89x6 PT pan Phillips zinc, $559/5000; board retention into printed bosses; converted at 1.31"
+-,CELL-LEADS-24AWG,1,any,,0.0153,0.0153,n/a,"ESTIMATE $0.02: 2 x 60 mm silicone wire, cradle contacts to BT1"

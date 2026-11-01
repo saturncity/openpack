@@ -154,7 +154,22 @@ if __name__ == "__main__":
     i_3v3 = 0.140            # A: nRF21540 at +19 dBm (~115 mA) + nRF5340 + PCM1840 IOVDD, peak during TX
     r_ldo = 0.238 / 0.5      # ohm: TLV755P 3.3 V dropout max 238 mV at 500 mA, 125 C (in dropout: an Rdson)
     i_5v_in = 0.032 * 5.0 / (3.2 * 0.85)   # A from the cell into the boost: ~32 mA at 5 V (PCM1840 AVDD, OPA1656, bias)
-    r_path = 0.023 + 0.10 + 0.03 + 0.05    # ohm: SF-1206F300 fuse, DMG2305UX Rds(on) at -2.5 V, JS102011SAQN contact, holder/traces
+    # Cell path (#34 review M1). Spring: MY-18650-05-J drawing, ~4 turns of ~9 mm diameter = ~113 mm of wire, assumed
+    # 0.5 mm phosphor bronze (1.1e-7 ohm m) -> 63 mOhm (not published: bench-measure). + plate 2, 2 x 60 mm 24 AWG leads
+    # 10, ground return through the L2 plane ~5, + the battery-path tracks measured from hw/pack/pack.kicad_pcb (L1).
+    import math, pathlib, sys
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent / "hw" / "pack"))
+    import layout as _layout
+    r_tracks = _layout.battery_path_ohm()
+    r_spring = 1.1e-7 * (4 * math.pi * 9e-3) / (math.pi * 0.25e-3 ** 2)
+    r_contacts = r_spring + 0.002 + 0.010 + 0.005 + r_tracks
+    R_CELL_PATH_BUDGET = 0.10   # ohm: contacts + leads + tracks allowance used before the layout existed
+    r_path = 0.023 + 0.10 + 0.03 + r_contacts   # ohm: SF-1206F300 fuse, DMG2305UX Rds(on) at -2.5 V, JS102011SAQN contact, cell path
+    i_peak = i_3v3 + i_5v_in
+    print(f"  cell path {r_contacts * 1e3:.0f} mOhm (spring {r_spring * 1e3:.0f} est., battery tracks {r_tracks * 1e3:.0f} measured on L1)"
+          f" vs {R_CELL_PATH_BUDGET * 1e3:.0f} mOhm budget: {'OVER' if r_contacts > R_CELL_PATH_BUDGET else 'within'};"
+          f" {i_peak ** 2 * r_contacts * 1e3:.1f} mW, {i_peak * r_contacts * 1e3:.0f} mV at the {i_peak * 1e3:.0f} mA peak")
+    assert i_peak < 1.0, "MYOUNG contacts carry no stated rating; ~1 A is the class figure for 0.3 mm phosphor-bronze cell contacts"
     r_top, r_bot, v_cell_max = 1e6, 1e6, 4.2   # hw/pack/pack.py R12 (BAT+ to VBAT_SENSE), R13 (to GND)
     ratio = r_bot / (r_top + r_bot)
     assert ratio * v_cell_max <= 3.3, "divider must keep P0.04/AIN0 within the 3.3 V rail (nRF5340 PS, SAADC: AIN0-AIN7 cannot exceed VDD)"
@@ -166,9 +181,12 @@ if __name__ == "__main__":
     print(f"  IOVDD min 3.00 + LDO {i_3v3 * r_ldo * 1e3:.0f} mV + path {(i_3v3 + i_5v_in) * r_path * 1e3:.0f} mV"
           f" + ADC error {v_err * 1e3:.0f} mV = {cutoff:.2f} V -> cutoff {CELL_CUTOFF_V:.1f} V (red LED below 3.4 V, PK-8)")
     assert CELL_CUTOFF_V < 3.4, "cutoff must sit below the red battery LED threshold"
-    # Stopping at 3.2 V under load leaves ~10 % of a protected cell unused; runtime at 0.55 W with 90 % of 3.5 Ah:
-    print(f"  runtime with 90 % of the cell usable: {0.9 * wh / 0.55:.1f} h (PK-7 >= 16 h)")
-    assert 0.9 * wh / 0.55 >= 16
+    # Usable charge above the cutoff, under the ~0.2 A pack load (0.06 C): typical protected 3.5 Ah 18650 discharge
+    # curves leave ~10 % below 3.2 V and ~15 % below 3.3 V (estimate from datasheet curves; bench-check on the PPK2, G5).
+    usable = {3.2: 0.90, 3.3: 0.85}[CELL_CUTOFF_V]
+    runtime_h = usable * wh / 0.55
+    print(f"  runtime at {CELL_CUTOFF_V:.1f} V cutoff, {usable:.0%} of the cell usable, 0.55 W: {runtime_h:.1f} h (PK-7 >= 16 h)")
+    assert runtime_h >= 16, "PK-7 fails at this cutoff"
 
 
 # ---- #26: corrected SYS-2 latency budget, TD options (docs/analysis/td-latency.md). Run: python3 audit.py ----
@@ -394,6 +412,14 @@ def carrier_ci_db(f_mhz, region, wifi_dbm=20.0, d_pack=10.0, d_wifi=2.0, pack_ei
     return c - i
 
 
+# Pack feed (#34): the link budget declares EIRP = conducted + WHIP_DBI with no feed loss; the u.FL -> whip pigtail's
+# loss is made up by conducted-power headroom, allowed up to PIGTAIL_IL_MAX_DB. Pigtail: BWIPX1-SMA-1.13L150 cut to
+# ~0.10 m of 1.13 mm coax (~3.6 dB/m at 2.45 GHz, typical 1.13 mm data) + one mated IPEX/MHF1 pair (~0.1 dB at 3 GHz,
+# I-PEX MHF spec class) -> 0.46 dB.
+PIGTAIL_IL_MAX_DB = 0.6
+PIGTAIL_IL_DB = 0.10 * 3.6 + 0.10
+
+
 def link_range_m(eirp_dbm, n, sys_nf_db, body_db=10.0, g_rx=6.0, fade_db=10.0, snr_db=10.0):
     """Max pack-receiver distance keeping fade_db of margin; path loss 40.2 + 10 n log10(d) dB at 2.44 GHz.
     Sensitivity = kTB(2 MHz) + system NF + SNR (10 dB reproduces the -93 dBm nRF5340 figure with NF ~7)."""
@@ -448,6 +474,10 @@ if __name__ == "__main__":
     print(f"  FEM: UK needs {uk_cond:.0f} dBm conducted, nRF5340 alone gives {NRF5340_MAX_DBM:.0f} dBm -> the PA adds"
           f" {uk_cond - NRF5340_MAX_DBM:.0f} dB (nRF21540 at low gain: ~38 mA at +10 dBm vs 110 mA at +20, Nordic)")
     assert uk_cond > NRF5340_MAX_DBM, "if this fails the PA is useless in the UK: drop to BT40E"
+    print(f"  pigtail: {PIGTAIL_IL_DB:.2f} dB <= {PIGTAIL_IL_MAX_DB} dB allowance; UK conducted becomes {uk_cond + PIGTAIL_IL_DB:.1f} dBm,"
+          f" US {REGIONS['US']['eirp_dbm'] - WHIP_DBI + PIGTAIL_IL_DB:.1f} dBm (BT40NE max 19.1)")
+    assert PIGTAIL_IL_DB <= PIGTAIL_IL_MAX_DB
+    assert REGIONS["US"]["eirp_dbm"] - WHIP_DBI + PIGTAIL_IL_DB <= 19.1, "US EIRP needs the conducted headroom to cover the pigtail"
 
     print("\n== Audit 3: link budget (body 10 dB, rx antenna 6 dBi, fade margin 10 dB: estimates) ==")
     chain = [(-6, 6), (20, 2), (-10.5, 10.5)]   # RK-2 coax 6 dB, rack LNA 20 dB/NF 2 (est.), 1:8 splitter 10.5 dB (est.)

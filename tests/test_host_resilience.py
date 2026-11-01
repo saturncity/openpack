@@ -40,17 +40,28 @@ class Fake:
 
     def _run(self):
         buf = b""
+        skip = 0   # raw payload bytes still owed after `dfu <n>` (a receiver consumes them; they are not command lines)
         while self.alive:
             try:
                 buf += os.read(self.master, 4096)
             except OSError:
                 return
-            while b"\n" in buf:
+            while True:
+                if skip:
+                    n = min(skip, len(buf))
+                    buf, skip = buf[n:], skip - n
+                    if skip:
+                        break
+                if b"\n" not in buf:
+                    break
                 line, buf = buf.split(b"\n", 1)
                 words = line.decode(errors="replace").split()
                 if not words:
                     continue
                 self.seen.append(words)
+                if (words[0] == "dfu" and len(words) > 1 and words[1].isdigit() and not self.script
+                        and str(self.replies.get("dfu", "")).startswith("ok")):
+                    skip = int(words[1])   # accepted: the payload follows
                 if self.script:
                     self.script(self, words[0])
                 else:
