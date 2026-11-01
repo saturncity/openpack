@@ -107,6 +107,7 @@ Corrected by #26 and #98 (`python3 audit.py`, `docs/analysis/td-latency.md`). Th
 | FW-4 | Codec in `fw/codec/`, pure C, no Zephyr dependency, bit-exact to `sim/codec/` reference (Twister test compares against golden vectors) |
 | FW-5 | All timing constants (`T_GAP`, `DAC_BLOCK`, RX window) are Kconfig; no magic numbers |
 | FW-6 | MCUboot on both roles; serial DFU on the pack, UART DFU on modules |
+| FW-7 | Pack frame lead (ADR-0020, ADR-0022): the audio frame clock (I2S RXPTRUPD) stays `OP_PACK_FRAME_LEAD_US` before the net core's payload latch. A PI loop on HFCLKAUDIO holds it, fed by the net core's latch margin every 100 frames. 0 skipped or repeated frames over 1 h at frame clock offsets of +0.371 ppm (HFCLKAUDIO FREQ 39846) and ±40 ppm; lead within ±3 µs after 60 s (`tests/bsim/sched/lead.sh`, `fw/tests/pack_lead`) |
 
 ## 9. Test gates (from `PLAN.md`, restated as pass/fail)
 

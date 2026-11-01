@@ -83,6 +83,34 @@ config OP_PACK_LATCH_LEAD_US
 	  of copy B (t0 + 877 us at 81 B) and give the latch interrupt time before copy A's EasyDMA read
 	  (t0 + ramp-up): 20 + 40 us. Every us here is SYS-2 latency (TD on with FLT=1: 4.6 ms budget).
 
+config OP_PACK_LEAD_REPORT_FRAMES
+	int "Pack: net core reports the latch margin to the app core every this many frames (#97)"
+	default 100
+	range 10 1000
+	help
+	  The app core's lead loop (ADR-0022) steers the audio frame clock rate from these reports. The
+	  gains below assume 100 (one report = 100 ms).
+
+config OP_PACK_LEAD_KP_PPB
+	int "Pack lead loop proportional gain (ppb of frame clock rate per us of margin error)"
+	default 2000
+
+config OP_PACK_LEAD_KI_PPB
+	int "Pack lead loop integral gain (ppb per us of margin error per report)"
+	default 100
+
+config OP_PACK_LEAD_LIM_PPB
+	int "Pack lead loop correction limit (ppb), also the integrator clamp"
+	default 100000
+
+config OP_TEST_FCLK_PPB
+	int "Test only: frame clock rate offset on the TIMER1 fallback (ppb); bsim -op_fclk_ppb overrides"
+	default 0
+	help
+	  The bsim device has one crystal (-xo_drift moves TIMER0 and TIMER1 together), so the lead
+	  loop is tested with this offset on the frame clock: +371 = HFCLKAUDIO at FREQ 39846, +-40000
+	  for margin. Ignored by the I2S frame clock. Never set in a shipped build.
+
 config OP_PACK_FRAME_PRIO
 	int "Pack: frame thread priority (cooperative, above the system workqueue)"
 	default -2
