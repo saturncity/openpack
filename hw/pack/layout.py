@@ -69,6 +69,30 @@ def width_for(z_target=50.0, **kw):
 
 
 # ---------------------------------------------------------------------------------------------------------------
+# board tracks without pcbnew (tests, audit.py): (net, layer, width, length) per segment
+# ---------------------------------------------------------------------------------------------------------------
+_SEG = re.compile(r'\(segment\s+\(start ([-\d.]+) ([-\d.]+)\)\s+\(end ([-\d.]+) ([-\d.]+)\)\s+\(width ([\d.]+)\)\s+'
+                  r'\(layer "([^"]+)"\)\s+\(net "([^"]*)"\)')
+CU_T = {"F.Cu": 0.035, "B.Cu": 0.035, "In1.Cu": 0.0152, "In2.Cu": 0.0152}   # JLC04161H copper (mm)
+RHO_CU = 1.72e-8                                                               # ohm m
+
+
+def segments(path=BOARD):
+    return [(m[6], m[5], float(m[4]), math.hypot(float(m[2]) - float(m[0]), float(m[3]) - float(m[1])))
+            for m in _SEG.findall(path.read_text())]
+
+
+def track_ohm(net, path=BOARD):
+    """total resistance of a net's tracks as if all were in series (conservative for a tree)"""
+    return sum(RHO_CU * (L * 1e-3) / ((w * 1e-3) * (CU_T[l] * 1e-3)) for n, l, w, L in segments(path) if n == net)
+
+
+def battery_path_ohm(path=BOARD):
+    """BT1+ -> F1 -> Q1 -> SW1 -> VSYS loads: every battery-path track summed (VSYS includes its U5 branch)"""
+    return sum(track_ohm(n, path) for n in BAT_NETS)
+
+
+# ---------------------------------------------------------------------------------------------------------------
 # netlist
 # ---------------------------------------------------------------------------------------------------------------
 def sexp(text):
@@ -132,6 +156,9 @@ PLACE = {
     "U5": (-3.0, 26.4, 0), "C4": (-6.0, 26.4, 270), "C5": (-0.2, 26.4, 270),
     "C29": (-10.6, 24.6, 180), "C32": (-12.9, 24.6, 180), "C28": (-11.0, 26.9, 180),
     "J3": (-18.5, 26.3, 0), "TP1": (-25.2, 26.6, 0), "TP2": (-23.1, 26.6, 0),
+    # bring-up test pads (rails, GND, I2S)
+    "TP3": (-8.0, -4.5, 0), "TP4": (5.0, -4.5, 0), "TP8": (2.0, -4.5, 0), "TP5": (7.0, 13.0, 0),
+    "TP6": (21.0, 9.5, 0), "TP7": (39.5, 10.5, 0), "TP9": (1.0, 11.0, 0), "TP10": (3.0, 11.0, 0), "TP11": (5.0, 11.0, 0),
     # --- boost cell ---
     "U4": _b(0, 0, 0), "L1": _b(-0.2, -2.45, 0), "C1": _b(-3.0, -0.3, 180),
     "C2": _b(2.8, -0.2, 270), "C3": _b(5.0, -0.2, 270), "R2": _b(0.45, 1.75, 180), "R3": _b(-1.5, 1.75, 180),
@@ -195,7 +222,11 @@ COMBS = [("U2", "1", [("C20", "1")], None), ("U2", "2", [("C22", "1"), ("C21", "
 # explicit fan-out vias for adjacent fine-pitch pins (staggered so the middle one passes between)
 PIN_VIAS = [("U2", "21", (12.7, -1.3)), ("U2", "22", (13.3, -2.4)), ("U2", "23", (13.95, -1.3))]
 
-POWER_NETS = {"BAT+", "BAT_F", "VBAT_RP", "VSYS", "+5V", "+3V3", "USB_VBUS"}
+# battery path (review M1): BT1+ -> F1 -> Q1 -> SW1 -> VSYS on L1 (35 um) at 1.0 mm, necking to 0.4 mm only inside
+# a 1.2 mm zone round pads too small for it. The fuse (3 A) then protects a track that can carry it.
+BAT_NETS = ("BAT+", "BAT_F", "VBAT_RP", "VSYS")
+BAT_W, NECK_ZONE = 1.0, 1.2
+POWER_NETS = {"+5V", "+3V3", "USB_VBUS"}
 ANALOG_NETS = {"MIC", "PRE_NP", "PRE_INP", "PRE_INM", "PRE_CG", "PRE_OUTA", "PRE_OUTB", "VCM", "ADC_IN1P", "ADC_IN1M",
                "ADC_IN2P", "ADC_IN2M", "ADC_VREF", "ADC_AREG", "+5V_BIAS"}
 NOISY_NETS = {"BOOST_SW", "VSYS", "BAT+", "BAT_F", "VBAT_RP", "USB_D+", "USB_D-", "USB_VBUS", "USB_CC1", "USB_CC2",
@@ -378,7 +409,7 @@ def route(b, fps, netinfo, nets, log):
     import pcbnew as P
     global LAYERS
     LAYERS = [P.F_Cu, P.In2_Cu, P.B_Cu]
-    g = router.Grid(BX0, BY0, BX1, BY1, g=0.1, clearance=CLEAR, slack=0.05, widths={"sig": 0.2, "pwr": 0.4},
+    g = router.Grid(BX0, BY0, BX1, BY1, g=0.1, clearance=CLEAR, slack=0.05, widths={"sig": 0.2, "pwr": 0.4, "bat": BAT_W},
                     via=(VIA_D, VIA_DRILL))
     nid = {n: i + 1 for i, n in enumerate(sorted(nets))}
     NCID = 253
@@ -426,6 +457,13 @@ def route(b, fps, netinfo, nets, log):
                     if router.in_poly(x, y, poly):
                         g.novia[i] = 1
             pads.setdefault((ref, p.GetNumber()), []).append(dict(poly=poly, layers=layers, net=net, c=to_xy(p.GetPosition())))
+    # neck zones round the battery-path pads (L1)
+    for (ref, num), lst in pads.items():
+        for pd in lst:
+            if pd["net"] in BAT_NETS and 0 in pd["layers"]:
+                xs = [q[0] for q in pd["poly"]]; ys = [q[1] for q in pd["poly"]]
+                for i, x, y in g._bbox_cells(min(xs) - NECK_ZONE, min(ys) - NECK_ZONE, max(xs) + NECK_ZONE, max(ys) + NECK_ZONE):
+                    g.neck[i] = nid[pd["net"]]
     # boost preroutes
     gnd = netinfo["GND"]
     for net, w, pts in BOOST_TRACKS:
@@ -503,7 +541,7 @@ def route(b, fps, netinfo, nets, log):
         if name == "GND":
             continue
         k = nid[name]
-        cls = "pwr" if name in POWER_NETS else "sig"
+        cls = "bat" if name in BAT_NETS else ("pwr" if name in POWER_NETS else "sig")
         w = g.widths[cls]
         # terminals: groups of (layer, cell) sets
         groups, labels = [], []
@@ -532,7 +570,7 @@ def route(b, fps, netinfo, nets, log):
             groups.append(cells); labels.append(f"{ref}.{pin}")
         if len(groups) < 2:
             continue
-        layers = [0] if name in ANALOG_NETS else [0, 1, 2]
+        layers = [0] if name in ANALOG_NETS or name in BAT_NETS else [0, 1, 2]
         forbid = {}
         if name in NOISY_NETS:
             forbid = {0: (TAG_ANALOG,), 1: (TAG_ANALOG,), 2: (TAG_ANALOG,)}
@@ -555,8 +593,8 @@ def route(b, fps, netinfo, nets, log):
                 break
             segs, vias = g.to_segments(path, cls, k, forbid)
             g.commit(segs, vias, w, k)
-            for l, a, c in segs:
-                add_track(b, netinfo[name], LAYERS[l], a, c, w)
+            for l, a, c, sw in segs:
+                add_track(b, netinfo[name], LAYERS[l], a, c, sw)
             for v in vias:
                 add_via(b, netinfo[name], v)
             end = path[-1]
@@ -591,7 +629,7 @@ def term_cells(g, pd):
 
 
 def route_order(nets):
-    first = ["ADC_AREG", "ADC_VREF", "ADC_DREG", "ADC_IN1M", "ADC_IN2M", "+3V3A", "I2S_BCLK", "I2S_FSYNC", "I2S_SDOUT",
+    first = list(BAT_NETS) + ["ADC_AREG", "ADC_VREF", "ADC_DREG", "ADC_IN1M", "ADC_IN2M", "+3V3A", "I2S_BCLK", "I2S_FSYNC", "I2S_SDOUT",
              "ADC_SHDNZ", "USB_VBUS", "BOOST_FB", "VSYS", "+5V", "PRE_INM", "PRE_CG", "PRE_OUTA", "PRE_OUTB", "PRE_INP", "PRE_NP", "MIC", "VCM",
              "ADC_IN1P", "ADC_IN2P", "ADC_IN1M", "ADC_IN2M", "ADC_VREF", "ADC_AREG", "ADC_DREG", "+3V3A", "+5V_BIAS",
              "USB_D+", "USB_D-", "USB_CC1", "USB_CC2", "USB_VBUS"]
@@ -812,7 +850,7 @@ def write_project():
                  "pcb_color": "rgba(0, 0, 0, 0.000)", "priority": 0},
             ],
             "meta": {"version": 4},
-            "netclass_patterns": [{"netclass": "Power", "pattern": n} for n in sorted(POWER_NETS)],
+            "netclass_patterns": [{"netclass": "Power", "pattern": n} for n in sorted(POWER_NETS | set(BAT_NETS))],
         },
         "meta": {"filename": "pack.kicad_pro", "version": 3},
     }

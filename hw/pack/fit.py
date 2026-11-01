@@ -155,9 +155,43 @@ def checks():
     legs = [(r, x, y) for r, x, y in _tht_pads()]
     near = [(r_, x, y) for r_, x, y in legs for sx_, sy_, rr in so if math.hypot(x - sx_, y - sy_) < rr + 1.1]
     ok("tht_legs_clear_standoffs", not near and P["z0"] - 1.6 > m.WALL, str(near))
-    ufl = (-25.1, 9.9, top + 2.0)
-    wb = (m.WHIP_XY[0], m.WHIP_XY[1], m.Z_TOP)
-    res["ufl_to_whip_straight_mm"] = round(math.dist(ufl, wb), 1)
+    # pigtail route: starts over the u.FL, ends under the whip hole, bends >= PIGTAIL_BEND_R, swept OD clears every part
+    pts = m.PIGTAIL
+    route_len = sum(math.dist(a_, b_) for a_, b_ in zip(pts, pts[1:]))
+    bends = []
+    for p0, p1, p2 in zip(pts, pts[1:], pts[2:]):
+        u = [p1[i] - p0[i] for i in range(3)]; v = [p2[i] - p1[i] for i in range(3)]
+        cos = sum(x * y for x, y in zip(u, v)) / (math.hypot(*u) * math.hypot(*v))
+        th = math.acos(max(-1.0, min(1.0, cos)))
+        need = m.PIGTAIL_BEND_R * math.tan(th / 2)    # tangent length of the bend arc
+        bends.append((round(math.degrees(th)), round(need, 1), round(min(math.hypot(*u), math.hypot(*v)) / 2, 1)))
+    bend_ok = all(nd <= half for _, nd, half in bends)
+    rr = m.PIGTAIL_OD / 2 + 0.5
+    hits = set()
+    for a_, b_ in zip(pts, pts[1:]):
+        n = int(math.dist(a_, b_) / 0.25) + 1
+        for k in range(n + 1):
+            q = [a_[i] + (b_[i] - a_[i]) * k / n for i in range(3)]
+            for e in env:
+                if e["h"] > 0 and q[2] - rr < top + e["h"] and e["x0"] - rr < q[0] < e["x1"] + rr and e["y0"] - rr < q[1] < e["y1"] + rr:
+                    hits.add(e["ref"])
+            for x, y in m.LEDS:   # light-pipe chimneys
+                if math.hypot(q[0] - x, q[1] - y) < m.LED_D / 2 + m.WALL + rr and q[2] > m.LED_TOP:
+                    hits.add("light pipe")
+            sa = m.SW_ACT
+            if sa["x0"] - 1.75 - rr < q[0] < sa["x1"] + 1.75 + a["travel"] + rr and sa["y0"] - rr < q[1] < sa["y1"] + rr:
+                hits.add("switch fork")
+            if not (inner[0] + rr < q[0] < inner[3] - rr and inner[1] + rr < q[1] < inner[4] - rr and q[2] < inner[5] - rr):
+                hits.add("wall/lid")
+    ends_ok = math.dist(pts[0][:2], (-25.1, 9.9)) < 0.1 and math.dist(pts[-1][:2], m.WHIP_XY) < 0.1
+    ok("pigtail_route", bend_ok and not hits and ends_ok and route_len <= 100.0,
+       f"length {route_len:.0f} mm (audit.py IL uses 100), bends (deg, tangent need, half-segment) {bends}, hits {sorted(hits)}")
+    res["pigtail_route_mm"] = round(route_len, 1)
+    # belt-clip inserts: not under the antenna overhang, under the board, clear of THT legs
+    ax0, ax1, ay0, ay1, _ = m.ANTENNA
+    clip_ok = all(not circle_box(x, y, m.BOSS_D / 2, (ax0, ay0, 0, ax1, ay1, 0)) for x, y in m.CLIP_SCREWS) and m.BOSS_TOP < P["z0"]
+    near_legs = [(r_, x, y) for r_, x, y in _tht_pads() for cx, cy in m.CLIP_SCREWS if math.hypot(x - cx, y - cy) < m.BOSS_D / 2 + 1.1]
+    ok("clip_inserts_clear", clip_ok and not near_legs, f"{m.CLIP_SCREWS}, boss top {m.BOSS_TOP} < board {P['z0']}; legs {near_legs}")
     res["board_mm"] = [round(P["x1"] - P["x0"], 1), round(P["y1"] - P["y0"], 1)]
     # cell cradle: protected 68-70 mm and bare 65 mm cells all leave the spring between solid (~3) and free (10.8 min)
     comp = {Lc: round(m.NEG_FACE - (m.POS_FACE + m.DIMPLE + Lc), 2) for Lc in (65.0, 68.0, 70.0)}
@@ -226,7 +260,9 @@ def render(res, m, env):
     R(sx - sl / 2, sy - sw / 2, sx + sl / 2, sy + sw / 2, outline="#e6a700", width=2)
     wx, wy = m.WHIP_XY
     d.ellipse([X(wx) - 5, Y(wy) - 5, X(wx) + 5, Y(wy) + 5], fill="#f2c200")
-    d.line([X(-25.1), Y(9.9), X(wx), Y(wy)], fill="#f2c200", width=1)
+    d.line([(X(q[0]), Y(q[1])) for q in m.PIGTAIL], fill="#c79a00", width=3)   # pigtail route (plan)
+    tx, ty = m.PIGTAIL_TIE
+    d.rectangle([X(tx) - 4, Y(ty) - 4, X(tx) + 4, Y(ty) + 4], outline="#c79a00", width=2)
     d.text((24, H - 18), "top view, lid off: board (green), parts (courtyards), holder+cell, posts, clip bosses, "
            "rests, M2 screw bosses + switch fork (purple), lid light pipes/switch slot (amber), whip + pigtail (yellow)", fill="black")
     (OUT / "render").mkdir(parents=True, exist_ok=True)

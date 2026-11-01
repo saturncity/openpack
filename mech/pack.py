@@ -37,6 +37,13 @@ JACK_D, JACK_Y, JACK_Z = 6.0, 0.0, PCB["z0"] + PCB["t"] + 5.2   # SJ1-3543 M6 bu
 USB_W, USB_H, USB_Y, USB_Z = 9.0, 3.2, 18.0, PCB["z0"] + PCB["t"] + 1.6
 RECESS = 0.8                              # USB-C mouth recess depth (pad inside keeps wall 1.6)
 WHIP_XY, WHIP_D, WHIP_L = (42.5, 27.5), 0.9, 31.0   # PK-5: 31 mm quarter-wave wire
+# u.FL -> whip pigtail (BWIPX1-SMA-1.13L150, SMA cut off; #104 review S2). Plugged into the BT40NE u.FL at (-25.1, 9.9)
+# (cable axis ~1.5 above the 2.0 module), runs at z 11 along y = 12 (clear of the switch fork at y >= 15.2 and the
+# light pipes at y 20), climbs over J2 to the whip exit under the lid hole; there the 0.9 mm whip wire is soldered on
+# and leaves through the lid. A tie-down (adhesive cable clip) sits at the y = 12 run. Bend radius >= 5 x OD (static).
+PIGTAIL_OD, PIGTAIL_BEND_R = 1.13, 6.0
+PIGTAIL = [(-25.1, 9.9, 10.1), (-15.0, 12.0, 11.0), (34.0, 12.0, 11.0), (42.5, 24.5, 15.0), (42.5, 27.5, 20.0)]
+PIGTAIL_TIE = (5.0, 12.0)
 POSTS = [(-43.9, 26.9), (-30.0, 26.9), (43.9, -26.9)]  # M2 lid posts (4th corner is the whip)
 LEDS = [(8.0, 20.0), (16.0, 20.0)]; LED_D = 2.5      # power/battery, peak/clip
 # light pipes: chimneys from the lid down to 0.4 mm above the LEDs (bore LED_D, wall WALL); optional 2.5 mm acrylic rod
@@ -50,8 +57,11 @@ SWITCH = (-4.0, 16.05, 4.6, 2.3)                     # recessed slide-switch slo
 # printed PETG belt clip (separate part), 2x M2 screws into heat-set inserts in the back wall.
 # Printed on its side (y up) so layers run along the spring arm; arm tapers 3 -> 2.4 mm, tip chamfer = lead-in lip.
 CLIP_T, CLIP_W, CLIP_OPEN, CLIP_PLATE, CLIP_ARM, CLIP_TIP_T = 3.0, 20.0, 4.0, 28.0, 28.0, 2.4
-CLIP_SCREWS = [(-32.0, -2.0), (-32.0, 12.0)]
-INSERT_D, BOSS_D, BOSS_TOP = 3.2, 7.0, 6.0   # M2 heat-set insert hole, boss, boss top z (insert sits on the floor)
+# clip screws under the PCB, clear of the BT40NE antenna overhang (x < -28, y 7.7-22.7; #104 review S1: no brass
+# under the antenna). Bosses stop 0.3 below the board, so the inserts are M2 x 3 heat-set (3.1 mm of boss above the floor).
+CLIP_SCREWS = [(-24.0, 3.0), (-24.0, 17.0)]
+INSERT_D, BOSS_D = 3.2, 7.0                  # M2 heat-set insert hole, boss
+BOSS_TOP = PCB["z0"] - 0.3                   # boss top z, under the board
 SNAP_T, SNAP_W, SNAP_LEN, BARB = 1.6, 8.0, 4.0, 0.6   # battery-door snap arms (2, on the window long sides)
 DOOR_CLR = 0.1
 OUT = Path(__file__).parent / "build"
@@ -164,6 +174,17 @@ def jack():  # M6 bushing from the body front (wall inner face) through the wall
 def usbc():
     return box(PCB["x1"] - 3, XR - RECESS, USB_Y - USB_W / 2, USB_Y + USB_W / 2, USB_Z - USB_H / 2, USB_Z + USB_H / 2)
 
+def pigtail():  # swept 1.13 mm coax as cylinders between the route points, balls at the bends
+    r = PIGTAIL_OD / 2
+    out = None
+    for a, b in zip(PIGTAIL, PIGTAIL[1:]):
+        d = cq.Vector(*b) - cq.Vector(*a)
+        s = cq.Workplane(obj=cq.Solid.makeCylinder(r, d.Length, cq.Vector(*a), d.normalized()))
+        out = s if out is None else out.union(s)
+    for p in PIGTAIL[1:-1]:
+        out = out.union(cq.Workplane("XY").sphere(r).translate(p))
+    return out
+
 def whip():
     return vcyl(WHIP_D, *WHIP_XY, Z_TOP, Z_TOP + WALL + WHIP_L)
 
@@ -229,7 +250,7 @@ def clip():  # plate on the back wall, riser, tapered return arm; mouth opening 
 
 ENCLOSURE = dict(base=base, lid=lid, door=door)   # printed body (PK-11 envelope)
 PRINTED = dict(ENCLOSURE, clip=clip, switch_ext=switch_ext)   # + clip and switch fork (outside PK-11 / inside the body)
-INTERNALS = dict(cell=cell, contacts=contacts, pcb=pcb, comps=comps, jack=jack, usbc=usbc, whip=whip)   # comps holds the antenna (U1 box)
+INTERNALS = dict(cell=cell, contacts=contacts, pcb=pcb, comps=comps, jack=jack, usbc=usbc, whip=whip, pigtail=pigtail)   # comps holds the antenna (U1 box)
 
 def parts():
     return {k: f() for k, f in {**PRINTED, **INTERNALS}.items()}

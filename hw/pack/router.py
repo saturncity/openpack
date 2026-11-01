@@ -63,6 +63,9 @@ class Grid:
         self.own = {c: [bytearray(self.N) for _ in range(self.L)] for c in self.cls}
         self.tag = [bytearray(self.N) for _ in range(self.L)]   # region tags (per-net forbids)
         self.novia = bytearray(self.N)                          # inside SMD pads: no via here
+        # "neck" zones (L1 only): around small pads of a wide net, the wide class may fall back to a NECK-wide track
+        self.neck = bytearray(self.N)
+        self.NECK, self.NECK_W = "pwr", self.widths["pwr"]
 
     # ---- geometry helpers ----
     def xy(self, i):
@@ -204,6 +207,16 @@ class Grid:
             gsc[k] = 0.0
             heapq.heappush(heap, (h(i), 0.0, k))
         moves = [(1, 0, 1.0), (-1, 0, 1.0), (0, 1, 1.0), (0, -1, 1.0), (1, 1, SQ2), (1, -1, SQ2), (-1, 1, SQ2), (-1, -1, SQ2)]
+        wide = cls not in ("sig", "pwr")
+        neck, narr = self.neck, self.own[self.NECK][0]
+
+        def ok0(j, v):   # layer-0 test with the neck fallback for wide classes
+            if v == FREE or v == net:
+                return True
+            if wide and neck[j] == net:
+                w = narr[j]
+                return w == FREE or w == net
+            return False
         expanded = 0
         ny = self.ny
         while heap:
@@ -231,14 +244,20 @@ class Grid:
                     continue
                 j = yy * nx + xx
                 v = arr[j]
-                if not (v == FREE or v == net):
+                if l == 0 and wide:
+                    if not ok0(j, v):
+                        continue
+                elif not (v == FREE or v == net):
                     continue
                 if fb and tg[j] in fb:
                     continue
                 if dx and dy:   # diagonal: both orthogonal neighbours must be free too (no corner cutting)
-                    v1 = arr[y * nx + xx]
-                    v2 = arr[yy * nx + x]
-                    if not ((v1 == FREE or v1 == net) and (v2 == FREE or v2 == net)):
+                    j1, j2 = y * nx + xx, yy * nx + x
+                    v1, v2 = arr[j1], arr[j2]
+                    if l == 0 and wide:
+                        if not (ok0(j1, v1) and ok0(j2, v2)):
+                            continue
+                    elif not ((v1 == FREE or v1 == net) and (v2 == FREE or v2 == net)):
                         continue
                 ng = gk + c * lc
                 kk = l * N + j
@@ -262,21 +281,34 @@ class Grid:
     # ---- path post-processing ----
     def seg_free(self, l, a, b, cls, net, forbid):
         """sample the segment every g/2 and require free cells (nearest-cell test)"""
+        return self.seg_kind(l, a, b, cls, net, forbid) is not None
+
+    def seg_kind(self, l, a, b, cls, net, forbid):
+        """None if blocked; else the width the segment can take: the class width, or NECK_W when every sample sits in
+        this net's neck zone (wide classes on L1 only). Mixed segments are refused so long runs stay full width."""
         L = math.hypot(b[0] - a[0], b[1] - a[1])
         n = max(1, int(L / (self.g / 2)))
         arr = self.own[cls][l]
+        narr = self.own[self.NECK][l]
         tg = self.tag[l]
+        wide_ok = neck_ok = True
+        can_neck = l == 0 and cls not in ("sig", "pwr")
         for s in range(n + 1):
             t = s / n
             i = self.cell(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
             if i is None:
-                return False
+                return None
+            if forbid and tg[i] in forbid:
+                return None
             v = arr[i]
             if not (v == FREE or v == net):
-                return False
-            if forbid and tg[i] in forbid:
-                return False
-        return True
+                wide_ok = False
+            w = narr[i]
+            if not (can_neck and self.neck[i] == net and (w == FREE or w == net)):
+                neck_ok = False
+            if not wide_ok and not neck_ok:
+                return None
+        return self.cls[cls] if wide_ok else self.NECK_W
 
     def to_segments(self, path, cls, net, forbid_tags):
         """path [(layer, cell)] -> runs per layer of points, string-pulled; returns (segments, vias)"""
@@ -297,7 +329,8 @@ class Grid:
             pts = self._pull(pts, l, cls, net, forbid_tags.get(l, ()))
             for a, b in zip(pts, pts[1:]):
                 if a != b:
-                    segs.append((l, a, b))
+                    w = self.seg_kind(l, a, b, cls, net, forbid_tags.get(l, ())) or self.cls[cls]
+                    segs.append((l, a, b, w))
         return segs, vias
 
     def _pull(self, pts, l, cls, net, forbid):
@@ -315,8 +348,9 @@ class Grid:
         return out
 
     def commit(self, segs, vias, width, net):
-        for l, a, b in segs:
-            self.mark_seg([l], a, b, width, net)
+        for seg in segs:
+            l, a, b = seg[:3]
+            self.mark_seg([l], a, b, seg[3] if len(seg) > 3 else width, net)
         for v in vias:
             self.mark_circle(range(self.L), v, self.via_d / 2, net)
             # hole-to-hole spacing for later vias of any net

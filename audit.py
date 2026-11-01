@@ -154,14 +154,21 @@ if __name__ == "__main__":
     i_3v3 = 0.140            # A: nRF21540 at +19 dBm (~115 mA) + nRF5340 + PCM1840 IOVDD, peak during TX
     r_ldo = 0.238 / 0.5      # ohm: TLV755P 3.3 V dropout max 238 mV at 500 mA, 125 C (in dropout: an Rdson)
     i_5v_in = 0.032 * 5.0 / (3.2 * 0.85)   # A from the cell into the boost: ~32 mA at 5 V (PCM1840 AVDD, OPA1656, bias)
-    # cradle contacts (#34): MY-18650-05-J coil spring, est. ~150 mm of ~0.5 mm phosphor bronze (1.1e-7 ohm m) -> 0.084 ohm;
-    # + plate 0.002, 2 x 60 mm 24 AWG leads 0.010, traces 0.004 -> 0.10 ohm (was 0.05 for the commercial holder)
-    import math
-    r_contacts = 1.1e-7 * 0.150 / (math.pi * 0.25e-3 ** 2) + 0.002 + 0.010 + 0.004
-    r_path = 0.023 + 0.10 + 0.03 + r_contacts   # ohm: SF-1206F300 fuse, DMG2305UX Rds(on) at -2.5 V, JS102011SAQN contact, cradle/leads/traces
+    # Cell path (#34 review M1). Spring: MY-18650-05-J drawing, ~4 turns of ~9 mm diameter = ~113 mm of wire, assumed
+    # 0.5 mm phosphor bronze (1.1e-7 ohm m) -> 63 mOhm (not published: bench-measure). + plate 2, 2 x 60 mm 24 AWG leads
+    # 10, ground return through the L2 plane ~5, + the battery-path tracks measured from hw/pack/pack.kicad_pcb (L1).
+    import math, pathlib, sys
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent / "hw" / "pack"))
+    import layout as _layout
+    r_tracks = _layout.battery_path_ohm()
+    r_spring = 1.1e-7 * (4 * math.pi * 9e-3) / (math.pi * 0.25e-3 ** 2)
+    r_contacts = r_spring + 0.002 + 0.010 + 0.005 + r_tracks
+    R_CELL_PATH_BUDGET = 0.10   # ohm: contacts + leads + tracks allowance used before the layout existed
+    r_path = 0.023 + 0.10 + 0.03 + r_contacts   # ohm: SF-1206F300 fuse, DMG2305UX Rds(on) at -2.5 V, JS102011SAQN contact, cell path
     i_peak = i_3v3 + i_5v_in
-    print(f"  cradle contacts {r_contacts * 1e3:.0f} mOhm at the {i_peak * 1e3:.0f} mA pack peak: {i_peak ** 2 * r_contacts * 1e3:.1f} mW, "
-          f"{i_peak * r_contacts * 1e3:.0f} mV")
+    print(f"  cell path {r_contacts * 1e3:.0f} mOhm (spring {r_spring * 1e3:.0f} est., battery tracks {r_tracks * 1e3:.0f} measured on L1)"
+          f" vs {R_CELL_PATH_BUDGET * 1e3:.0f} mOhm budget: {'OVER' if r_contacts > R_CELL_PATH_BUDGET else 'within'};"
+          f" {i_peak ** 2 * r_contacts * 1e3:.1f} mW, {i_peak * r_contacts * 1e3:.0f} mV at the {i_peak * 1e3:.0f} mA peak")
     assert i_peak < 1.0, "MYOUNG contacts carry no stated rating; ~1 A is the class figure for 0.3 mm phosphor-bronze cell contacts"
     r_top, r_bot, v_cell_max = 1e6, 1e6, 4.2   # hw/pack/pack.py R12 (BAT+ to VBAT_SENSE), R13 (to GND)
     ratio = r_bot / (r_top + r_bot)
