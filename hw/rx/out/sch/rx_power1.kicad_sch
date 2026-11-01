@@ -6,7 +6,7 @@
   (paper "A4")
   (title_block
     (title "OpenPack receiver sub-board")
-    (date "2026-10-31")
+    (date "2026-11-01")
     (company "")
     (comment 1 "Generated with SKiDL")
     (comment 2 "")
@@ -1322,7 +1322,7 @@
       (embedded_fonts no)))
   (symbol
     (lib_id "openpack_rx:C")
-    (at 151.13 137.16 270)
+    (at 129.54 134.62 270)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -1331,37 +1331,37 @@
     (fields_autoplaced yes)
     (uuid c6734edd-6d79-5240-aa17-6c0a6a2ade7b)
     (property "Reference" "C1"
-      (at 151.13 134.62 270)
+      (at 129.54 132.08 270)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "10u"
-      (at 151.13 139.7 270)
+      (at 129.54 137.16 270)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-      (at 151.13 137.16 270)
+      (at 129.54 134.62 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 151.13 137.16 270)
+      (at 129.54 134.62 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Capacitor"
-      (at 151.13 137.16 270)
+      (at 129.54 134.62 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "C_10u_0603_X5R"
-      (at 151.13 142.24 270)
+      (at 129.54 139.70000000000002 270)
       (effects
         (font
           (size 1.27 1.27))
@@ -1372,12 +1372,12 @@
       (uuid c94d3c7e-1426-5a19-941d-21b66e5e1c6e))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "C1")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:C")
-    (at 151.13 144.78 270)
+    (at 129.54 142.24 270)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -1386,37 +1386,37 @@
     (fields_autoplaced yes)
     (uuid 7eadd816-d154-54e2-9df2-73f0f190d548)
     (property "Reference" "C2"
-      (at 151.13 142.24 270)
+      (at 129.54 139.70000000000002 270)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "100n"
-      (at 151.13 147.32 270)
+      (at 129.54 144.78 270)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-      (at 151.13 144.78 270)
+      (at 129.54 142.24 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 151.13 144.78 270)
+      (at 129.54 142.24 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Capacitor"
-      (at 151.13 144.78 270)
+      (at 129.54 142.24 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "C_100n_0402"
-      (at 151.13 149.86 270)
+      (at 129.54 147.32000000000002 270)
       (effects
         (font
           (size 1.27 1.27))
@@ -1427,12 +1427,12 @@
       (uuid 5969fc87-b990-50d5-a78a-59e83332f4b4))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "C2")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:C")
-    (at 151.13 152.4 270)
+    (at 129.54 149.86 270)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -1441,37 +1441,37 @@
     (fields_autoplaced yes)
     (uuid 2d1f360b-2b20-5a86-83fb-77ec3c1baccd)
     (property "Reference" "C3"
-      (at 151.13 149.86 270)
+      (at 129.54 147.32000000000002 270)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "1u"
-      (at 151.13 154.94 270)
+      (at 129.54 152.4 270)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-      (at 151.13 152.4 270)
+      (at 129.54 149.86 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 151.13 152.4 270)
+      (at 129.54 149.86 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Capacitor"
-      (at 151.13 152.4 270)
+      (at 129.54 149.86 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "C_1u_0402"
-      (at 151.13 157.48000000000002 270)
+      (at 129.54 154.94000000000003 270)
       (effects
         (font
           (size 1.27 1.27))
@@ -1482,13 +1482,12 @@
       (uuid 4ab18de5-dddb-5fda-a23f-b89d35b637ba))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "C3")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:C")
-    (at 148.59 41.91 0)
-    (mirror x)
+    (at 163.83 102.87 90)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -1497,37 +1496,37 @@
     (fields_autoplaced yes)
     (uuid ed25cd75-0fe1-516f-9ad2-5dec53989329)
     (property "Reference" "C4"
-      (at 148.59 39.37 0)
+      (at 163.83 100.33 90)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "10u"
-      (at 148.59 44.449999999999996 0)
+      (at 163.83 105.41000000000001 90)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-      (at 148.59 41.91 0)
+      (at 163.83 102.87 90)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 148.59 41.91 0)
+      (at 163.83 102.87 90)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Capacitor"
-      (at 148.59 41.91 0)
+      (at 163.83 102.87 90)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "C_10u_0603_X5R"
-      (at 148.59 46.989999999999995 0)
+      (at 163.83 107.95 90)
       (effects
         (font
           (size 1.27 1.27))
@@ -1538,12 +1537,12 @@
       (uuid 4ceaa67c-9dd4-513d-a60d-88ab16b634ba))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "C4")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:C")
-    (at 151.13 160.02 270)
+    (at 129.54 157.48 270)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -1552,37 +1551,37 @@
     (fields_autoplaced yes)
     (uuid 8641cb35-ac68-5878-bd09-bbb7ee8b3978)
     (property "Reference" "C5"
-      (at 151.13 157.48000000000002 270)
+      (at 129.54 154.94 270)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "1u"
-      (at 151.13 162.56 270)
+      (at 129.54 160.01999999999998 270)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-      (at 151.13 160.02 270)
+      (at 129.54 157.48 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 151.13 160.02 270)
+      (at 129.54 157.48 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Capacitor"
-      (at 151.13 160.02 270)
+      (at 129.54 157.48 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "C_1u_0402"
-      (at 151.13 165.10000000000002 270)
+      (at 129.54 162.56 270)
       (effects
         (font
           (size 1.27 1.27))
@@ -1593,12 +1592,12 @@
       (uuid af1b2eb3-fab0-5e11-adb6-a2122ea8cf04))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "C5")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:C")
-    (at 87.63 88.9 270)
+    (at 114.3 52.07 0)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -1607,37 +1606,37 @@
     (fields_autoplaced yes)
     (uuid a85ec201-28a6-5d8b-898b-719dbd57807d)
     (property "Reference" "C6"
-      (at 87.63 86.36 270)
+      (at 114.3 49.53 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "10u"
-      (at 87.63 91.44000000000001 270)
+      (at 114.3 54.61 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-      (at 87.63 88.9 270)
+      (at 114.3 52.07 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 87.63 88.9 270)
+      (at 114.3 52.07 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Capacitor"
-      (at 87.63 88.9 270)
+      (at 114.3 52.07 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "C_10u_0603_X5R"
-      (at 87.63 93.98 270)
+      (at 114.3 57.15 0)
       (effects
         (font
           (size 1.27 1.27))
@@ -1648,12 +1647,12 @@
       (uuid ddc2fa01-1771-559b-a2f1-713ec859f52d))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "C6")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:CP")
-    (at 140.97 137.16 90)
+    (at 119.38 134.62 90)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -1662,37 +1661,37 @@
     (fields_autoplaced yes)
     (uuid 941e95ba-0497-5d48-b23e-3fe5dbebd503)
     (property "Reference" "C7"
-      (at 140.97 134.62 90)
+      (at 119.38 132.08 90)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "100u 25V"
-      (at 140.97 139.7 90)
+      (at 119.38 137.16 90)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "Capacitor_SMD:CP_Elec_6.3x5.4"
-      (at 140.97 137.16 90)
+      (at 119.38 134.62 90)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 140.97 137.16 90)
+      (at 119.38 134.62 90)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Polarised capacitor"
-      (at 140.97 137.16 90)
+      (at 119.38 134.62 90)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "ALU_100u_25V"
-      (at 140.97 142.24 90)
+      (at 119.38 139.70000000000002 90)
       (effects
         (font
           (size 1.27 1.27))
@@ -1703,12 +1702,12 @@
       (uuid 6d029755-8e8d-549f-bb34-97e74de6334d))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "C7")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:C")
-    (at 140.97 144.78 90)
+    (at 119.38 142.24 90)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -1717,37 +1716,37 @@
     (fields_autoplaced yes)
     (uuid 42113e14-58d6-5df6-9102-7b2e0350aff6)
     (property "Reference" "C8"
-      (at 140.97 142.24 90)
+      (at 119.38 139.70000000000002 90)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "100n"
-      (at 140.97 147.32 90)
+      (at 119.38 144.78 90)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-      (at 140.97 144.78 90)
+      (at 119.38 142.24 90)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 140.97 144.78 90)
+      (at 119.38 142.24 90)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Capacitor"
-      (at 140.97 144.78 90)
+      (at 119.38 142.24 90)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "C_100n_0402"
-      (at 140.97 149.86 90)
+      (at 119.38 147.32000000000002 90)
       (effects
         (font
           (size 1.27 1.27))
@@ -1758,12 +1757,12 @@
       (uuid 8b1763f4-316e-57d2-b43e-ab6342c12f5d))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "C8")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:CP")
-    (at 151.13 167.64 270)
+    (at 129.54 165.1 270)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -1772,37 +1771,37 @@
     (fields_autoplaced yes)
     (uuid c723baff-41c9-57ed-9c67-33c255596064)
     (property "Reference" "C9"
-      (at 151.13 165.1 270)
+      (at 129.54 162.56 270)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "47u 25V"
-      (at 151.13 170.17999999999998 270)
+      (at 129.54 167.64 270)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "Capacitor_SMD:CP_Elec_5x5.4"
-      (at 151.13 167.64 270)
+      (at 129.54 165.1 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 151.13 167.64 270)
+      (at 129.54 165.1 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Polarised capacitor"
-      (at 151.13 167.64 270)
+      (at 129.54 165.1 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "ALU_47u_25V"
-      (at 151.13 172.72 270)
+      (at 129.54 170.18 270)
       (effects
         (font
           (size 1.27 1.27))
@@ -1813,12 +1812,12 @@
       (uuid 4078df39-2851-5a0d-a285-322c49893f9b))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "C9")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:TVS")
-    (at 151.13 134.62 270)
+    (at 129.54 132.08 270)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -1827,37 +1826,37 @@
     (fields_autoplaced yes)
     (uuid 7c0360ea-c931-51e8-ac4c-2b9b8a9f4995)
     (property "Reference" "D1"
-      (at 151.13 132.08 270)
+      (at 129.54 129.54000000000002 270)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "SMF15A"
-      (at 151.13 137.16 270)
+      (at 129.54 134.62 270)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "Diode_SMD:D_SOD-123F"
-      (at 151.13 134.62 270)
+      (at 129.54 132.08 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 151.13 134.62 270)
+      (at 129.54 132.08 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Unidirectional TVS diode"
-      (at 151.13 134.62 270)
+      (at 129.54 132.08 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "SMF15A"
-      (at 151.13 139.70000000000002 270)
+      (at 129.54 137.16000000000003 270)
       (effects
         (font
           (size 1.27 1.27))
@@ -1868,12 +1867,12 @@
       (uuid 07da9e92-ed2c-5852-8140-e8891d8d81e3))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "D1")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:TVS")
-    (at 151.13 175.26 270)
+    (at 129.54 172.72 270)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -1882,37 +1881,37 @@
     (fields_autoplaced yes)
     (uuid 5a13ee40-db78-559f-aa50-46e1b2f20a88)
     (property "Reference" "D2"
-      (at 151.13 172.72 270)
+      (at 129.54 170.18 270)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "SMF5.0A"
-      (at 151.13 177.79999999999998 270)
+      (at 129.54 175.26 270)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "Diode_SMD:D_SOD-123F"
-      (at 151.13 175.26 270)
+      (at 129.54 172.72 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 151.13 175.26 270)
+      (at 129.54 172.72 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Unidirectional TVS diode"
-      (at 151.13 175.26 270)
+      (at 129.54 172.72 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "SMF5.0A"
-      (at 151.13 180.34 270)
+      (at 129.54 177.8 270)
       (effects
         (font
           (size 1.27 1.27))
@@ -1923,12 +1922,12 @@
       (uuid fc0f80c0-aeae-5eac-9a33-51b793d97523))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "D2")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:BAT54")
-    (at 137.16 57.15 90)
+    (at 148.59 91.44 0)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -1937,37 +1936,37 @@
     (fields_autoplaced yes)
     (uuid ebf34cc2-50f9-5109-8fdd-1747d0c130db)
     (property "Reference" "D9"
-      (at 137.16 54.61 90)
+      (at 148.59 88.89999999999999 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "BAT54"
-      (at 137.16 59.69 90)
+      (at 148.59 93.98 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-      (at 137.16 57.15 90)
+      (at 148.59 91.44 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 137.16 57.15 90)
+      (at 148.59 91.44 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Schottky diode, SOT-23"
-      (at 137.16 57.15 90)
+      (at 148.59 91.44 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "BAT54,215"
-      (at 137.16 62.23 90)
+      (at 148.59 96.52 0)
       (effects
         (font
           (size 1.27 1.27))
@@ -1980,12 +1979,12 @@
       (uuid 1e6f364c-bea3-5eb5-99bb-06e0c9152317))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "D9")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:Conn_Backplane")
-    (at 181.61 142.24 0)
+    (at 160.02 139.7 0)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -1994,37 +1993,37 @@
     (fields_autoplaced yes)
     (uuid 8928ac64-dc8c-51f5-9b27-9dc1519ae80b)
     (property "Reference" "J1"
-      (at 181.61 139.70000000000002 0)
+      (at 160.02 137.16 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "backplane 2x13"
-      (at 181.61 144.78 0)
+      (at 160.02 142.23999999999998 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical_SMD"
-      (at 181.61 142.24 0)
+      (at 160.02 139.7 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 181.61 142.24 0)
+      (at 160.02 139.7 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Receiver backplane connector, 2x13 2.54 mm (ADR-0014)"
-      (at 181.61 142.24 0)
+      (at 160.02 139.7 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "HDR_2x13_2.54_SMD_KEY14"
-      (at 181.61 147.32000000000002 0)
+      (at 160.02 144.78 0)
       (effects
         (font
           (size 1.27 1.27))
@@ -2083,12 +2082,12 @@
       (uuid 00279c38-35a4-535c-84e3-e6b43cb6831a))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "J1")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:R")
-    (at 151.13 142.24 270)
+    (at 129.54 139.7 270)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -2097,37 +2096,37 @@
     (fields_autoplaced yes)
     (uuid 731b126b-9dc7-5ef5-8b13-d2d2c11d1c4e)
     (property "Reference" "R1"
-      (at 151.13 139.70000000000002 270)
+      (at 129.54 137.16 270)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "10"
-      (at 151.13 144.78 270)
+      (at 129.54 142.23999999999998 270)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 151.13 142.24 270)
+      (at 129.54 139.7 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 151.13 142.24 270)
+      (at 129.54 139.7 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Resistor"
-      (at 151.13 142.24 270)
+      (at 129.54 139.7 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "R_0603_1%"
-      (at 151.13 147.32000000000002 270)
+      (at 129.54 144.78 270)
       (effects
         (font
           (size 1.27 1.27))
@@ -2138,12 +2137,12 @@
       (uuid 20590ff1-8878-52d6-98f6-dcc2b8376320))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "R1")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:TLV76733")
-    (at 153.67 60.96 90)
+    (at 144.78 107.95 0)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -2152,37 +2151,37 @@
     (fields_autoplaced yes)
     (uuid 85911265-412b-5c62-94bf-457ed59b8afa)
     (property "Reference" "U4"
-      (at 153.67 58.42 90)
+      (at 144.78 105.41 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "TLV76733"
-      (at 153.67 63.5 90)
+      (at 144.78 110.49000000000001 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "Package_SO:HVSSOP-8-1EP_3x3mm_P0.65mm_EP1.57x1.89mm"
-      (at 153.67 60.96 90)
+      (at 144.78 107.95 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 153.67 60.96 90)
+      (at 144.78 107.95 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "TI TLV76733 1 A 3.3 V LDO, 16 V input"
-      (at 153.67 60.96 90)
+      (at 144.78 107.95 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "TLV76733DGNR"
-      (at 153.67 66.04 90)
+      (at 144.78 113.03 0)
       (effects
         (font
           (size 1.27 1.27))
@@ -2207,12 +2206,13 @@
       (uuid c2fd70ca-7b3b-5ab7-a896-9f80a7d43588))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "U4")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:TLV76733")
-    (at 106.68 83.82 180)
+    (at 109.22 50.8 270)
+    (mirror x)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -2221,37 +2221,37 @@
     (fields_autoplaced yes)
     (uuid 9e9dfefc-03ad-5798-b83f-4eddefe9738a)
     (property "Reference" "U5"
-      (at 106.68 81.27999999999999 180)
+      (at 109.22 48.26 270)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "TLV76733"
-      (at 106.68 86.36 180)
+      (at 109.22 53.339999999999996 270)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "Package_SO:HVSSOP-8-1EP_3x3mm_P0.65mm_EP1.57x1.89mm"
-      (at 106.68 83.82 180)
+      (at 109.22 50.8 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 106.68 83.82 180)
+      (at 109.22 50.8 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "TI TLV76733 1 A 3.3 V LDO, 16 V input"
-      (at 106.68 83.82 180)
+      (at 109.22 50.8 270)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "TLV76733DGNR"
-      (at 106.68 88.89999999999999 180)
+      (at 109.22 55.879999999999995 270)
       (effects
         (font
           (size 1.27 1.27))
@@ -2276,1678 +2276,1678 @@
       (uuid e40bbbf0-4fe6-5757-b057-88a72ae0082c))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "U5")
           (unit 1)))))
   (wire
     (pts
-      (xy 161.29 137.16)
-      (xy 156.21 137.16))
+      (xy 139.7 134.62)
+      (xy 134.62 134.62))
     (stroke
       (width 0)
       (type default))
-    (uuid 57a527ba-4904-5c8c-8c47-eccec7e315bc))
+    (uuid 56613268-da11-506b-a5dc-70c39ba2a91e))
   (wire
     (pts
-      (xy 156.21 137.16)
-      (xy 156.21 144.78))
+      (xy 134.62 134.62)
+      (xy 134.62 142.24))
     (stroke
       (width 0)
       (type default))
-    (uuid f61017e7-3834-557a-bf14-68a94c185ee9))
+    (uuid 04583d88-3d6a-5649-b5e5-f8942c9a6620))
   (wire
     (pts
-      (xy 156.21 144.78)
-      (xy 156.21 152.4))
+      (xy 134.62 142.24)
+      (xy 134.62 149.86))
     (stroke
       (width 0)
       (type default))
-    (uuid 382849fc-f816-58c6-b4cc-090c4e16efcc))
+    (uuid 5cbac5bf-5b34-5d20-a1e6-ee3ee54a5507))
   (wire
     (pts
-      (xy 156.21 152.4)
-      (xy 156.21 160.02))
+      (xy 134.62 149.86)
+      (xy 134.62 157.48))
     (stroke
       (width 0)
       (type default))
-    (uuid e6f23ece-03d0-5d87-a7aa-397d858fa201))
+    (uuid 230d6f92-4084-5c5d-ab25-b846cef0c61a))
   (wire
     (pts
-      (xy 156.21 160.02)
-      (xy 156.21 167.64))
+      (xy 134.62 157.48)
+      (xy 134.62 165.1))
     (stroke
       (width 0)
       (type default))
-    (uuid f94af989-b44d-5047-9543-7a8fc4484ecf))
+    (uuid 80c852d5-24c1-5932-80a4-60abc0e51106))
   (wire
     (pts
-      (xy 156.21 167.64)
-      (xy 156.21 175.26))
+      (xy 134.62 165.1)
+      (xy 134.62 172.72))
     (stroke
       (width 0)
       (type default))
-    (uuid 368f0dbe-eb41-5887-bb2c-e378f07315cd))
+    (uuid 6fbde483-29a6-529c-913f-7c8000d242a3))
   (wire
     (pts
-      (xy 148.59 52.07)
-      (xy 148.59 46.99))
+      (xy 153.67 102.87)
+      (xy 158.75 102.87))
     (stroke
       (width 0)
       (type default))
-    (uuid 649ec95b-4225-5b09-a88a-e7a3d5e3cb5e))
+    (uuid 4d8a1b56-bb7a-5805-90ab-e379f8f32978))
   (wire
     (pts
-      (xy 97.79 88.9)
-      (xy 92.71 88.9))
+      (xy 114.3 41.91)
+      (xy 114.3 46.99))
     (stroke
       (width 0)
       (type default))
-    (uuid a5ea28a3-4b7c-5b64-94eb-b0af43c9599d))
+    (uuid 512f8777-bbcb-5bcd-b7c9-01e77877a7ff))
   (wire
     (pts
-      (xy 161.29 134.62)
-      (xy 156.21 134.62))
+      (xy 139.7 132.08)
+      (xy 134.62 132.08))
     (stroke
       (width 0)
       (type default))
-    (uuid 47c7bd9d-81f1-51b5-93a5-b7b14fed7c58))
+    (uuid 8aab248e-9c9b-5e76-ad97-73834a5095c9))
   (wire
     (pts
-      (xy 156.21 134.62)
-      (xy 156.21 142.24))
+      (xy 134.62 132.08)
+      (xy 134.62 139.7))
     (stroke
       (width 0)
       (type default))
-    (uuid bf4272eb-a911-5b58-8358-e91080d25ddb))
+    (uuid 7606dba0-e57e-5545-8c36-5792ed0955e7))
   (junction
-    (at 156.21 137.16)
+    (at 134.62 134.62)
     (diameter 0)
     (color 0 0 0 0)
-    (uuid aa32cd24-b2ba-59f8-b33d-66b4de2b9523))
+    (uuid d31cb079-5137-509f-851e-84d8e8ec3a74))
   (junction
-    (at 156.21 144.78)
+    (at 134.62 142.24)
     (diameter 0)
     (color 0 0 0 0)
-    (uuid b8ef149a-fb8b-56a8-a450-b31845edcb43))
+    (uuid 98fa307c-69ca-599d-b692-acd8497d187c))
   (junction
-    (at 156.21 152.4)
+    (at 134.62 149.86)
     (diameter 0)
     (color 0 0 0 0)
-    (uuid f4c73dbd-0ccf-5aaf-a0ae-72e54bf4d6a6))
+    (uuid df159cdd-ec0e-58c9-b902-a13b0306e402))
   (junction
-    (at 156.21 160.02)
+    (at 134.62 157.48)
     (diameter 0)
     (color 0 0 0 0)
-    (uuid 72074c26-9c1f-5b31-bbb0-b689b9c4d0c8))
+    (uuid 6852762f-69ae-5390-a273-48d536720993))
   (junction
-    (at 156.21 167.64)
+    (at 134.62 165.1)
     (diameter 0)
     (color 0 0 0 0)
-    (uuid 38dd1b37-8de8-5af4-a9ee-775962e9931e))
+    (uuid 8bf427d4-fcb1-5463-9a34-886f963bb38e))
   (junction
-    (at 156.21 134.62)
+    (at 134.62 132.08)
     (diameter 0)
     (color 0 0 0 0)
-    (uuid f8b0e93f-080b-5187-bbe1-c778e0c6e6b9))
+    (uuid 3cd2e712-aecf-5b3c-a2d6-edbbe233837c))
   (symbol
     (lib_id "power:GND")
-    (at 146.05 137.16 270.0)
+    (at 124.46 134.62 270.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 8192c442-b400-533d-8e83-4893a06237b2)
+    (uuid 0dd565d0-a644-5cc8-8fb1-2955389bd3ec)
     (property "Reference" "#PWR001"
-      (at 146.05 135.89 0)
+      (at 124.46 133.35 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 146.05 133.35 0)
+      (at 124.46 130.81 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 146.05 137.16 0)
+      (at 124.46 134.62 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 146.05 137.16 0)
+      (at 124.46 134.62 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 598a33f1-092c-5b8c-b3a7-e931c7ad3e76))
+      (uuid 23ea83c7-839b-54f7-a07a-902a3b680594))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR001")
           (unit 1)))))
   (symbol
     (lib_id "power:GND")
-    (at 146.05 144.78 270.0)
+    (at 124.46 142.24 270.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 2b099298-f34a-577d-b56c-f2d5b94b5b29)
+    (uuid dc41177a-7584-546d-bfae-f43df1cbb43d)
     (property "Reference" "#PWR002"
-      (at 146.05 143.51 0)
+      (at 124.46 140.97 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 146.05 140.97 0)
+      (at 124.46 138.43 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 146.05 144.78 0)
+      (at 124.46 142.24 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 146.05 144.78 0)
+      (at 124.46 142.24 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 8b646090-d3d8-5319-b308-0f936947d2b2))
+      (uuid c2e1e4c0-09e5-519a-a395-949fca705492))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR002")
           (unit 1)))))
   (symbol
     (lib_id "power:GND")
-    (at 146.05 152.4 270.0)
+    (at 124.46 149.86 270.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 58974632-395a-5e8c-93b2-f77545cafa89)
+    (uuid 42c6f4c4-2296-5acc-9671-3734de0a9e3c)
     (property "Reference" "#PWR003"
-      (at 146.05 151.13 0)
+      (at 124.46 148.59 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 146.05 148.59 0)
+      (at 124.46 146.05 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 146.05 152.4 0)
+      (at 124.46 149.86 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 146.05 152.4 0)
+      (at 124.46 149.86 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 972616d9-793f-5f5b-b322-9673c650c909))
+      (uuid 6ecdc21c-b6c3-5b3c-90cf-42196858f9f2))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR003")
           (unit 1)))))
   (symbol
     (lib_id "power:GND")
-    (at 148.59 36.83 180.0)
+    (at 168.91 102.87 90.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 3ead0e3e-1bb4-59c2-95fd-648a6e5d8a74)
+    (uuid 015593ee-ef3b-5377-84b0-637dc52c53cb)
     (property "Reference" "#PWR004"
-      (at 148.59 35.559999999999995 0)
+      (at 168.91 101.60000000000001 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 148.59 33.019999999999996 0)
+      (at 168.91 99.06 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 148.59 36.83 0)
+      (at 168.91 102.87 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 148.59 36.83 0)
+      (at 168.91 102.87 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid b8f5d6e5-7196-5ee7-82e8-fb00ad08ef57))
+      (uuid d1f3d600-0898-5163-af2e-43c4ebe2f933))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR004")
           (unit 1)))))
   (symbol
     (lib_id "power:GND")
-    (at 146.05 160.02 270.0)
+    (at 124.46 157.48 270.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 482f5493-9077-5e3d-a471-dc2340927ab8)
+    (uuid af4b1082-4ca2-5be7-9896-c33b0438a80b)
     (property "Reference" "#PWR005"
-      (at 146.05 158.75 0)
+      (at 124.46 156.20999999999998 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 146.05 156.21 0)
+      (at 124.46 153.67 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 146.05 160.02 0)
+      (at 124.46 157.48 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 146.05 160.02 0)
+      (at 124.46 157.48 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 7bbf792f-b1c9-5f20-b095-d73b86c26610))
+      (uuid c26abceb-b29a-5186-893b-ef9d336f1f43))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR005")
           (unit 1)))))
   (symbol
     (lib_id "power:GND")
-    (at 82.55 88.9 270.0)
+    (at 114.3 57.15 0.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid fa1b1f6b-8ed2-5d5f-bc80-08ea480a7d0e)
+    (uuid 5ed390d4-d293-5385-8eee-986517713983)
     (property "Reference" "#PWR006"
-      (at 82.55 87.63000000000001 0)
+      (at 114.3 55.879999999999995 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 82.55 85.09 0)
+      (at 114.3 53.339999999999996 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 82.55 88.9 0)
+      (at 114.3 57.15 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 82.55 88.9 0)
+      (at 114.3 57.15 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid e6bcec54-5f22-550a-90b0-3f5ebc46b430))
+      (uuid dd2b02b9-c97d-58f4-9af9-a726b0ba482e))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR006")
           (unit 1)))))
   (symbol
     (lib_id "power:+12VA")
-    (at 135.89 137.16 90.0)
+    (at 114.3 134.62 90.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 522880cb-2e59-5d90-9b84-4dc5fbd6e193)
+    (uuid 24676428-b99c-51a3-8ecd-afd546a9c3b8)
     (property "Reference" "#PWR007"
-      (at 135.89 135.89 0)
+      (at 114.3 133.35 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "+12VA"
-      (at 135.89 133.35 0)
+      (at 114.3 130.81 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 135.89 137.16 0)
+      (at 114.3 134.62 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 135.89 137.16 0)
+      (at 114.3 134.62 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid bc0879df-3cb9-5869-9b51-28b6650e6928))
+      (uuid 7ae2a173-bfb9-5688-871f-16eeb419c734))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR007")
           (unit 1)))))
   (symbol
     (lib_id "power:+12VA")
-    (at 135.89 144.78 90.0)
+    (at 114.3 142.24 90.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid cb59b7e6-1b80-5f9c-b5b9-a360c3d75360)
+    (uuid 804be00d-52af-57f9-887e-83bac953f4c7)
     (property "Reference" "#PWR008"
-      (at 135.89 143.51 0)
+      (at 114.3 140.97 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "+12VA"
-      (at 135.89 140.97 0)
+      (at 114.3 138.43 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 135.89 144.78 0)
+      (at 114.3 142.24 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 135.89 144.78 0)
+      (at 114.3 142.24 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid b195c6c9-4db1-54ff-96cf-aefeabe45e1a))
+      (uuid 6b7dd6c6-7b54-55bc-933b-55a8361a4afc))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR008")
           (unit 1)))))
   (symbol
     (lib_id "power:GND")
-    (at 146.05 167.64 270.0)
+    (at 124.46 165.1 270.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 9e0d7429-adfb-567c-a5d9-2f817a8c5404)
+    (uuid b09a7760-102e-5138-8210-72e8a86ba7cc)
     (property "Reference" "#PWR009"
-      (at 146.05 166.36999999999998 0)
+      (at 124.46 163.82999999999998 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 146.05 163.82999999999998 0)
+      (at 124.46 161.29 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 146.05 167.64 0)
+      (at 124.46 165.1 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 146.05 167.64 0)
+      (at 124.46 165.1 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 7054f40e-e5ba-5fac-ae49-facff3dcda3d))
+      (uuid 468d5d5e-295f-54ca-bc04-53f69daf9fd0))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR009")
           (unit 1)))))
   (symbol
     (lib_id "power:GND")
-    (at 146.05 134.62 270.0)
+    (at 124.46 132.08 270.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid c6c5070b-3f8e-5950-b4e6-8e9621ece82f)
+    (uuid 2c62b16e-0641-59b4-9f8a-8de7e47ee838)
     (property "Reference" "#PWR010"
-      (at 146.05 133.35 0)
+      (at 124.46 130.81 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 146.05 130.81 0)
+      (at 124.46 128.27 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 146.05 134.62 0)
+      (at 124.46 132.08 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 146.05 134.62 0)
+      (at 124.46 132.08 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 6463001e-71b1-5d0c-a930-a7990043d017))
+      (uuid df1b48e1-ab61-5d76-928a-102294d2b885))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR010")
           (unit 1)))))
   (symbol
     (lib_id "power:GND")
-    (at 146.05 175.26 270.0)
+    (at 124.46 172.72 270.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid edc327c6-421d-5a8d-bc95-21b9a3b8518b)
+    (uuid 525fc061-2b36-5d9b-970f-648be777918d)
     (property "Reference" "#PWR011"
-      (at 146.05 173.98999999999998 0)
+      (at 124.46 171.45 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 146.05 171.45 0)
+      (at 124.46 168.91 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 146.05 175.26 0)
+      (at 124.46 172.72 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 146.05 175.26 0)
+      (at 124.46 172.72 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 97ee58a4-2806-55f7-8590-9a9bc415fea9))
+      (uuid 6ec7493e-51d2-5159-b974-9bb69a7b29af))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR011")
           (unit 1)))))
   (global_label "+12V_R"
     (shape bidirectional)
-    (at 135.89 66.04 270)
+    (at 139.7 90.17 180)
     (effects
       (font
         (size 1.27 1.27))
       (justify right))
-    (uuid 3b8da88b-5cd9-5239-acfc-c5f95ff6123f))
+    (uuid b7bd73d6-e8ba-52a3-adda-32ba5bb7944c))
   (symbol
     (lib_id "power:+12VA")
-    (at 135.89 48.26 0.0)
+    (at 157.48 90.17 270.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 55265a54-fb7d-58aa-b7c7-081d9ccd0e2c)
+    (uuid 6f35ca8f-1335-59f2-a582-8799e52ab16b)
     (property "Reference" "#PWR012"
-      (at 135.89 46.989999999999995 0)
+      (at 157.48 88.9 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "+12VA"
-      (at 135.89 44.449999999999996 0)
+      (at 157.48 86.36 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 135.89 48.26 0)
+      (at 157.48 90.17 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 135.89 48.26 0)
+      (at 157.48 90.17 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid d1448cc0-38c4-5f15-834f-01879ad695cc))
+      (uuid 5bb57533-b02d-5904-999d-2e3783cae67c))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR012")
           (unit 1)))))
   (symbol
     (lib_id "power:GND")
-    (at 161.29 127.0 270.0)
+    (at 139.7 124.46 270.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 5acc8112-11f6-5ed1-b571-51bc418659c0)
+    (uuid 300ef704-6333-52b0-b2de-b743ff09c5a8)
     (property "Reference" "#PWR013"
-      (at 161.29 125.73 0)
+      (at 139.7 123.19 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 161.29 123.19 0)
+      (at 139.7 120.64999999999999 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 161.29 127.0 0)
+      (at 139.7 124.46 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 161.29 127.0 0)
+      (at 139.7 124.46 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 1e6169a1-4519-51d3-8a07-723e7ec97edf))
+      (uuid fb2c07a3-d3a9-5111-b87f-8dfdc34cad74))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR013")
           (unit 1)))))
   (global_label "AUD_HOT"
     (shape bidirectional)
-    (at 161.29 129.54 180)
+    (at 139.7 127.0 180)
     (effects
       (font
         (size 1.27 1.27))
       (justify right))
-    (uuid 0c4c5eb0-b339-5894-81d2-80d4eb6d7cc6))
+    (uuid 0ab2df71-658c-5f43-9595-ff4ef2442e76))
   (symbol
     (lib_id "power:GND")
-    (at 161.29 132.08 270.0)
+    (at 139.7 129.54 270.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 190634d1-598b-55c9-84d3-786277d876b6)
+    (uuid 785eb4bd-2f02-52f9-a2c5-fed328ebc703)
     (property "Reference" "#PWR014"
-      (at 161.29 130.81 0)
+      (at 139.7 128.26999999999998 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 161.29 128.27 0)
+      (at 139.7 125.72999999999999 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 161.29 132.08 0)
+      (at 139.7 129.54 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 161.29 132.08 0)
+      (at 139.7 129.54 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 2d56c4e1-898d-56fe-b5e0-183ad6daf12d))
+      (uuid 179b3190-344c-56e1-84a6-97ec5eb7d504))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR014")
           (unit 1)))))
   (symbol
     (lib_id "power:+12V")
-    (at 161.29 134.62 90.0)
+    (at 139.7 132.08 90.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid b4dcd423-e1c4-5217-a0f8-e1582e1c636b)
+    (uuid d648fb0b-041c-54d2-80c0-76e606392a39)
     (property "Reference" "#PWR015"
-      (at 161.29 133.35 0)
+      (at 139.7 130.81 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "+12V"
-      (at 161.29 130.81 0)
+      (at 139.7 128.27 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 161.29 134.62 0)
+      (at 139.7 132.08 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 161.29 134.62 0)
+      (at 139.7 132.08 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid c1a54657-6cc4-5489-be77-ce0550e7f32b))
+      (uuid ecdf54fe-7b29-5703-b2af-2306f4cb1936))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR015")
           (unit 1)))))
   (symbol
     (lib_id "power:+5V")
-    (at 161.29 137.16 90.0)
+    (at 139.7 134.62 90.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid acbff815-3c01-56d6-b068-2b44f84b994e)
+    (uuid dc87b06c-5d8d-50d4-ba81-d20fa337725a)
     (property "Reference" "#PWR016"
-      (at 161.29 135.89 0)
+      (at 139.7 133.35 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "+5V"
-      (at 161.29 133.35 0)
+      (at 139.7 130.81 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 161.29 137.16 0)
+      (at 139.7 134.62 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 161.29 137.16 0)
+      (at 139.7 134.62 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 4a17deda-5ef6-5e3c-8ede-6fa24a4d9a6f))
+      (uuid 5fb65180-edd9-5828-8957-b97c9236c6bb))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR016")
           (unit 1)))))
   (symbol
     (lib_id "power:GND")
-    (at 161.29 139.7 270.0)
+    (at 139.7 137.16 270.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid ce446832-7b30-548f-8363-2eda03abb5dc)
+    (uuid 9e8b564c-3a5e-5cb7-9d2f-737623797b8c)
     (property "Reference" "#PWR017"
-      (at 161.29 138.42999999999998 0)
+      (at 139.7 135.89 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 161.29 135.89 0)
+      (at 139.7 133.35 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 161.29 139.7 0)
+      (at 139.7 137.16 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 161.29 139.7 0)
+      (at 139.7 137.16 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid f0b24bc4-c7c5-5b9e-85b0-32ff9a36b86d))
+      (uuid 77108919-0449-5b60-a568-df92104f30c2))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR017")
           (unit 1)))))
   (global_label "BP_I2S_BCK"
     (shape bidirectional)
-    (at 161.29 142.24 180)
+    (at 139.7 139.7 180)
     (effects
       (font
         (size 1.27 1.27))
       (justify right))
-    (uuid d8ad1ad2-db32-56b6-a412-2867c567928b))
+    (uuid ebfb04be-690f-5efc-b0eb-507b0e80cccb))
   (global_label "BP_I2S_LRCK"
     (shape bidirectional)
-    (at 161.29 144.78 180)
+    (at 139.7 142.24 180)
     (effects
       (font
         (size 1.27 1.27))
       (justify right))
-    (uuid aeea5b13-7fbd-5a12-af2c-5b26185d0e6c))
+    (uuid 3465b01d-b46a-57ca-be5c-7a0bb72a789b))
   (global_label "BP_UART_TX"
     (shape bidirectional)
-    (at 161.29 147.32 180)
+    (at 139.7 144.78 180)
     (effects
       (font
         (size 1.27 1.27))
       (justify right))
-    (uuid 58da41e1-007f-598f-91f5-861fc9ab4df8))
+    (uuid 12adefd4-2a9d-5c1b-8e1b-4199361580ba))
   (global_label "BP_nRESET"
     (shape bidirectional)
-    (at 161.29 149.86 180)
+    (at 139.7 147.32 180)
     (effects
       (font
         (size 1.27 1.27))
       (justify right))
-    (uuid 24de2332-9bb0-506a-ae51-e8960397611a))
+    (uuid 9d1bddbe-9bc6-57f0-b95f-2d6fef1d1fef))
   (global_label "BP_LED_LOCK"
     (shape bidirectional)
-    (at 161.29 152.4 180)
+    (at 139.7 149.86 180)
     (effects
       (font
         (size 1.27 1.27))
       (justify right))
-    (uuid c4daf22b-ee38-5d3b-9669-7d1f595a3e25))
+    (uuid ee1f09db-6e80-5b14-ae6d-6546b225bc2c))
   (global_label "BP_SLOT0"
     (shape bidirectional)
-    (at 161.29 154.94 180)
+    (at 139.7 152.4 180)
     (effects
       (font
         (size 1.27 1.27))
       (justify right))
-    (uuid ab461e3f-bd51-506a-9568-3270b008f4c9))
+    (uuid 7b899b45-0f9c-5b0b-8105-2bc4e7c1f580))
   (global_label "BP_SLOT2"
     (shape bidirectional)
-    (at 161.29 157.48 180)
+    (at 139.7 154.94 180)
     (effects
       (font
         (size 1.27 1.27))
       (justify right))
-    (uuid b081c8f2-3eae-5f38-a3ce-4324ffdb8dff))
+    (uuid 9a38606c-7409-5b7a-895c-8139e0a32f4a))
   (symbol
     (lib_id "power:GND")
-    (at 201.93 127.0 90.0)
+    (at 180.34 124.46 90.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 77f44177-7ceb-545e-ba19-4ad2dbd43869)
+    (uuid c5268443-ff7e-5732-869e-17023e0155dd)
     (property "Reference" "#PWR018"
-      (at 201.93 125.73 0)
+      (at 180.34 123.19 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 201.93 123.19 0)
+      (at 180.34 120.64999999999999 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 201.93 127.0 0)
+      (at 180.34 124.46 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 201.93 127.0 0)
+      (at 180.34 124.46 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 5757b412-f4c8-5fd9-88e5-beb051bdd5d9))
+      (uuid d75c6239-a14a-54c1-b958-73782ad1d64d))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR018")
           (unit 1)))))
   (global_label "AUD_COLD"
     (shape bidirectional)
-    (at 201.93 129.54 0)
+    (at 180.34 127.0 0)
     (effects
       (font
         (size 1.27 1.27))
       (justify left))
-    (uuid de05debb-cda4-54db-9cc1-c4bd8fd0df90))
+    (uuid 73991434-064b-5f6e-a09c-4b7da7604094))
   (symbol
     (lib_id "power:GND")
-    (at 201.93 132.08 90.0)
+    (at 180.34 129.54 90.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid bd96edde-3cb8-5ea6-9762-e3c2e565467f)
+    (uuid 1910b4f1-651a-5eb2-917b-dd57839ddfeb)
     (property "Reference" "#PWR019"
-      (at 201.93 130.81 0)
+      (at 180.34 128.26999999999998 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 201.93 128.27 0)
+      (at 180.34 125.72999999999999 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 201.93 132.08 0)
+      (at 180.34 129.54 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 201.93 132.08 0)
+      (at 180.34 129.54 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 72f890c5-3385-5d05-9263-375115f8bb7e))
+      (uuid 6ad94e2d-5fe3-588d-b9ff-da7ff7e7b6c3))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR019")
           (unit 1)))))
   (symbol
     (lib_id "power:+12V")
-    (at 201.93 134.62 270.0)
+    (at 180.34 132.08 270.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 51d47c84-c0c2-5aa2-9e9a-957a69255439)
+    (uuid e52cb7f5-3092-536e-b7e6-4a7f51890bb4)
     (property "Reference" "#PWR020"
-      (at 201.93 133.35 0)
+      (at 180.34 130.81 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "+12V"
-      (at 201.93 130.81 0)
+      (at 180.34 128.27 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 201.93 134.62 0)
+      (at 180.34 132.08 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 201.93 134.62 0)
+      (at 180.34 132.08 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 6238a3ee-c045-5e16-939a-b09f76e5b6a5))
+      (uuid d317699a-da02-5b42-b63f-26e9fd9bd442))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR020")
           (unit 1)))))
   (symbol
     (lib_id "power:+5V")
-    (at 201.93 137.16 270.0)
+    (at 180.34 134.62 270.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid b62683e6-67b0-561d-a183-cb299d1535a6)
+    (uuid 502fee5f-44e0-5d57-a2c5-8fb78476cfdc)
     (property "Reference" "#PWR021"
-      (at 201.93 135.89 0)
+      (at 180.34 133.35 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "+5V"
-      (at 201.93 133.35 0)
+      (at 180.34 130.81 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 201.93 137.16 0)
+      (at 180.34 134.62 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 201.93 137.16 0)
+      (at 180.34 134.62 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid fa068c50-1090-56c8-a1bb-df9133a5a773))
+      (uuid 1e76ed68-0096-5c8f-9617-2ec903c55cd7))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR021")
           (unit 1)))))
   (symbol
     (lib_id "power:GND")
-    (at 201.93 139.7 90.0)
+    (at 180.34 137.16 90.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 4008af7d-5b72-57bc-bba3-442ea26e6fab)
+    (uuid 471fddf4-b841-5a4e-b8df-91e444a491dd)
     (property "Reference" "#PWR022"
-      (at 201.93 138.42999999999998 0)
+      (at 180.34 135.89 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 201.93 135.89 0)
+      (at 180.34 133.35 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 201.93 139.7 0)
+      (at 180.34 137.16 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 201.93 139.7 0)
+      (at 180.34 137.16 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid dae6a540-5834-59d4-bbb5-ac3992077e71))
+      (uuid 57be3ef1-82fa-5779-b3ba-a5873e58e6a0))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR022")
           (unit 1)))))
   (global_label "BP_I2S_SDOUT"
     (shape bidirectional)
-    (at 201.93 144.78 0)
+    (at 180.34 142.24 0)
     (effects
       (font
         (size 1.27 1.27))
       (justify left))
-    (uuid 217a739c-299e-5f20-b5e1-66ac36b1363b))
+    (uuid 08825544-09cc-511b-bf0b-2fc3451e15c5))
   (global_label "BP_UART_RX"
     (shape bidirectional)
-    (at 201.93 147.32 0)
+    (at 180.34 144.78 0)
     (effects
       (font
         (size 1.27 1.27))
       (justify left))
-    (uuid 23e1a78d-78b7-5ef8-aeb5-548c8c6d463c))
+    (uuid 651ce9c4-adc0-5a68-8888-8f5410f55e86))
   (global_label "BP_BOOT"
     (shape bidirectional)
-    (at 201.93 149.86 0)
+    (at 180.34 147.32 0)
     (effects
       (font
         (size 1.27 1.27))
       (justify left))
-    (uuid f1d52cc3-6049-51b6-b899-edd47e91505e))
+    (uuid 7703e7d1-4a94-52f9-88b0-3d235f9d0c4d))
   (global_label "BP_LED_PEAK"
     (shape bidirectional)
-    (at 201.93 152.4 0)
+    (at 180.34 149.86 0)
     (effects
       (font
         (size 1.27 1.27))
       (justify left))
-    (uuid d0fd14e2-0887-5d3b-a586-57b26322470a))
+    (uuid 2f0ffdcf-c57a-5609-a86d-643b8dbb83cd))
   (global_label "BP_SLOT1"
     (shape bidirectional)
-    (at 201.93 154.94 0)
+    (at 180.34 152.4 0)
     (effects
       (font
         (size 1.27 1.27))
       (justify left))
-    (uuid 0550b0a2-7552-54e9-90c2-a01ffdedbf18))
+    (uuid 7e3f3762-0129-5caf-9e6b-6a09ed637b07))
   (symbol
     (lib_id "power:GND")
-    (at 201.93 157.48 90.0)
+    (at 180.34 154.94 90.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 80376742-a9a5-5ef4-98cc-52ffd34824ae)
+    (uuid d474472a-b08b-5437-a9c5-b14a469e6408)
     (property "Reference" "#PWR023"
-      (at 201.93 156.20999999999998 0)
+      (at 180.34 153.67 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 201.93 153.67 0)
+      (at 180.34 151.13 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 201.93 157.48 0)
+      (at 180.34 154.94 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 201.93 157.48 0)
+      (at 180.34 154.94 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid c901fce6-3922-54ed-b8bf-aa4d5d168013))
+      (uuid 07af2ec1-9c55-5ee7-8c94-a34261c18298))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR023")
           (unit 1)))))
   (global_label "+12V_R"
     (shape bidirectional)
-    (at 146.05 142.24 180)
+    (at 124.46 139.7 180)
     (effects
       (font
         (size 1.27 1.27))
       (justify right))
-    (uuid 9e8a4ce6-bf5b-53de-8ba9-776649f53abf))
+    (uuid a790ee8d-644f-5ba1-bd81-cbcb147b1046))
   (symbol
     (lib_id "power:+5V")
-    (at 148.59 69.85 180.0)
+    (at 135.89 102.87 90.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 7caba40f-397d-58d6-abd4-469e7666e534)
+    (uuid 7cf592f2-ce14-563c-bbaf-8c8aa7ddbfc0)
     (property "Reference" "#PWR024"
-      (at 148.59 68.58 0)
+      (at 135.89 101.60000000000001 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "+5V"
-      (at 148.59 66.03999999999999 0)
+      (at 135.89 99.06 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 148.59 69.85 0)
+      (at 135.89 102.87 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 148.59 69.85 0)
+      (at 135.89 102.87 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid f10efa66-81d7-5572-b633-8b31312c1b97))
+      (uuid 0ac572dd-a91c-58a7-9bd0-cda8d234eeda))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR024")
           (unit 1)))))
   (symbol
     (lib_id "power:+5V")
-    (at 151.13 69.85 180.0)
+    (at 135.89 105.41 90.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 0bc9082c-0b77-50fc-b594-49798b1a99ed)
+    (uuid 0fe63694-f034-52d4-bb06-63ff0f18d57f)
     (property "Reference" "#PWR025"
-      (at 151.13 68.58 0)
+      (at 135.89 104.14 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "+5V"
-      (at 151.13 66.03999999999999 0)
+      (at 135.89 101.6 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 151.13 69.85 0)
+      (at 135.89 105.41 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 151.13 69.85 0)
+      (at 135.89 105.41 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 25764a81-d55c-52a4-9b90-57765b432c91))
+      (uuid a3552830-f458-54ae-b29d-71a25321591c))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR025")
           (unit 1)))))
   (symbol
     (lib_id "power:GND")
-    (at 153.67 69.85 0.0)
+    (at 135.89 107.95 270.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid b9f90350-a40d-5fba-a51e-ac3066838dab)
+    (uuid b3b719dc-f41e-572f-9e3a-ab6d24a5e909)
     (property "Reference" "#PWR026"
-      (at 153.67 68.58 0)
+      (at 135.89 106.68 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 153.67 66.03999999999999 0)
+      (at 135.89 104.14 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 153.67 69.85 0)
+      (at 135.89 107.95 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 153.67 69.85 0)
+      (at 135.89 107.95 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 96cdabda-772a-5f3b-9035-ac71a8dda6f7))
+      (uuid 53a5df1e-915b-5a84-bb3b-2de8956f267a))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR026")
           (unit 1)))))
   (symbol
     (lib_id "power:GND")
-    (at 156.21 69.85 0.0)
+    (at 135.89 110.49 270.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid c620fe0c-53e7-5ba8-8950-06aa983bdc6d)
+    (uuid 4d8ba9b2-04b5-5893-a12b-932162453345)
     (property "Reference" "#PWR027"
-      (at 156.21 68.58 0)
+      (at 135.89 109.22 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 156.21 66.03999999999999 0)
+      (at 135.89 106.67999999999999 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 156.21 69.85 0)
+      (at 135.89 110.49 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 156.21 69.85 0)
+      (at 135.89 110.49 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid c8131bbe-892a-5ae2-af54-2f0319c90edc))
+      (uuid 3ce2fdbd-71b6-5b56-bf9c-72887e83ed92))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR027")
           (unit 1)))))
   (symbol
     (lib_id "power:GND")
-    (at 158.75 69.85 0.0)
+    (at 135.89 113.03 270.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid b0e952d9-ed6a-5211-9c8a-9bc7545953d0)
+    (uuid 35def83f-c759-50cb-9ad7-ef31b0f0e57f)
     (property "Reference" "#PWR028"
-      (at 158.75 68.58 0)
+      (at 135.89 111.76 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 158.75 66.03999999999999 0)
+      (at 135.89 109.22 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 158.75 69.85 0)
+      (at 135.89 113.03 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 158.75 69.85 0)
+      (at 135.89 113.03 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 1b85348b-bce2-5e4c-9b6a-c5d191dfdd75))
+      (uuid 66bdd231-406e-5118-b6e6-b53179efbd17))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR028")
           (unit 1)))))
   (symbol
     (lib_id "power:+3V3")
-    (at 148.59 52.07 0.0)
+    (at 153.67 102.87 270.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 1b51ac6d-b58e-5d9a-bacb-bd24bd74eae9)
+    (uuid c2a1635d-4f83-5cd4-a95e-0e2c637a2639)
     (property "Reference" "#PWR029"
-      (at 148.59 50.8 0)
+      (at 153.67 101.60000000000001 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "+3V3"
-      (at 148.59 48.26 0)
+      (at 153.67 99.06 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 148.59 52.07 0)
+      (at 153.67 102.87 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 148.59 52.07 0)
+      (at 153.67 102.87 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid f505edfd-7fbf-58ac-a441-fb5ee2c94795))
+      (uuid 7e208547-4370-55ec-a45b-08e9e63b122c))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR029")
           (unit 1)))))
   (symbol
     (lib_id "power:+3V3")
-    (at 151.13 52.07 0.0)
+    (at 153.67 105.41 270.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 7ad008d6-486f-5ac3-b733-b0d7cbef1003)
+    (uuid 21466a1b-8be4-52c8-9d92-47e1a4267420)
     (property "Reference" "#PWR030"
-      (at 151.13 50.8 0)
+      (at 153.67 104.14 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "+3V3"
-      (at 151.13 48.26 0)
+      (at 153.67 101.6 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 151.13 52.07 0)
+      (at 153.67 105.41 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 151.13 52.07 0)
+      (at 153.67 105.41 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 5f4ad41a-174f-54fc-803e-fdedc06478f4))
+      (uuid 68025ffa-23b8-5460-a0a7-9fa8a5c1202a))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR030")
           (unit 1)))))
   (symbol
     (lib_id "power:+5V")
-    (at 115.57 88.9 270.0)
+    (at 114.3 59.69 180.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid c6f82a05-de63-5fa1-be8f-6d3ca48dc0dd)
+    (uuid 81048e45-9b59-5acf-bd07-e848fa49b5a6)
     (property "Reference" "#PWR031"
-      (at 115.57 87.63000000000001 0)
+      (at 114.3 58.419999999999995 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "+5V"
-      (at 115.57 85.09 0)
+      (at 114.3 55.879999999999995 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 115.57 88.9 0)
+      (at 114.3 59.69 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 115.57 88.9 0)
+      (at 114.3 59.69 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 5a6e1c54-bd6d-5122-a8b2-67cdca83423e))
+      (uuid 446af9d7-9569-53e4-b1fd-c60378e41d61))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR031")
           (unit 1)))))
   (symbol
     (lib_id "power:+5V")
-    (at 115.57 86.36 270.0)
+    (at 111.76 59.69 180.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid e8f89954-854e-5abf-812c-ae1098c19adc)
+    (uuid 61976d2c-6a77-5ad6-b971-dbfd3ce52b81)
     (property "Reference" "#PWR032"
-      (at 115.57 85.09 0)
+      (at 111.76 58.419999999999995 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "+5V"
-      (at 115.57 82.55 0)
+      (at 111.76 55.879999999999995 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 115.57 86.36 0)
+      (at 111.76 59.69 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 115.57 86.36 0)
+      (at 111.76 59.69 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid c03e60ea-2ea5-596a-ac2c-239bfa55c4ec))
+      (uuid c98ac4be-7237-5ce0-a755-25c85389fa33))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR032")
           (unit 1)))))
   (symbol
     (lib_id "power:GND")
-    (at 115.57 83.82 90.0)
+    (at 109.22 59.69 0.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid c20818a7-5f9a-5257-a202-08eb52841f70)
+    (uuid 2e23290f-3005-55b1-a747-5805729a8eff)
     (property "Reference" "#PWR033"
-      (at 115.57 82.55 0)
+      (at 109.22 58.419999999999995 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 115.57 80.00999999999999 0)
+      (at 109.22 55.879999999999995 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 115.57 83.82 0)
+      (at 109.22 59.69 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 115.57 83.82 0)
+      (at 109.22 59.69 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid d476489f-1bd9-5df5-aff0-59ccf49fba79))
+      (uuid 18304ec3-4485-50f4-a817-254fbdda59e6))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR033")
           (unit 1)))))
   (symbol
     (lib_id "power:GND")
-    (at 115.57 81.28 90.0)
+    (at 106.68 59.69 0.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid c6920c32-c429-51a1-855b-8561a22f0830)
+    (uuid 42ea4820-a62b-5fa4-b572-4906c578a070)
     (property "Reference" "#PWR034"
-      (at 115.57 80.01 0)
+      (at 106.68 58.419999999999995 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 115.57 77.47 0)
+      (at 106.68 55.879999999999995 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 115.57 81.28 0)
+      (at 106.68 59.69 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 115.57 81.28 0)
+      (at 106.68 59.69 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 88a8a905-b79b-57fc-9ab6-ed22ed9a32b2))
+      (uuid f1aab8e4-a538-5cf2-adf4-b75711078409))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR034")
           (unit 1)))))
   (symbol
     (lib_id "power:GND")
-    (at 115.57 78.74 90.0)
+    (at 104.14 59.69 0.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid c9300d58-c8e7-5238-a58e-34424d483763)
+    (uuid 4204b81d-d4a5-5967-840f-276c20e2cbc1)
     (property "Reference" "#PWR035"
-      (at 115.57 77.47 0)
+      (at 104.14 58.419999999999995 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 115.57 74.92999999999999 0)
+      (at 104.14 55.879999999999995 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 115.57 78.74 0)
+      (at 104.14 59.69 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 115.57 78.74 0)
+      (at 104.14 59.69 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 84f7a930-35c6-5e0c-a03f-451a757d1211))
+      (uuid f966348d-03be-589f-bcf4-1d46d505e98c))
     (instances
       (project "rx"
-        (path "/580e9439-f5de-4128-99ba-7fd564042b1a/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
+        (path "/689a486e-23a7-4795-b72b-a629f0fc62f3/818fbebb-2eeb-5f44-8419-8ff160c87ce5"
           (reference "#PWR035")
           (unit 1)))))
   (global_label "+3V3A"
     (shape bidirectional)
-    (at 97.79 88.9 180)
+    (at 114.3 41.91 90)
     (effects
       (font
         (size 1.27 1.27))
-      (justify right))
-    (uuid 0da49dfc-73df-5a00-98b1-991baa33f4f6))
+      (justify left))
+    (uuid 4cb38e9a-6922-5ff2-9d5a-382e2fa5825e))
   (global_label "+3V3A"
     (shape bidirectional)
-    (at 97.79 86.36 180)
+    (at 111.76 41.91 90)
     (effects
       (font
         (size 1.27 1.27))
-      (justify right))
-    (uuid c25e413c-9324-5c63-985f-6fcaccf87620))
+      (justify left))
+    (uuid 733f8b14-2c0c-5587-91a8-e34621f9a536))
   (no_connect
-    (at 138.43 48.26)
-    (uuid 62f56e80-52a7-5ede-9861-08571ce4cb96))
+    (at 157.48 92.71)
+    (uuid 9336ac7b-2611-58dd-82fd-120e8d9c5777))
   (no_connect
-    (at 201.93 142.24)
-    (uuid a4b391b3-3b2f-5885-b9b2-acc9d3ea301c))
+    (at 180.34 139.7)
+    (uuid 13ec7c5e-265e-5c39-baf4-46de63fa7e9c))
   (no_connect
-    (at 153.67 52.07)
-    (uuid 12eca56e-fd7c-50d7-ad11-a24cca266635))
+    (at 153.67 107.95)
+    (uuid 1f393040-f1ae-5658-8a15-c5545039e9a0))
   (no_connect
-    (at 156.21 52.07)
-    (uuid 230f9474-0933-5395-adc7-252c8c821f73))
+    (at 153.67 110.49)
+    (uuid 0a432d75-4ddd-5d4f-ac41-d3af6cd2a6b3))
   (no_connect
-    (at 97.79 83.82)
-    (uuid 8e435837-9293-5fed-aff9-6a2e0dbef114))
+    (at 109.22 41.91)
+    (uuid 5d9f1745-4106-5c1d-885e-61874e6ce2d1))
   (no_connect
-    (at 97.79 81.28)
-    (uuid 376fe4ee-ceb7-554f-82c1-0a391032390e)))
+    (at 106.68 41.91)
+    (uuid 92462016-9435-5389-a0ac-140b7a6e75a9)))

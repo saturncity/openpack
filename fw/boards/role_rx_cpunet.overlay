@@ -1,0 +1,12 @@
+/* ADR-0021 (#112): the receiver sub-board carries a Fanstel BT40E (nRF5340 + u.FL, no nRF21540). The nRF21540 FEM
+ * node (#107) is pack-only (BT40NE), so the receiver net core drops it. Applied to the fw_net image by
+ * fw/sysbuild.cmake when SB_CONFIG_OP_ROLE_RX=y, after the board overlay. P1.05 (the BT40NE's ANT_SEL pad E1) is an
+ * unused GPIO on the BT40E and firmware leaves it alone. fw/src/rx/rx.c refuses to build if the node is still okay.
+ */
+&nrf_radio_fem {
+	status = "disabled";
+};
+
+&radio {
+	/delete-property/ fem;
+};
