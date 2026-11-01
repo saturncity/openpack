@@ -41,7 +41,10 @@ Status: accepted. 2026-11-01. Issue #101 (part of #6). **Supersedes ADR-0016's i
 
 - **Consequences:**
   - R1 rests on placement, with 1.5 dB of the 3 dB design margin left at the worst point. Several settings off at once can drop below the twin threshold, so the install doc demands the numbers as written.
-  - #32/#34 swap the receiver module BT40NE → BT40E: same Fanstel BT40 spec v1.08 pin functions; confirm the outline and u.FL position.
+  - #32/#34 swap the receiver module BT40NE → BT40E. It is u.FL-only with no FEM (Fanstel $9.55; DigiKey UK £9.78, 803 in stock, `docs/analysis/module-antenna.md`).
+    - It has a **different footprint** (14×16 mm BT40 pads, not the BT40NE's), so `hw/rx` needs the new symbol/footprint before layout. Its nine FEM pads become GPIO.
+    - The receiver's ANT_SEL open item (#105) goes away.
+    - The pack keeps the BT40NE.
   - PR #95 drops its pad options and relaxes the RK-5 NF line for the wing install.
   - Phase 5 measures the HG2409P 60–90° pattern (#92). Phase 6 repeats SYS-3 with the antennas in the wings of a full house.
   - A venue that can't keep the no-Wi-Fi-in-the-wings rule falls back to TD on for the affected packs.

@@ -20,6 +20,13 @@
  * offset (0.04 us/frame) with no drift out of the window. After OP_RX_MISS_LIMIT consecutive frames
  * with no valid copy the receiver re-acquires (pack reboot, RX-10).
  *
+ * Time diversity (ADR-0017) is per pack and needs no receiver setting: the payload length of the
+ * packet that locks (42 B off, 81 B on) sets the timeline (air time, copy B offset, deadline) and,
+ * for 81 B, the tracking window OP_RX_TRACK_WIN_TD_US. A TD pack's merged frames go through op_td_rx,
+ * which plays frame n at packet n+2's deadline: from packet n, or recovered from packet n+2's td_audio
+ * when both copies of n failed (RX-4). A copy of the other length (the pack's td setting changed)
+ * re-acquires at the next deadline.
+ *
  * All peripheral access is via the nrfx HAL (the bsim models only see HAL writes, ADR-0009).
  * DISABLE is only sent in a non-DISABLED state: in DISABLED it raises a second DISABLED event.
  */
@@ -31,6 +38,7 @@
 #include <hal/nrf_timer.h>
 #include <hal/nrf_dppi.h>
 #include "op_rx.h"
+#include "op_td.h"
 
 #define DPPI_RXEN 0 /* TIMER0 COMPARE0/1 -> RADIO RXEN */
 #define DPPI_ADDR 1 /* RADIO ADDRESS -> TIMER0 CAPTURE5 */
@@ -38,19 +46,32 @@
 #define CC_NOW    NRF_TIMER_CC_CHANNEL6
 #define RAMP_US   40 /* RXEN -> READY, fast ramp-up */
 #define W_US      CONFIG_OP_RX_TRACK_WIN_US
-#define AIR_US    ((2 + 4 + 1 + 1 + OP_FRAME_LEN + 3) * 4) /* AIR-2 packet at 4 us/byte */
+#define W_TD_US   MIN(CONFIG_OP_RX_TRACK_WIN_US, CONFIG_OP_RX_TRACK_WIN_TD_US)
 #define ADDR_US   ((2 + 4) * 4) /* copy start -> ADDRESS event: preamble + access address */
-#define LEAD_US   (RAMP_US + W_US)
-#define B_OFS_US  (AIR_US + CONFIG_OP_T_GAP_US) /* copy B start - copy A start (AIR-4) */
-#define EXP_A_US  (LEAD_US + ADDR_US)           /* expected ADDRESS of copy A */
-#define CC_B_US   B_OFS_US                      /* RXEN for window B */
-#define CLOSE_A   (EXP_A_US + W_US + 2)
-#define CLOSE_B   (CC_B_US + CLOSE_A)
-#define DEADLINE  (CC_B_US + LEAD_US + AIR_US + W_US + 10)
+/* Frame timeline for payload length l and window w (us from frame start). */
+#define AIR_US(l)       ((2 + 4 + 1 + 1 + (l) + 3) * 4) /* AIR-2 packet at 4 us/byte */
+#define LEAD_US(w)      (RAMP_US + (w))
+#define B_OFS_US(l)     (AIR_US(l) + CONFIG_OP_T_GAP_US) /* copy B start - copy A start (AIR-4) */
+#define EXP_A_US(w)     (LEAD_US(w) + ADDR_US)           /* expected ADDRESS of copy A */
+#define CC_B_US(l)      B_OFS_US(l)                      /* RXEN for window B */
+#define CLOSE_A(w)      (EXP_A_US(w) + (w) + 2)
+#define CLOSE_B(l, w)   (CC_B_US(l) + CLOSE_A(w))
+#define DEADLINE(l, w)  (CC_B_US(l) + LEAD_US(w) + AIR_US(l) + (w) + 10)
 #define NEVER     UINT32_MAX
 
-BUILD_ASSERT(CC_B_US > CLOSE_A, "window B must open after window A closes");
-BUILD_ASSERT(DEADLINE + W_US < OP_FRAME_US, "deadline and re-centring must fit in one frame");
+BUILD_ASSERT(CC_B_US(OP_FRAME_LEN) > CLOSE_A(W_US), "window B must open after window A closes");
+BUILD_ASSERT(DEADLINE(OP_FRAME_LEN, W_US) + W_US < OP_FRAME_US,
+	     "deadline and re-centring must fit in one frame");
+BUILD_ASSERT(CC_B_US(OP_PAYLOAD_MAX) > CLOSE_A(W_TD_US), "TD: window B must open after window A closes");
+BUILD_ASSERT(DEADLINE(OP_PAYLOAD_MAX, W_TD_US) + W_TD_US < OP_FRAME_US,
+	     "TD: deadline and re-centring must fit in one frame (OP_RX_TRACK_WIN_TD_US)");
+
+/* The timeline in use, set from the payload length at lock. */
+struct tl {
+	uint8_t len;
+	bool td;
+	int32_t w, b_ofs, exp_a, close_a, close_b, deadline;
+};
 
 struct win {
 	bool ok;
@@ -61,14 +82,19 @@ struct win {
 
 struct ev {
 	uint8_t kind; /* 0 frame, 1 lock, 2 re-acquire */
+	uint8_t len;  /* payload length locked to */
+	uint16_t deadline;
 	uint32_t t_us;
 	struct op_rx_msg m;
 };
 
 K_MSGQ_DEFINE(evq, sizeof(struct ev), 16, 4);
 
-static uint8_t buf[2][2 + OP_FRAME_LEN]; /* S0, LENGTH, payload per window */
+static uint8_t buf[2][2 + OP_PAYLOAD_MAX]; /* S0, LENGTH, payload per window */
 static struct win win[2];
+static struct tl tl;
+static struct op_td_rx tdr;
+static bool relen; /* a CRC-valid copy of the other payload length arrived */
 static struct op_ant ant;
 static bool tracking;
 static uint8_t cur; /* window in progress: 0 = A, 1 = B */
@@ -87,7 +113,7 @@ static uint32_t now_us(void)
 
 static void post(uint8_t kind, const struct op_rx_msg *m)
 {
-	struct ev e = {.kind = kind, .t_us = now_us()};
+	struct ev e = {.kind = kind, .len = tl.len, .deadline = tl.deadline, .t_us = now_us()};
 
 	if (m != NULL) {
 		e.m = *m;
@@ -116,6 +142,20 @@ static void set_cc(uint32_t p, uint32_t b, uint32_t ca, uint32_t cb, uint32_t d)
 	nrf_timer_cc_set(NRF_TIMER0, NRF_TIMER_CC_CHANNEL4, d);
 }
 
+static void tl_set(uint8_t len)
+{
+	int32_t w = len == OP_PAYLOAD_MAX ? W_TD_US : W_US;
+
+	tl = (struct tl){.len = len, .td = len == OP_PAYLOAD_MAX, .w = w, .b_ofs = B_OFS_US(len),
+			 .exp_a = EXP_A_US(w), .close_a = CLOSE_A(w), .close_b = CLOSE_B(len, w),
+			 .deadline = DEADLINE(len, w)};
+}
+
+static bool known_len(uint8_t len)
+{
+	return len == OP_FRAME_LEN || len == OP_PAYLOAD_MAX;
+}
+
 /* RX-2: back-to-back RX on channel A, timer free-running from 0. Radio is DISABLED on entry. */
 static void acquire(void)
 {
@@ -136,7 +176,10 @@ static void lock(void)
 {
 	uint32_t c = nrf_timer_cc_get(NRF_TIMER0, CC_CAP);
 
-	set_cc(c + OP_FRAME_US - EXP_A_US, NEVER, NEVER, NEVER, NEVER);
+	tl_set(buf[0][1]);
+	op_td_rx_init(&tdr);
+	relen = false;
+	set_cc(c + OP_FRAME_US - tl.exp_a, NEVER, NEVER, NEVER, NEVER);
 	nrf_timer_shorts_enable(NRF_TIMER0, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK);
 	nrf_radio_subscribe_set(NRF_RADIO, NRF_RADIO_TASK_RXEN, DPPI_RXEN);
 	tracking = true;
@@ -151,7 +194,8 @@ static void lock(void)
 static void radio_isr(const void *arg)
 {
 	bool end = nrf_radio_event_check(NRF_RADIO, NRF_RADIO_EVENT_END);
-	bool ok = end && nrf_radio_crc_status_check(NRF_RADIO) && buf[cur][1] == OP_FRAME_LEN;
+	bool crc = end && nrf_radio_crc_status_check(NRF_RADIO) && known_len(buf[cur][1]);
+	bool ok = crc && (!tracking || buf[cur][1] == tl.len);
 
 	nrf_radio_event_clear(NRF_RADIO, NRF_RADIO_EVENT_DISABLED);
 	nrf_radio_event_clear(NRF_RADIO, NRF_RADIO_EVENT_END);
@@ -166,10 +210,11 @@ static void radio_isr(const void *arg)
 	}
 	struct win *w = &win[cur];
 	uint32_t c = nrf_timer_cc_get(NRF_TIMER0, CC_CAP);
-	int32_t exp = cur ? EXP_A_US + B_OFS_US : EXP_A_US;
+	int32_t exp = cur ? tl.exp_a + tl.b_ofs : tl.exp_a;
 	int32_t err = (int32_t)c - exp;
 
-	w->ok = ok && err >= -W_US && err <= W_US;
+	relen |= crc && !ok;
+	w->ok = ok && err >= -tl.w && err <= tl.w;
 	w->cap = c;
 	w->rssi = ok ? -(int8_t)nrf_radio_rssi_sample_get(NRF_RADIO) : 0;
 	if (cur == 0) {
@@ -178,7 +223,7 @@ static void radio_isr(const void *arg)
 		nrf_timer_task_trigger(NRF_TIMER0, nrf_timer_capture_task_get(CC_NOW));
 		uint32_t now = nrf_timer_cc_get(NRF_TIMER0, CC_NOW);
 
-		if (now >= CC_B_US && now < CLOSE_B) {
+		if (now >= tl.b_ofs && now < tl.close_b) {
 			nrf_radio_task_trigger(NRF_RADIO, NRF_RADIO_TASK_RXEN);
 		}
 	}
@@ -196,29 +241,58 @@ static void close_window(void)
 static void deadline(void)
 {
 	struct op_rx_msg m = {0};
+	const uint8_t *p = NULL;
 	int32_t err = 0;
+	uint8_t flags;
+	int8_t rssi = 0;
+	bool out = true;
 
 	if (win[0].ok) {
-		memcpy(m.frame, &buf[0][2], OP_FRAME_LEN);
-		m.rssi = win[0].rssi;
-		err = (int32_t)win[0].cap - EXP_A_US;
+		p = &buf[0][2];
+		rssi = win[0].rssi;
+		err = (int32_t)win[0].cap - tl.exp_a;
 	} else if (win[1].ok) {
-		memcpy(m.frame, &buf[1][2], OP_FRAME_LEN);
-		m.rssi = win[1].rssi;
-		err = (int32_t)win[1].cap - (EXP_A_US + B_OFS_US);
+		p = &buf[1][2];
+		rssi = win[1].rssi;
+		err = (int32_t)win[1].cap - (tl.exp_a + tl.b_ofs);
 	}
-	m.flags = (win[0].ok ? OP_RX_A_OK : 0) | (win[1].ok ? OP_RX_B_OK : 0);
-	m.flags |= m.flags ? OP_RX_VALID : 0;
+	flags = (win[0].ok ? OP_RX_A_OK : 0) | (win[1].ok ? OP_RX_B_OK : 0);
+	flags |= flags ? OP_RX_VALID : 0;
+	if (tl.td) {
+		/* tag: this packet's copy flags and RSSI, handed back with its frame two packets later */
+		uint16_t t = 0;
+
+		switch (op_td_rx(&tdr, p, flags | ((uint8_t)rssi << 8), m.frame, &t)) {
+		case OP_TD_NONE:
+			out = false;
+			break;
+		case OP_TD_REC: /* frame n had no valid copy; its audio and the RSSI come from this packet */
+			t = ((uint8_t)rssi << 8) | OP_RX_VALID | OP_RX_TD_REC;
+			break;
+		default:
+			break;
+		}
+		m.flags = (t & 0xff) | OP_RX_TD;
+		m.rssi = (int8_t)(t >> 8);
+	} else {
+		if (p != NULL) {
+			memcpy(m.frame, p, OP_FRAME_LEN);
+		}
+		m.flags = flags;
+		m.rssi = rssi;
+	}
 	m.epoch = epoch;
 	m.ant = win[0].ant | (win[1].ant << 1);
 	for (uint8_t c = 0; c < 2; c++) {
 		(void)op_ant_report(&ant, c, win[c].ant, win[c].ok, win[c].rssi);
 	}
-	post(0, &m);
-	misses = m.flags ? 0 : misses + 1;
+	if (out) {
+		post(0, &m);
+	}
+	misses = flags ? 0 : misses + 1;
 	memset(win, 0, sizeof(win));
 	frame++;
-	if (misses >= CONFIG_OP_RX_MISS_LIMIT) {
+	if (misses >= CONFIG_OP_RX_MISS_LIMIT || relen) {
 		post(2, NULL);
 		acquire();
 		return;
@@ -240,7 +314,7 @@ static bool take(nrf_timer_event_t ev)
 static void timer_isr(const void *arg)
 {
 	if (take(NRF_TIMER_EVENT_COMPARE0) && tracking) {
-		set_cc(OP_FRAME_US, CC_B_US, CLOSE_A, CLOSE_B, DEADLINE);
+		set_cc(OP_FRAME_US, tl.b_ofs, tl.close_a, tl.close_b, tl.deadline);
 	}
 	if (take(NRF_TIMER_EVENT_COMPARE2) && tracking) {
 		close_window();
@@ -260,7 +334,7 @@ static void radio_init(void)
 		.s0len = 1,
 		.lflen = 8,
 		.plen = NRF_RADIO_PREAMBLE_LENGTH_16BIT,
-		.maxlen = OP_FRAME_LEN,
+		.maxlen = OP_PAYLOAD_MAX,
 		.statlen = 0,
 		.balen = 3,
 		.whiteen = true,
@@ -307,8 +381,9 @@ static void rx_thread(void *a, void *b, void *c)
 		if (e.kind == 0) {
 			(void)op_ipc_send((const uint8_t *)&e.m, sizeof(e.m));
 		} else {
-			printk("RX %s epoch=%u t_us=%u dropped=%u ant_switches=%u\n",
-			       e.kind == 1 ? "lock" : "reacquire", e.m.epoch, e.t_us, dropped, ant.switches);
+			printk("RX %s epoch=%u t_us=%u dropped=%u ant_switches=%u len=%u td=%d deadline_us=%u\n",
+			       e.kind == 1 ? "lock" : "reacquire", e.m.epoch, e.t_us, dropped, ant.switches,
+			       e.len, e.len == OP_PAYLOAD_MAX, e.deadline);
 		}
 	}
 }
@@ -330,9 +405,11 @@ int op_rx_start(void)
 	timer_init();
 	IRQ_CONNECT(TIMER0_IRQn, 0, timer_isr, NULL, 0);
 	irq_enable(TIMER0_IRQn);
-	printk("RX start pack_id=%d fA=%d fB=%d win_us=%d exp_a_us=%d cc_b_us=%d deadline_us=%d\n",
-	       OP_PACK_ID, OP_CH_A_MHZ, OP_CH_B_MHZ, W_US, EXP_A_US, CC_B_US,
-	       DEADLINE);
+	printk("RX start pack_id=%d fA=%d fB=%d win_us=%d exp_a_us=%d cc_b_us=%d deadline_us=%d "
+	       "td: win_us=%d cc_b_us=%d deadline_us=%d\n",
+	       OP_PACK_ID, OP_CH_A_MHZ, OP_CH_B_MHZ, W_US, EXP_A_US(W_US), CC_B_US(OP_FRAME_LEN),
+	       DEADLINE(OP_FRAME_LEN, W_US), W_TD_US, CC_B_US(OP_PAYLOAD_MAX),
+	       DEADLINE(OP_PAYLOAD_MAX, W_TD_US));
 	nrf_timer_task_trigger(NRF_TIMER0, NRF_TIMER_TASK_START);
 	acquire();
 	return 0;

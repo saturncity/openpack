@@ -88,14 +88,22 @@ jobs:
           }
           check 0.10 10 -power=15
           check 0.40 50 -sigma=0.9
-      - name: "pack frame schedule (AIR-4, #22), 10 s"
+      - name: "pack frame schedule (AIR-4, #22) + app-core stress (FW-2, #87), 10 s each"
         if: ${{ !cancelled() }}
-        timeout-minutes: 10
+        timeout-minutes: 12
         run: |
           export ZEPHYR_SDK_INSTALL_DIR="${ZEPHYR_SDK_INSTALL_DIR:-$(find /opt/toolchains -maxdepth 1 -name 'zephyr-sdk-*' | head -1)}"
+          pip install -q numpy  # check.py: payloads vs sim/codec/codec.py
           west build -p -b nrf5340bsim/nrf5340/cpuapp openpack/fw -d b_fw --sysbuild
           openpack/tests/bsim/sched/run.sh b_fw/fw/zephyr/zephyr.exe 10 | tee sched.txt
           grep -q 'SCHED_CHECK.*PASS' sched.txt
+          # #87: the 50 ms console poll that exposed it, plus a thread above the frame thread waking
+          # every 1 ms for 80 us (inside the 100 us frame lead): still no skip, no repeat.
+          west build -p -b nrf5340bsim/nrf5340/cpuapp openpack/fw -d b_stress --sysbuild -- \
+            -Dfw_CONFIG_OP_TEST_PROTO_POLL_MS=50 -Dfw_CONFIG_OP_TEST_APP_LOAD_PERIOD_US=1000 \
+            -Dfw_CONFIG_OP_TEST_APP_LOAD_BUSY_US=80 -Dfw_CONFIG_OP_TEST_APP_LOAD_PRIO=-3
+          openpack/tests/bsim/sched/run.sh b_stress/fw/zephyr/zephyr.exe 10 | tee sched_stress.txt
+          grep -q 'SCHED_CHECK.*seq_skips=0 repeats=0 .*PASS' sched_stress.txt
       - name: "receiver lock, tracking, merge, pack reboot (RX-2..RX-4, RX-10, #23)"
         if: ${{ !cancelled() }}
         timeout-minutes: 15

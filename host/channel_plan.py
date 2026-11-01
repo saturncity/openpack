@@ -33,6 +33,9 @@ def validate(plan):
         raise ValueError(f"region must be one of {REGIONS}")
     reg = plan["region"]
     pairs = {int(k): (v["fA"], v["fB"]) for k, v in packs.items()}
+    for k, v in packs.items():
+        if not isinstance(v.get("td", False), bool):
+            raise ValueError(f"pack {k}: td must be true or false (ADR-0017)")
     freqs, load, gapped = [], {}, 0
     for pid, (a, b) in pairs.items():
         if not (2402 <= a <= 2440):
@@ -70,6 +73,14 @@ def gap_lost_to_wifi13(pairs):
     """UK: packs whose gap carrier sits under Wi-Fi 13 if a venue uses it: within 10 MHz of 2472. 2482 is 10 MHz
     from it, as 2402 is from Wi-Fi 1, and would need 18.4 dB of isolation (audit.py Audit 4), so it counts as lost."""
     return sorted(k for k, ab in pairs.items() if any(_gap(f) and abs(f - WIFI_13) <= 10 for f in ab))
+
+
+def td(path=PATH):
+    """Packs with time diversity on (optional `td: true` per pack, default off, ADR-0017). The booth pushes it to
+    the receiver (`td on|off`) on pair; the pack itself is set over USB (`td on`) at configuration time."""
+    plan = yaml.safe_load(Path(path).read_text())
+    validate(plan)
+    return {int(k) for k, v in plan["packs"].items() if v.get("td", False)}
 
 
 def region(path=PATH):

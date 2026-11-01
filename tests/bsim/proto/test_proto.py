@@ -89,7 +89,8 @@ def test_rx_status_10hz(rx):
     t0 = time.time()
     for _ in range(20):
         f = kv(modules.request(rx, "status", timeout=0.5))
-        assert set(f) == {"locked", "rssi", "loss", "batt", "peak", "clip", "temp"}
+        assert set(f) == {"locked", "rssi", "loss", "batt", "peak", "clip", "temp", "td"}
+        assert f["td"] == "0"  # no pack on air: nothing seen in time-diversity mode (ADR-0017)
         assert f["locked"] in ("0", "1") and f["clip"] in ("0", "1") and f["temp"] in ("0", "1")
         assert -127 <= int(f["rssi"]) <= 0
         assert 0 <= float(f["loss"]) <= 1
@@ -102,6 +103,7 @@ def test_rx_status_10hz(rx):
 def test_rx_commands(rx):
     assert modules.request(rx, "pair 3 2424 2473") == ""
     assert modules.request(rx, "trim -3.5") == ""
+    assert modules.request(rx, "td on") == "" and modules.request(rx, "td") == "td=on"
     scan = modules.request(rx, "scan").split()
     assert len(scan) == 42 and scan[0] == "2400:-100" and scan[-1] == "2482:-100"
     with pytest.raises(modules.ModuleError, match="^err "):
@@ -119,9 +121,11 @@ def test_pack_cdc_commands(pack):
     assert modules.request(pack, "chan") == "chan=2410,2460"
     assert modules.request(pack, "power -8") == ""
     assert modules.request(pack, "region eu") == ""
+    assert modules.request(pack, "td") == "td=off"  # ADR-0017: off by default
+    assert modules.request(pack, "td on") == ""
     assert modules.request(pack, "save") == ""
     f = kv(modules.request(pack, "info"))
-    assert (f["id"], f["chan"], f["power"], f["region"]) == ("4", "2410,2460", "-8", "eu")
-    for bad in ("id 9", "chan 2410 2420", "power 20", "region zz"):
+    assert (f["id"], f["chan"], f["power"], f["region"], f["td"]) == ("4", "2410,2460", "-8", "eu", "on")
+    for bad in ("id 9", "chan 2410 2420", "power 20", "region zz", "td yes"):
         with pytest.raises(modules.ModuleError, match="^err "):
             modules.request(pack, bad)

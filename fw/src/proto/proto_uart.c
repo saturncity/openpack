@@ -6,11 +6,20 @@
 #include <zephyr/drivers/uart.h>
 #include <zephyr/sys/ring_buffer.h>
 #include "proto.h"
+#include "op_frame.h"
+#include "op_rx.h"
 
 #define PROTO_DEV DEVICE_DT_GET(DT_CHOSEN(zephyr_console))
 
 #ifdef CONFIG_OP_ROLE_RX
-static struct op_rx_state st = {.sample = op_rx_stub_sample};
+/* Telemetry is the stub until #23/#24, except td: what the merge sees (rx_app.c). */
+static void sample(struct op_rx_state *s)
+{
+	op_rx_stub_sample(s);
+	s->td = op_rx_app_td();
+}
+
+static struct op_rx_state st = {.sample = sample};
 #define TBL  op_rx_cmds
 #define NTBL op_rx_ncmds
 #else
@@ -21,9 +30,16 @@ static struct op_pack_state st;
 static int pack_init(void)
 {
 	op_pack_state_init(&st, CONFIG_OP_PACK_ID, CONFIG_OP_CH_A_MHZ, CONFIG_OP_CH_B_MHZ);
+	st.cur.td = IS_ENABLED(CONFIG_OP_TIME_DIVERSITY); /* boot value of `td` (ADR-0017) */
+	st.saved = st.cur;
 	return 0;
 }
 SYS_INIT(pack_init, APPLICATION, 0);
+
+bool op_pack_td(void)
+{
+	return st.cur.td;
+}
 #endif
 
 static void put(const struct device *d, const char *s, size_t n)
@@ -67,7 +83,10 @@ static void proto_thread(void *a, void *b, void *c)
 	uart_irq_rx_enable(d);
 	for (;;) {
 		if (ring_buf_get(&rxrb, &ch, 1) == 0) {
-			k_sem_take(&rxsem, K_FOREVER);
+			/* #87 stress only: OP_TEST_PROTO_POLL_MS > 0 brings back the 50 ms poll. */
+			k_sem_take(&rxsem, CONFIG_OP_TEST_PROTO_POLL_MS > 0
+						   ? K_MSEC(CONFIG_OP_TEST_PROTO_POLL_MS)
+						   : K_FOREVER);
 			continue;
 		}
 		if (ch == '\r') {

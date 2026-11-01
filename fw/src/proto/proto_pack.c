@@ -7,8 +7,8 @@ static const char *c_info(void *c, int argc, char **argv, char *out, size_t n)
 {
 	struct op_pack_state *s = c;
 
-	snprintf(out, n, " fw=%s role=pack id=%d chan=%d,%d power=%d region=%s", OP_FW_VERSION, s->cur.id,
-		 s->cur.ch_a, s->cur.ch_b, s->cur.power_dbm, s->cur.region);
+	snprintf(out, n, " fw=%s role=pack id=%d chan=%d,%d power=%d region=%s td=%s", OP_FW_VERSION, s->cur.id,
+		 s->cur.ch_a, s->cur.ch_b, s->cur.power_dbm, s->cur.region, s->cur.td ? "on" : "off");
 	return NULL;
 }
 
@@ -88,6 +88,23 @@ static const char *c_region(void *c, int argc, char **argv, char *out, size_t n)
 	return NULL;
 }
 
+/* Time diversity (ADR-0017): a configuration-time setting, like chan. The frame source reads it every frame. */
+static const char *c_td(void *c, int argc, char **argv, char *out, size_t n)
+{
+	struct op_pack_state *s = c;
+	int v;
+
+	if (argc == 0) {
+		snprintf(out, n, " td=%s", s->cur.td ? "on" : "off");
+		return NULL;
+	}
+	if (argc != 1 || (v = op_parse_onoff(argv[0])) < 0) {
+		return "usage: td [on|off]";
+	}
+	s->cur.td = v;
+	return NULL;
+}
+
 static const char *c_save(void *c, int argc, char **argv, char *out, size_t n)
 {
 	struct op_pack_state *s = c;
@@ -99,7 +116,8 @@ static const char *c_save(void *c, int argc, char **argv, char *out, size_t n)
 
 const struct op_cmd op_pack_cmds[] = {
 	{"info", c_info},   {"id", c_id},         {"chan", c_chan},
-	{"power", c_power}, {"region", c_region}, {"save", c_save},
+	{"power", c_power}, {"region", c_region}, {"td", c_td},
+	{"save", c_save},
 };
 const size_t op_pack_ncmds = sizeof(op_pack_cmds) / sizeof(op_pack_cmds[0]);
 

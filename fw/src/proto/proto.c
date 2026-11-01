@@ -35,6 +35,11 @@ int op_parse_int(const char *s, long lo, long hi, long *v)
 	return 0;
 }
 
+int op_parse_onoff(const char *s)
+{
+	return !strcmp(s, "on") ? 1 : !strcmp(s, "off") ? 0 : -1;
+}
+
 int op_parse_tenths(const char *s, int limit, int *tenths)
 {
 	int neg = 0, whole = 0, frac = 0, digits = 0;

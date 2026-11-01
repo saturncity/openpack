@@ -109,7 +109,7 @@ PR #95's rule: every stage's total input ≥ 6 dB under its worst P1dB, and PIMD
 - BT40E modules on the eight receiver sub-boards, no pad, and the W1 rule.
 - It is the only option that meets the wing NF need with margin, keeps every stage ≥ 6 dB under P1dB and inside the nRF5340 PIMD in all venues and both regions, and still doesn't compress with a pack 0.5 m on axis. PIMD fails there, which is why the rule exists. It is also the cheapest.
 - The receiver never transmits in v1 (ADR-0004), so it doesn't need a PA. A later downlink would get the nRF5340's own +3 dBm, plenty at stage range.
-- `hw/rx/rx.py` takes its pin functions from the Fanstel BT40/F/E/N/NE spec v1.08, which also covers the BT40E. Confirm the BT40E outline and u.FL position before layout (#34).
+- The BT40E is u.FL-only, no FEM: Fanstel $9.55, DigiKey UK £9.78, 803 in stock (`docs/analysis/module-antenna.md`, #106). Its footprint differs from the BT40NE's (14×16 mm BT40 pads), so `hw/rx` swaps the symbol and footprint before layout (#32/#34). The receiver's ANT_SEL item (#105) goes away; the pack keeps the BT40NE.
 - Crew phones in the wings would be inside any option's phone distance, so the install doc says airplane mode in the wings.
 - bsim doesn't model compression; the `*-onaxis` runs (§4) show only the C/I side.
 
@@ -161,4 +161,4 @@ The run: `run.py --only bc --eirp 9 --plan host/channel_plan_us.yaml --geometry 
 - **Propagation:** free space only: no body loss, multipath or curtain loss (wing masking costs ~1 dB). Body blocking (R10) is helped by the two opposite wings, but it isn't modelled here.
 - **Static geometry:** bsim holds each geometry still for 20 s. RX-5 is replayed from a converged state, so walking transients are covered by the other copy, but they aren't timed.
 - **2482 carrier:** bsim stops at 2480 MHz, so pack 1's 2482 carrier is credited by equivalence (ADR-0016).
-- **Compression:** compression and PIMD come from datasheet limits (PR #95), not from bsim. The BT40E outline is not yet checked.
+- **Compression:** compression and PIMD come from datasheet limits (PR #95), not from bsim. The BT40E footprint swap in `hw/rx` is still to do.
