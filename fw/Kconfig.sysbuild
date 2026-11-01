@@ -1,3 +1,11 @@
+# #120: MCUboot on the app core has no hardware RNG (the app core has none; the nRF5340 RNG is on the
+# net core, reached over HCI, which MCUboot lacks). RSA via PSA then selects the insecure
+# TEST_RANDOM_GENERATOR. ECDSA-P256 only verifies, so it needs no RNG: default it on our boards.
+# Declared before the stock choice so this default wins.
+choice BOOT_SIGNATURE_TYPE
+	default BOOT_SIGNATURE_TYPE_ECDSA_P256 if $(BOARD) = "openpack_pack" || $(BOARD) = "openpack_rx"
+endchoice
+
 source "share/sysbuild/Kconfig"
 
 config OP_ROLE_RX
