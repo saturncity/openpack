@@ -402,7 +402,9 @@ def placement(P):
     pl[P.one("+3V3", "TP")] = (190.0, 210.6, 0)
     pl["U12"] = (232.0, 300.0, 0)
     ilm, dv, cin, co = efuse_parts(P, "U12")
-    pl[ilm] = (229.0, 302.6, 90); pl[dv] = (230.2, 302.6, 90); pl[cin] = (229.4, 297.8, 0); pl[co] = (235.0, 302.0, 90)
+    ux, uy = 232.0, 300.0           # the slot eFuses' cluster (#34)
+    pl[ilm] = (ux + 1.0, uy + 2.0, 180); pl[dv] = (ux - 1.8, uy + 2.8, 90)
+    pl[cin] = (ux - 2.6, uy - 2.0, 0); pl[co] = (ux + 3.0, uy + 2.4, 90)
     en = P.on("U12_EN", "R"); pl[en[0]] = (227.6, 297.2, 90); pl[en[1]] = (226.2, 297.2, 90)
     pl["J5"] = (232.0, 309.5, 0)
     pl[P.one("+12V_HOST", "TP")] = (236.4, 305.6, 0)
@@ -581,7 +583,7 @@ def courtyard_overlaps(fps, t=0.03):
 
 
 FIXED_PREFIX = ("J", "U", "H", "Q", "F")
-PAD_EXTRA = ("BUCK_EN",)       # 0.5 mm pitch beside VIN: keep the VIN neck a full Power clearance away
+PAD_EXTRA = ()       # 0.5 mm pitch beside VIN: keep the VIN neck a full Power clearance away
 
 
 def legalize(fps, pl, margin=0.1, passes=400):
@@ -956,6 +958,48 @@ def gnd_hand(b, cu, fps, gnd_vias):
         xs = sorted(v[0] for v in flt)
         pk.add_track(b, NETS["HOST_GPIO6"], P_.In2_Cu, (xs[0], ty), (xs[-1], ty), 0.2)
         cu.seg(1, (xs[0], ty), (xs[-1], ty), 0.2, "HOST_GPIO6")
+    hand_signals(b, cu, fps)
+
+
+def hand_signals(b, cu, fps):
+    """signal hops the generic router got wrong or could not start (#34):
+    - every TPS2595 ILM pin 7 -> its resistor (east along the pin axis, then up past pin 8);
+    - TPS62933 VIN pin 3 -> its 100 nF (west along the pin axis: a slanted neck passed EN pin 2 at 0.11 mm);
+    - the SC16IS752s' right-hand pin column: each signal pin to its own via, two staggered columns (the slot nets
+      leave that column in a fan, and the last one routed found its pin walled in)."""
+    import pcbnew as P_
+
+    def track(net, pts, w=0.2):
+        for a, c in zip(pts, pts[1:]):
+            pk.add_track(b, NETS[net], P_.F_Cu, a, c, w)
+            cu.seg(0, a, c, w, net)
+    for ref, fp in fps.items():
+        if not str(fp.GetFPID().GetLibItemName()).startswith("Texas_DSG0008A"):
+            continue
+        a = pc(fps, ref, "7")
+        net = [p_.GetNetname() for p_ in fp.Pads() if p_.GetNumber() == "7"][0]
+        rr = [r_ for r_ in fps if r_.startswith("R") and any(p_.GetNetname() == net for p_ in fps[r_].Pads())][0]
+        num = [p_.GetNumber() for p_ in fps[rr].Pads() if p_.GetNetname() == net][0]
+        t = pc(fps, rr, num)
+        track(net, [a, (t[0], a[1]), t])
+        HAND.update({(ref, "7"), (rr, num)})
+    a, t = pc(fps, "U2", "3"), pc(fps, "C11", "1")
+    track("+12V_BUS", [a, (a[0] - 0.66, a[1]), t], 0.3)
+    VIN_HIDDEN.add(("U2", "3"))
+    for ref in ("U4", "U5"):
+        for p_ in fps[ref].Pads():
+            net, n = p_.GetNetname(), int(p_.GetNumber())
+            if n < 15 or not net or net in ("GND", "+3V3"):
+                continue
+            a = pc(fps, ref, str(n))
+            v = (a[0] + 1.25 + (1.1 if n % 2 else 0.0), a[1])
+            track(net, [a, v])
+            pk.add_via(b, NETS[net], v)
+            cu.via_at(v, net, d=VIA_D + 0.05)
+            HAND.add((ref, str(n)))
+
+
+VIN_HIDDEN = set()    # pads joined by hand to a pad the router does join: hidden from the router (no island)
 
 
 def gnd_fanout(b, cu, pads, gnd_vias, log):
@@ -1023,7 +1067,7 @@ def zone_fanout(b, cu, pads, net, rect, log, placed):
             cx, cy = (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2
             g, _ = cu.grid((cx - 6, cy - 6, cx + 6, cy + 6), net)
             best = None
-            for r in (0.0, 0.6, 0.9, 1.2, 1.6, 2.0, 2.5, 3.0, 3.6):
+            for r in ((1.2, 1.6, 2.0, 2.5, 3.0, 3.6) if ref.startswith("NT") else (0.0, 0.6, 0.9, 1.2, 1.6, 2.0, 2.5, 3.0, 3.6)):
                 for ang in (270, 240, 300, 180, 0, 210, 330, 90, 120, 60, 150, 30):
                     a = math.radians(ang)
                     vx, vy = cx + r * math.cos(a), cy + r * math.sin(a)
@@ -1254,6 +1298,7 @@ def main(argv):
     import pcbnew as P_
     RF_LOG.clear()
     HAND.clear()
+    VIN_HIDDEN.clear()
     b, fps, netinfo, nets, P, pl = build()
     NETS.clear(); NETS.update(netinfo)
     bad = legalize(fps, pl)
@@ -1270,6 +1315,9 @@ def main(argv):
     for key in HAND:
         for it in pads.get(key, []):
             it.conn = True
+    for key in VIN_HIDDEN:
+        for it in pads.get(key, []):
+            it.net = "__hidden"
     print("placed, RF drawn", flush=True)
     nf = gnd_fanout(b, cu, pads, gnd_vias, log)
     print(f"GND fan-out {nf}", flush=True)
