@@ -53,41 +53,12 @@ H_L1L2, ER = 0.2104, 4.4
 
 
 # ---------------------------------------------------------------------------------------------------------------
-# 50 ohm grounded coplanar waveguide on L1 (gap G to the L1 GND pour) over the L2 plane. Conductor-backed CPW,
-# Wadell "Transmission Line Design Handbook" 3.4.3 (Ghione/Naldi), zero-thickness: the 35 um copper lowers Z0 by
-# ~1 ohm, inside the JLC +-10 % impedance tolerance. The pack's microstrip formula (pk.microstrip_z0) is the G -> inf limit.
+# 50 ohm grounded coplanar waveguide on L1 (0.25 mm gap to the L1 GND pour) over the L2 plane. Sized with a 2D field
+# solve of this stackup (hw/rx/rf_line.py: the closed-form CPW formula is off for gap > h), calibrated on the pack's
+# Hammerstad-Jensen microstrip: w = 0.31 mm -> 50.1 ohm.
 # ---------------------------------------------------------------------------------------------------------------
-def _K(k):
-    """complete elliptic integral of the first kind, by the arithmetic-geometric mean"""
-    a, b = 1.0, math.sqrt(1 - k * k)
-    for _ in range(40):
-        a, b = (a + b) / 2, math.sqrt(a * b)
-    return math.pi / (2 * a)
-
-
-def gcpw_z0(w, g, h=H_L1L2, er=ER):
-    k = w / (w + 2 * g)
-    k1 = math.tanh(math.pi * w / (4 * h)) / math.tanh(math.pi * (w + 2 * g) / (4 * h))
-    r = _K(math.sqrt(1 - k * k)) / _K(k)          # K(k')/K(k)
-    r1 = _K(k1) / _K(math.sqrt(1 - k1 * k1))       # K(k1)/K(k1')
-    eeff = (1 + er * r * r1) / (1 + r * r1)
-    z = 60 * math.pi / math.sqrt(eeff) / (1 / r + r1)
-    return z, eeff
-
-
-def gcpw_width(z_target=50.0, g=0.25):
-    lo, hi = 0.05, 2.0
-    for _ in range(60):
-        mid = (lo + hi) / 2
-        if gcpw_z0(mid, g)[0] > z_target:
-            lo = mid
-        else:
-            hi = mid
-    return (lo + hi) / 2
-
-
-RF_GAP = 0.25                                  # L1 pour clearance to the RF line (netclass RF_50R clearance)
-RF_W = round(gcpw_width(50.0, RF_GAP), 2)      # 0.35 mm, see hw/REVIEW.md
+rf_line = _load("hw_rx_rf_line", HERE / "rf_line.py")
+RF_W, RF_GAP = rf_line.RF_W, rf_line.RF_GAP
 RF_NETS = ("RF_A", "RF_B", "SW_RF1", "SW_RF2", "SW_RFC", "RF_OUT")
 FENCE_OFF, FENCE_PITCH = 1.0, 1.2              # via fence: centre 1.0 mm off the line, 1.2 mm pitch (lambda/28 in FR4)
 
@@ -147,7 +118,7 @@ PLACE = {
     "R50": (4.0, 54.9, 0), "R47": (11.6, 54.9, 0),
     "D6": (2.1, 49.8, 90), "D4": (5.9, 49.8, 90), "D3": (9.7, 49.8, 90), "D5": (13.5, 49.8, 90),
     "C47": (3.2, 40.0, 0), "C48": (3.2, 29.0, 0), "R54": (12.4, 36.0, 90), "R55": (12.4, 25.4, 90),
-    "K1": (8.8, 16.8, 270), "R49": (2.8, 8.4, 0), "R52": (6.0, 8.4, 0), "R48": (12.2, 8.9, 90), "R51": (13.6, 8.9, 90),
+    "K1": (8.8, 16.8, 270), "R49": (2.0, 8.1, 90), "R52": (10.3, 8.0, 0), "R48": (4.2, 8.1, 90), "R51": (7.6, 8.0, 0),
     # --- +12 V entry, hold-up, coil drive, supervisor (middle column) ---
     "D1": (17.4, 9.6, 90), "D7": (18.2, 17.0, 270), "Q1": (18.8, 23.8, 0), "R62": (21.6, 22.0, 90), "R63": (23.0, 22.0, 90),
     "TP13": (21.8, 26.0, 0),
@@ -160,7 +131,7 @@ PLACE = {
     "U4": (34.0, 50.0, 0), "C3": (30.2, 50.0, 90), "C4": (38.05, 50.4, 90), "TP4": (40.6, 50.0, 0),
     "TP6": (29.0, 21.0, 0),
     # --- module decoupling + SWD ---
-    "C10": (44.0, 70.6, 90), "C11": (42.4, 70.6, 90), "C12": (40.6, 70.6, 90),
+    "C10": (43.0, 71.6, 90), "C11": (44.6, 72.0, 90), "C12": (40.6, 70.6, 90),
     "J2": (40.0, 60.0, 0),
     # --- backplane series resistors above J1 pins 13..26 ---
     "R33": (25.6, 8.4, 90), "R34": (27.6, 8.4, 90), "R20": (30.2, 8.4, 90), "R22": (32.6, 8.4, 90), "R31": (35.2, 8.4, 90),
@@ -169,6 +140,12 @@ PLACE = {
     "R24": (33.0, 14.0, 90), "R28": (36.6, 14.0, 90), "R29": (38.4, 14.0, 90), "R30": (40.2, 14.0, 90),
 }
 FIXED = {"C37", "C38", "U1", "J1", "J3", "J4", "J5", "U2", "C20", "C21", "C22", "K1", "C47", "C48", "U3", "U6", "H1", "H2", "J2"}
+
+# silkscreen: refdes inside the body outline where pads leave room; tiny parts keep theirs on F.Fab; the antenna
+# inputs get a plain label (the jumpers are plugged by hand)
+REF_AT = {"K1": (8.8, 16.8), "U6": (8.2, 59.6), "U3": (10.4, 72.5)}
+HIDE_REF = {"J3", "J4", "U2", "U5"}
+SILK_TEXT = {"ANT A": (13.0, 76.6), "ANT B": (12.6, 88.6), "OpenPack RX #34": (38.5, 46.0), "J1 underside, pin 1": (13.0, 0.9)}
 
 # PCM5102A charge pump: pin -> cap pad as an L-shaped L1 stub (out along the pin, then onto the pad), drawn before
 # the GND fan-out so the CPGND/AGND vias cannot take the room (ref, pad, ref, pad). These two-pin nets are not routed.
@@ -249,7 +226,7 @@ def build():
             fp.SetPosition(V(x, y))
             fp.SetOrientationDegrees(rot)
         fps[ref] = fp
-        if ref[0] in "RCLDQ" or ref.startswith("TP"):
+        if ref[0] in "RCLDQ" or ref.startswith("TP") or ref in HIDE_REF:
             fp.Reference().SetVisible(False)
         else:
             fp.Reference().SetTextSize(P.VECTOR2I(mm(0.8), mm(0.8)))
@@ -279,6 +256,14 @@ def build():
                 if p.GetNumber() == pin:
                     p.SetNet(netinfo[name]); hit += 1
             assert hit, (ref, pin)
+    for ref, (x, y) in REF_AT.items():
+        fps[ref].Reference().SetPosition(V(x, y))
+        fps[ref].Reference().SetTextAngleDegrees(0)
+    for txt, (x, y) in SILK_TEXT.items():
+        t = P.PCB_TEXT(b)
+        t.SetText(txt); t.SetLayer(P.F_SilkS); t.SetPosition(V(x, y))
+        t.SetTextSize(P.VECTOR2I(mm(0.8), mm(0.8))); t.SetTextThickness(mm(0.15))
+        b.Add(t)
     return b, fps, netinfo, nets
 
 
@@ -751,7 +736,9 @@ def segments(path=BOARD):
 def drc(out=None):
     out = out or (HERE / "out" / "drc.json")
     out.parent.mkdir(exist_ok=True)
-    subprocess.run(["kicad-cli", "pcb", "drc", "--format", "json", "--severity-all", "--refill-zones",
+    # --save-board keeps the refilled zones: only kicad-cli's fill sees rx.kicad_pro's netclass clearances (the RF_50R
+    # 0.25 mm coplanar gap); the pcbnew Python fill used the zone's 0.2 mm, and the fab outputs export the saved fill
+    subprocess.run(["kicad-cli", "pcb", "drc", "--format", "json", "--severity-all", "--refill-zones", "--save-board",
                     "-o", str(out), str(BOARD)], capture_output=True, text=True)
     rep = json.loads(out.read_text())
     errs = [v for v in rep.get("violations", []) if v.get("severity") == "error"]
@@ -775,9 +762,8 @@ def main(argv):
     save(b)
     rep, errs, warns, unconn = drc()
     print(pk.summarize(errs, warns, unconn))
-    z, ee = gcpw_z0(RF_W, RF_GAP)
-    print(f"50 ohm GCPW L1/L2 (h {H_L1L2}, er {ER}, gap {RF_GAP}): w = {gcpw_width(50.0, RF_GAP):.3f} mm -> {RF_W} mm, "
-          f"Z0 {z:.1f} ohm, eeff {ee:.2f}; microstrip limit {pk.width_for(50.0):.3f} mm")
+    print(f"50 ohm GCPW L1/L2 (h {H_L1L2}, er {ER}): w {RF_W} mm, gap {RF_GAP} mm -> {rf_line.z_cal(RF_W, RF_GAP):.1f} ohm "
+          f"(rf_line.py); microstrip would be {pk.width_for(50.0):.3f} mm")
     print("placement after legalize:", {k: v for k, v in PLACE.items()})
     if "--no-out" not in argv:
         outputs_rx = _load("hw_rx_outputs", HERE / "outputs_rx.py")

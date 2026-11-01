@@ -1,0 +1,52 @@
+(version 1)
+# JLCPCB 4-layer standard capabilities (jlcpcb.com/capabilities/pcb-capabilities, 1 oz outer / 0.5 oz inner), the same
+# limits as hw/pack/pack.kicad_dru. The router works to larger values (0.15 clearance, 0.2 signal / 0.5 power tracks,
+# 0.6/0.3 via), so passing here leaves DFM margin. Numbers: hw/REVIEW.md (receiver section).
+
+(rule "JLC track width"
+  (constraint track_width (min 0.09mm)))
+
+(rule "JLC copper clearance"
+  (constraint clearance (min 0.09mm)))
+
+(rule "JLC via"
+  (condition "A.Type == 'Via'")
+  (constraint hole_size (min 0.15mm))
+  (constraint via_diameter (min 0.25mm))
+  (constraint annular_width (min 0.075mm)))
+
+(rule "JLC PTH"
+  (condition "A.Type == 'Pad' && A.isPlated()")
+  (constraint hole_size (min 0.15mm) (max 6.3mm))
+  (constraint annular_width (min 0.1mm)))
+
+(rule "JLC NPTH"
+  (condition "A.Type == 'Pad' && !A.isPlated()")
+  (constraint hole_size (min 0.5mm)))
+
+(rule "JLC hole to hole"
+  (constraint hole_to_hole (min 0.25mm)))
+
+(rule "JLC copper to edge"
+  (constraint edge_clearance (min 0.3mm)))
+
+(rule "JLC silkscreen"
+  (layer "?.Silkscreen")
+  (constraint text_height (min 0.8mm))
+  (constraint text_thickness (min 0.15mm)))
+
+# RF_50R: 50 ohm grounded coplanar waveguide on L1 over the L2 plane, JLC04161H-7628 (h 0.2104 mm, er 4.4), 0.25 mm gap
+# to the L1 GND pour: w = 0.31mm -> 50.1 ohm (hw/rx/rf_line.py field solve). The gap is the netclass clearance (rx.kicad_pro).
+(rule "RF_50R width"
+  (condition "A.NetClass == 'RF_50R'")
+  (constraint track_width (min 0.30mm) (opt 0.31mm) (max 0.32mm)))
+
+(rule "RF_50R gap"
+  (condition "A.NetClass == 'RF_50R' || B.NetClass == 'RF_50R'")
+  (constraint clearance (min 0.24mm)))
+
+# rails, relay coil and the audio output legs (#104 review M1 lesson): never on the 15 um inner copper
+(rule "current paths on outer copper"
+  (condition "(A.NetClass == 'Power' || A.NetClass == 'Audio_I') && A.Type == 'Track' && A.Width > 0.25mm")
+  (layer inner)
+  (constraint disallow track))

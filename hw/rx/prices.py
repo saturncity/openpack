@@ -52,7 +52,7 @@ PRICES = {  # mpn: (usd_each_at_100, source, uk_distributor)
 
 # Items with no schematic symbol.
 EXTRAS = [  # (item, qty, usd_each, source, uk_distributor)
-    ("PCB 4-layer ~40x80 mm (50 ohm RF traces)", 1, 1.50, "est. (qty-100 panel share)", "JLCPCB (ships to UK)"),
+    ("PCB 4-layer 48x90 mm (50 ohm RF traces)", 1, 1.50, "est. (qty-100 panel share; size from the #34 layout)", "JLCPCB (ships to UK)"),
     ("U.FL-U.FL jumper 50 mm (switch out -> module u.FL)", 1, 1.50, "est.", "LCSC / RS UK"),
 ]
 

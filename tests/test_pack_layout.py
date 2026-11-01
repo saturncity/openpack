@@ -126,3 +126,15 @@ def test_jlc_rotation_corrections():
     assert outputs.jlc_rot("SOT-23", 0) == 180 and outputs.jlc_rot("SOT-23-5", 270) == 90
     assert outputs.jlc_rot("WQFN-24-1EP_4x4mm_P0.5mm_EP2.6x2.6mm", 180) == 90
     assert outputs.jlc_rot("SOIC-8_3.9x4.9mm_P1.27mm", 0) == 270 and outputs.jlc_rot("C_0402_1005Metric", 90) == 90
+
+
+@needs_kicad
+def test_dru_rules_are_loaded(tmp_path):
+    """#34 receiver review: KiCad 10 ignores the whole .kicad_dru when one rule does not parse. The pack's
+    `min_resolved_spokes` rule did that, so the JLC minimums were never checked. A probe rule must now fire."""
+    board = _copy_board(tmp_path)
+    (tmp_path / "pack.kicad_dru").write_text((PACK / "pack.kicad_dru").read_text() +
+                                             '\n(rule "probe"\n  (constraint track_width (min 5mm)))\n')
+    out = tmp_path / "drc.json"
+    subprocess.run([KICAD, "pcb", "drc", "--format", "json", "-o", str(out), str(board)], check=True, capture_output=True)
+    assert any(v["type"] == "track_width" for v in json.loads(out.read_text())["violations"])
