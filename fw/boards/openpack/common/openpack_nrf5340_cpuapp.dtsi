@@ -1,0 +1,68 @@
+/* OpenPack boards, nRF5340 application core: everything that is not a pin (#118).
+ * Pins live only in the generated <board>_nrf5340_cpuapp-pins.dtsi (fw/boards/openpack/gen_pins.py, from the netlist).
+ * Fanstel BT40NE / BT40E (ADR-0007, ADR-0021): 32 MHz and 32.768 kHz crystals and both DC/DC inductors are on the
+ * module (Fanstel v1.09 p.26). VDD = VDDH = 3.3 V (normal-voltage mode, ADR-0012/0014), so REG0 (vregh) is unused.
+ * No external QSPI flash on either board: &qspi stays disabled. MCUboot uses the internal 1 MB (FW-6).
+ */
+#include <nordic/nrf5340_cpuapp_qkaa.dtsi>
+#include <zephyr/dt-bindings/adc/nrf-saadc.h>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/ {
+	chosen {
+		zephyr,console = &uart0;
+		zephyr,shell-uart = &uart0;
+		zephyr,uart-mcumgr = &uart0;
+		zephyr,sram = &sram0_image;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &slot0_partition;
+		zephyr,sram-secure-partition = &sram0_s;
+		zephyr,sram-non-secure-partition = &sram0_ns;
+	};
+};
+
+&vregmain {
+	regulator-initial-mode = <NRF5X_REG_MODE_DCDC>;
+};
+
+&vregradio {
+	regulator-initial-mode = <NRF5X_REG_MODE_DCDC>;
+};
+
+/* LFXO: Fanstel does not state the 32.768 kHz load; the DK's 7 pF internal until the bench check (Phase 5). */
+&lfxo {
+	load-capacitors = "internal";
+	load-capacitance-picofarad = <7>;
+};
+
+&adc {
+	status = "okay";
+};
+
+&gpiote {
+	status = "okay";
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&uart0 {
+	compatible = "nordic,nrf-uarte";
+	status = "okay";
+	current-speed = <115200>;
+};
+
+/* I2S0 pins come from pinctrl; firmware drives it through the nrfx HAL (fw/src/audio/op_audio_i2s.c), not the
+ * Zephyr I2S driver (CONFIG_I2S stays off). "okay" so the nRF pinctrl driver handles the I2S PSEL functions.
+ */
+&i2s0 {
+	status = "okay";
+};
+
+/* Default MCUboot layout: mcuboot 64 kB, slot0/slot1 464 kB each, storage 32 kB; SRAM split and IPC shared SRAM. */
+#include <nordic/nrf5340_cpuapp_partition.dtsi>

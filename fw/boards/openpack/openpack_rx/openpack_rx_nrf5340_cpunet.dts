@@ -1,0 +1,9 @@
+/* OpenPack receiver sub-board (Fanstel BT40E), nRF5340 network core (#118). No pin numbers here: see the generated -pins.dtsi. */
+/dts-v1/;
+#include "../common/openpack_nrf5340_cpunet.dtsi"
+#include "openpack_rx_nrf5340_cpunet-pins.dtsi"
+
+/ {
+	model = "OpenPack receiver sub-board (Fanstel BT40E) nRF5340 Network";
+	compatible = "openpack,openpack-rx-nrf5340-cpunet";
+};

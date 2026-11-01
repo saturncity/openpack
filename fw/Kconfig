@@ -2,6 +2,7 @@ mainmenu "OpenPack firmware"
 
 choice OP_ROLE
 	prompt "Device role (FW-1)"
+	default OP_ROLE_RX if BOARD_OPENPACK_RX
 	default OP_ROLE_PACK
 
 config OP_ROLE_PACK
@@ -184,6 +185,41 @@ config OP_TX_MAX_CONDUCTED_DBM
 	  EN 300 328 non-adaptive line. A build whose OP_TX_SOC_DBM (+ OP_FEM_GAIN_DB with a FEM) exceeds this does
 	  not compile (fw/src/net/op_fem.h). Raise it only for a US-region build (ADR-0015, FCC 15.247).
 
+# PK-8 / ADR-0012 (#118): cell monitor on boards with the VBAT_SENSE divider (openpack_pack).
+config OP_BATT
+	bool "Pack battery LEDs and 3.3 V cutoff from the board's vbat voltage divider"
+	default y if OP_ROLE_PACK && SOC_COMPATIBLE_NRF5340_CPUAPP && $(dt_nodelabel_enabled,vbat)
+	select ADC
+	select POWEROFF
+
+config OP_BATT_CUTOFF_MV
+	int "Shut down below this cell voltage, under load (mV, ADR-0012)"
+	default 3300
+	depends on OP_BATT
+
+config OP_BATT_LOW_MV
+	int "Battery LED red below this cell voltage (mV, PK-8)"
+	default 3400
+	depends on OP_BATT
+
+config OP_BATT_HYST_MV
+	int "Battery LED back to green this far above OP_BATT_LOW_MV (mV)"
+	default 50
+	depends on OP_BATT
+
+config OP_BATT_CUTOFF_SAMPLES
+	int "Consecutive samples below the cutoff before shutdown"
+	default 5
+	range 1 255
+	depends on OP_BATT
+	help
+	  At one sample per second, 5 s below 3.3 V: a single TX current spike or ADC outlier does not end a show.
+
+config OP_BATT_PERIOD_MS
+	int "Battery sample period (ms)"
+	default 1000
+	depends on OP_BATT
+
 # FW-2: the nRF5340 builds split work across cores over ipc0.
 config OP_NRF5340
 	bool
@@ -196,14 +232,14 @@ rsource "src/rx_app/Kconfig"
 
 choice OP_AUDIO_BACKEND
 	prompt "Audio I/O backend (FW-3)"
-	default OP_AUDIO_I2S if BOARD_NRF5340DK
+	default OP_AUDIO_I2S if BOARD_NRF5340DK || BOARD_OPENPACK_PACK || BOARD_OPENPACK_RX
 	default OP_AUDIO_WAV
 
 config OP_AUDIO_WAV
 	bool "WAV files on the host (native_sim, nrf5340bsim)"
 
 config OP_AUDIO_I2S
-	bool "I2S hardware (stub until Phase 5)"
+	bool "I2S hardware: PCM1840 capture (pack), PCM5102A output (receiver)"
 
 endchoice
 

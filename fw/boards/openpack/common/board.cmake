@@ -1,0 +1,10 @@
+# OpenPack boards (#118): SWD on Tag-Connect pads, so the same runners as the nRF5340 DK.
+if(CONFIG_SOC_NRF5340_CPUAPP)
+  board_runner_args(jlink "--device=nrf5340_xxaa_app" "--speed=4000")
+endif()
+if(CONFIG_SOC_NRF5340_CPUNET)
+  board_runner_args(jlink "--device=nrf5340_xxaa_net" "--speed=4000")
+endif()
+include(${ZEPHYR_BASE}/boards/common/nrfutil.board.cmake)
+include(${ZEPHYR_BASE}/boards/common/nrfjprog.board.cmake)
+include(${ZEPHYR_BASE}/boards/common/jlink.board.cmake)

@@ -1,0 +1,11 @@
+identifier: openpack_rx/nrf5340/cpunet
+name: OpenPack-rx-nRF5340-cpunet
+vendor: openpack
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+ram: 64
+flash: 92
+supported:
+  - gpio

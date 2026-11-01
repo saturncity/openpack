@@ -1,0 +1,56 @@
+/* OpenPack boards, nRF5340 network core (#118). The net core has no UART pin on either board (the DK's P1.00/P1.01
+ * net-core console would collide with the receiver's ANT_SEL on P1.01), so its console is SEGGER RTT over SWD.
+ * Net-core GPIOs (FEM on the pack, ANT_SEL on the receiver) are handed over by the app core's gpio_fwd node.
+ */
+#include <nordic/nrf5340_cpunet_qkaa.dtsi>
+
+/ {
+	chosen {
+		zephyr,sram = &sram1;
+		zephyr,flash = &flash1;
+		zephyr,code-partition = &slot0_partition;
+	};
+};
+
+&gpiote {
+	status = "okay";
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&flash1 {
+	partitions {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		boot_partition: partition@0 {
+			compatible = "zephyr,mapped-partition";
+			label = "mcuboot";
+			reg = <0x00000000 0xc000>;
+		};
+		slot0_partition: partition@c000 {
+			compatible = "zephyr,mapped-partition";
+			label = "image-0";
+			reg = <0x0000c000 0x17000>;
+		};
+		slot1_partition: partition@23000 {
+			compatible = "zephyr,mapped-partition";
+			label = "image-1";
+			reg = <0x00023000 0x17000>;
+		};
+		storage_partition: partition@3a000 {
+			compatible = "zephyr,mapped-partition";
+			label = "storage";
+			reg = <0x0003a000 0x6000>;
+		};
+	};
+};
+
+#include <nordic/nrf5340_shared_sram_partition.dtsi>

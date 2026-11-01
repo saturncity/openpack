@@ -1,0 +1,2 @@
+/* App-level devicetree for the pack board (#118): the same icmsg IPC as the DK. Pins are in the board. */
+#include "nrf5340dk_nrf5340_cpuapp.overlay"

@@ -1,0 +1,9 @@
+/* OpenPack body-pack (Fanstel BT40NE), nRF5340 network core (#118). No pin numbers here: see the generated -pins.dtsi. */
+/dts-v1/;
+#include "../common/openpack_nrf5340_cpunet.dtsi"
+#include "openpack_pack_nrf5340_cpunet-pins.dtsi"
+
+/ {
+	model = "OpenPack body-pack (Fanstel BT40NE) nRF5340 Network";
+	compatible = "openpack,openpack-pack-nrf5340-cpunet";
+};

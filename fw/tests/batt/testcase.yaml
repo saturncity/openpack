@@ -1,0 +1,5 @@
+tests:
+  # PK-8 / ADR-0012 cell monitor (fw/src/app/op_batt.c): divider scaling, LOW hysteresis, 3.3 V cutoff, pure C.
+  fw.batt:
+    platform_allow: native_sim
+    tags: openpack

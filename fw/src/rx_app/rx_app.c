@@ -165,6 +165,10 @@ int op_rx_app_start(void)
 	op_plc_init(&plc);
 	op_clk_init(&pi, CONFIG_OP_RX_CLK_KP_PPB, CONFIG_OP_RX_CLK_KI_PPB, CONFIG_OP_RX_CLK_LIM_PPB);
 	audio_ok = op_audio_start() == 0;
+	err = op_rx_out_start(audio_ok); /* XSMT now, relay OUT_EN >= 5 s after boot (ADR-0014) */
+	if (err != 0) {
+		return err;
+	}
 	printk("RXAPP_CFG audio out %s, slot target %d samples, kp %d ki %d ppb\n",
 	       audio_ok ? "on" : "off (no backend or no input WAV)", TARGET,
 	       CONFIG_OP_RX_CLK_KP_PPB, CONFIG_OP_RX_CLK_KI_PPB);

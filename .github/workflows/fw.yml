@@ -216,8 +216,15 @@ jobs:
       - name: build BabbleSim
         working-directory: tools/bsim
         run: make everything -s -j4
-      - name: twister fw/
+      - name: "twister fw/, incl. openpack_pack / openpack_rx build-only (#118)"
         run: |
           export ZEPHYR_SDK_INSTALL_DIR="${ZEPHYR_SDK_INSTALL_DIR:-$(find /opt/toolchains -maxdepth 1 -name 'zephyr-sdk-*' | head -1)}"
+          export BOARD_ROOT="$PWD/openpack/fw"  # our boards for the (sysbuild) cmake runs; --board-root for twister
           west twister -T openpack/fw -p native_sim -p nrf5340bsim/nrf5340/cpuapp -p nrf5340dk/nrf5340/cpuapp \
+            -p openpack_pack/nrf5340/cpuapp -p openpack_rx/nrf5340/cpuapp --board-root "$BOARD_ROOT/boards" \
             -v --inline-logs --outdir twister-out
+      - name: "board devicetree pins vs. the netlists (#118)"
+        run: |
+          export ZEPHYR_SDK_INSTALL_DIR="${ZEPHYR_SDK_INSTALL_DIR:-$(find /opt/toolchains -maxdepth 1 -name 'zephyr-sdk-*' | head -1)}"
+          python3 openpack/fw/boards/openpack/gen_pins.py --check
+          python3 openpack/fw/boards/openpack/gen_pins.py --check-dts twister-out
