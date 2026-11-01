@@ -11,3 +11,4 @@ Status: accepted. Issue #87. Follow-ups #97 (silicon: hold the lead), #98 (latch
 | R13 | ✓ bsim stress in CI, bit-exact payloads | ✓ | ✗ |
 
 - **Consequences:** No skips under any load that leaves the frame thread its 100 us. A higher-priority load of 300 us > lead skips, as it should (negative control). Repeats fall from 0.7 % to 0. On silicon the I2S clock (HFCLKAUDIO, +0.37 ppm) drifts 1.34 ms/h against TIMER0, so the lead must be steered (#97). The wait from latch to TXEN (435 us) is not in SPEC §2 (#98).
+- **Update (#98):** the latch moved from the DISABLED interrupt after copy B (t0 + 565 µs) to TIMER0 COMPARE3 at t0 − `OP_PACK_LATCH_LEAD_US` (20 µs), the same for 42 B and 81 B. Audio frame done → TXEN is now 100 + 20 = 120 µs, measured in bsim (a) from the app core's frame clock. SYS-2: 2.67 ms TD off (2.28 with FLT=1), 4.60 ms TD on with FLT=1.

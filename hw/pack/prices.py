@@ -14,7 +14,9 @@ PRICES = {  # mpn: (usd_each_at_100, source)
     "USBLC6-2SC6": (0.21, DK),
     "SJ1-3543": (1.61, DK + " (Same Sky, M6 threaded bushing + nut); fallback Switchcraft 35RAPC3BH3 $3.29"),
     "USB4105-GF-A": (0.57, DK),
-    "BH-18650-B1BA002": (1.36, "LCSC C2988620 q1 (via Flux part page); retention from battery door"),
+    # printed cradle in mech/pack.py + two stamped contacts (the MYOUNG BH-18650-B1BA002 holder is SMT: dropped, #34)
+    "MY-18650-04-J/05-J": (0.2265, "LCSC C19184125 MY-18650-04-J (+ plate) $0.1181 @50-149 + C19184124 MY-18650-05-J "
+                                    "(- spring) $0.1084 (only ladder shown, @5); read 2026-11-01"),
     "JS102011SAQN": (0.64, DK),
     "DMG2305UX-7": (0.10, "est."),
     "TPD1E10B06DPYR": (0.41, "Digi-Key listing price (tier not shown; q1 assumed)"),
@@ -44,7 +46,12 @@ PRICES = {  # mpn: (usd_each_at_100, source)
 EXTRAS = [  # (item, qty, usd_each, source)
     ("PCB 4-layer ~60x90 mm", 1, 2.50, "est. (audit.py v1 figure)"),
     ("3D-printed PETG enclosure + clip (mech/)", 1, 2.50, "est. (audit.py v1 figure)"),
-    ("u.FL to wire pigtail + 31 mm whip (PK-5)", 1, 1.00, "est."),
+    # PK-5 whip feed: IPEX/MHF1 1.13 mm cable, SMA end cut off, ~100 mm kept; 31 mm 0.9 mm tinned wire soldered on
+    ("IPEX 1.13 pigtail BWIPX1-SMA-1.13L150 (BAT Wireless, SMA cut off)", 1, 0.6015, "LCSC C784404 $0.6015 @100, 1908 in stock, read 2026-11-01"),
+    ("whip: 31 mm 0.9 mm tinned Cu wire + 20 mm heat-shrink", 1, 0.03, "est."),
+    ("cell leads: 2 x 60 mm 24 AWG silicone wire", 1, 0.02, "est."),
+    ("M2 x 6 thread-forming pan screw (PT type, zinc)", 2, 0.112, "Fastener Superstore 585907 M2-0.89x6 PT pan Phillips zinc, "
+     "$559 per 5000 carton = $0.112 (read 2026-11-01; LCSC/Accu listing not found)"),
 ]
 
 # Informational: the same module bought from Digi-Key (qty-100 cut tape, 2026-10-31, part 22107427).
