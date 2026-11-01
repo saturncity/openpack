@@ -13,6 +13,11 @@
  * copy B start follow the length of the frame being sent. 81 B copies end at t0 + 877 us: a TD pack
  * forfeits the RX slot (the TD build sets OP_RX_WINDOW_US = 0).
  *
+ * Payload: the newest IPC frame (op_sched_put) is latched in the DISABLED interrupt after copy B
+ * (LATCH_US) for the next t0. At start the net core tells the app core where that latch is
+ * (op_sched_sync), and the app core places its audio frame clock OP_PACK_FRAME_LEAD_US before it, so
+ * every frame lands in its own slot (#87, ADR-0020).
+ *
  * All peripheral access is via the nrfx HAL (the bsim models only see HAL writes, ADR-0009).
  */
 #include <string.h>
@@ -45,6 +50,27 @@ static bool fresh, on_b, armed;
 /* Before the app core's first frame: an empty payload of the boot td setting's length. */
 #define BOOT_LEN (IS_ENABLED(CONFIG_OP_TIME_DIVERSITY) ? OP_PAYLOAD_MAX : OP_FRAME_LEN)
 static uint32_t underrun, overrun, cc_b = CC_B_US(BOOT_LEN);
+static int32_t margin_min = INT32_MAX, margin_max = INT32_MIN; /* latch - arrival, us */
+
+/* Payload latch: the DISABLED interrupt after copy B (load()), in TIMER0 us after t0. It follows the
+ * payload length on air (TD: 81 B copies end later). The app core is phased once, at start, to the
+ * boot length's latch; a later `td` switch keeps one frame per slot but moves the lead (fw/PROTOCOL.md).
+ */
+#define LATCH_US(len) (CC_B_US(len) + RAMP_US + AIR_US(len))
+#define CC_NOW        NRF_TIMER_CC_CHANNEL2 /* capture only */
+
+/* TIMER0 us since the last t0 (0..OP_FRAME_US-1). */
+static uint32_t phase_us(void)
+{
+	nrf_timer_task_trigger(NRF_TIMER0, nrf_timer_capture_task_get(CC_NOW));
+	return nrf_timer_cc_get(NRF_TIMER0, CC_NOW);
+}
+
+/* us until the next latch, 1..OP_FRAME_US */
+static int32_t to_latch_us(void)
+{
+	return OP_FRAME_US - (int32_t)((phase_us() + OP_FRAME_US - LATCH_US(pkt[1])) % OP_FRAME_US);
+}
 
 void op_sched_put(const uint8_t *payload, size_t len)
 {
@@ -52,6 +78,12 @@ void op_sched_put(const uint8_t *payload, size_t len)
 		return;
 	}
 	unsigned int key = irq_lock();
+	/* Margin to this frame's own latch: the app core aims for OP_PACK_FRAME_LEAD_US (pack.c); the
+	 * deviation from that is taken within +-half a frame, so a late frame shows as negative.
+	 */
+	int32_t dev = (to_latch_us() - CONFIG_OP_PACK_FRAME_LEAD_US + OP_FRAME_US + OP_FRAME_US / 2) %
+			      OP_FRAME_US - OP_FRAME_US / 2;
+	int32_t m = CONFIG_OP_PACK_FRAME_LEAD_US + dev;
 
 	if (fresh) {
 		overrun++;
@@ -59,7 +91,20 @@ void op_sched_put(const uint8_t *payload, size_t len)
 	memcpy(pending, payload, len);
 	pending_len = len;
 	fresh = true;
+	margin_min = MIN(margin_min, m);
+	margin_max = MAX(margin_max, m);
 	irq_unlock(key);
+}
+
+/* #87: tell the app core where the latch is, so it places its audio frame clock
+ * CONFIG_OP_PACK_FRAME_LEAD_US before it (src/app/pack.c). Message: u16 LE us to the next latch.
+ */
+int op_sched_sync(void)
+{
+	uint8_t m[OP_SYNC_LEN];
+
+	sys_put_le16((uint16_t)to_latch_us(), m);
+	return op_ipc_send(m, sizeof(m));
 }
 
 /* Runs in the RADIO ISR after copy B: next frame's payload. A missing frame repeats the last one.
@@ -144,6 +189,32 @@ static void test_stop(struct k_timer *t)
 
 static K_TIMER_DEFINE(test_stop_timer, test_stop, NULL);
 
+/* Test only (CONFIG_OP_TEST_SCHED_REPORT, bsim): once per second, how early the app core's frames
+ * reached the latch (margin = latch - arrival, us; tests/bsim/sched/check.py) and the counters.
+ */
+static void report(struct k_work *w)
+{
+	unsigned int key = irq_lock();
+	int32_t lo = margin_min, hi = margin_max;
+
+	margin_min = INT32_MAX;
+	margin_max = INT32_MIN;
+	irq_unlock(key);
+	if (lo <= hi) { /* no line for a second without frames */
+		printk("PACK_IPC margin_us_min=%d margin_us_max=%d overruns=%u underruns=%u\n", lo, hi,
+		       overrun, underrun);
+	}
+}
+
+static K_WORK_DEFINE(report_work, report);
+
+static void report_expiry(struct k_timer *t)
+{
+	k_work_submit(&report_work);
+}
+
+static K_TIMER_DEFINE(report_timer, report_expiry, NULL);
+
 int op_sched_start(void)
 {
 	int err = nrf_clock_control_request_sync(DEVICE_DT_GET(DT_NODELABEL(hfclk)), NULL, K_MSEC(100));
@@ -173,9 +244,14 @@ int op_sched_start(void)
 	if (CONFIG_OP_PACK_TEST_RUN_MS > 0) {
 		k_timer_start(&test_stop_timer, K_MSEC(CONFIG_OP_PACK_TEST_RUN_MS), K_NO_WAIT);
 	}
-	printk("SCHED start pack_id=%d fA=%d fB=%d air_us=%d cc_b_us=%d td_air_us=%d td_cc_b_us=%d\n",
+	if (IS_ENABLED(CONFIG_OP_TEST_SCHED_REPORT)) {
+		k_timer_start(&report_timer, K_SECONDS(1), K_SECONDS(1));
+	}
+	printk("SCHED start pack_id=%d fA=%d fB=%d air_us=%d cc_b_us=%d latch_us=%d td_air_us=%d "
+	       "td_cc_b_us=%d td_latch_us=%d\n",
 	       OP_PACK_ID, OP_CH_A_MHZ, OP_CH_B_MHZ, AIR_US(OP_FRAME_LEN), CC_B_US(OP_FRAME_LEN),
-	       AIR_US(OP_PAYLOAD_MAX), CC_B_US(OP_PAYLOAD_MAX));
+	       LATCH_US(OP_FRAME_LEN), AIR_US(OP_PAYLOAD_MAX), CC_B_US(OP_PAYLOAD_MAX),
+	       LATCH_US(OP_PAYLOAD_MAX));
 	return 0;
 }
 

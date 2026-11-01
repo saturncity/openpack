@@ -24,18 +24,22 @@ extern int op_pack_id, op_ch_a_mhz, op_ch_b_mhz;
 #define OP_CH_B_MHZ CONFIG_OP_CH_B_MHZ
 #endif
 
-/* FW-2: one frame per IPC message, app core -> net core. */
+/* FW-2: one frame per IPC message, app core -> net core. Pack only, net -> app, once at start: the
+ * latch sync (OP_SYNC_LEN bytes, u16 LE us to the net core's next payload latch, #87).
+ */
+#define OP_SYNC_LEN 2
 int op_ipc_init(void (*rx)(const uint8_t *frame, size_t len));
 int op_ipc_send(const uint8_t *frame, size_t len);
 
 /* Net core, pack role: AIR-4 schedule. */
 int op_sched_start(void);
+int op_sched_sync(void);
 void op_sched_put(const uint8_t *payload, size_t len); /* 42 B, or 81 B with TD on */
 uint32_t op_sched_underruns(void);
 uint32_t op_sched_overruns(void);
 
-/* App core, pack role: placeholder 1 ms frame source until audio + codec land. Sends a 42 B or, with
- * the pack's `td` setting on (op_pack_td, src/proto/proto_uart.c), an 81 B payload.
+/* App core, pack role: audio -> ADPCM-6 -> IPC, one frame per audio frame (src/app/pack.c). Sends a
+ * 42 B or, with the pack's `td` setting on (op_pack_td, src/proto/proto_uart.c), an 81 B payload.
  */
-int op_framesrc_start(void);
+int op_pack_start(void);
 bool op_pack_td(void);

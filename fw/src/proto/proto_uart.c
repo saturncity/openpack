@@ -83,7 +83,10 @@ static void proto_thread(void *a, void *b, void *c)
 	uart_irq_rx_enable(d);
 	for (;;) {
 		if (ring_buf_get(&rxrb, &ch, 1) == 0) {
-			k_sem_take(&rxsem, K_FOREVER);
+			/* #87 stress only: OP_TEST_PROTO_POLL_MS > 0 brings back the 50 ms poll. */
+			k_sem_take(&rxsem, CONFIG_OP_TEST_PROTO_POLL_MS > 0
+						   ? K_MSEC(CONFIG_OP_TEST_PROTO_POLL_MS)
+						   : K_FOREVER);
 			continue;
 		}
 		if (ch == '\r') {
