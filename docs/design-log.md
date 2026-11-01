@@ -660,6 +660,14 @@ Unresolved items, worst first. Each links to its entry.
 - **Residual risk:** substitutions at order time.
 - **Bench:** no.
 
+### SC-5. Single consolidated shopping list (#36, ADR-0019)
+- **Difficulty:** the owner buys once, from UK sources, with VAT and import VAT visible. Most prices could not be re-read on 2026-11-01 (Farnell, Mouser and Pi Hut fetches timed out or returned nothing), and the BOMs miss some things the work needs.
+- **Options:** one list by category (simple to read, many checkouts) or one basket per distributor (what the owner actually does). Re-quote every line live, or reuse the repo's readings and mark the rest.
+- **Chosen:** baskets per distributor, generated from `hw/bom/pack_uk.csv`, `hw/rx/out/bom.csv` and hand-entered lines (`hw/bom/shopping.py` -> `hw/bom/shopping.csv`, `docs/shopping-list.md`, test `tests/test_shopping.py`). Each price is `quoted` (source URL, read date) or `estimated`; bench, fab, mechanical and shipping lines are all estimates. 4 packs and 4 receivers (one per pack; 4 of the rack's 8 slots). Spares: passives max(10, 25 %), cheap ICs 1. Receiver ICs get x1.3 on their qty-100 price for a 4-board order. PCBs ordered 10 pcs each (4 + 6 spares) as the re-spin mitigation of ADR-0019; one top-side stencil each (all parts are on Top). LCSC and JLCPCB orders kept under GBP 135 (VAT at checkout, no duty). Added what the BOMs miss: Tag-Connect TC2030-IDC-NL for programming, protected 18650 cells and external charger (no on-board charging, PK-6), solder paste, u.FL pigtails and SMA attenuators for conducted-power measurement, a tinySA Ultra for the #92 OBW check (indicative, not a lab EN 300 328 report). NanoVNA and an oscilloscope are optional and excluded from totals. PETG, M2 screws and heat-set inserts from RS UK in place of a US fastener source. Antennas, coax, jumpers and stands as decided (ADR-0016, ADR-0021, owner prices). Rack is a placeholder until #34.
+- **Links:** ADR-0016, ADR-0019, ADR-0021, #36, #38, #92, `docs/shopping-list.md`.
+- **Residual risk:** estimated lines (about half the total) can move; the tinySA has no confirmed UK stockist; CA3N030 may be too short for the far wing (CA3N075 22.86 m, see the rack placeholder); an unprotected or flat-top 18650 would not suit the printed cradle; a reflow hot plate is assumed owned.
+- **Bench:** yes, uses these tools (#38, #92).
+
 ## Compliance (UK/EU, EN 300 328, IR 2030, FCC notes)
 
 ### CO-1. UK region: 9 dBm EIRP non-adaptive
