@@ -1,7 +1,7 @@
 # ADR-0018: Rack main board: LNA + BAW filter + 1:8 Wilkinson per antenna, fused slots, CM4 IO board as the host carrier
 Status: accepted. 2026-11-01. Issue #33. Schematic `hw/rack/backplane.py` (SKiDL, ERC 0/0). Splitter model `hw/rack/wilkinson.py`. Numbers `python3 audit.py` Audit 6. Tests `tests/test_backplane_sch.py`, `tests/test_rack_rf.py`.
 - **Context:** RK-1..RK-3 fix the rear panel (8 XLR, 2 BNC with switchable 12 V bias-T, RJ45, USB-C service, 12 V brick), the RF chain (LNA NF ≤ 2 dB → 1:8 splitter → 8 modules, 6 dB coax budget) and a CM4 host. ADR-0014 fixes the slot connector (key at 14). ADR-0016 (PR #93) fixes the antennas: 2 × 8 dBi patch on 15.2 m coax (4.2 dB), install rule ≥ 4 m to actors, Wi-Fi ≥ 4.4 m behind / ≥ 12.2 m in front, 3 dB R1 C/I margin. Open: the parts, the splitter, the power tree, how 8 UARTs reach the CM4, and the carrier. The owner is UK-based.
-- **Sources:** Qorvo QPL9057 datasheet Rev. F (pins, EVB, S/noise parameters, abs max). TI TPS2595 SLVSE57C (pins, Eq. 4 R_ILM = 2000/(I − 0.04), UVLO 1.2/1.1 V, EN ≤ 6 V, variants). TI TPS62933 SLUSEA4D (pins, 5 V/3 A reference design). NXP SC16IS752 Rev. 9.1 Table 2 (TSSOP-28 pins, SPI mode, IRQ 1 kΩ). Infineon ESD101-B1 datasheet (±5.5 V, 0.1 pF). Raspberry Pi CM4 datasheet (Table 1 alt functions, 5 UARTs) and CM4IO datasheet (12 V jack, on-board 5 V, J2 nRPIBOOT, micro-USB rpiboot, 40-way J8). DigiKey UK pages (GBP, stock) on 2026-11-01. JLCPCB JLC04161H-7628 stackup.
+- **Sources:** Qorvo QPL9057 datasheet Rev. F (pins, EVB, S/noise parameters, abs max). TI TPS2595 SLVSE57C (pins, Eq. 4 R_ILM = 2000/(I − 0.04), UVLO 1.2/1.1 V, EN ≤ 6 V, variants). TI TPS62933 SLUSEA4D (pins, 5 V/3 A reference design). NXP SC16IS752 Rev. 9.1 Table 2 (TSSOP-28 pins, SPI mode, IRQ 1 kΩ). Infineon ESD101-B1 datasheet (±5.5 V, 0.1 pF). ESD103-B1 (±15 V, 0.09 pF): from Infineon's datasheet v2.0 as quoted by Farnell/LCSC listings; the PDF itself was not read. Raspberry Pi CM4 datasheet (Table 1 alt functions, 5 UARTs) and CM4IO datasheet (12 V jack, on-board 5 V, J2 nRPIBOOT, micro-USB rpiboot, 40-way J8). DigiKey UK pages (GBP, stock) on 2026-11-01. JLCPCB JLC04161H-7628 stackup.
 - **Decision:**
   - **RF chain, per antenna** (`rf_a`, `rf_b`): BNC (Amphenol 112487, 4 GHz) → **ESD103-B1-02EL** (±15 V, 0.09 pF; survives the bias) → **bias-T**: 39 nH LQW18AN (SRF 3.28 GHz, 1 A) to 100 pF + 10 nF, 10 Ω, SMF12A, fed by a **TPS259541 eFuse** (0.49 A limit, 13.7 V clamp). EN is a host GPIO with a 100 k pull-down, so the bias is **off by default** (the HG2409P is passive) and a DC-shorted antenna trips the eFuse; FLT goes to the host → **100 pF DC block** → **ESD101-B1-02EL** at 0 V (the LNA is HBM class 1B) → **QPL9057** per its EVB (5.1 k bias, 18 nH choke, 100 pF blocks, SD tied low) → **QPQ1907 BAW band-pass** (2402.5–2481.5 MHz, ≤ 2.2 dB), after the LNA so its loss barely costs NF → 1:8 Wilkinson → 8 u.FL → 200 mm u.FL cables to each sub-board's J3 (A) / J4 (B).
   - **Splitter:** a 3-stage corporate Wilkinson in L1 microstrip over L2 on JLC04161H-7628 (h 0.2104 mm, εr 4.4 per JLCPCB, tan δ 0.02 est.). 50 Ω = 0.387 mm; 70.7 Ω arms = 0.196 mm × 17.76 mm (λ/4 at 2441.75 MHz); 100 Ω 0402 thin-film isolation resistors (7 per tree); compact tree (feeds 5/10/6/5 mm). The arms are `TL` parts (net-tie copper) so the netlist keeps each divider explicit.
@@ -11,6 +11,7 @@ Status: accepted. 2026-11-01. Issue #33. Schematic `hw/rack/backplane.py` (SKiDL
     - **per slot, a TPS259541 on +12 V and a TPS259531 (5.7 V clamp) on +5 V**, 0.49 A each, dV/dt 22 nF (≈ 0.2 A inrush). A shorted sub-board trips only its own eFuses, auto-retries, and the other seven keep running;
     - a 1.5 A eFuse to the CM4IO over a JST VH pigtail.
     - All power FLT pins are wire-ORed to one host GPIO.
+    - Load (est.): slots 8 × 42 mA at 12 V, CM4IO 0.75 A (its 9 W budget), the 5 V rail ~1.1 A (0.5 A from 12 V), so ~1.6 A, or 2.6 A with both bias-Ts at their limit. That is under the 3.5 A input limit and the 5 A brick.
     - Chassis (XLR pin 1 and shells) bonds to GND once, at NT1.
   - **Slots:** the ADR-0014 socket (Sullins PPPC132LFBN-RC; position 14 plugged), slot-ID straps (bit 0 = GND, 1 = open), I2S NC, front LEDs (560 Ω, ~2 mA, green lock / red peak) and an XLR NC3MAH. Pin 2 is hot, pin 3 cold; pin 1 and the shell go to chassis. **SMAJ58CA on pins 2 and 3** (VRWM 58 V ≥ P48 52 V max).
   - **Host carrier: the official Raspberry Pi CM4 IO Board (SC0326)** with a **CM4 without wireless** (CM4002008 = SC0680), on a 40-way ribbon (pin n to pin n) to the main board's J2.
@@ -39,7 +40,7 @@ Status: accepted. 2026-11-01. Issue #33. Schematic `hw/rack/backplane.py` (SKiDL
 | R-id | CM4IO + ribbon, CM4 UARTs + 2× SC16IS752 (chosen) | CM4 on the main board (custom carrier) | CM4IO + USB hub + 2× FT4232H | Pi 4/5 SBC instead of a CM4 |
 |---|---|---|---|---|
 | R1 dropouts | ✓ CM4 without radio; host crash leaves audio running (slots power on without it) | ✓ | ✓ | partial: on-board Wi-Fi must be disabled in software |
-| R9 1U, 8 XLR | ✓ 160 × 90 mm board beside the main board, ~25 mm tall | ✓ smaller | ✓ | partial: USB/Ethernet face the wrong way, 2 extra cables |
+| R9 1U, 8 XLR | ✓ 160 × 90 mm board beside the main board, ~25 mm tall (est., item 5) | ✓ smaller | ✓ | partial: USB/Ethernet face the wrong way, 2 extra cables |
 | R11 remote mgmt | ✓ GbE, every slot UART + reset + boot | ✓ | ✓ | ✓ |
 | R13 sim/design first | ✓ the vendor board needs no new design; the SC16IS752 pinout was read from its datasheet | partial: Ethernet magnetics, CM4 pinout and power are new, unverified design | ✗ the FT4232H datasheet could not be read (ftdichip.com 403); 64-pin part | ✓ |
 | RK-3 boot ≤ 60 s | ✓ eMMC | ✓ | ✓ | partial: SD card |
@@ -55,7 +56,7 @@ Status: accepted. 2026-11-01. Issue #33. Schematic `hw/rack/backplane.py` (SKiDL
      - Confirm all of these before #40.
   3. **Firmware and host:**
      - nRF21540 LNA on, with the RSSI bypass above;
-     - config.txt: `enable_uart=1`, `dtoverlay=uart3,uart4,uart5`, `spi1-2cs`, and two SC16IS75x overlays (IRQ 24/25, xtal 14745600);
+     - config.txt: `enable_uart=1`, `dtoverlay=uart3,uart4,uart5`, `spi1-2cs`, and two SC16IS75x overlays (IRQ 24/25, xtal 14745600); drop `console=serial0` from cmdline.txt, since UART0 is slot 0;
      - the host drives the SC16IS752 GPIOs as open drain (never output-high).
      - Slot k = UART map `SLOT_UART` in `backplane.py`.
   4. Layout (#34):
