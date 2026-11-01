@@ -118,10 +118,14 @@ def _b(dx, dy, rot):
     return (round(B[0] + dx, 4), round(B[1] + dy, 4), rot)
 
 
+# M2 board-retention holes (not in the netlist): thread-forming M2 x 6 screws into the printed bosses at
+# mech/pack.py PCB_SCREWS (must match).
+MOUNT = {"H1": (-25.0, -3.5), "H2": (36.0, 26.0)}
+
 PLACE = {
     "U1": U1_POS,
     # --- power entry (bottom left) ---
-    "BT1": (-19.5, -4.2, 0), "F1": (-21.5, -0.4, 0), "Q1": (-17.6, -0.4, 180), "R1": (-14.8, -1.6, 0),
+    "BT1": (-19.0, -4.2, 0), "F1": (-21.5, -0.4, 0), "Q1": (-17.6, -0.4, 180), "R1": (-14.8, -1.6, 0),
     "R12": (-14.6, 5.4, 90), "R13": (-13.4, 5.4, 270), "C30": (-12.2, 5.4, 270),
     "SW1": (-3.5, 19.0, 0),
     # --- 3V3 LDO + module decoupling (top strip) ---
@@ -144,9 +148,9 @@ PLACE = {
     "C13": (31.7, 4.9, 0), "C14": (29.2, 6.5, 180),
     "R20": (27.0, -0.9, 0), "D6": (25.3, -3.4, 0), "C10": (30.6, -1.8, 180),
     "R6": (28.3, -4.5, 0), "R8": (29.85, -4.5, 270), "R7": (30.9, -4.5, 90), "C11": (32.2, -4.5, 270),
-    "C9": (34.9, 5.2, 90), "D5": (35.9, 5.2, 90), "R5": (33.5, 5.2, 270),
+    "D5": (33.4, 1.6, 90), "C9": (33.4, 3.6, 90), "R5": (33.4, 5.6, 270),
     "R4": (33.0, 8.5, 0), "C8": (36.5, 8.5, 0),
-    "J1": (45.4, 0.0, 0),
+    "J1": (46.4, 0.0, 0),   # body front on the wall inner face (x 46.4): M6 bushing through the wall, nut outside
     # --- LEDs under the lid holes (8, 20) and (16, 20) ---
     "D1": (7.2, 20.0, 90), "D2": (8.8, 20.0, 90), "D3": (15.2, 20.0, 90), "D4": (16.8, 20.0, 90),
     "R14": (7.2, 23.0, 90), "R15": (8.8, 23.0, 90), "R16": (15.2, 23.0, 90), "R17": (16.8, 23.0, 90),
@@ -264,6 +268,15 @@ def build():
             fp.Reference().SetTextSize(P.VECTOR2I(mm(0.8), mm(0.8)))
             fp.Reference().SetTextThickness(mm(0.12))
         fp.Value().SetVisible(False)
+    for ref, (x, y) in MOUNT.items():
+        fp = P.FootprintLoad(str(KICAD_FP / "MountingHole.pretty"), "MountingHole_2.2mm_M2")
+        fp.SetReference(ref)
+        fp.SetFPID(P.LIB_ID("MountingHole", "MountingHole_2.2mm_M2"))
+        fp.Reference().SetVisible(False)
+        fp.Value().SetVisible(False)
+        b.Add(fp)
+        fp.SetPosition(V(x, y))
+        fps[ref] = fp
     missing = set(PLACE) - set(comps)
     assert not missing, missing
     # nets onto pads (netlist pin -> footprint pad; USB4105 pairs and shield named differently)
@@ -277,17 +290,21 @@ def build():
                 if p.GetNumber() in names:
                     p.SetNet(netinfo[name]); hit += 1
             assert hit, (ref, pin)
+    # SJ1-3543 anchor legs (unnumbered on the datasheet) are soldered: tie them to GND
+    for p in fps["J1"].Pads():
+        if p.GetNumber() == "MP":
+            p.SetNet(netinfo["GND"])
     # QFN exposed pad: the footprint's paste-only sub-pads are unnumbered; EP is "25"
     return b, fps, netinfo, nets
 
 
-FIXED = {"U1", "J1", "J2", "J3", "SW1", "D1", "D2", "D3", "D4", "U4", "L1", "C1", "C2", "C3", "R2", "R3", "U2", "U3", "BT1", "C12", "C15", "R9", "R10"}
+FIXED = {"U1", "J1", "J2", "J3", "SW1", "D1", "D2", "D3", "D4", "U4", "L1", "C1", "C2", "C3", "R2", "R3", "U2", "U3", "BT1", "C12", "C15", "R9", "R10", "H1", "H2"}
 
 
 def legalize(fps, margin=0.1, iters=400):
     """nudge movable parts until no courtyards overlap (anchors in FIXED stay put); moves snap to 0.05 mm"""
     import pcbnew as P
-    order = list(PLACE)
+    order = list(PLACE) + list(MOUNT)
     for _ in range(iters):
         moved = False
         for a, bref in courtyard_overlaps(fps):
@@ -402,7 +419,7 @@ def route(b, fps, netinfo, nets, log):
             g.mark_poly(layers, poly, k)
             if p.GetAttribute() == P.PAD_ATTRIB_PTH:
                 x, y = to_xy(p.GetPosition())
-                g.mark_via_hole((x, y))
+                g.mark_via_hole((x, y), hole_r=P.ToMM(p.GetDrillSize().x) / 2)
             else:
                 xs = [q[0] for q in poly]; ys = [q[1] for q in poly]
                 for i, x, y in g._bbox_cells(min(xs), min(ys), max(xs), max(ys)):

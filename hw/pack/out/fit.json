@@ -21,11 +21,11 @@
  },
  "lid_clearance": {
   "ok": true,
-  "detail": "tallest J1 top z 13.1, lid underside 21.2"
+  "detail": "tallest J1 top z 16.2, lid underside 21.2"
  },
  "jack_in_opening": {
   "ok": true,
-  "detail": "jack y 0.00 vs JACK_Y 0.0; axis z 9.60 vs JACK_Z 9.60"
+  "detail": "jack y 0.00 vs JACK_Y 0.0; axis z 11.80 vs JACK_Z 11.80; body front x 46.4 on the wall face; bushing 3.6 through a 1.6 wall (nut needs ~1.5)"
  },
  "usb_in_opening": {
   "ok": true,
@@ -35,12 +35,27 @@
   "ok": true,
   "detail": "{'D1': (7.199999999999999, 20.0), 'D2': (8.8, 20.0), 'D3': (15.2, 20.0), 'D4': (16.799999999999997, 20.0)}"
  },
- "switch_under_slot": {
+ "switch_fork_on_actuator": {
   "ok": true,
-  "detail": "SW1 x -3.50 vs slot x -3.5"
+  "detail": "SW1 at (-3.5, 19.0, 0), SW_ACT {'x0': -5.5, 'x1': -4.0, 'y0': 15.2, 'y1': 17.2, 'travel': 1.5}"
  },
- "light_pipe_mm": 15.4,
- "switch_actuator_gap_mm": 10.8,
+ "switch_stalk_in_slot": {
+  "ok": true,
+  "detail": "stalk x -5.75..-2.25 in slot -6.30..-1.70"
+ },
+ "switch_fork_clear": {
+  "ok": true,
+  "detail": "[]"
+ },
+ "light_pipes_clear": {
+  "ok": true,
+  "detail": "[]"
+ },
+ "light_pipe_bore_mm": 15.4,
+ "screws_match_layout": {
+  "ok": true,
+  "detail": "mech [(-25.0, -3.5), (36.0, 26.0)] layout {'H1': (-25.0, -3.5), 'H2': (36.0, 26.0)}"
+ },
  "tht_legs_clear_standoffs": {
   "ok": true,
   "detail": "[]"
@@ -73,29 +88,44 @@
    22.32
   ],
   [
-   "J1",
-   38.9,
-   -2.5
+   "BT1",
+   -20.75,
+   -4.2
+  ],
+  [
+   "BT1",
+   -17.25,
+   -4.2
   ],
   [
    "J1",
-   42.9,
+   38.4,
+   5.0
+  ],
+  [
+   "J1",
+   43.4,
+   5.0
+  ],
+  [
+   "J1",
+   43.4,
+   -5.0
+  ],
+  [
+   "J1",
+   38.4,
+   -5.0
+  ],
+  [
+   "J1",
+   43.4,
    0.0
   ],
   [
    "J1",
-   34.9,
+   38.4,
    2.5
-  ],
-  [
-   "BT1",
-   -21.25,
-   -4.2
-  ],
-  [
-   "BT1",
-   -17.75,
-   -4.2
   ]
  ]
 }

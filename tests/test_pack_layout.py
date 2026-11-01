@@ -72,7 +72,7 @@ def test_board_matches_netlist():
         line = line.strip()
         if line.startswith('(property "Reference"'):
             refs.add(line.split('"')[3])
-    assert refs == set(comps), (set(comps) ^ refs)
+    assert refs - set(layout.MOUNT) == set(comps), (set(comps) ^ (refs - set(layout.MOUNT)))
     assert set(layout.PLACE) == set(comps)
 
 

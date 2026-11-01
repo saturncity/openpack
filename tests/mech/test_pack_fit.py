@@ -1,12 +1,16 @@
 """Pack PCB (#34) against the CadQuery enclosure: the board STEP from kicad-cli (hw/pack/out/fab/pack.step) and the
 per-part envelope boxes (out/fab/envelope.json: courtyard x datasheet height) must not intersect the printed body,
-the holder or the cell. Skips without cadquery. hw/pack/fit.py runs the same check without CadQuery."""
-import json, sys
+the holder or the cell. Skips without cadquery outside CI. hw/pack/fit.py runs the same check without CadQuery."""
+import json, os, sys
 from pathlib import Path
 
 import pytest
 
-cq = pytest.importorskip("cadquery")
+# CI installs cadquery (ci.yml check job): there a missing cadquery is a failure, not a skip
+if os.environ.get("CI"):
+    import cadquery as cq
+else:
+    cq = pytest.importorskip("cadquery")
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "mech"))
 import pack  # noqa: E402

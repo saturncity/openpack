@@ -19,7 +19,7 @@ RENDER = HERE / "out" / "render"
 LAYERS = {"L1_F.Cu": "F.Cu", "L2_In1.Cu": "In1.Cu", "L3_In2.Cu": "In2.Cu", "L4_B.Cu": "B.Cu"}
 GERBER_LAYERS = "F.Cu,In1.Cu,In2.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts"
 # component heights above the board top (mm) for the enclosure fit check: datasheet body heights, rounded up
-HEIGHT = {"U1": 2.0, "J1": 6.5, "J2": 3.3, "SW1": 3.8, "U3": 1.75, "U2": 0.8, "U4": 0.6, "L1": 1.2, "BT1": 0.0,
+HEIGHT = {"U1": 2.0, "J1": 9.6, "J2": 3.3, "SW1": 3.5, "H1": 0.0, "H2": 0.0, "U3": 1.75, "U2": 0.8, "U4": 0.6, "L1": 1.2, "BT1": 0.0,
           "J3": 0.0, "TP1": 0.0, "TP2": 0.0, "Q1": 1.1, "D6": 1.1, "U5": 1.45, "U6": 1.45, "U7": 1.45, "F1": 0.9}
 HEIGHT_BY_FP = {"C_1206": 1.8, "C_0805": 1.35, "C_0603": 0.95, "C_0402": 0.6, "R_0402": 0.4, "D_0402": 0.6, "LED_0603": 0.8}
 

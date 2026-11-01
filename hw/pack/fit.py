@@ -36,7 +36,7 @@ def circle_box(cx, cy, r, b):
 def checks():
     m = load_mech()
     sys.path.insert(0, str(HERE))
-    import layout
+    import layout, footprints
     P = m.PCB
     top = P["z0"] + P["t"]
     env = json.loads((OUT / "fab" / "envelope.json").read_text())
@@ -110,11 +110,15 @@ def checks():
             tallest = (e["ref"], top + e["h"])
     ok("parts_clear", not bad, json.dumps(bad))
     ok("lid_clearance", inner[5] - tallest[1] >= 1.0, f"tallest {tallest[0]} top z {tallest[1]:.1f}, lid underside {inner[5]:.1f}")
-    # connectors in their wall openings (jack axis 3.0 mm and USB-C centre 1.6 mm above the board top, mech JACK_Z/USB_Z)
+    # connectors in their wall openings (jack axis from the SJ1-3543 drawing, USB-C centre 1.6 mm above the board top)
     j1 = next(e for e in env if e["ref"] == "J1")
     j2 = next(e for e in env if e["ref"] == "J2")
-    ok("jack_in_opening", abs((j1["y0"] + j1["y1"]) / 2 - m.JACK_Y) < 0.3 and abs(m.JACK_Z - (top + 3.0)) < 1e-6,
-       f"jack y {(j1['y0'] + j1['y1']) / 2:.2f} vs JACK_Y {m.JACK_Y}; axis z {top + 3.0:.2f} vs JACK_Z {m.JACK_Z:.2f}")
+    axis = top + footprints.JACK["AXIS"]
+    front = layout.PLACE["J1"][0]
+    ok("jack_in_opening", abs((j1["y0"] + j1["y1"]) / 2 - m.JACK_Y) < 0.3 and abs(m.JACK_Z - axis) < 1e-6
+       and abs(front - (m.L / 2 - m.WALL)) < 0.05 and footprints.JACK["BUSHING"] > m.WALL + 1.5,
+       f"jack y {(j1['y0'] + j1['y1']) / 2:.2f} vs JACK_Y {m.JACK_Y}; axis z {axis:.2f} vs JACK_Z {m.JACK_Z:.2f}; "
+       f"body front x {front} on the wall face; bushing {footprints.JACK['BUSHING']} through a {m.WALL} wall (nut needs ~1.5)")
     usb_y = (j2["y0"] + j2["y1"]) / 2
     USB4105_BODY_W = 8.94   # GCT USB4105 shell width (courtyard is wider: it includes the shield tabs inside)
     ok("usb_in_opening", abs(usb_y - m.USB_Y) < 0.3 and USB4105_BODY_W <= m.USB_W + 0.6
@@ -123,15 +127,34 @@ def checks():
     pos = {e["ref"]: ((e["x0"] + e["x1"]) / 2, (e["y0"] + e["y1"]) / 2) for e in env}
     led_ok = all(min(math.hypot(pos[r][0] - x, pos[r][1] - y) for x, y in m.LEDS) <= 1.2 for r in ("D1", "D2", "D3", "D4"))
     ok("leds_under_lid_holes", led_ok, str({r: pos[r] for r in ("D1", "D2", "D3", "D4")}))
+    # switch fork: actuator (from the KiCad footprint at SW1's placement) inside the fork, stalk travel inside the slot
     sx, sy, sl, sw = m.SWITCH
-    ok("switch_under_slot", abs(pos["SW1"][0] - sx) < 1.0, f"SW1 x {pos['SW1'][0]:.2f} vs slot x {sx}")
-    led_h = next(e["h"] for e in env if e["ref"] == "D1")
-    res["light_pipe_mm"] = round(m.Z_TOP + m.WALL - (top + led_h), 1)
-    res["switch_actuator_gap_mm"] = round(m.Z_TOP - (top + next(e["h"] for e in env if e["ref"] == "SW1")), 1)
+    a = m.SW_ACT
+    swx, swy, swr = layout.PLACE["SW1"]
+    act_ok = swr == 0 and abs(a["x0"] - (swx - 2.0)) < 1e-6 and abs(a["x1"] - (swx - 0.5)) < 1e-6 and abs(a["y0"] - (swy - 3.8)) < 1e-6
+    xc = (a["x0"] + a["x1"]) / 2
+    travel = (xc - 1.0, xc + 1.0 + a["travel"])
+    ok("switch_fork_on_actuator", act_ok, f"SW1 at {layout.PLACE['SW1']}, SW_ACT {a}")
+    ok("switch_stalk_in_slot", sx - sl / 2 < travel[0] - 0.2 and sx + sl / 2 > travel[1] + 0.2 and
+       abs(sy - (a["y0"] + a["y1"] - 0.3) / 2) < 0.05, f"stalk x {travel[0]:.2f}..{travel[1]:.2f} in slot {sx - sl / 2:.2f}..{sx + sl / 2:.2f}")
+    fork = [(a["x0"] - 1.75, a["y0"], top + 0.3, a["x0"] - 0.15, a["y1"] - 0.3, top + 3.6),
+            (a["x1"] + 0.15, a["y0"], top + 0.3, a["x1"] + 1.75, a["y1"] - 0.3, top + 3.6),
+            (a["x0"] - 1.75, a["y0"], top + 3.6, a["x1"] + 1.75, a["y1"] - 0.3, m.Z_TOP)]
+    hits = sorted({e["ref"] for e in env for f in fork if e["ref"] != "SW1" and e["h"] > 0
+                   and box_overlap(f, (e["x0"], e["y0"], top, e["x1"], e["y1"], top + e["h"]))})
+    ok("switch_fork_clear", not hits, str(hits))
+    # light-pipe chimneys: from the lid down to LED_TOP + 0.4, outer d LED_D + 2 WALL
+    r = m.LED_D / 2 + m.WALL
+    hits = sorted({e["ref"] for e in env for x, y in m.LEDS if e["h"] > 0 and top + e["h"] > m.LED_TOP + 0.4
+                   and circle_box(x, y, r, (e["x0"], e["y0"], 0, e["x1"], e["y1"], 0))})
+    ok("light_pipes_clear", not hits and abs(m.LED_TOP - (top + 0.8)) < 1e-6, str(hits))
+    res["light_pipe_bore_mm"] = round(m.Z_TOP + m.WALL - m.LED_TOP, 1)
+    # board retention: screw bosses under the layout's M2 holes
+    ok("screws_match_layout", sorted(m.PCB_SCREWS) == sorted(layout.MOUNT.values()), f"mech {m.PCB_SCREWS} layout {layout.MOUNT}")
     # THT legs (1.6 mm below the board) vs the PCB standoffs
-    so = [(P["x0"] + 3, P["y0"] + 3), (P["x1"] - 3, P["y0"] + 3), (P["x0"] + 3, P["y1"] - 3), (P["x1"] - 3, P["y1"] - 3)]
+    so = [(x, y, 2.0) for x, y in m.PCB_RESTS] + [(x, y, m.SCREW_BOSS_D / 2) for x, y in m.PCB_SCREWS]
     legs = [(r, x, y) for r, x, y in _tht_pads()]
-    near = [(r, x, y) for r, x, y in legs for sx_, sy_ in so if math.hypot(x - sx_, y - sy_) < 2.0 + 1.0]
+    near = [(r_, x, y) for r_, x, y in legs for sx_, sy_, rr in so if math.hypot(x - sx_, y - sy_) < rr + 1.1]
     ok("tht_legs_clear_standoffs", not near and P["z0"] - 1.6 > m.WALL, str(near))
     ufl = (-25.1, 9.9, top + 2.0)
     wb = (m.WHIP_XY[0], m.WHIP_XY[1], m.Z_TOP)
@@ -186,8 +209,13 @@ def render(res, m, env):
         r = m.BOSS_D / 2
         d.ellipse([X(x - r), Y(y + r), X(x + r), Y(y - r)], outline="#555", width=2)
     P = m.PCB
-    for x, y in [(P["x0"] + 3, P["y0"] + 3), (P["x1"] - 3, P["y0"] + 3), (P["x0"] + 3, P["y1"] - 3), (P["x1"] - 3, P["y1"] - 3)]:
+    for x, y in m.PCB_RESTS:
         d.ellipse([X(x - 2), Y(y + 2), X(x + 2), Y(y - 2)], outline="#aaa")
+    for x, y in m.PCB_SCREWS:
+        r = m.SCREW_BOSS_D / 2
+        d.ellipse([X(x - r), Y(y + r), X(x + r), Y(y - r)], outline="#7a00c7", width=2)
+    sa = m.SW_ACT
+    R(sa["x0"] - 1.75, sa["y0"], sa["x1"] + 1.75, sa["y1"] - 0.3, outline="#7a00c7", width=2)
     for x, y in m.LEDS:
         r = m.LED_D / 2
         d.ellipse([X(x - r), Y(y + r), X(x + r), Y(y - r)], outline="#e6a700", width=2)
@@ -197,7 +225,7 @@ def render(res, m, env):
     d.ellipse([X(wx) - 5, Y(wy) - 5, X(wx) + 5, Y(wy) + 5], fill="#f2c200")
     d.line([X(-25.1), Y(9.9), X(wx), Y(wy)], fill="#f2c200", width=1)
     d.text((24, H - 18), "top view, lid off: board (green), parts (courtyards), holder+cell, posts, clip bosses, "
-           "standoffs, lid LED holes/switch slot (amber), whip + pigtail (yellow)", fill="black")
+           "rests, M2 screw bosses + switch fork (purple), lid light pipes/switch slot (amber), whip + pigtail (yellow)", fill="black")
     (OUT / "render").mkdir(parents=True, exist_ok=True)
     img.save(OUT / "render" / "fit_top.png")
     # side section looking from -y: z vs x

@@ -322,8 +322,9 @@ class Grid:
             # hole-to-hole spacing for later vias of any net
             self.mark_via_hole(v)
 
-    def mark_via_hole(self, c, hole_gap=0.5):
-        rr = self.via_drill + hole_gap      # centre spacing between two drills of this size
+    def mark_via_hole(self, c, hole_gap=0.5, hole_r=None):
+        hole_r = self.via_drill / 2 if hole_r is None else hole_r
+        rr = hole_r + self.via_drill / 2 + hole_gap      # centre spacing from this drill to a via drill
         for i, x, y in self._bbox_cells(c[0] - rr, c[1] - rr, c[0] + rr, c[1] + rr):
             if math.hypot(x - c[0], y - c[1]) < rr:
                 self.novia[i] = 1

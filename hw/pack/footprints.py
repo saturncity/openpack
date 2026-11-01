@@ -10,7 +10,7 @@ u = mm from the module's outer left edge (15.0 wide), v = mm up from the pad-end
   shield ends at v = 19.0, antenna area v = 19.0..29.9 (10.9 mm); u.FL at u = 2.22, v = 29.9 - 13.8 = 16.1.
   p.20: "the antenna area of module shall extend 9.8 mm outside the edge of host PCB" -> board edge at v = 19.0.
 
-SJ1-3543 jack and the 18650 holder landing are PROVISIONAL (no datasheet on this machine): see hw/REVIEW.md.
+SJ1-3543: Same Sky SJ1-354X datasheet (09/12/2024). The 18650 holder landing is two wire pads (hw/REVIEW.md).
 """
 import pathlib
 
@@ -103,9 +103,17 @@ def bt40ne():
     return _wrap("Fanstel_BT40NE", "Fanstel BT40NE nRF5340+nRF21540 module, 15x29.9 mm; datasheet v1.08 p.9/p.13; antenna area overhangs the board edge (p.20)", b)
 
 
-# SJ1-3543: PROVISIONAL geometry. Barrel axis along +x, bushing face at x = 0 (board edge), body behind it.
-JACK = dict(BODY=(-12.0, 0.0, -3.5, 3.5), BUSHING=5.0, H=6.0,
-            PINS={"S": (-2.5, 0.0), "R": (-6.5, 2.5), "T": (-10.5, -2.5)})
+# SJ1-3543: Same Sky "SJ1-354X" datasheet, 09/12/2024, p.2 (mechanical drawing + recommended PCB layout, top view).
+# Body 12.0 W x 11.6 L x 9.6 H behind an M6x0.5 bushing 3.6 long; jack axis ~5.2 above the PCB (scaled from the
+# front view, 9.6 body height, +-0.3). Layout: 8 x d1.50 holes in two columns, 3.00 and 8.00 behind the connector
+# edge (= body front face), rows at +5 / +2.5 / 0 / -2.5 / -5. SJ1-3543 fits pins 1 sleeve, 2 tip, 3 ring;
+# 4/5 (switches) are not populated on -3543, so those holes are left out. The three unnumbered holes take the
+# housing's kinked anchor legs: plated, tied to GND in layout.py.
+# Footprint frame: barrel axis along +x, connector edge (body front) at x = 0, body behind it; KiCad y down.
+# (datasheet top view rotated 180 deg: its pin 3 at (8, +5) -> here (-8, +5) y-down)
+JACK = dict(BODY=(-11.6, 0.0, -6.0, 6.0), BUSHING=3.6, BUSHING_D=6.0, H=9.6, AXIS=5.2, DRILL=1.5, PAD=2.2,
+            PINS={"S": (-3.0, 0.0), "T": (-8.0, -2.5), "R": (-8.0, 5.0)},
+            ANCHORS=[(-3.0, -5.0), (-3.0, 5.0), (-8.0, -5.0)])
 
 
 def sj1_3543():
@@ -113,13 +121,16 @@ def sj1_3543():
     b = _text("Reference", "REF**", (x0 + x1) / 2, y0 - 1.2, "F.SilkS")
     b += _text("Value", "SJ1-3543", (x0 + x1) / 2, 0, "F.Fab")
     b += _rect(x0, y0, x1, y1, "F.Fab")
-    b += _rect(x1, -3.0, x1 + JACK["BUSHING"], 3.0, "F.Fab")
-    b += _fp_text("PROVISIONAL pinout", (x0 + x1) / 2, y1 + 1.0, "F.Fab", 0.6)
+    r = JACK["BUSHING_D"] / 2
+    b += _rect(x1, -r, x1 + JACK["BUSHING"], r, "F.Fab")
+    b += _fp_text("M6 bushing", x1 + 1.8, r + 0.8, "F.Fab", 0.5)
     b += _rect(x0 - 0.25, y0 - 0.25, x1 + JACK["BUSHING"] + 0.25, y1 + 0.25, "F.CrtYd", 0.05)
     b += _rect(x0 - 0.15, y0 - 0.15, x1, y1 + 0.15, "F.SilkS", 0.12)
     for n, (x, y) in JACK["PINS"].items():
-        b += _tht(n, x, y, 1.8, 1.0)
-    return _wrap("SameSky_SJ1-3543", "3.5 mm locking TRS jack, M6 bushing, PROVISIONAL pad positions: verify against the Same Sky SJ1-3543 drawing", b, "through_hole")
+        b += _tht(n, x, y, JACK["PAD"], JACK["DRILL"])
+    for x, y in JACK["ANCHORS"]:
+        b += _tht("MP", x, y, JACK["PAD"], JACK["DRILL"])
+    return _wrap("SameSky_SJ1-3543", "Same Sky SJ1-3543 3.5 mm stereo jack, M6 bushing + nut, right angle THT (SJ1-354X datasheet 09/12/2024)", b, "through_hole")
 
 
 def holder_leads():

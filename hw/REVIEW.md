@@ -27,7 +27,7 @@ Process (docs/agents/hands-off.md, "PCB layout review"): `kicad-cli` renders eve
 | **Analog separation** | Boost to ADC (U4→U2) is 14 mm. Boost to op-amp (U4→U3) is 28 mm. Boost to jack is 47 mm. A tagged analog region (x ≥ 8, y ≤ 11.5) is closed **on every layer** to the boost, battery, USB, LED, UART and SWD nets. Analog nets route on L1 only, over solid L2. The digital nets that end at U2 (I2S, SHDNZ) arrive on L4 and come up through three staggered vias at the QFN | ✓ |
 | **Decoupling** | PCM1840: AVDD/AREG/VREF go to their 100 nF/1 µF/10 µF caps through straight "comb" stubs (≤ 2 mm), DREG and IOVDD through 0.5 mm doglegs. AVSS and MSZ tie straight into the exposed pad, which has its own via. OPA1656: 100 nF 2.2 mm from V+, 10 µF beside it, V− = GND pin with a via. BT40NE: C29 100 nF sits right above VDD pad 9 / VSS pad 10 (loop under 2 mm). C32 (VDDH, pad F4 is under the module) is 4 mm away through the F4 via, the closest possible spot outside the module. LDOs and U7 have their caps at the pins | ✓ |
 | **Return paths** | L2 is solid apart from via antipads (`L2_In1.Cu.png`). Every SMD GND pad has its own via to L2 (`gnd_fanout`). Before the fix, long digital runs on L1 cut the L1 pour; they now go to L4 (layer costs), and L1 keeps a near-solid pour. L4 signals (USB pair, I2S, LEDs) reference L3, which is a GND pour crossed by a few power tracks. Where they cross, L2 is the reference 1.07 mm away. Accepted for FS USB, 3 MHz BCLK and LEDs | ✓ |
-| **Connectors vs enclosure** | `hw/pack/fit.py` (box model) and `tests/mech/test_pack_fit.py` (CadQuery, STEP + per-part boxes) check this. Jack J1: y 0 = JACK_Y, axis z 9.6 = JACK_Z, bushing through the teardrop hole. USB-C J2: y 18 = USB_Y, shell 8.94 mm in a 9.6 mm opening, mouth z 8.2 = USB_Z. LED pairs sit under the lid holes at (8, 20) and (16, 20). SW1 sits under the slot (slot moved to x = −3.5 so it doesn't overlap the module). Tallest part (jack) tops out 8.1 mm below the lid. THT legs clear the standoffs | ✓ |
+| **Connectors vs enclosure** | `hw/pack/fit.py` (box model, the CI gate) and `tests/mech/test_pack_fit.py` (CadQuery, STEP + per-part boxes) check this.<br>• **Jack J1:** Same Sky SJ1-354X datasheet (09/12/2024). Body front sits on the wall's inner face (x 46.4), so the 3.6 mm M6 bushing passes the 1.6 mm wall with 2.0 mm left for the nut. Axis z 11.8 = JACK_Z (5.2 mm above the board).<br>• **USB-C J2:** y 18 = USB_Y, shell 8.94 mm in a 9.6 mm opening, mouth z 8.2 = USB_Z.<br>• **Lid:** LED pairs sit under light-pipe chimneys at (8, 20) and (16, 20). The switch fork's stalk runs in a 4.6 × 2.3 mm slot, travel included.<br>• **Clearances:** the tallest part (jack, 9.6 mm) tops out 5.0 mm below the lid. THT legs clear the bosses and rests | ✓ |
 
 ### Fixes made during review (each found in the renders or DRC, then fixed in `layout.py`)
 
@@ -43,6 +43,25 @@ Process (docs/agents/hands-off.md, "PCB layout review"): `kicad-cli` renders eve
 10. **The BT1 lead pad was 1.9 mm from a standoff.** Fix: BT1 moved 2 mm.
 11. **Library footprint USB4105** has 0.194 mm from its NPTH to a pad. The hole-clearance rule is set to 0.15 mm, within JLC's capability.
 
+### Coordinator follow-ups (PR #104)
+
+- **SJ1-3543 footprint (done).** Taken from the Same Sky SJ1-354X datasheet, p.2:
+  - body 12.0 × 11.6 × 9.6 mm, M6×0.5 bushing 3.6 mm
+  - pins 1 sleeve / 2 tip / 3 ring on Ø1.5 holes, 3.0 and 8.0 mm behind the connector edge, rows 2.5 mm apart
+  - switch pins 4/5 aren't fitted on the -3543, so they are omitted
+  - the three anchor legs are plated and tied to GND
+  - axis height 5.2 mm, scaled from the front view (±0.3)
+
+  The front-end parts moved off the larger body; tip → ESD/22 pF/bias is about 5 mm.
+- **Board retention (done).** Two Ø2.2 mm holes (H1 (−25, −3.5), H2 (36, 26)) take M2 × 6 thread-forming screws into Ø5.6 printed bosses with a 1.8 mm pilot, 3 mm deep (`mech/pack.py` `PCB_SCREWS`). Two plain Ø4 rests at (−25, 25.5) and (30, −3.5). `fit.py` checks that the holes and bosses line up.
+- **Light pipes and switch extension (done, `mech/pack.py`).**
+  - Light pipes: chimneys Ø5.7 (bore 2.5, wall 1.6) hang from the lid to 0.4 mm above the LEDs. They are open bores; a 2.5 mm clear acrylic rod (15.4 mm) is optional. The lid now prints outer-face-down so the chimneys point up.
+  - Switch: a printed fork (`switch_ext`, prints lying flat) straddles SW1's right-angle actuator, which sticks out 2 mm toward −y and slides 1.5 mm along x (KiCad footprint F.Fab). Its 2.0 × 1.7 mm stalk rises to 0.4 mm below the lid surface in a 4.6 × 2.3 mm slot.
+  - The C&K datasheet (littelfuse.com) returned 403, so the actuator height isn't pinned. The prongs span 0.3–3.6 mm above the board to cover it. Check it on a real switch.
+- **Holder (chosen, not priced in).** The current part, MYOUNG BH-18650-B1BA002 (LCSC C2988620), is listed as **SMT**, which can't work with the holder on the enclosure floor. Chosen: **MPD BH-18650-W**, single 18650, 152 mm wire leads, Digi-Key BH-18650-W-ND (ships to the UK), €2.2277 @ 100 ≈ $2.58 (+$1.22). Its footprint is still the two wire pads (BT1).
+- **Pigtail (specified, not priced in).** **Molex 0731160017**: U.FL to open-end 1.13 mm coax, 305 mm, Digi-Key WM9574-ND, $2.95 @ 100 (+$1.95 over the $1.00 estimate). Cut it to ~100 mm (71 mm straight run plus slack). Note: the part is marked last-time-buy. UK stock alternative: RS Molex 73412-0231 (U.FL–U.FL, 110 mm), £2.96 @ 1. It needs a U.FL on the whip side, or cutting to a 55 mm tail, which is too short.
+- **PK-12: holder + pigtail + 2 screws would take the BOM from $34.98 to ≈ $38.2, over $35.** `prices.py` is unchanged pending a decision (coordinator asked to stop here).
+
 ### Accepted warnings
 
 - `starved_thermal` (4): the L1 pour reaches four 0402 GND pads from one side only. The zone's minimum spoke count can't be set from the KiCad 10 Python API, and the `min_resolved_spokes` rule does not override it. Each of these pads already has its own via to L2, so the pour is a second path. Downgraded to a warning in `pack.kicad_pro`.
@@ -50,12 +69,12 @@ Process (docs/agents/hands-off.md, "PCB layout review"): `kicad-cli` renders eve
 
 ### Open items (must close before ordering)
 
-1. **SJ1-3543 footprint is PROVISIONAL.** No datasheet is on this machine, so the T/R/S pin positions and the 3.0 mm axis height are placeholders. Get the Same Sky drawing, then fix `footprints.py` `JACK` and re-run.
+1. ~~SJ1-3543 footprint provisional~~: done from the datasheet (see above). Still to check: axis height (5.2 ± 0.3) on a real part.
 2. **BT40NE antenna wiring is unverified.** Datasheet p.22 says "The nRF21540 in BT40X is hardware-wired to the PCB trace antenna. ANT-SEL pin is not used." If that holds for the BT40NE, the u.FL/whip (PK-5) may not be driven at all. Ask Fanstel which path the BT40NE's FEM drives (ADR-0012 item 2). The keepout here supports either path.
-3. **Holder BT1** is a two-pad wire landing for the floor-mounted holder in `mech/pack.py`. Confirm that the MYOUNG BH-18650-B1BA002 comes with leads, or use a leaded holder (ADR-0012 item 7).
-4. **PCB retention.** The mech standoffs are solid supports, and the board has no screw holes. Add M2 holes and pilot holes in the standoffs, or a lid rib clamp (mech follow-up).
-5. **Light pipes (15.4 mm) and a switch actuator extension (10.8 mm)** are needed from the board-top parts to the lid.
-6. **u.FL → whip pigtail is about 71 mm straight** (the module is at the far end from the whip, which PK-5's ≥ 40 mm cell distance pins to the +x corner). At about 3.5 dB/m for 1.13 mm coax that costs ≈ 0.3 dB. Order an 80–100 mm pigtail.
+3. **Holder:** BH-18650-W chosen, but its BOM line is blocked on PK-12. Its body is about 77 × 21 × 20 mm per the listing; confirm it against `mech/pack.py` HOLD_* when the datasheet is read.
+4. ~~PCB retention~~: done (2 × M2 + 2 rests).
+5. ~~Light pipes / switch extension~~: done. Still to check: the SW1 actuator height.
+6. **u.FL → whip pigtail is about 71 mm straight**, ≈ 0.3 dB at about 3.5 dB/m. Part specified above; its BOM line is blocked on PK-12.
 7. **No 3D models are installed**, so the STEP is the bare board. The fit uses courtyard × datasheet height boxes (`outputs.py` `HEIGHT`).
 8. **USB D± are routed as two 0.2 mm tracks**, not a 90 Ω coupled pair (~50 mm on L4). That is fine for full-speed 12 Mb/s.
 9. **Fab DFM (end of project):** upload `hw/pack/out/fab/gerber` to JLCPCB's DFM check and attach the report. `bom_jlc.csv` has no LCSC numbers yet. Check the CPL rotations against JLC's preview (KiCad and JLC rotation conventions differ for some packages). Nothing has been uploaded and no account has been created.
