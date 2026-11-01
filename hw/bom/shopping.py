@@ -4,7 +4,9 @@
     python3 hw/bom/shopping.py --check  # exit 1 if either is stale
 
 Pack and receiver lines are derived from hw/bom/pack_uk.csv and hw/rx/out/bom.csv so quantities follow the boards.
-Hand-entered lines (bench, antennas, fab, mechanical) are in MANUAL below. The rack is a placeholder (#34).
+Rack backplane parts come from hw/bom/rack_uk.csv (the hw/rack/out/bom.csv of PR #126 summed per MPN, UK baskets chosen here).
+Hand-entered lines (bench, antennas, fab, mechanical, rack host/case/PCB) are in MANUAL below.
+An MPN is bought once: when packs, receivers and the rack all use it, the demands are summed into one line.
 All GBP, ex VAT; VAT 20 % on everything (LCSC / JLCPCB: collected at checkout, no duty under GBP 135 per order).
 """
 import csv
@@ -18,13 +20,14 @@ ROOT = HERE.parent.parent
 VAT = 0.20
 N_PACKS = 4
 N_RX = 4          # one receiver sub-board per pack (ADR-0018 slot per carrier); the rack has 8 slots, 4 are used
+CUTS_ARE_IN_TOTAL = True  # owner has not decided the optional cuts: their cost stays in the required total
 RX_Q4_UPLIFT = 1.30  # hw/rx prices are qty-100; pack_uk.csv shows qty-4 is ~1.3x qty-100 for active parts
 D_REPO = "2026-10-31"
 D_NOW = "2026-11-01"
 
 BASKETS = [  # order = basket order in the list
     "Digi-Key UK", "Mouser UK", "Farnell UK", "RS UK", "LCSC", "JLCPCB",
-    "ITM Components", "Simply Sound & Lighting", "The Pi Hut", "Thomann", "Lab401 (EU)", "The Debug Store", "Knives and Tools UK", "123-3D UK",
+    "ITM Components", "Simply Sound & Lighting", "Rapid Online", "The Pi Hut", "Thomann", "Lab401 (EU)", "The Debug Store", "Knives and Tools UK", "123-3D UK",
     "tinySA reseller (UK)",
 ]
 SEARCH = {
@@ -35,16 +38,18 @@ SEARCH = {
     "LCSC": "https://www.lcsc.com/search?q=",
 }
 FIELDS = ["basket", "category", "item", "mpn", "qty", "unit_gbp_ex", "line_gbp_ex", "line_vat", "price_status",
-          "source_url", "date_read", "required", "reason", "notes"]
+          "source_url", "date_read", "required", "cut_qty", "reason", "notes"]
 
 CAT_BENCH, CAT_PACK, CAT_RX, CAT_ANT, CAT_FAB, CAT_MECH, CAT_SHIP, CAT_RACK = (
     "Bench kit", "Packs x4", "Receivers x4", "Antennas, coax, stands", "PCB fabrication", "Mechanical and cells",
-    "Shipping", "RACK (pending #34)")
+    "Shipping", "Rack")
 
 
-def line(basket, cat, item, mpn, qty, unit, status, url, date, reason, notes="", required=True):
+def line(basket, cat, item, mpn, qty, unit, status, url, date, reason, notes="", required=True, cut_qty=0):
+    """cut_qty: how many of qty the owner may choose to drop (an optional cut). The line stays in the required total."""
     return dict(basket=basket, category=cat, item=item, mpn=mpn, qty=qty, unit_gbp_ex=unit, price_status=status,
-                source_url=url, date_read=date, required="yes" if required else "optional", reason=reason, notes=notes)
+                source_url=url, date_read=date, required="yes" if required else "optional", cut_qty=cut_qty,
+                reason=reason, notes=notes)
 
 
 # ---------------------------------------------------------------- hand-entered lines
@@ -52,11 +57,11 @@ Q, E = "quoted", "estimated"
 MANUAL = [
     # Bench kit
     line("Digi-Key UK", CAT_BENCH, "nRF5340-DK", "nRF5340-DK", 2, 36.58, Q, SEARCH["Digi-Key UK"] + "nRF5340-DK", D_NOW,
-         "Phase 5 DK bring-up (#38): ADC/DAC delay, T_GAP, lock, end-to-end latency. Second DK is the peer.",
-         "Digi-Key UK result page 2026-11-01: GBP 36.58 qty 1 (DK UK shows ex VAT; the page does not label it). Stock level not shown on the result page. Also stocked by Mouser UK and Farnell UK (their pages timed out)."),
+         "Phase 5 DK bring-up (#38): ADC/DAC delay, T_GAP, lock, end-to-end latency. Second DK is the peer. OPTIONAL CUT: the second DK (GBP 36.58) is listed under the optional cuts.",
+         "Digi-Key UK result page 2026-11-01: GBP 36.58 qty 1 (DK UK shows ex VAT; the page does not label it). Stock level not shown on the result page. Also stocked by Mouser UK and Farnell UK (their pages timed out).", cut_qty=1),
     line("Digi-Key UK", CAT_BENCH, "Nordic Power Profiler Kit II", "nRF-PPK2", 1, 80.17, Q, SEARCH["Digi-Key UK"] + "nRF-PPK2", D_NOW,
          "#38 FEM and pack current; sources/measures 0.8-5 V for the battery-life check.",
-         "Digi-Key UK 2026-11-01: GBP 80.17 ex VAT (96.20 inc), 1,798 in stock."),
+         "Digi-Key UK 2026-11-01: GBP 80.17 ex VAT (96.20 inc), 1,798 in stock. OPTIONAL CUT (listed under the optional cuts).", cut_qty=1),
     line("Digi-Key UK", CAT_BENCH, "TI PCM1840 evaluation module", "PCM1840EVM", 1, 148.84, Q, SEARCH["Digi-Key UK"] + "PCM1840EVM", D_NOW,
          "#38 ADC delay and noise measured before the pack is populated (ADR-0019 mitigation).",
          "Digi-Key UK 2026-11-01: GBP 148.84 ex VAT (178.61 inc), 2 in stock, 12 week factory lead time, purchase limit applies. Was estimated at 55: nearly 3x higher. Order early; Mouser UK page timed out. OPTIONAL: under the single-purchase plan (ADR-0019) the PCM1840 arrives on our own pack boards at the same time, so a separate eval board adds no earlier test step.", False),
@@ -111,20 +116,24 @@ MANUAL = [
     line("ITM Components", CAT_ANT, "L-com HyperLink 2.4 GHz 8 dBi flat patch, N-female", "HG2409P-NF", 2, 72.12, Q,
          "https://www.itm.com", D_NOW,
          "One per wing (ADR-0021); R1 antenna.", "Price from ADR-0016 (ITM Components UK). Assumed ex VAT (ITM lists ex VAT by default); ADR does not state the basis."),
-    line("ITM Components", CAT_ANT, "L-com CA3N030 400-series coax N-male/N-male 9.14 m (30 ft)", "CA3N030", 2, 45.80, Q,
+    line("ITM Components", CAT_ANT, "L-com CA3N030 400-series coax N-male/N-male 9.14 m (30 ft): rack to near wing", "CA3N030", 1, 45.80, Q,
          "https://www.itm.com", D_NOW,
-         "Antenna to rack feed, owner decision. Near-wing length per design-log.",
-         "Owner-given ITM price GBP 45.80 ex VAT. OPEN: the design-log rack placeholder says the far wing may need CA3N075 (22.86 m, near the 6 dB RK-2 budget); the rack agent decides. Not priced, not included."),
-    line("ITM Components", CAT_ANT, "L-com LCCA30301-FT1.5 BNC-male to N-female jumper 45 cm", "LCCA30301-FT1.5", 2, 37.09, Q,
+         "Rack to near-wing boom, owner decision (#126 choice, RK-7h).",
+         "Owner-given ITM price GBP 45.80 ex VAT, one per rack."),
+    line("ITM Components", CAT_ANT, "L-com CA3N075 400-series coax N-male/N-male 22.86 m (75 ft): rack to far wing", "CA3N075", 1, 88.02, Q,
          "https://www.itm.com", D_NOW,
-         "Joins each coax to the RK-1 BNC on the rack (ADR-0016, 4.2 dB of the 6 dB RK-2 budget).",
-         "Price from ADR-0016 (supplier not stated there; assumed ITM as the L-com stockist). Listed here with the antennas because it is antenna feed, not backplane."),
+         "Rack to far-wing boom (12 m stage). A 30 ft lead does not reach the far wing (design-log RK-7h; audit.py Audit 5 needs 13.6 m on a 6 x 6 m venue). 7.65 dB at 100 ft is the longest the wing noise figure allows.",
+         "ITM Components UK, ex VAT, read 2026-11-01 (rack PR #126, hw/rack/prices.py ANTENNA_KIT)."),
+    line("RS UK", CAT_ANT, "Amphenol RF N socket to BNC plug adapter (at the rack BNC, one per wing)", "NF-BM-NT3G-50", 2, 8.40, Q,
+         "https://uk.rs-online.com/web/c/?searchTerm=285-6398", D_NOW,
+         "Joins each coax to the rack BNC. Replaces the L-com LCCA30301-FT1.5 jumper (GBP 37.09 each): 0.1 dB instead of ~0.2 dB plus a mated pair (rack PR #126).",
+         "RS UK 285-6398, ex VAT, from a search snippet 2026-11-01 (rack PR #126); stock not seen."),
     line("ITM Components", CAT_ANT, "L-com HGX-PMT07 pole mount bracket for HG2409P", "HGX-PMT07", 2, 14.45, Q,
          "https://www.itm.com", D_NOW, "Holds each panel on the stand pole at 4 m, tilted 10 deg down (ADR-0021).", "Owner-given ITM price ex VAT."),
     line("Simply Sound & Lighting", CAT_ANT, "Thor winch-up lighting stand", "LS003", 2, 140.83, Q,
          "https://www.simplysoundandlighting.co.uk", D_NOW,
          "4 m mounting height in each wing where the venue has no boom (ADR-0021; install doc step 3).",
-         "Owner-given ~GBP 140.83 ex VAT each. Large item: delivery is a separate line (estimated)."),
+         "Owner-given ~GBP 140.83 ex VAT each. Large item: delivery is a separate line (estimated). OPTIONAL CUT: the venue's own lighting stands or booms may serve (the HGX-PMT07 U-bolt mounts stay).", cut_qty=2),
 
     # Mechanical and cells
     line("RS UK", CAT_MECH, "Protected 18650 Li-ion cell, button top, ~3000 mAh", "18650 protected", N_PACKS + 2, 7.00, E,
@@ -180,7 +189,9 @@ MANUAL = [
     line("ITM Components", CAT_SHIP, "Delivery (antennas and coax)", "-", 1, 10.00, E, "https://www.itm.com", "",
          "Coax drums are heavy.", "Estimate."),
     line("Simply Sound & Lighting", CAT_SHIP, "Delivery (2 stands)", "-", 1, 30.00, E, "https://www.simplysoundandlighting.co.uk", "",
-         "Stands are about 10 kg each.", "Estimate."),
+         "Stands are about 10 kg each.", "Estimate. Goes with the stands if they are cut.", cut_qty=1),
+    line("Rapid Online", CAT_SHIP, "Delivery (1U case, about 4 kg)", "-", 1, 6.00, E, "https://www.rapidonline.com", "",
+         "Rapid UK delivery charge not read.", "Estimate."),
     line("The Pi Hut", CAT_SHIP, "Delivery", "-", 1, 3.50, E, "https://thepihut.com", "", "Standard.", "Estimate."),
     line("Thomann", CAT_SHIP, "Delivery to the UK", "-", 1, 8.00, E, "https://www.thomann.de/gb/", "",
          "Thomann ships from Germany; UK prices include VAT at checkout.", "Estimate."),
@@ -191,13 +202,45 @@ MANUAL = [
          "https://knivesandtools.co.uk/en/pt/-nitecore-ui2-battery-charger.htm", D_NOW, "Fixed GBP 9.95 inc VAT for all orders.", "Page read 2026-11-01."),
     line("123-3D UK", CAT_SHIP, "Delivery", "-", 1, 4.00, E, "https://www.123-3d.co.uk", "", "Standard.", "Estimate."),
 
-    # Rack placeholders (qty 0, excluded)
-    line("RACK", CAT_RACK, "Backplane PCB(s) + stencil (hw/rack)", "TBD", 0, 0, "placeholder", "", "",
-         "Rack main board: Wilkinson 1:8 per antenna, fused slots, CM4 carrier (ADR-0018). Numbers come from #34.", "Fill after the rack layout PR merges.", False),
-    line("RACK", CAT_RACK, "Backplane parts (slot sockets, LNA, BAW filters, splitters, connectors)", "TBD", 0, 0, "placeholder", "", "",
-         "From hw/rack BOM.", "Fill after the rack layout PR merges.", False),
-    line("RACK", CAT_RACK, "1U chassis, CM4 + IO board, power supply, XLR/BNC panel parts", "TBD", 0, 0, "placeholder", "", "",
-         "Rack enclosure and host (ADR-0018).", "Fill after the rack layout PR merges.", False),
+    # Rack: host, case, cables, panel parts, main-board PCB (hw/rack/prices.py EXTRAS, PR #126). Backplane parts: hw/bom/rack_uk.csv.
+    line("The Pi Hut", CAT_RACK, "Raspberry Pi CM4 2 GB RAM / 8 GB eMMC, no wireless (SC0680 = CM4002008)", "CM4002008", 1, 79.20, Q,
+         "https://thepihut.com", D_NOW, "Rack host (ADR-0018). SC0681 (16 GB eMMC) at the same price is the drop-in alternative.",
+         "The Pi Hut UK qty 1, 2026-11-01 (coordinator decision on #95; DigiKey UK SC0680 was 0 stock at GBP 61.64)."),
+    line("Digi-Key UK", CAT_RACK, "Raspberry Pi CM4 IO Board (SC0326)", "SC0326", 1, 26.15, Q, SEARCH["Digi-Key UK"] + "SC0326", D_NOW,
+         "CM4 carrier for the rack host.", "Digi-Key UK 2026-11-01, read."),
+    line("Digi-Key UK", CAT_RACK, "40-way IDC ribbon 152 mm socket-socket (Assmann H3AAH-4006G)", "H3AAH-4006G", 1, 1.30, Q,
+         SEARCH["Digi-Key UK"] + "H3AAH-4006G", D_NOW, "Main board J2 to CM4IO J8.", "Digi-Key UK 2026-11-01, read."),
+    line("LCSC", CAT_RACK, "CM4IO 12 V pigtail: JST VH 2-pin housing to 2.1 mm DC plug, 200 mm", "CM4IO-12V-pigtail", 1, 3.00, E,
+         SEARCH["LCSC"] + "JST+VH+2+pin+housing", "", "Feeds the CM4IO from the main board J5.", "Estimate (rack PR #126); LCSC or RS UK."),
+    line("RS UK", CAT_RACK, "Taoglas CAB.6012 U.FL-U.FL 1.13 mm jumper 100 mm", "CAB.6012", 16, 1.02, Q,
+         SEARCH["RS UK"] + "069-0832", D_NOW,
+         "Main-board RF port to each receiver J3/J4 (8 slots x 2); the ports sit right behind each receiver (0.3 dB + 2 mated pairs). All 16 are bought although 4 slots are used, as in #126.",
+         "RS UK 069-0832, read by the coordinator 2026-11-01; stock unconfirmed. Alternative LCSC C7541876 (Kinghelm)."),
+    line("Digi-Key UK", CAT_RACK, "Neutrik NE8FDP etherCON RJ45 feedthrough (rear panel)", "NE8FDP", 1, 12.78, Q,
+         SEARCH["Digi-Key UK"] + "NE8FDP", D_NOW, "Rear-panel network port.", "Digi-Key UK 2026-11-01, read."),
+    line("RS UK", CAT_RACK, "Cat6 patch lead 0.3 m (NE8FDP to CM4IO RJ45)", "Cat6 0.3 m", 1, 2.00, E, SEARCH["RS UK"] + "cat6+patch+0.3m", "",
+         "Panel RJ45 to the CM4IO.", "Estimate (rack PR #126); RS UK or Farnell UK."),
+    line("The Pi Hut", CAT_RACK, "Panel-mount USB-C socket to micro-B plug 30 cm, M3 ears 20 mm apart (Adafruit 4056)", "Adafruit 4056", 1, 3.83, Q,
+         "https://thepihut.com", D_NOW,
+         "CM4IO rpiboot port on the front panel (RK-1); no CC resistors, so service with a USB-A-to-C lead.",
+         "The Pi Hut UK SKU 103462, GBP 4.60 inc VAT, read 2026-11-01; SOLD OUT that day (Adafruit direct USD 4.95). Order may wait."),
+    line("Digi-Key UK", CAT_RACK, "Mean Well GST60A12-P1J 12 V 5 A desktop brick, 2.1 mm plug, C14 inlet", "GST60A12-P1J", 1, 14.50, Q,
+         SEARCH["Digi-Key UK"] + "GST60A12-P1J", D_NOW, "Rack 12 V supply.", "Digi-Key UK 2026-11-01, read (6,852 in stock)."),
+    line("Digi-Key UK", CAT_RACK, "UK mains cord BS1363 to C13, 1.83 m", "AC-12206-UK", 1, 8.35, Q,
+         SEARCH["Digi-Key UK"] + "AC-12206-UK", D_NOW, "Mains lead for the 12 V brick.", "Digi-Key UK 2026-11-01, read (7,931 in stock)."),
+    line("JLCPCB", CAT_RACK, "Rack main board, full JLCPCB order: 5 x 4-layer 412 x 321.5 mm ENIG boards, large framed stencil, extended-part fees, DHL ~2 kg, UK import VAT and handling",
+         "rack.kicad_pcb", 1, 300.00, E, "https://cart.jlcpcb.com/quote", "",
+         "The rack main board (hw/rack/out/fab). One board is used, four are spares (5 is JLC's minimum).",
+         "ESTIMATE: reviewer's range GBP 250-350 for the whole order, mid value; the JLC quote page needs a browser, so quote before ordering. The figure already includes DHL and UK import VAT, so the VAT column here slightly overstates. Own order: the shipping line above is for the pack and receiver boards."),
+    line("Rapid Online", CAT_RACK, "Hammond RM1U1913SBK 1U 19 in aluminium case, 330 mm deep", "RM1U1913SBK", 1, 140.76, Q,
+         "https://www.rapidonline.com", D_NOW, "Rack chassis (mech/rack.py; panels drilled per hw/rack/mech/out).",
+         "Rapid Online 31-1555, read by the coordinator 2026-11-01, in stock; DigiKey UK HM996-ND GBP 142.98 (90 in stock)."),
+    line("RS UK", CAT_RACK, "M3 x 11 mm F-F hex spacer + 2 x M3 x 6 screws (receiver mounts, 2 per slot)", "M3x11 spacer set", 16, 0.30, E,
+         SEARCH["RS UK"] + "M3+11mm+hex+spacer", "", "Receiver mounts H1/H2 in each of 8 slots.", "Estimate (brass class price; rack PR #126)."),
+    line("RS UK", CAT_RACK, "M2.5 x 10 mm F-F spacer + screws (CM4IO above the main board)", "M2.5x10 spacer set", 4, 0.30, E,
+         SEARCH["RS UK"] + "M2.5+10mm+spacer", "", "CM4IO standoffs.", "Estimate (rack PR #126)."),
+    line("RS UK", CAT_RACK, "M3 x 5 mm F-F spacer + screws (main board to the case floor, 8 holes)", "M3x5 spacer set", 8, 0.25, E,
+         SEARCH["RS UK"] + "M3+5mm+spacer", "", "Main-board mounting.", "Estimate (rack PR #126)."),
 ]
 
 
@@ -224,15 +267,15 @@ def basket_for_rx(dist):
 
 
 def derive():
-    demand = OrderedDict()  # (basket, mpn) -> dict
+    """Sum the demand per MPN over packs, receivers and the rack, then place each MPN in ONE basket."""
+    demand = OrderedDict()  # mpn -> dict(qty, who, srcs)
 
-    def add(key, qty, who, unit4, unit100, status, url, date, note, item):
-        d = demand.setdefault(key, dict(qty=0, who=[], unit4=unit4, unit100=unit100, status=status, url=url,
-                                        date=date, note=note, item=item))
+    def add(basket, mpn, qty, who, unit4, unit100, status, url, date, note, item):
+        d = demand.setdefault(mpn, dict(qty=0, who=[], srcs=[]))
         d["qty"] += qty
         d["who"].append(who)
-        if who.startswith("pack"):  # pack_uk.csv price is the better-sourced one; prefer it
-            d.update(unit4=unit4, unit100=unit100, status=status, url=url, date=date, note=note)
+        d["srcs"].append(dict(basket=basket, unit4=unit4, unit100=unit100, status=status, url=url, date=date,
+                              note=note, item=item, pack=who.startswith("pack")))
 
     with open(HERE / "pack_uk.csv") as f:
         for r in csv.DictReader(f):
@@ -247,7 +290,7 @@ def derive():
             url = r["url"]
             if url.rstrip("/").endswith((".co.uk", ".com")) or not url:
                 url = SEARCH[basket] + mpn
-            add((basket, mpn), q * N_PACKS, f"pack x{q}", float(r["gbp_qty4"]), float(r["gbp_qty100"]),
+            add(basket, mpn, q * N_PACKS, f"pack x{q}", float(r["gbp_qty4"]), float(r["gbp_qty100"]),
                 E if est else Q, url, "" if est else date, r["notes"], r["ref"])
 
     with open(ROOT / "hw/rx/out/bom.csv") as f:
@@ -272,26 +315,33 @@ def derive():
             url = SEARCH[basket] + mpn
             note = (f"rx price from hw/rx/out/bom.csv ({src})" +
                     (f"; x{RX_Q4_UPLIFT} on the qty-100 figure for a 4-board order" if active and not quoted_exact else ""))
-            add((basket, mpn), q * N_RX, f"rx x{q}", unit_adj, unit_adj, E if est else Q, url,
+            add(basket, mpn, q * N_RX, f"rx x{q}", unit_adj, unit_adj, E if est else Q, url,
                 "" if est else D_NOW, note, r["refs"])
 
-    # extras from pack_uk.csv that need their own treatment
+    with open(HERE / "rack_uk.csv") as f:  # rack backplane parts, one rack (hw/rack/out/bom.csv, PR #126)
+        for r in csv.DictReader(f):
+            basket, mpn, unit = r["basket"], r["mpn"], float(r["unit_gbp"])
+            quoted = r["status"] == "quoted"
+            add(basket, mpn, int(r["qty"]), "rack", unit, unit, Q if quoted else E, SEARCH[basket] + mpn,
+                D_NOW if quoted else "", "rack price from hw/rack/prices.py (" + r["source"] + ")", mpn)
+
     out = []
-    for (basket, mpn), d in demand.items():
+    labels = {"pack": "Packs x4", "rx": "Receivers x4", "rack": CAT_RACK}
+    for mpn, d in demand.items():
+        baskets = [s_["basket"] for s_ in d["srcs"]]
+        basket = "LCSC" if "LCSC" in baskets else baskets[0]  # one basket per MPN; LCSC when any user can buy there
+        cands = [s_ for s_ in d["srcs"] if s_["basket"] == basket]
+        src = next((s_ for s_ in cands if s_["pack"]), cands[0])
         passive = is_passive(mpn)
-        unit_ref = d["unit4"]
-        sp = spares(unit_ref, passive, d["qty"])
+        sp = spares(src["unit4"], passive, d["qty"])
         order = d["qty"] + sp
-        unit = d["unit100"] if order >= 100 else d["unit4"]
-        cat = CAT_PACK if all(w.startswith("pack") for w in d["who"]) else (
-            CAT_RX if all(w.startswith("rx") for w in d["who"]) else "Packs x4 + Receivers x4")
-        status = d["status"]
-        if mpn == "BT40NE":  # BT40NE is the consigned module the brief names; keep price quoted
-            pass
-        reason = (f"Needed {d['qty']} ({'; '.join(d['who'])}; refs {d['item'][:40]}), +{sp} spare"
+        unit = src["unit100"] if order >= 100 else src["unit4"]
+        kinds = [k for k in ("pack", "rx", "rack") if any(w.startswith(k) for w in d["who"])]
+        cat = labels[kinds[0]] if len(kinds) == 1 else " + ".join(labels[k] for k in kinds)
+        reason = (f"Needed {d['qty']} ({'; '.join(d['who'])}; refs {src['item'][:40]}), +{sp} spare"
                   if sp else f"Needed {d['qty']} ({'; '.join(d['who'])})")
-        out.append(line(basket, cat, d["item"][:60] if False else mpn, mpn, order, round(unit, 4), status,
-                        d["url"], d["date"], reason, d["note"][:240]))
+        out.append(line(basket, cat, mpn, mpn, order, round(unit, 4), src["status"],
+                        src["url"], src["date"], reason, src["note"][:240]))
     return out
 
 
@@ -303,7 +353,7 @@ def all_lines():
         l["unit_gbp_ex"] = round(float(l["unit_gbp_ex"]), 4)
         l["line_gbp_ex"] = round(l["qty"] * l["unit_gbp_ex"], 2)
         l["line_vat"] = round(l["line_gbp_ex"] * VAT, 2)
-    order = {b: i for i, b in enumerate(BASKETS + ["RACK"])}
+    order = {b: i for i, b in enumerate(BASKETS)}
     lines.sort(key=lambda l: (order[l["basket"]], l["category"] == CAT_SHIP, l["category"], l["mpn"]))
     return lines
 
@@ -333,6 +383,19 @@ def summarize(lines):
     return base, cat, opt
 
 
+CUT_WHY = {  # mpn -> why the owner may drop it
+    "nRF5340-DK": "One DK runs most bring-up; the second is the peer for the radio link and end-to-end latency tests (#38), which the packs and rack could stand in for later.",
+    "nRF-PPK2": "Only measures pack and FEM current; the battery-life check can use a bench meter instead.",
+    "LS003": "The venue's existing lighting stands or booms may serve as the 4 m antenna mounts (the HGX-PMT07 mounts stay).",
+    "-": "Delivery for the two stands; goes with them.",
+}
+
+
+def cuts(lines):
+    """Optional cuts: lines (or part of a line) in the required total that the owner may choose to drop."""
+    return [l for l in lines if l["required"] == "yes" and l["cut_qty"]]
+
+
 def render(lines):
     base, cat, opt = summarize(lines)
     tot = sum(base.values())
@@ -341,47 +404,58 @@ def render(lines):
     q_total = sum(l["line_gbp_ex"] for l in lines if l["price_status"] == Q and l["required"] == "yes")
     o = []
     o.append("# OpenPack shopping list (issue #36, ADR-0019)\n")
-    o.append("One purchase, bought once, after all design is done (ADR-0019). **Everything except the rack backplane**: "
-             "the RACK section is a placeholder until the rack layout (#34) merges. Generated from `hw/bom/shopping.csv` "
+    o.append("One purchase, bought once, after all design is done (ADR-0019). **Packs, receivers, bench kit and the rack** "
+             "(main board PR #126, filled in here). Generated from `hw/bom/shopping.csv` "
              "by `python3 hw/bom/shopping.py`; do not edit this file by hand. A test (`tests/test_shopping.py`) checks that the totals add up.\n")
     o.append("## Totals\n")
     o.append("| Basket | Ex VAT (GBP) | VAT 20 % | Inc VAT |\n|---|---:|---:|---:|")
     for b, v in base.items():
         o.append(f"| {b} | {money(v)} | {money(v*VAT)} | {money(v*(1+VAT))} |")
-    o.append(f"| **Grand total (required, no rack)** | **{money(tot)}** | **{money(tot*VAT)}** | **{money(tot*(1+VAT))}** |")
+    o.append(f"| **Grand total (required)** | **{money(tot)}** | **{money(tot*VAT)}** | **{money(tot*(1+VAT))}** |")
     o.append(f"| Optional items (not in total) | {money(opt)} | {money(opt*VAT)} | {money(opt*(1+VAT))} |")
-    o.append(f"| RACK (pending #34) | TBD | TBD | TBD |\n")
+    o.append("")
     o.append(f"Of the required total, GBP {money(q_total)} ex VAT is **quoted** and the rest, GBP {money(tot-q_total)}, is **estimated** "
              f"(including shipping). Estimated prices are marked `estimated` in every table; none can be called a quote.\n")
+    cl = cuts(lines)
+    cut_tot = sum(l["cut_qty"] * l["unit_gbp_ex"] for l in cl)
+    o.append("## Optional cuts the owner may choose\n")
+    o.append("The owner has not decided these. **They are still inside the required total above.** "
+             "Taking all of them saves the amount in the last row.\n")
+    o.append("| Basket | Item | Qty cut | Saving ex VAT | VAT 20 % | Saving inc VAT | Why it may go |\n|---|---|---:|---:|---:|---:|---|")
+    for l in cl:
+        sv = l["cut_qty"] * l["unit_gbp_ex"]
+        name = l["item"] if l["mpn"] != "-" else l["item"]
+        o.append(f"| {l['basket']} | {name} ({l['mpn']}) | {l['cut_qty']} | {money(sv)} | {money(sv*VAT)} | {money(sv*(1+VAT))} | {CUT_WHY[l['mpn']]} |")
+    o.append(f"| **All cuts** | | | **{money(cut_tot)}** | **{money(cut_tot*VAT)}** | **{money(cut_tot*(1+VAT))}** | Total after all cuts: GBP {money(tot-cut_tot)} ex VAT, {money((tot-cut_tot)*(1+VAT))} inc VAT |\n")
+    o.append("Lines already marked OPTIONAL in the baskets (PCM1840EVM, NanoVNA-H4, DS1054Z) are excluded from the total and are not in this table.\n")
     o.append("## How prices were read\n")
     o.append("- All prices GBP **ex VAT**; VAT 20 % shown separately and added in the inc-VAT column. Digi-Key UK, Mouser UK, Farnell UK, RS UK show ex- and inc-VAT side by side; ITM Components and the owner-given Simply Sound prices are ex VAT.\n"
              "- **quoted** = a price read from a source page, with its URL and read date. For pack lines these are the readings in `hw/bom/pack_uk.csv` (2026-10-31 for Digi-Key UK, 2026-11-01 for LCSC) and `hw/rx/out/bom.csv`; for the antennas, coax, mounts and stands they are the figures given by the owner or ADR-0016 on 2026-11-01. Prices are at the quantity of 4 packs (or the 100-tier when the order quantity reaches 100), not re-read today.\n"
              "- **estimated** = no page read (or the repo marks it ESTIMATE). Bench kit lines were re-read on 2026-11-01 from Digi-Key UK, The Debug Store, Lab401, Knives and Tools UK and 123-3D UK (some from search snippets, marked in the notes). Farnell, Mouser and RS pages timed out or were refused. Still estimated: JLCPCB fab, stencil and shipping (quote page is dynamic), protected cells, fasteners, wire, most delivery lines. Re-check each basket before paying.\n"
              "- **LCSC and JLCPCB** orders to the UK: 20 % import VAT is collected at checkout, no duty under GBP 135 per consignment, courier shipping is a separate line. Split orders so each stays under GBP 135 ex VAT (the PCB order and parts order already do).\n"
-             "- Quantities: pack lines are 4 packs; receiver lines are **4 receivers** (one per pack; the rack has 8 slots, 4 stay empty). Spares: passives max(10, 25 %), ICs under GBP 1 get 1 spare, dearer parts none. Lines used by both pack and receiver are merged into one line.\n"
+             "- Quantities: pack lines are 4 packs; receiver lines are **4 receivers** (one per pack; the rack has 8 slots, 4 stay empty, but all 8 get their main-board parts and u.FL jumpers). An MPN is bought **once**: parts shared by packs, receivers and the rack are summed into one line (shared passives sit in LCSC). Rack-only lines come from `hw/bom/rack_uk.csv` (the #126 backplane BOM summed per MPN); the rack host, case, cables and PCB order are in `hw/bom/shopping.py`. Spares: passives max(10, 25 %), ICs under GBP 1 get 1 spare, dearer parts none. Lines used by both pack and receiver are merged into one line.\n"
              "- Parts the repo consigns elsewhere: BT40NE (pack) at Digi-Key UK GBP 16.34 at qty 4, BT40E (receiver) at Digi-Key UK GBP 9.78 (10 week lead on both; order first). F1 fuse SF-1206F300-2 at Digi-Key UK. No FEM is bought (U8 is not fitted).\n")
     o.append("## Gaps and decisions\n")
     o.append("- **Not UK-sourceable / unconfirmed:** the tinySA Ultra+ comes from Lab401 (France), no UK stockist was found; protected 18650 cells (no UK seller page could be read), the NanoVNA (optional). Everything else is on a UK distributor's list but unverified in stock.\n"
              "- **Missing from the BOMs, added here:** Tag-Connect TC2030-IDC-NL (programming), protected 18650 cells, an external 18650 charger, solder paste, the u.FL pigtails and attenuators for conducted-power measurement.\n"
-             "- **Open:** CA3N030 (9.14 m) is ordered for both wings by the owner; the design-log rack placeholder suggests the far wing may need CA3N075 (22.86 m). If so, swap one line when #34 lands. A reflow hot plate/oven and a multimeter are assumed owned.\n"
+             "- **Decided with the rack (#126):** near wing CA3N030 (9.14 m), far wing CA3N075 (22.86 m); an N-socket to BNC-plug adapter at the rack replaces the LCCA30301-FT1.5 jumper. A reflow hot plate/oven and a multimeter are assumed owned.\n"
+             "- **Biggest estimate:** the rack main-board PCB order, GBP 300 (reviewer's range 250-350, the JLC page needs a browser). Quote it before ordering.\n"
              "- **Not listed (assumed owned):** Bambu A1 mini (ADR-0008 says the owner has it), PC, soldering iron.\n")
     cur = None
-    for b in BASKETS + ["RACK"]:
+    for b in BASKETS:
         bl = [l for l in lines if l["basket"] == b]
         if not bl:
             continue
-        if b == "RACK":
-            o.append("## RACK (pending #34): placeholder\n")
-            o.append("Do not buy these yet. Pull in the numbers from the rack layout PR (#34) when it merges, then regenerate. Antennas, coax and stands are NOT here; they are in the ITM and Simply Sound baskets.\n")
-        else:
-            bt = base.get(b, 0)
-            o.append(f"## Basket: {b}\n")
-            o.append(f"**Basket total: GBP {money(bt)} ex VAT, VAT {money(bt*VAT)}, GBP {money(bt*(1+VAT))} inc VAT.**\n")
+        bt = base.get(b, 0)
+        o.append(f"## Basket: {b}\n")
+        o.append(f"**Basket total: GBP {money(bt)} ex VAT, VAT {money(bt*VAT)}, GBP {money(bt*(1+VAT))} inc VAT.**\n")
         o.append("| Item | Part number | Qty | Unit (GBP ex VAT) | Line total | Price | Link | Reason / what it unblocks |\n|---|---|---:|---:|---:|---|---|---|")
         for l in bl:
             tag = l["price_status"] + (f" {l['date_read']}" if l["date_read"] and l["price_status"] == Q else "")
-            if l["required"] != "yes" and b != "RACK":
+            if l["required"] != "yes":
                 tag += ", OPTIONAL"
+            elif l["cut_qty"]:
+                tag += f", OPTIONAL CUT x{l['cut_qty']}"
             link = f"[link]({l['source_url']})" if l["source_url"] else "-"
             item = l["item"] if l["category"] in (CAT_BENCH, CAT_ANT, CAT_FAB, CAT_MECH, CAT_SHIP, CAT_RACK) else f"{l['category']} part"
             reason = l["reason"] + ((" " + l["notes"]) if l["notes"] else "")
@@ -393,7 +467,7 @@ def render(lines):
     for c, v in cat.items():
         o.append(f"| {c} | {money(v)} | {money(v*VAT)} | {money(v*(1+VAT))} |")
     o.append(f"| **Total** | **{money(tot)}** | **{money(tot*VAT)}** | **{money(tot*(1+VAT))}** |\n")
-    o.append("Shipping is its own category. Optional items are excluded. The RACK section is excluded (placeholder).\n")
+    o.append("Shipping is its own category. Lines marked OPTIONAL are excluded; the optional cuts above are included.\n")
     return "\n".join(o)
 
 

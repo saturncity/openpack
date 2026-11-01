@@ -36,7 +36,7 @@ def test_basket_and_grand_totals_add_up():
     for r in req:
         cats[r["category"]] = cats.get(r["category"], 0) + float(r["line_gbp_ex"])
     assert abs(sum(cats.values()) - grand) < 0.005
-    assert "RACK" not in base
+    assert "Rapid Online" in base and "RACK" not in base
 
 
 def test_every_line_priced_and_sourced():
@@ -44,7 +44,7 @@ def test_every_line_priced_and_sourced():
         assert r["price_status"] in ("quoted", "estimated", "placeholder"), r["mpn"]
         if r["price_status"] == "quoted":
             assert r["source_url"].startswith("http") and r["date_read"], r["mpn"]
-        assert r["basket"] in shopping.BASKETS + ["RACK"]
+        assert r["basket"] in shopping.BASKETS
 
 
 def test_pack_and_rx_quantities_cover_four_boards():
@@ -61,3 +61,30 @@ def test_pack_and_rx_quantities_cover_four_boards():
 
 def test_generated_files_current():
     assert subprocess.run([sys.executable, str(ROOT / "hw/bom/shopping.py"), "--check"]).returncode == 0
+
+
+def test_no_mpn_appears_twice():
+    seen = {}
+    for r in rows():
+        m = r["mpn"]
+        if m in ("-", "TBD"):
+            continue
+        assert m not in seen, f"{m} is in both {seen[m]} and {r['basket']}"
+        seen[m] = r["basket"]
+
+
+def test_optional_cuts_stay_in_total_and_are_listed():
+    cut = [r for r in rows() if r["required"] == "yes" and int(r["cut_qty"])]
+    assert {r["mpn"] for r in cut} == {"nRF5340-DK", "nRF-PPK2", "LS003", "-"}
+    md = (ROOT / "docs/shopping-list.md").read_text()
+    assert "## Optional cuts the owner may choose" in md
+    for r in cut:
+        assert int(r["cut_qty"]) <= int(r["qty"])
+    total = sum(int(r["cut_qty"]) * float(r["unit_gbp_ex"]) for r in cut)
+    assert f"**{total:,.2f}**" in md
+
+
+def test_rack_antenna_choices():
+    by = {r["mpn"]: r for r in rows()}
+    assert by["CA3N030"]["qty"] == "1" and by["CA3N075"]["qty"] == "1"
+    assert "LCCA30301-FT1.5" not in by and by["NF-BM-NT3G-50"]["qty"] == "2"
