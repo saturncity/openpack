@@ -318,11 +318,16 @@ def placement(P):
         pl[c["cbias"][1]] = (x0 + s * 3.4, 17.6, 0)
         pl[c["r2512"]] = (x0 + s * 7.4, 15.8, 90)
         pl[c["tvs"]] = (x0 + s * 10.3, 15.2, ("face", ("2",), ("1",), (0, 1)))
-        pl[c["efb"]] = (x0 + s * 8.6, 23.0, 0)
+        # bias eFuse: the slot eFuses' cluster (the WSON does not mirror, so neither does its cluster): ILM resistor
+        # beside pin 7, dV/dt cap beside pin 1, input cap below, output cap above-right (#34)
+        ux, uy = x0 + s * 8.6, 23.0
+        pl[c["efb"]] = (ux, uy, 0)
         ilm, dv, cin, co = efuse_parts(P, c["efb"])
-        pl[ilm] = (x0 + s * 6.0, 25.6, 90); pl[dv] = (x0 + s * 7.2, 25.6, 90)
-        pl[cin] = (x0 + s * 11.0, 25.6, 90); pl[co] = (x0 + s * 11.6, 21.0, 0)
-        pl[c["en"]] = (x0 + s * 8.4, 26.2, 90); pl[c["fl"]] = (x0 + s * 9.6, 26.2, 90)
+        pl[ilm] = (ux + 1.0, uy + 2.0, 180); pl[dv] = (ux - 1.8, uy + 2.8, 90)
+        pl[cin] = (ux - 2.6, uy - 2.0, 0); pl[co] = (ux + 3.0, uy + 2.4, 90)
+        # EN pull-down / FLT pull-up: anywhere on their nets, so at the host end (no +3V3 run to the rear panel)
+        hi = 0 if ant == "A" else 2
+        pl[c["en"]] = (226.0 + 1.6 * hi, 247.0, 90); pl[c["fl"]] = (226.0 + 1.6 * (hi + 1), 247.0, 90)
         pl[c["fb"]] = (x0 - s * 8.6, 26.6, 90)
         for i, cc in enumerate(c["csup"]):
             pl[cc] = (x0 - s * (4.2 + 1.3 * i), 26.6, 90)
@@ -1013,7 +1018,13 @@ def zone_fanout(b, cu, pads, net, rect, log, placed):
     return n
 
 
-def route_all(b, cu, nets, log):
+# the bias eFuses' EN / FLT sit inside the B.Cu +12V_BUS rear strip, the GND fan-out fences them in front and L1 is RF
+# from y 31: they route first, on F.Cu + In2 only, before the strip joins the router's copper (their vias become holes
+# in the strip pour; nothing runs on B.Cu there) (#34)
+EARLY_NETS = ("HOST_GPIO22", "HOST_GPIO23", "HOST_GPIO26", "HOST_GPIO27")
+
+
+def route_all(b, cu, nets, log, only=None):
     """everything that is not RF, GND or a pour: audio legs first (B.Cu only), then power (outer copper, wide),
     then signals (any routing layer, inner preferred for long runs)"""
     import pcbnew as P_
@@ -1029,8 +1040,10 @@ def route_all(b, cu, nets, log):
     rf_or_skip = lambda n: is_rf(n) or n in skip or n.startswith("__")
     order = [n for n in AUDIO_NETS] + [n for n in BIG_NETS] + \
         [n for n in POWER_NETS if n not in BIG_NETS] + \
-        sorted((n for n in nets if n not in WIDE_NETS and not rf_or_skip(n)),
+        sorted((n for n in nets if n not in WIDE_NETS and not rf_or_skip(n) and n not in EARLY_NETS),
                key=lambda n: (n.startswith(("HOST_", "S")), n))
+    if only is not None:
+        order = list(only)
     forbid_rf = {0: (3,)}
     for net in order:
         if net not in nets or len(nets[net]) < 2 and net not in ZONES_B:
@@ -1041,6 +1054,8 @@ def route_all(b, cu, nets, log):
             kw = dict(cls="big", layers=[0, 2], layer_cost=(1.0, 9.0, 1.3), via_cost=6.0)
         elif net in POWER_NETS:
             kw = dict(cls="wide", layers=[0, 2], layer_cost=(1.0, 9.0, 1.2), via_cost=6.0)
+        elif net in EARLY_NETS:
+            kw = dict(cls="sig", layers=[0, 1], layer_cost=(1.5, 1.0, 9.0), via_cost=4.0)
         else:
             kw = dict(cls="sig", layers=[0, 1, 2], layer_cost=(1.5, 1.0, 1.3), via_cost=8.0)
         t0 = time.time()
@@ -1217,14 +1232,15 @@ def main(argv):
     print("placed, RF drawn", flush=True)
     nf = gnd_fanout(b, cu, pads, gnd_vias, log)
     print(f"GND fan-out {nf}", flush=True)
+    for r in RF_ZONE:
+        cu.tag((0,), r, 3)
+    failed_early = route_all(b, cu, nets, log, only=EARLY_NETS)
     for net, poly in ZONES_B.items():
         if net != "CHASSIS":
             cu.zone(2, poly, net)
-    for r in RF_ZONE:
-        cu.tag((0,), r, 3)
     nc = zone_fanout(b, cu, pads, "CHASSIS", (ZONES_B["CHASSIS"][0][0], ZONES_B["CHASSIS"][0][1],
                                                 ZONES_B["CHASSIS"][2][0], ZONES_B["CHASSIS"][2][1]), log, [])
-    failed = route_all(b, cu, nets, log)
+    failed = {**failed_early, **route_all(b, cu, nets, log)}
     nfence = rf_fence(b, cu, gnd_vias)
     nst = stitch_grid(b, cu, gnd_vias)
     for line in log:
