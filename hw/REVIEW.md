@@ -85,14 +85,14 @@ Process (docs/agents/hands-off.md, "PCB layout review"): `kicad-cli` renders eve
   - Narrower sections are 0.4 mm necks of ≤ 1.36 mm, and only inside a 1.2 mm zone around pads too small for 1 mm (SOT-563/SOT-23-5 pins).
   - SW1's on-throw moved from pin 1 to **pin 3** (`pack.py`), so the battery feed and VSYS no longer cross at the switch.
   - Track resistance from the board is **40 mΩ** for all four nets (the reviewer measured ≈ 150 mΩ on In2).
-  - `audit.py` now builds the cell path from the board (tracks) plus estimates for spring, plate and leads: **121 mΩ, over the old 100 mΩ allowance**. The cutoff computes to **3.2012 V, so it rounds up to 3.3 V** (1.2 mV over 3.2). Firmware has no hard-coded value yet. Measuring the spring's real resistance will settle 3.2 vs 3.3. Red LED (3.4 V) and runtime (18.6 h) still pass.
+  - `audit.py` now builds the cell path from the board (tracks) plus estimates for spring, plate and leads: **121 mΩ, over the old 100 mΩ allowance**. The cutoff computes to **3.2012 V, so it rounds up to 3.3 V** (1.2 mV over 3.2). **3.3 V accepted** (ADR-0012 amended): runtime at 3.3 V is 17.5 h ≥ 16 h (PK-7, asserted in `audit.py`), and the red LED (3.4 V) still sits above it.
   - `test_battery_path_on_l1_wide` asserts the layer, the widths, the neck lengths and ≤ 50 mΩ.
 - **M2 test points (folded in).** TP3–TP11 from `review-104-tps` (415194b) are now in `pack.py` and `layout.py`. TP9–TP11 (I2S) and TP5 moved, because at their original spots they blocked the 1 mm VSYS corridor.
 - **S1 (belt clip, fixed).** The clip inserts moved to (−24, 3) / (−24, 17), under the board and clear of the antenna overhang. Bosses stop 0.3 mm under the board, so the inserts are M2 × 3 heat-set. Still under or near the antenna: the lid-post screws at (−30, 26.9) and (−43.9, 26.9). Use nylon there if the PCB-antenna fallback matters. The board-copper keepout is ✓; the enclosure metal check is only partly ✓.
 - **S2 (pigtail route, defined).** `mech/pack.py` `PIGTAIL`: from the u.FL at z 10.1, along y = 12 at z 11 (tie-down at x 5), over J2, to the whip exit at (42.5, 27.5, 20). Route is 81 mm, bend radius 6 mm (≥ 5 × OD). `fit.py` checks bends, the swept OD + 0.5 mm against every part, the light pipes, the switch fork and the walls; `pigtail()` is in the CadQuery interference set.
 - **S3 (JLC outputs, done).**
   - `bom_jlc.csv` has an LCSC # on every line. Each code was checked against LCSC's product record.
-  - `CONSIGN` (not at LCSC): BT40NE, F1 SF-1206F300-2, and R7 (180k 0402, no listing found).
+  - `CONSIGN` (not at LCSC): F1 SF-1206F300-2, and the BT40NE (Fanstel only). R7 is C25760 (0402WGF1803TCE).
   - `DNP` (excluded from the CPL): BT1 cradle contacts (off-board), J1 (THT, hand-solder), J3 and TP pads.
   - CPL rotations use a footprint correction table (`outputs.py` `ROT_CORR`: SOT-23* +180, QFN +270, SOIC +270, after the community JLC rotation DB). Tests check both files.
   - SOT-563 (U4), USB4105 and JS102011SAQN have no table entry. Check them in JLC's CPL preview at DFM.

@@ -181,9 +181,12 @@ if __name__ == "__main__":
     print(f"  IOVDD min 3.00 + LDO {i_3v3 * r_ldo * 1e3:.0f} mV + path {(i_3v3 + i_5v_in) * r_path * 1e3:.0f} mV"
           f" + ADC error {v_err * 1e3:.0f} mV = {cutoff:.2f} V -> cutoff {CELL_CUTOFF_V:.1f} V (red LED below 3.4 V, PK-8)")
     assert CELL_CUTOFF_V < 3.4, "cutoff must sit below the red battery LED threshold"
-    # Stopping at 3.2 V under load leaves ~10 % of a protected cell unused; runtime at 0.55 W with 90 % of 3.5 Ah:
-    print(f"  runtime with 90 % of the cell usable: {0.9 * wh / 0.55:.1f} h (PK-7 >= 16 h)")
-    assert 0.9 * wh / 0.55 >= 16
+    # Usable charge above the cutoff, under the ~0.2 A pack load (0.06 C): typical protected 3.5 Ah 18650 discharge
+    # curves leave ~10 % below 3.2 V and ~15 % below 3.3 V (estimate from datasheet curves; bench-check on the PPK2, G5).
+    usable = {3.2: 0.90, 3.3: 0.85}[CELL_CUTOFF_V]
+    runtime_h = usable * wh / 0.55
+    print(f"  runtime at {CELL_CUTOFF_V:.1f} V cutoff, {usable:.0%} of the cell usable, 0.55 W: {runtime_h:.1f} h (PK-7 >= 16 h)")
+    assert runtime_h >= 16, "PK-7 fails at this cutoff"
 
 
 # ---- #26: corrected SYS-2 latency budget, TD options (docs/analysis/td-latency.md). Run: python3 audit.py ----
