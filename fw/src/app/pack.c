@@ -26,6 +26,9 @@
 #include "op_audio.h"
 #include "adpcm6.h"
 #include "op_td.h"
+#if defined(CONFIG_OP_TEST_SCHED_REPORT)
+#include "nsi_hw_scheduler.h" /* bsim: device time, for run.py (a) frame clock -> TXEN */
+#endif
 
 #define HDR 3 /* AIR-3: seq u8, status u16 LE; then one ADPCM-6 frame (codec_state + audio) */
 #define MIN_FIRST_US 50 /* first frame clock at least this far after the sync arrives */
@@ -38,11 +41,18 @@ static K_SEM_DEFINE(tick, 0, 2); /* frame clocks not yet processed: a 2-buffer D
 static K_SEM_DEFINE(synced, 0, 1);
 static atomic_t started;
 static bool audio_ok;
+static uint32_t fclk_hw_mod; /* test only: device time of the last frame clock, mod OP_FRAME_US */
 
 static void tmr_isr(const void *arg)
 {
 	nrf_timer_event_clear(NRF_TIMER1, NRF_TIMER_EVENT_COMPARE0);
 	nrf_timer_cc_set(NRF_TIMER1, NRF_TIMER_CC_CHANNEL0, OP_FRAME_US); /* after the phased first */
+#if defined(CONFIG_OP_TEST_SCHED_REPORT)
+	/* the counter cleared at the compare: now - count = the frame clock instant */
+	nrf_timer_task_trigger(NRF_TIMER1, nrf_timer_capture_task_get(NRF_TIMER_CC_CHANNEL1));
+	fclk_hw_mod = (uint32_t)((nsi_hws_get_time() - nrf_timer_cc_get(NRF_TIMER1, NRF_TIMER_CC_CHANNEL1)) %
+				 OP_FRAME_US);
+#endif
 	k_sem_give(&tick);
 }
 
@@ -93,6 +103,9 @@ static void frame_thread(void *a, void *b, void *c)
 		adpcm6_encode(pcm, &f[HDR]);
 		/* a lost frame shows as a seq skip on air */
 		(void)op_ipc_send(p, op_td_tx(&td, f, op_pack_td(), p));
+		if (IS_ENABLED(CONFIG_OP_TEST_SCHED_REPORT) && seq == 0) { /* every 256 frames */
+			printk("PACK_FCLK fclk_hw_mod_us=%u\n", fclk_hw_mod);
+		}
 	}
 }
 

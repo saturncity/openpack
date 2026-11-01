@@ -13,10 +13,12 @@
  * copy B start follow the length of the frame being sent. 81 B copies end at t0 + 877 us: a TD pack
  * forfeits the RX slot (the TD build sets OP_RX_WINDOW_US = 0).
  *
- * Payload: the newest IPC frame (op_sched_put) is latched in the DISABLED interrupt after copy B
- * (LATCH_US) for the next t0. At start the net core tells the app core where that latch is
+ * Payload: the newest IPC frame (op_sched_put) is latched by TIMER0 COMPARE3 at LATCH_US =
+ * t0 - OP_PACK_LATCH_LEAD_US, just before the t0 it goes on air at (#98): after copy B's EasyDMA is
+ * done (both lengths) and OP_PACK_LATCH_LEAD_US + ramp-up before copy A's EasyDMA read. The latch is
+ * the same for 42 B and 81 B. At start the net core tells the app core where that latch is
  * (op_sched_sync), and the app core places its audio frame clock OP_PACK_FRAME_LEAD_US before it, so
- * every frame lands in its own slot (#87, ADR-0020).
+ * every frame lands in its own slot and audio frame done -> TXEN = the two leads (#87, ADR-0020).
  *
  * All peripheral access is via the nrfx HAL (the bsim models only see HAL writes, ADR-0009).
  */
@@ -29,6 +31,9 @@
 #include <hal/nrf_timer.h>
 #include <hal/nrf_dppi.h>
 #include "op_frame.h"
+#if defined(CONFIG_OP_TEST_SCHED_REPORT)
+#include "nsi_hw_scheduler.h" /* bsim: device time, for run.py (a) frame clock -> TXEN */
+#endif
 
 #define DPPI_CH 0 /* the net core runs no BT controller, nothing else allocates DPPI */
 #define RAMP_US 40
@@ -43,6 +48,14 @@ BUILD_ASSERT(RAMP_US + 2 * AIR_US(OP_PAYLOAD_MAX) + CONFIG_OP_T_GAP_US <=
 		     OP_FRAME_US - (IS_ENABLED(CONFIG_OP_TIME_DIVERSITY) ? CONFIG_OP_RX_WINDOW_US : 0),
 	     "time diversity: both 81 B copies must fit the frame (ADR-0017)");
 
+/* Payload latch (#98): TIMER0 COMPARE3, in TIMER0 us after t0, OP_PACK_LATCH_LEAD_US before the
+ * next t0. Copy B (81 B: t0 + 877) has left EasyDMA; copy A's read starts at t0 + ramp-up.
+ */
+#define LATCH_US (OP_FRAME_US - CONFIG_OP_PACK_LATCH_LEAD_US)
+#define CC_LATCH NRF_TIMER_CC_CHANNEL3
+BUILD_ASSERT(RAMP_US + 2 * AIR_US(OP_PAYLOAD_MAX) + CONFIG_OP_T_GAP_US < LATCH_US,
+	     "the latch must follow the end of copy B at every length");
+
 static uint8_t pkt[2 + OP_PAYLOAD_MAX]; /* S0, LENGTH, payload */
 static uint8_t pending[OP_PAYLOAD_MAX];
 static uint8_t pending_len;
@@ -51,13 +64,9 @@ static bool fresh, on_b, armed;
 #define BOOT_LEN (IS_ENABLED(CONFIG_OP_TIME_DIVERSITY) ? OP_PAYLOAD_MAX : OP_FRAME_LEN)
 static uint32_t underrun, overrun, cc_b = CC_B_US(BOOT_LEN);
 static int32_t margin_min = INT32_MAX, margin_max = INT32_MIN; /* latch - arrival, us */
+static uint32_t t0_hw_mod; /* test only: device time of the next t0, mod OP_FRAME_US */
 
-/* Payload latch: the DISABLED interrupt after copy B (load()), in TIMER0 us after t0. It follows the
- * payload length on air (TD: 81 B copies end later). The app core is phased once, at start, to the
- * boot length's latch; a later `td` switch keeps one frame per slot but moves the lead (fw/PROTOCOL.md).
- */
-#define LATCH_US(len) (CC_B_US(len) + RAMP_US + AIR_US(len))
-#define CC_NOW        NRF_TIMER_CC_CHANNEL2 /* capture only */
+#define CC_NOW NRF_TIMER_CC_CHANNEL2 /* capture only */
 
 /* TIMER0 us since the last t0 (0..OP_FRAME_US-1). */
 static uint32_t phase_us(void)
@@ -69,7 +78,7 @@ static uint32_t phase_us(void)
 /* us until the next latch, 1..OP_FRAME_US */
 static int32_t to_latch_us(void)
 {
-	return OP_FRAME_US - (int32_t)((phase_us() + OP_FRAME_US - LATCH_US(pkt[1])) % OP_FRAME_US);
+	return OP_FRAME_US - (int32_t)((phase_us() + OP_FRAME_US - LATCH_US) % OP_FRAME_US);
 }
 
 void op_sched_put(const uint8_t *payload, size_t len)
@@ -107,7 +116,7 @@ int op_sched_sync(void)
 	return op_ipc_send(m, sizeof(m));
 }
 
-/* Runs in the RADIO ISR after copy B: next frame's payload. A missing frame repeats the last one.
+/* Runs in the TIMER0 ISR at the latch: next frame's payload. A missing frame repeats the last one.
  * Copy B of the next frame starts AIR_US(len) + T_GAP after t0; COMPARE1 is not due until then.
  */
 static void load(void)
@@ -134,19 +143,28 @@ static void radio_isr(const void *arg)
 		nrf_radio_frequency_set(NRF_RADIO, OP_CH_B_MHZ);
 	} else {
 		nrf_radio_frequency_set(NRF_RADIO, OP_CH_A_MHZ);
-		load();
 	}
 }
 
-/* First frame only: COMPARE1 would otherwise fire at CC_B_US before the first COMPARE0 (t0) and send
- * copy B ahead of copy A. CC1 starts unreachable and is armed here, at t0, CC_B_US before it is due.
+/* COMPARE3: the payload latch, every frame. COMPARE0, first frame only: COMPARE1 would otherwise fire
+ * at CC_B_US before the first COMPARE0 (t0) and send copy B ahead of copy A. CC1 starts unreachable
+ * and is armed here, at t0, CC_B_US before it is due.
  */
 static void timer_isr(const void *arg)
 {
-	nrf_timer_event_clear(NRF_TIMER0, NRF_TIMER_EVENT_COMPARE0);
-	nrf_timer_cc_set(NRF_TIMER0, NRF_TIMER_CC_CHANNEL1, cc_b);
-	armed = true;
-	nrf_timer_int_disable(NRF_TIMER0, NRF_TIMER_INT_COMPARE0_MASK);
+	if (nrf_timer_event_check(NRF_TIMER0, NRF_TIMER_EVENT_COMPARE3)) {
+		nrf_timer_event_clear(NRF_TIMER0, NRF_TIMER_EVENT_COMPARE3);
+		load();
+#if defined(CONFIG_OP_TEST_SCHED_REPORT)
+		t0_hw_mod = (uint32_t)((nsi_hws_get_time() + OP_FRAME_US - phase_us()) % OP_FRAME_US);
+#endif
+	}
+	if (nrf_timer_event_check(NRF_TIMER0, NRF_TIMER_EVENT_COMPARE0)) {
+		nrf_timer_event_clear(NRF_TIMER0, NRF_TIMER_EVENT_COMPARE0);
+		nrf_timer_cc_set(NRF_TIMER0, NRF_TIMER_CC_CHANNEL1, cc_b);
+		armed = true;
+		nrf_timer_int_disable(NRF_TIMER0, NRF_TIMER_INT_COMPARE0_MASK);
+	}
 }
 
 static void radio_init(void)
@@ -190,7 +208,8 @@ static void test_stop(struct k_timer *t)
 static K_TIMER_DEFINE(test_stop_timer, test_stop, NULL);
 
 /* Test only (CONFIG_OP_TEST_SCHED_REPORT, bsim): once per second, how early the app core's frames
- * reached the latch (margin = latch - arrival, us; tests/bsim/sched/check.py) and the counters.
+ * reached the latch (margin = latch - arrival, us; tests/bsim/sched/check.py), the counters, and the
+ * device time of t0 mod 1 ms (with the app core's PACK_FCLK line: frame clock -> TXEN, run.py (a)).
  */
 static void report(struct k_work *w)
 {
@@ -201,8 +220,9 @@ static void report(struct k_work *w)
 	margin_max = INT32_MIN;
 	irq_unlock(key);
 	if (lo <= hi) { /* no line for a second without frames */
-		printk("PACK_IPC margin_us_min=%d margin_us_max=%d overruns=%u underruns=%u\n", lo, hi,
-		       overrun, underrun);
+		printk("PACK_IPC margin_us_min=%d margin_us_max=%d overruns=%u underruns=%u "
+		       "t0_hw_mod_us=%u\n",
+		       lo, hi, overrun, underrun, t0_hw_mod);
 	}
 }
 
@@ -233,7 +253,8 @@ int op_sched_start(void)
 	nrf_timer_prescaler_set(NRF_TIMER0, 4); /* 16 MHz / 2^4 = 1 MHz */
 	nrf_timer_cc_set(NRF_TIMER0, NRF_TIMER_CC_CHANNEL0, OP_FRAME_US);
 	nrf_timer_cc_set(NRF_TIMER0, NRF_TIMER_CC_CHANNEL1, UINT32_MAX); /* armed at t0, timer_isr */
-	nrf_timer_int_enable(NRF_TIMER0, NRF_TIMER_INT_COMPARE0_MASK);
+	nrf_timer_cc_set(NRF_TIMER0, CC_LATCH, LATCH_US);
+	nrf_timer_int_enable(NRF_TIMER0, NRF_TIMER_INT_COMPARE0_MASK | NRF_TIMER_INT_COMPARE3_MASK);
 	IRQ_CONNECT(TIMER0_IRQn, 0, timer_isr, NULL, 0);
 	irq_enable(TIMER0_IRQn);
 	nrf_timer_shorts_enable(NRF_TIMER0, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK);
@@ -247,11 +268,10 @@ int op_sched_start(void)
 	if (IS_ENABLED(CONFIG_OP_TEST_SCHED_REPORT)) {
 		k_timer_start(&report_timer, K_SECONDS(1), K_SECONDS(1));
 	}
-	printk("SCHED start pack_id=%d fA=%d fB=%d air_us=%d cc_b_us=%d latch_us=%d td_air_us=%d "
-	       "td_cc_b_us=%d td_latch_us=%d\n",
+	printk("SCHED start pack_id=%d fA=%d fB=%d air_us=%d cc_b_us=%d td_air_us=%d td_cc_b_us=%d "
+	       "latch_us=%d\n",
 	       OP_PACK_ID, OP_CH_A_MHZ, OP_CH_B_MHZ, AIR_US(OP_FRAME_LEN), CC_B_US(OP_FRAME_LEN),
-	       LATCH_US(OP_FRAME_LEN), AIR_US(OP_PAYLOAD_MAX), CC_B_US(OP_PAYLOAD_MAX),
-	       LATCH_US(OP_PAYLOAD_MAX));
+	       AIR_US(OP_PAYLOAD_MAX), CC_B_US(OP_PAYLOAD_MAX), LATCH_US);
 	return 0;
 }
 
