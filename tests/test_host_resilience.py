@@ -40,12 +40,22 @@ class Fake:
 
     def _run(self):
         buf = b""
+        skip = 0       # raw payload bytes still owed after an accepted `dfu <n>`: a receiver consumes them, they are not command lines
+        owed = None    # the reply to send once the payload is in (host/PROTOCOL.md: `ok` follows the payload, not the header)
         while self.alive:
             try:
                 buf += os.read(self.master, 4096)
             except OSError:
                 return
-            while b"\n" in buf:
+            while True:
+                if skip:
+                    n = min(skip, len(buf))
+                    buf, skip = buf[n:], skip - n
+                    if skip:
+                        break
+                    self.send(owed)
+                if b"\n" not in buf:
+                    break
                 line, buf = buf.split(b"\n", 1)
                 words = line.decode(errors="replace").split()
                 if not words:
@@ -53,6 +63,9 @@ class Fake:
                 self.seen.append(words)
                 if self.script:
                     self.script(self, words[0])
+                elif (words[0] == "dfu" and len(words) > 1 and words[1].isdigit() and int(words[1]) > 0
+                      and str(self.replies.get("dfu", "")).startswith("ok")):
+                    skip, owed = int(words[1]), self.replies["dfu"].encode() + b"\n"
                 else:
                     self.reply(words[0])
 
@@ -148,6 +161,16 @@ def test_unterminated_flood_is_bounded(fakes):
     f = fakes(s)
     r, dt = timed(modules.request, f.path, "info", timeout=0.4)
     assert isinstance(r, modules.ModuleError) and dt < 1.0
+
+
+def test_back_to_back_dfu_uploads(fakes):
+    """The fake receiver eats the payload (no trailing newline) and acks after it, so a second upload still gets its `ok` fast
+    (the order-dependent Schemathesis 504 `receiver 1: no reply` came from a fake that glued the payload onto the next command)."""
+    f = fakes()
+    for payload in (b"\x01\xffJ\x02", b"abcd", b"x"):
+        r, dt = timed(modules.request, f.path, f"dfu {len(payload)}", payload, timeout=5.0)
+        assert r == "" and dt < 2.0
+    assert f.seen == [["dfu", "4"], ["dfu", "4"], ["dfu", "1"]]
 
 
 def test_err_reply_is_rejected_not_down(fakes):

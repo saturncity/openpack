@@ -16,7 +16,7 @@ Status: accepted. 2026-10-31. Issue #31, PR #75 (amended after review). Schemati
     - Cell sense AIN0 (pad 5), tapped at the cell. LEDs on Z0–Z3 (P1.09–P1.12). UART test pads B1/C1.
     - FEM pads Z6 A6 C2 C6 D1 D2 E0 E1 E2 are no-connect. Firmware's `nordic,nrf21540-fem` node must use: SCK P1.15, MOSI P1.08, MISO P0.25, CSN P1.06, TX_EN P0.21, RX_EN P0.27, PDN P0.26, MODE P1.04, ANT_SEL P1.05.
   - **PCM1840.** I2S slave (MSZ=0, FMT1=FMT0=1); low-latency filter (MD0=1, R3); DRE on (MD1=1). Path 1 (×2) on IN1, path 2 (×1, Q7) on IN2, INxM AC-grounded.
-  - **Power.** BAT+ goes through a 3 A chip fuse (Bourns SF-1206F300, 23 mΩ, about 5 mV drop) in case someone fits an unprotected cell. A 0.5 A PTC (~1 Ω) was rejected: it costs about 0.2 V of 3.3 V headroom. Firmware **shuts down below 3.2 V cell, measured under load**. Derivation in `audit.py`: IOVDD 3.0 V + LDO 67 mV + path 40 mV + ADC error 80 mV = 3.19 V. No buck-boost.
+  - **Power.** BAT+ goes through a 3 A chip fuse (Bourns SF-1206F300, 23 mΩ, about 5 mV drop) in case someone fits an unprotected cell. A 0.5 A PTC (~1 Ω) was rejected: it costs about 0.2 V of 3.3 V headroom. Firmware **shuts down below 3.3 V cell, measured under load** (amended 2026-11-01, #34/#104: was 3.2 V). Derivation in `audit.py`: IOVDD 3.0 V + LDO 67 mV + path 54 mV (the cell path now includes the cradle spring estimate and the battery tracks measured from the layout, 121 mΩ) + ADC error 80 mV = 3.201 V, rounded up to 3.3 V. Runtime at 3.3 V (85 % of the cell usable) is asserted against PK-7 in `audit.py`. No buck-boost.
   - **LEDs.** Lite-On LTST-C191K*KT AlInGaP parts (Vf ~2.0 V) with 1 kΩ, about 1 mA each. **PK-8 thresholds:**
     - The single-ended pin swings at most about VREF/2 = 1.375 V peak, i.e. −6.3 dBFS of the 2.83 V-peak differential full scale. The PK-2 max (0.6 Vrms) reads −7.7 dBFS on path 1.
     - So amber "peak" at ≥ −10 dBFS and red "clip" at ≥ −7 dBFS. Red means past the design maximum, within 0.7 dB of the analog clip.
@@ -45,7 +45,7 @@ Status: accepted. 2026-10-31. Issue #31, PR #75 (amended after review). Schemati
 | R2 | ✓ | No clip at 0.6 Vrms in op-amp CM, output swing, or ADC pin |
 | R12 | ✓ | $34.98 (Fanstel price) |
 | R7 | ✓ | Removable protected 18650, reverse FET, no charger |
-| R8 | ✓ | 18.6 h with the 3.2 V cutoff |
+| R8 | ✓ | 17.5 h with the 3.3 V cutoff (amended 2026-11-01; was 18.6 h at 3.2 V) |
 | R4 | ✓ | Recessed switch only |
 | R14 | ✓ | LEDs |
 
