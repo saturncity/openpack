@@ -2,7 +2,7 @@
 
 **Final design report, written in the style of an IB Design Technology Internal Assessment**
 
-Date: 1 November 2026. Repository: `saturncity/openpack`, at `main` 72fe649 (PR #125 merged).
+Date: 1 November 2026. Repository: `saturncity/openpack`, `main` after PR #129.
 
 ---
 
@@ -252,7 +252,7 @@ One Zephyr application, built as either pack or receiver (SPEC FW-1):
 - **Pack.** The radio core sends copy A, waits 100 µs, then sends copy B on the second carrier, once every millisecond. The application core encodes ADPCM-6. Its timing follows the audio clock, which a PI control loop holds **100 ± 3 µs** ahead of the radio (ADR-0020, ADR-0022). This fixed a bug where one frame was skipped every 40 minutes (design log FW-2, FW-4).
 - **Receiver.** It locks on within 2 s and takes the first valid copy. Packet-loss concealment (PLC) repeats the last frame with a fade, then mutes after 10 ms. The receiver chooses between its two antennas per carrier, with a new rule to switch on a missed packet (ADR-0021). A clock-recovery loop keeps the DAC in step with the pack: in a 1-hour simulation at ±40 ppm there were **0 slips** and the error stayed ≤ 0.28 samples (ADR-0013).
 - **Boards.** Pin assignments are generated from the circuit netlists and checked in CI (PR #119). The bootloader is MCUboot with ECDSA-P256 signing (PR #121). It still uses the public development key.
-- **In progress.** Issue #25 (real receiver telemetry, saved settings, USB console, firmware update command) is being finished in PR #129 and has **not merged**. Until it does, pack settings are lost at power-off (design log FW-11).
+- **Console and updates (PR #129).** The receiver reports real link figures (lock, signal strength, frames lost, concealments). Pack settings are saved to flash and survive power-off. The pack has a USB console, and a `dfu` command that restarts into the bootloader so new firmware can be loaded. USB and firmware updates are checked only by building them, not on hardware yet (#38). One gap remains: a setting changed from the console is saved but does not yet retune the radio, which still uses the pack number and channels built into it (#132; design log FW-13). For the 4-pack prototype each pack is simply built with its own number.
 
 ### C6. Latency
 
@@ -332,7 +332,7 @@ Sourcing points:
 | R8 / PK-7 | `audit.py` runtime model | **17.5 h** ≥ 16 h | **Pass by calc**; PPK2 measurement pending |
 | R9 / SYS-1 | CadQuery rack fit (106 checks) | 1U, 8 XLR, 3.39 mm under the lid | **Pass in CAD**; side-lug dry fit pending |
 | R10 | Design; body loss budgeted at 10 dB + 10 dB fade | 2 BNC on the rack | **Pass (design)**; body blocking pending (Phase 5/6) |
-| R11 / API | Schemathesis + pytest in CI (G3), receiver reset test | Passing on `main` | **Pass in CI**; real receiver telemetry in PR #129, in progress |
+| R11 / API | Schemathesis + pytest in CI (G3), receiver reset test | Passing on `main` | **Pass in CI**; real receiver telemetry merged (PR #129); bench check pending (#38) |
 | R12 / PK-12 | `audit.py` BOM | **$33.34** ≤ $35 at Fanstel price; $36.63 at Digi-Key | **Partial**: cap met, ~$30 target missed by $3.34 |
 | R13 | `PLAN.md` gates G1–G4 | All design done digitally first | **Pass** |
 | R14 | Design | 4 LEDs (battery, low, peak, clip) | **Pass (design)** |
@@ -394,7 +394,7 @@ The others are 6 (antenna rear lobes read off a plot), 9 (phone leakage near the
 2. **Get Fanstel's EN 300 328 reports** and confirm the two pin settings before ordering.
 3. **Cut the rack cost.** Use venue booms instead of the stands (−£311.66), and get a real JLC quote to replace the £300 estimate.
 4. **For a v2:** a smarter loss concealment if the measured audible-event rate exceeds 10 per hour (ADR-0010); a downlink using the reserved 300 µs slot; and sub-1 GHz as the strongest fallback if UK Wi-Fi proves worse than modelled.
-5. **Merge #25 (PR #129)** so settings survive power-off.
+5. **Let console settings retune the radio** (#132), and teach the host app the new firmware-update method (#128).
 
 ---
 
@@ -481,7 +481,7 @@ The others are 6 (antenna rear lobes read off a plot), 9 (phone leakage near the
 - #125 shopping list
 - #126 rack layout
 
-Open: #129 (#25 finish).
+Also merged: #129 (receiver telemetry, saved settings, USB, firmware update). Open follow-ups: #128, #132.
 
 **Key files:**
 
