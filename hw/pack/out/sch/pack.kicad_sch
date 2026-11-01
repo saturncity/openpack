@@ -2,11 +2,11 @@
   (version 20250114)
   (generator "skidl")
   (generator_version "0.2.0")
-  (uuid 78635028-5e00-4d94-b8e0-3a588010e4ac)
+  (uuid 348f043e-890f-4dda-8658-b3397936878d)
   (paper "A4")
   (title_block
     (title "OpenPack body-pack")
-    (date "2026-10-31")
+    (date "2026-11-01")
     (company "")
     (comment 1 "Generated with SKiDL")
     (comment 2 "")
@@ -14,7 +14,7 @@
     (comment 4 ""))
   (lib_symbols)
   (sheet
-    (at 139.45 107.95)
+    (at 139.45 62.23)
     (size 18.29 17.78)
     (exclude_from_sim no)
     (in_bom yes)
@@ -28,19 +28,19 @@
       (color 0 0 0 0.0))
     (uuid 818fbebb-2eeb-5f44-8419-8ff160c87ce5)
     (property "Sheetname" "power1"
-      (at 139.45 107.24 0)
+      (at 139.45 61.52 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left bottom)))
     (property "Sheetfile" "pack_power1.kicad_sch"
-      (at 139.45 126.31 0)
+      (at 139.45 80.59 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left top))))
   (sheet
-    (at 137.41 62.23)
+    (at 137.41 85.09)
     (size 22.35 17.78)
     (exclude_from_sim no)
     (in_bom yes)
@@ -54,19 +54,19 @@
       (color 0 0 0 0.0))
     (uuid 8cd18c6f-5a34-578b-be21-29b4c5eade79)
     (property "Sheetname" "front_end1"
-      (at 137.41 61.52 0)
+      (at 137.41 84.38 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left bottom)))
     (property "Sheetfile" "pack_front_end1.kicad_sch"
-      (at 137.41 80.59 0)
+      (at 137.41 103.45 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left top))))
   (sheet
-    (at 139.7 85.09)
+    (at 139.7 107.95)
     (size 17.78 17.78)
     (exclude_from_sim no)
     (in_bom yes)
@@ -80,13 +80,13 @@
       (color 0 0 0 0.0))
     (uuid bd70bb8b-a1aa-55f9-b4f0-63f6d32e4cdc)
     (property "Sheetname" "adc1"
-      (at 139.7 84.38 0)
+      (at 139.7 107.24 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left bottom)))
     (property "Sheetfile" "pack_adc1.kicad_sch"
-      (at 139.7 103.45 0)
+      (at 139.7 126.31 0)
       (effects
         (font
           (size 1.27 1.27))

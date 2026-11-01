@@ -55,7 +55,8 @@ def build():
     with Group("power"):  # one schematic sheet
         # ---- PK-6 power: 18650 -> 3 A chip fuse -> P-FET reverse-polarity -> slide switch -> VSYS ----
         # Fuse guards against an unprotected cell; 23 mOhm cold (5 mV at 0.2 A), unlike a ~1 Ohm PTC (ADR-0012).
-        bt = part("Battery_18650", "BT1", "18650 holder", "openpack:BH-18650-B1BA002", "BH-18650-B1BA002")
+        # cell in a printed cradle (mech/pack.py), MYOUNG MY-18650-04-J (+ plate) / -05-J (- spring) wired to 2 pads
+        bt = part("Battery_18650", "BT1", "18650 cradle contacts", "openpack:Cell_Wire_Pads", "MY-18650-04-J/05-J")
         bt["+"] += vbat; bt["-"] += gnd
         q1 = part("PMOS", "Q1", "DMG2305UX", "Package_TO_SOT_SMD:SOT-23", "DMG2305UX-7")
         f1 = part("Fuse", "F1", "3A fast", "Fuse:Fuse_1206_3216Metric", "SF-1206F300-2"); f1[1] += vbat; f1[2] += vbatf

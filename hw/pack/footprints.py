@@ -10,7 +10,7 @@ u = mm from the module's outer left edge (15.0 wide), v = mm up from the pad-end
   shield ends at v = 19.0, antenna area v = 19.0..29.9 (10.9 mm); u.FL at u = 2.22, v = 29.9 - 13.8 = 16.1.
   p.20: "the antenna area of module shall extend 9.8 mm outside the edge of host PCB" -> board edge at v = 19.0.
 
-SJ1-3543: Same Sky SJ1-354X datasheet (09/12/2024). The 18650 holder landing is two wire pads (hw/REVIEW.md).
+SJ1-3543: Same Sky SJ1-354X datasheet (09/12/2024). BT1 is two wire pads for the cradle contacts (hw/REVIEW.md).
 """
 import pathlib
 
@@ -141,10 +141,10 @@ def holder_leads():
     b += _fp_text("+", -1.75, -2.0, "F.SilkS", 1.0)
     b += _fp_text("-", 1.75, -2.0, "F.SilkS", 1.0)
     b += _rect(-3.2, -1.45, 3.2, 1.45, "F.CrtYd", 0.05)
-    return _wrap("BH-18650-B1BA002", "Wire-lead landing for the floor-mounted 18650 holder (mech/pack.py holds the cell beside the board)", b, "through_hole")
+    return _wrap("Cell_Wire_Pads", "Wire landing for the 18650 cradle contacts (MYOUNG MY-18650-04-J/05-J in mech/pack.py)", b, "through_hole")
 
 
-FOOTPRINTS = {"Fanstel_BT40NE": bt40ne, "SameSky_SJ1-3543": sj1_3543, "BH-18650-B1BA002": holder_leads}
+FOOTPRINTS = {"Fanstel_BT40NE": bt40ne, "SameSky_SJ1-3543": sj1_3543, "Cell_Wire_Pads": holder_leads}
 
 
 def write_lib():

@@ -1,6 +1,6 @@
 """Pack PCB (#34) against the CadQuery enclosure: the board STEP from kicad-cli (hw/pack/out/fab/pack.step) and the
 per-part envelope boxes (out/fab/envelope.json: courtyard x datasheet height) must not intersect the printed body,
-the holder or the cell. Skips without cadquery outside CI. hw/pack/fit.py runs the same check without CadQuery."""
+the cradle contacts or the cell. Skips without cadquery outside CI. hw/pack/fit.py runs the same check without CadQuery."""
 import json, os, sys
 from pathlib import Path
 
@@ -26,7 +26,7 @@ def box(x0, x1, y0, y1, z0, z1):
 @pytest.fixture(scope="module")
 def solids():
     ps = pack.parts()
-    return {k: ps[k] for k in ("base", "lid", "door", "holder", "cell")}
+    return {k: ps[k] for k in ("base", "lid", "door", "contacts", "cell")}
 
 
 def _vol(a, b):

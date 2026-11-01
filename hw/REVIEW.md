@@ -58,9 +58,26 @@ Process (docs/agents/hands-off.md, "PCB layout review"): `kicad-cli` renders eve
   - Light pipes: chimneys Ø5.7 (bore 2.5, wall 1.6) hang from the lid to 0.4 mm above the LEDs. They are open bores; a 2.5 mm clear acrylic rod (15.4 mm) is optional. The lid now prints outer-face-down so the chimneys point up.
   - Switch: a printed fork (`switch_ext`, prints lying flat) straddles SW1's right-angle actuator, which sticks out 2 mm toward −y and slides 1.5 mm along x (KiCad footprint F.Fab). Its 2.0 × 1.7 mm stalk rises to 0.4 mm below the lid surface in a 4.6 × 2.3 mm slot.
   - The C&K datasheet (littelfuse.com) returned 403, so the actuator height isn't pinned. The prongs span 0.3–3.6 mm above the board to cover it. Check it on a real switch.
-- **Holder (chosen, not priced in).** The current part, MYOUNG BH-18650-B1BA002 (LCSC C2988620), is listed as **SMT**, which can't work with the holder on the enclosure floor. Chosen: **MPD BH-18650-W**, single 18650, 152 mm wire leads, Digi-Key BH-18650-W-ND (ships to the UK), €2.2277 @ 100 ≈ $2.58 (+$1.22). Its footprint is still the two wire pads (BT1).
-- **Pigtail (specified, not priced in).** **Molex 0731160017**: U.FL to open-end 1.13 mm coax, 305 mm, Digi-Key WM9574-ND, $2.95 @ 100 (+$1.95 over the $1.00 estimate). Cut it to ~100 mm (71 mm straight run plus slack). Note: the part is marked last-time-buy. UK stock alternative: RS Molex 73412-0231 (U.FL–U.FL, 110 mm), £2.96 @ 1. It needs a U.FL on the whip side, or cutting to a 55 mm tail, which is too short.
-- **PK-12: holder + pigtail + 2 screws would take the BOM from $34.98 to ≈ $38.2, over $35.** `prices.py` is unchanged pending a decision (coordinator asked to stop here).
+- **Cell holder → printed cradle (done, priced).** The MYOUNG BH-18650-B1BA002 holder is SMT, and the commercial leaded holder broke PK-12, so both are dropped. `mech/pack.py` `holder()` is now a cradle printed as part of the base:
+  - two end blocks, each with a 0.5 mm slot (1.6 mm walls each side) and a U-window lip, plus side rails and 0.5 mm floor pads
+  - contacts: MYOUNG **MY-18650-04-J** (+ plate with 1.8 mm dimple, LCSC C19184125, $0.1181 @ 50–149) and **MY-18650-05-J** (− plate + coil spring, free length 11.6 ± 0.8, LCSC C19184124, $0.1084)
+  - each contact has a solder tail (Ø0.8 hole), bent 90° out through a notch in its block's back wall and wired to the BT1 pads
+  - plate faces 76 mm apart, so the spring sits at **4.2 / 6.2 / 9.2 mm** for 70 / 68 / 65 mm cells (never solid, ≥ 0.6 mm preload); `fit.py` checks this
+  - the plate's contact centre is 9.75 mm above its bottom edge, which is the cell axis
+  - the door window is 2.4 mm longer, so a cell can be pushed into the spring
+
+  Current: the contacts have no stated rating. The class figure for 0.3 mm phosphor bronze is about 1 A, against a 199 mA pack peak. Spring + plate + leads + traces is estimated at 0.10 Ω (20 mV at peak). The `audit.py` cutoff path now includes it, and the cutoff stays 3.2 V. **Closes the old holder-fit open item.**
+- **Pigtail (done, priced).** BAT Wireless **BWIPX1-SMA-1.13L150** (IPEX/MHF1, 1.13 mm coax, 150 mm, 6 GHz), LCSC C784404, **$0.6015 @ 100**, 1908 in stock. Cut off the SMA, keep ~100 mm, and solder 31 mm of 0.9 mm tinned wire on as the whip (est. $0.03).
+  - Loss: 0.10 m × ~3.6 dB/m + one IPEX pair ~0.1 dB = **0.46 dB**, under the new explicit `audit.py` allowance `PIGTAIL_IL_MAX_DB = 0.6`.
+  - Before this, the link budget declared EIRP = conducted + 2 dBi with no feed loss. Conducted headroom makes the loss up: UK 7.5 dBm, US 18.5 dBm, BT40NE max 19.1.
+- **Screws (priced).** 2 × M2-0.89 × 6 PT pan-head thread-forming screws, Fastener Superstore 585907, $0.112 each from a 5000-piece carton. LCSC and Accu had no listing I could read.
+- **PK-12: $33.34** at qty 100 (was $34.98), a margin of $1.66. Line by line:
+  - holder $1.36 → contacts $0.23
+  - pigtail est. $1.00 → $0.60 + whip $0.03
+  - screws +$0.22
+  - cell leads +$0.02
+
+  UK (`hw/bom/uk_total.py`): £26.58 ex VAT = $34.81 at the assumed 1.31 rate.
 
 ### Accepted warnings
 
@@ -71,10 +88,10 @@ Process (docs/agents/hands-off.md, "PCB layout review"): `kicad-cli` renders eve
 
 1. ~~SJ1-3543 footprint provisional~~: done from the datasheet (see above). Still to check: axis height (5.2 ± 0.3) on a real part.
 2. **BT40NE antenna wiring is unverified.** Datasheet p.22 says "The nRF21540 in BT40X is hardware-wired to the PCB trace antenna. ANT-SEL pin is not used." If that holds for the BT40NE, the u.FL/whip (PK-5) may not be driven at all. Ask Fanstel which path the BT40NE's FEM drives (ADR-0012 item 2). The keepout here supports either path.
-3. **Holder:** BH-18650-W chosen, but its BOM line is blocked on PK-12. Its body is about 77 × 21 × 20 mm per the listing; confirm it against `mech/pack.py` HOLD_* when the datasheet is read.
+3. ~~Holder~~: replaced by the printed cradle + MYOUNG contacts (done). Still to check: contact current rating (not published; class ~1 A vs 0.2 A peak) and the spring resistance estimate.
 4. ~~PCB retention~~: done (2 × M2 + 2 rests).
 5. ~~Light pipes / switch extension~~: done. Still to check: the SW1 actuator height.
-6. **u.FL → whip pigtail is about 71 mm straight**, ≈ 0.3 dB at about 3.5 dB/m. Part specified above; its BOM line is blocked on PK-12.
+6. ~~Pigtail~~: BWIPX1-SMA-1.13L150 cut to ~100 mm, 0.46 dB, priced (done).
 7. **No 3D models are installed**, so the STEP is the bare board. The fit uses courtyard × datasheet height boxes (`outputs.py` `HEIGHT`).
 8. **USB D± are routed as two 0.2 mm tracks**, not a 90 Ω coupled pair (~50 mm on L4). That is fine for full-speed 12 Mb/s.
 9. **Fab DFM (end of project):** upload `hw/pack/out/fab/gerber` to JLCPCB's DFM check and attach the report. `bom_jlc.csv` has no LCSC numbers yet. Check the CPL rotations against JLC's preview (KiCad and JLC rotation conventions differ for some packages). Nothing has been uploaded and no account has been created.

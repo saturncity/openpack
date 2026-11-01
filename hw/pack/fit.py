@@ -54,8 +54,7 @@ def checks():
        and layout.NOTCH == P["notch"], f"layout {min(xs), max(xs), min(ys), max(ys)} mech {P['x0'], P['x1'], P['y0'], P['y1']}")
     board = (P["x0"], P["y0"], P["z0"], P["x1"], P["y1"], top)
     # solids the board and parts must miss
-    hx0 = m.CELL_X0 - m.HOLD_END; hx1 = m.CELL_X0 + m.CELL_L + m.HOLD_END
-    holder = (hx0, m.YC - m.HOLD_W / 2, m.WALL, hx1, m.YC + m.HOLD_W / 2, m.ZC + 4.0)
+    holder = (m.CRADLE_X0, m.YC - m.HOLD_W / 2, m.WALL, m.CRADLE_X1, m.YC + m.HOLD_W / 2, m.BLOCK_TOP)   # printed cradle
     cell = (m.CELL_X0, m.YC - m.CELL_D / 2, m.ZC - m.CELL_D / 2, m.CELL_X0 + m.CELL_L, m.YC + m.CELL_D / 2, m.ZC + m.CELL_D / 2)
     usb_pad = (m.XR - m.WALL - 0.8, m.USB_Y - 8, m.WALL, m.XR - m.WALL + 0.1, m.USB_Y + 8, m.Z_TOP - 1.5)
     cyls = [("post", x, y, 2.5, m.WALL, m.Z_TOP) for x, y in m.POSTS] + \
@@ -160,6 +159,10 @@ def checks():
     wb = (m.WHIP_XY[0], m.WHIP_XY[1], m.Z_TOP)
     res["ufl_to_whip_straight_mm"] = round(math.dist(ufl, wb), 1)
     res["board_mm"] = [round(P["x1"] - P["x0"], 1), round(P["y1"] - P["y0"], 1)]
+    # cell cradle: protected 68-70 mm and bare 65 mm cells all leave the spring between solid (~3) and free (10.8 min)
+    comp = {Lc: round(m.NEG_FACE - (m.POS_FACE + m.DIMPLE + Lc), 2) for Lc in (65.0, 68.0, 70.0)}
+    ok("cradle_cell_lengths", all(3.0 <= c <= m.SPRING_FREE - 0.8 - 1.0 for c in comp.values())
+       and abs(m.ZC - m.WALL - 9.75) < 1e-6, f"spring length at cell 65/68/70 mm: {comp} (free {m.SPRING_FREE} +- 0.8)")
     res["fail"] = fail
     return res, m, env
 
@@ -191,7 +194,7 @@ def render(res, m, env):
     R = lambda x0, y0, x1, y1, **k: d.rectangle([X(x0), Y(y1), X(x1), Y(y0)], **k)
     R(-m.L / 2, -m.W / 2, m.L / 2, m.W / 2, outline="#555", width=2)
     R(-m.L / 2 + m.WALL, -m.W / 2 + m.WALL, m.L / 2 - m.WALL, m.W / 2 - m.WALL, outline="#999")
-    R(m.CELL_X0 - m.HOLD_END, m.YC - m.HOLD_W / 2, m.CELL_X0 + m.CELL_L + m.HOLD_END, m.YC + m.HOLD_W / 2, fill="#ddd", outline="#222")
+    R(m.CRADLE_X0, m.YC - m.HOLD_W / 2, m.CRADLE_X1, m.YC + m.HOLD_W / 2, fill="#ddd", outline="#222")
     R(m.CELL_X0, m.YC - m.CELL_D / 2, m.CELL_X0 + m.CELL_L, m.YC + m.CELL_D / 2, fill="#9bb7e0", outline="#3a7bd5")
     pts = [(X(x), Y(y)) for x, y in layout.OUTLINE]
     d.polygon(pts, fill="#cfe8d6", outline="#1f8a4c")
@@ -241,7 +244,7 @@ def render(res, m, env):
     d.rectangle([X(a[0]), Z(top + a[4]), X(a[1]), Z(top)], fill="#f7d9a8", outline="#c77d00")
     for x, y in m.CLIP_SCREWS[:1]:
         d.rectangle([X(x - m.BOSS_D / 2), Z(m.BOSS_TOP), X(x + m.BOSS_D / 2), Z(m.WALL)], fill="#bbb")
-    d.rectangle([X(m.CELL_X0 - m.HOLD_END), Z(m.ZC + 4), X(m.CELL_X0 + m.CELL_L + m.HOLD_END), Z(m.WALL)], outline="#222")
+    d.rectangle([X(m.CRADLE_X0), Z(m.BLOCK_TOP), X(m.CRADLE_X1), Z(m.WALL)], outline="#222")
     for e in env:
         d.rectangle([X(e["x0"]), Z(top + e["h"]), X(min(e["x1"], m.L / 2 + 3)), Z(top)], outline="#2f6f4f")
     d.ellipse([X(m.L / 2 - m.WALL) - 3 * S, Z(m.JACK_Z) - 3 * S, X(m.L / 2 - m.WALL) + 3 * S, Z(m.JACK_Z) + 3 * S], outline="#d94f4f", width=2)

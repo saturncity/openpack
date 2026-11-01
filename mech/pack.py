@@ -9,9 +9,17 @@ from pathlib import Path
 L, W, WALL = 96.0, 62.0, 1.6              # outer plan size (PK-11: <= 100 x 65), wall
 H_IN = 19.6                               # interior height; body = WALL + H_IN + WALL
 Z_TOP = WALL + H_IN                       # top of walls / underside of lid
-CELL_D, CELL_L = 18.5, 65.5               # 18650
-HOLD_CLR, HOLD_END, HOLD_W = 0.25, 5.0, 21.0   # holder bore clearance, end block length, width
-CELL_GAP_Z = 0.5                          # cell sits 0.5 above floor
+CELL_D, CELL_L, CELL_L_MIN = 18.5, 70.0, 65.0   # 18650: modelled at the longest protected cell (68-70); 65 = bare cell
+HOLD_W = 21.0                             # cradle width (end blocks)
+CELL_GAP_Z = 0.5                          # cell sits on 0.5 mm pads above the floor
+# Printed cell cradle (part of the base) with two stamped contacts dropped into slots (#34):
+#   + MYOUNG MY-18650-04-J: 13.8 x 16.75 x 0.3 phosphor-bronze plate, 1.8 mm dimple, solder tail 4.45 (bent 90 deg out
+#     through a notch in the back wall); - MY-18650-05-J: same plate + coil spring, free length 11.6 +- 0.8.
+#   Plate faces CRADLE_D apart: spring compressed to CRADLE_D - DIMPLE - L = 4.2 mm (70 mm cell) .. 6.2 (68) .. 9.2 (65),
+#   i.e. 5.4 .. 2.4 mm preload on a 10.8 mm (min) free length; never solid. Contact centre 9.75 above the plate's
+#   bottom edge = cell axis when the plate stands on the floor (ZC - WALL = 9.75).
+CRADLE_X0, CRADLE_D, SLOT_T, DIMPLE, SPRING_FREE = -L / 2 + WALL + 0.2, 76.0, 0.5, 1.8, 11.6
+PLATE = (13.8, 16.75, 0.3)                # width, height, thickness
 # board beside the holder; notch clears the (-30, 26.9) lid post; z0 raised so the BT40NE antenna (overhanging
 # x < -28) rides above the clip bosses (top z 6.0). Matches hw/pack/layout.py OUTLINE.
 PCB = dict(x0=-28.0, x1=45.4, y0=-6.5, y1=28.5, z0=WALL + 3.4, t=1.6, comp_h=8.0, notch=(-26.5, 24.0))
@@ -20,7 +28,11 @@ ANTENNA = (-38.9, -28.0, 7.7, 22.7, 2.0)               # BT40NE antenna section 
 # 2 plain rests. Boss wall (5.6 - 1.8) / 2 = 1.9 >= WALL; pilot 3.0 deep leaves 2.0 under it.
 PCB_SCREWS, SCREW_BOSS_D, SCREW_PILOT_D, SCREW_PILOT_DEPTH = [(-25.0, -3.5), (36.0, 26.0)], 5.6, 1.8, 3.0
 PCB_RESTS = [(-25.0, 25.5), (30.0, -3.5)]
-CELL_X0 = -L / 2 + WALL + 0.2 + HOLD_END  # cell start; blocks flank it
+POS_FACE = CRADLE_X0 + WALL + SLOT_T / 2 + PLATE[2] / 2          # + plate face towards the cell
+NEG_FACE = POS_FACE + CRADLE_D                                     # - plate face towards the cell
+CELL_X0 = POS_FACE + DIMPLE                                        # cell pushed onto the + dimple by the spring
+CRADLE_X1 = NEG_FACE + PLATE[2] / 2 + SLOT_T / 2 + WALL      # outer face of the - end block (slot centred on the plate)
+LIP_POS, LIP_NEG = (POS_FACE + SLOT_T / 2 - PLATE[2] / 2, POS_FACE + SLOT_T / 2 - PLATE[2] / 2 + WALL), (NEG_FACE - SLOT_T / 2 + PLATE[2] / 2 - WALL, NEG_FACE - SLOT_T / 2 + PLATE[2] / 2)
 JACK_D, JACK_Y, JACK_Z = 6.0, 0.0, PCB["z0"] + PCB["t"] + 5.2   # SJ1-3543 M6 bushing, axis 5.2 above the board
 USB_W, USB_H, USB_Y, USB_Z = 9.0, 3.2, 18.0, PCB["z0"] + PCB["t"] + 1.6
 RECESS = 0.8                              # USB-C mouth recess depth (pad inside keeps wall 1.6)
@@ -74,11 +86,34 @@ XR = L / 2                                      # +x outer wall face
 def cell():
     return cq.Workplane("YZ").workplane(offset=CELL_X0).center(YC, ZC).circle(CELL_D / 2).extrude(CELL_L)
 
+BLOCK_TOP = ZC + 8.0
+
 def holder():
-    def blk(x0):
-        b = box(x0, x0 + HOLD_END, YC - HOLD_W / 2, YC + HOLD_W / 2, WALL, ZC + 4.0)
-        return b.cut(cyl_x(CELL_D + 2 * HOLD_CLR, x0 - 1, x0 + HOLD_END + 1, YC, ZC))
-    return blk(CELL_X0 - HOLD_END).union(blk(CELL_X0 + CELL_L))
+    """printed cradle (unioned into the base): end blocks with a contact slot + lip, side rails, floor pads"""
+    w, h, t = PLATE
+    def blk(x0, x1, slot_x, lip, back):
+        b = box(x0, x1, YC - HOLD_W / 2, YC + HOLD_W / 2, WALL - 0.1, BLOCK_TOP)
+        b = b.cut(box(slot_x - SLOT_T / 2, slot_x + SLOT_T / 2, YC - w / 2 - 0.2, YC + w / 2 + 0.2, WALL, BLOCK_TOP + 1))
+        # U-window in the lip, open at the top (prints without support); posts either side still retain the 13.8 plate
+        b = b.cut(box(lip[0] - 0.01, lip[1] + 0.01, YC - 5.5, YC + 5.5, ZC - 5.5, BLOCK_TOP + 1))
+        return b.cut(box(back[0] - 0.01, back[1] + 0.01, YC - 3.0, YC + 3.0, WALL - 0.2, WALL + 1.2))   # solder-tail notch
+    ps = POS_FACE - t / 2
+    ns = NEG_FACE + t / 2
+    c = blk(CRADLE_X0, LIP_POS[1], ps, LIP_POS, (CRADLE_X0, ps - SLOT_T / 2))   # slots centred on the plates, walls 1.6
+    c = c.union(blk(LIP_NEG[0], CRADLE_X1, ns, LIP_NEG, (ns + SLOT_T / 2, CRADLE_X1)))
+    for sgn in (-1, 1):   # side rails, touching the cell's sides
+        y0 = YC + sgn * (CELL_D / 2 + 0.3)
+        c = c.union(box(LIP_POS[1], LIP_NEG[0], min(y0, y0 + sgn * WALL), max(y0, y0 + sgn * WALL), WALL - 0.1, ZC - 1.0))
+    for x in (CELL_X0 + 12, CELL_X0 + CELL_L_MIN - 12):   # 0.5 mm pads the cell rests on
+        c = c.union(box(x - 3, x + 3, YC - 4, YC + 4, WALL - 0.1, WALL + CELL_GAP_Z))
+    return c
+
+def contacts():  # the two stamped contacts: plates in their slots, + dimple, - spring (compressed by the 70 mm cell)
+    w, h, t = PLATE
+    pl = lambda xc: box(xc - t / 2, xc + t / 2, YC - w / 2, YC + w / 2, WALL, WALL + h)
+    c = pl(POS_FACE - t / 2).union(pl(NEG_FACE + t / 2))
+    c = c.union(cyl_x(6.0, POS_FACE, CELL_X0, YC, ZC))
+    return c.union(cyl_x(10.0, CELL_X0 + CELL_L, NEG_FACE, YC, ZC))
 
 def pcb():
     p = PCB
@@ -136,6 +171,7 @@ def base():
     b = box(-L / 2, L / 2, -W / 2, W / 2, 0, Z_TOP).cut(box(-L / 2 + WALL, L / 2 - WALL, -W / 2 + WALL, W / 2 - WALL, WALL, Z_TOP + 1))
     for x, y in POSTS:
         b = b.union(vcyl(5.0, x, y, WALL - 0.1, Z_TOP)).cut(vcyl(1.8, x, y, Z_TOP - 8, Z_TOP + 1))
+    b = b.union(holder())   # printed cell cradle
     p = PCB  # PCB rests (d4) and screw bosses (M2 thread-forming pilot)
     for x, y in PCB_RESTS:
         b = b.union(vcyl(4.0, x, y, WALL - 0.1, p["z0"]))
@@ -151,7 +187,7 @@ def base():
     return b
 
 def _window():
-    return box(CELL_X0 - 0.25, CELL_X0 + CELL_L + 0.25, YC - 9.5, YC + 9.5, Z_TOP - 1, Z_TOP + WALL + 1)
+    return box(CELL_X0 - 0.25, CELL_X0 + CELL_L + 2.4, YC - 9.5, YC + 9.5, Z_TOP - 1, Z_TOP + WALL + 1)   # +2.4: push into the spring
 
 def lid():
     l = box(-L / 2, L / 2, -W / 2, W / 2, Z_TOP, Z_TOP + WALL).cut(_window())
@@ -166,7 +202,7 @@ def lid():
 
 def door():  # tool-free battery door: plug in the lid window; two snap arms click under the lid, pry out with a fingernail
     c = DOOR_CLR
-    x0, x1 = CELL_X0 - 0.25 + c, CELL_X0 + CELL_L + 0.25 - c
+    x0, x1 = CELL_X0 - 0.25 + c, CELL_X0 + CELL_L + 2.4 - c
     d = box(x0, x1, YC - 9.5 + c, YC + 9.5 - c, Z_TOP, Z_TOP + WALL)
     xm = (x0 + x1) / 2   # arms on the long sides (clear of the round cell), centred along x
     for yo, sgn in ((YC - 9.5 + c, -1), (YC + 9.5 - c, 1)):
@@ -193,7 +229,7 @@ def clip():  # plate on the back wall, riser, tapered return arm; mouth opening 
 
 ENCLOSURE = dict(base=base, lid=lid, door=door)   # printed body (PK-11 envelope)
 PRINTED = dict(ENCLOSURE, clip=clip, switch_ext=switch_ext)   # + clip and switch fork (outside PK-11 / inside the body)
-INTERNALS = dict(cell=cell, holder=holder, pcb=pcb, comps=comps, jack=jack, usbc=usbc, whip=whip)   # comps holds the antenna (U1 box)
+INTERNALS = dict(cell=cell, contacts=contacts, pcb=pcb, comps=comps, jack=jack, usbc=usbc, whip=whip)   # comps holds the antenna (U1 box)
 
 def parts():
     return {k: f() for k, f in {**PRINTED, **INTERNALS}.items()}

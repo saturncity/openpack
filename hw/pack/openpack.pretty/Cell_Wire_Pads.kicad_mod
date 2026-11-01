@@ -1,5 +1,5 @@
-(footprint "BH-18650-B1BA002" (version 20240108) (generator "openpack_footprints") (layer "F.Cu")
-  (descr "Wire-lead landing for the floor-mounted 18650 holder (mech/pack.py holds the cell beside the board)")
+(footprint "Cell_Wire_Pads" (version 20240108) (generator "openpack_footprints") (layer "F.Cu")
+  (descr "Wire landing for the 18650 cradle contacts (MYOUNG MY-18650-04-J/05-J in mech/pack.py)")
   (attr through_hole)
   (property "Reference" "REF**" (at 0.000 -2.400 0) (layer "F.SilkS")
     (effects (font (size 1.0 1.0) (thickness 0.150))))

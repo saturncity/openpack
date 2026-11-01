@@ -2,12 +2,12 @@
   (version "D")
   (design
     (source "pack.py")
-    (date "10/31/2026 11:02 PM")
+    (date "11/01/2026 02:37 AM")
     (tool "SKiDL (3.0.0)")
     (sheet
       (number 1)
-      (name "/power1/")
-      (tstamps "/1c71258b-4a63-53c3-96a6-ba5ec56f90dd/")
+      (name "/mcu_usb1/")
+      (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/")
       (title_block
         (title)
         (company)
@@ -117,8 +117,8 @@
           (value ""))))
     (sheet
       (number 4)
-      (name "/mcu_usb1/")
-      (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/")
+      (name "/power1/")
+      (tstamps "/1c71258b-4a63-53c3-96a6-ba5ec56f90dd/")
       (title_block
         (title)
         (company)
@@ -192,16 +192,16 @@
   (components
     (comp
       (ref "BT1")
-      (value "18650 holder")
+      (value "18650 cradle contacts")
       (description "18650 cell holder, single cell")
-      (footprint "openpack:BH-18650-B1BA002")
+      (footprint "openpack:Cell_Wire_Pads")
       (fields
         (field
-          (name "MPN") "BH-18650-B1BA002")
+          (name "MPN") "MY-18650-04-J/05-J")
         (field
           (name "Description") "18650 cell holder, single cell")
         (field
-          (name "Footprint") "openpack:BH-18650-B1BA002")
+          (name "Footprint") "openpack:Cell_Wire_Pads")
         (field
           (name "Datasheet"))
         (field
