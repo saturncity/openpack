@@ -104,7 +104,8 @@ CASE_HOLES = [(4.0, 30.0), (BW - 4.0, 30.0), (4.0, 205.0), (BW - 4.0, 205.0), (4
 # lambda/4 of the 70.7 ohm arm from that eeff at 2441.75 MHz. hw/rack/rf_routed.py re-checks the tree as drawn.
 # ---------------------------------------------------------------------------------------------------------------
 RF_SOLVE = {(0.35, 0.5): (50.17, 3.099), (0.34, 0.5): (50.96, 3.09), (0.36, 0.5): (49.41, 3.108),
-            (0.17, 0.5): (70.25, 2.902), (0.18, 0.5): (68.66, 2.916), (0.16, 0.5): (71.93, 2.888)}
+            (0.17, 0.5): (70.25, 2.902), (0.18, 0.5): (68.66, 2.916), (0.16, 0.5): (71.93, 2.888),
+            (0.25, 0.5): (59.46, 3.001)}       # 0.25: the shunt-part stubs only (each <= 1.5 mm, < lambda/45)
 W50, W70, RF_GAP = 0.35, 0.17, 0.5
 F0 = 2441.75e6
 LQ = 299792458.0 / (4 * F0 * math.sqrt(RF_SOLVE[(W70, RF_GAP)][1])) * 1e3       # 18.02 mm
@@ -149,6 +150,8 @@ ZONES_B = {"+12V_BUS": [(143.0, 21.6), (364.0, 21.6), (364.0, 160.6), (410.5, 16
            "+5V": [(1.5, 166.0), (410.5, 166.0), (410.5, 170.4), (230.0, 170.4), (230.0, 197.0), (196.0, 197.0),
                    (196.0, 170.4), (1.5, 170.4)],
            "CHASSIS": [(0.4, 0.4), (BW - 0.4, 0.4), (BW - 0.4, 21.0), (0.4, 21.0)]}
+BUCK_SW_ZONE = [(213.45, 184.2), (219.0, 184.2), (219.0, 188.2), (216.4, 188.2), (216.4, 186.45), (215.6, 186.45),
+                (215.6, 185.42), (213.45, 185.42)]
 RF_SOLID_GND = ("J3", "J4") + tuple(f"J{30 + k}" for k in range(N_SLOTS)) + tuple(f"J{40 + k}" for k in range(N_SLOTS)) + \
     ("U6", "U7", "U8", "U9")
 
@@ -323,8 +326,11 @@ def placement(P):
         pl[c["fb"]] = (x0 - s * 8.6, 26.6, 90)
         for i, cc in enumerate(c["csup"]):
             pl[cc] = (x0 - s * (4.2 + 1.3 * i), 26.6, 90)
-        pl[c["rb"]] = (x0 - s * 2.7, 21.2, 90)
-        pl[c["cvb"]] = (x0 - s * 2.7, 23.0, 90)
+        # QPL9057 pin 1 (VBIAS) sits 0.5 mm left of the RF input pin 2 for both chains (the footprint does not
+        # mirror): its cap goes beside it and rf_frontend() draws the stub; the router cannot leave a pad that close
+        # to an RF line. A's resistor shares the stub; B's stays on its supply side and the router joins it on In2.
+        pl[c["cvb"]] = (x0 - 1.9, 22.45, 90)
+        pl[c["rb"]] = (x0 - 1.9, 19.9, 90) if ant == "A" else (x0 + 2.7, 21.2, 90)
         pl[c["tps"][0]] = (x0 + s * 13.0, 19.6, 0)
         pl[c["tps"][1]] = (x0 - s * 10.6, 29.4, 0)
     # ---- power entry behind the DC jack ----
@@ -336,7 +342,7 @@ def placement(P):
     pl["C1"] = (x - 6.2, 36.2, 0)                                   # 100 uF 6.3 x 5.4 on +12V_PROT
     pl["U1"] = (x + 1.0, 35.6, 0)
     ilm, dv, cin, co = efuse_parts(P, "U1")
-    pl[ilm] = (x + 1.0, 39.0, 0); pl[dv] = (x - 1.6, 39.0, 0); pl[cin] = (x - 1.8, 32.4, 0); pl[co] = (x + 4.0, 38.0, 90)
+    pl[ilm] = (x + 2.0, 37.6, 180); pl[dv] = (x - 1.6, 39.0, 0); pl[cin] = (x - 1.8, 32.4, 0); pl[co] = (x + 4.0, 38.0, 90)
     en = P.on("U1_EN", "R")
     pl[en[0]] = (x + 5.4, 36.0, 90); pl[en[1]] = (x + 6.8, 36.0, 90)
     pl["C5"] = (x + 3.0, 42.6, 0); pl["C6"] = (x - 4.0, 44.0, 0)    # +12V_BUS bulk at the eFuse output, by the spine
@@ -354,7 +360,8 @@ def placement(P):
         for u, dx in ((f"U{20 + k}", 12.0), (f"U{30 + k}", 32.0)):
             pl[u] = (sx + dx, 175.0, 0)
             ilm, dv, cin, co = efuse_parts(P, u)
-            pl[ilm] = (sx + dx - 3.0, 177.8, 90); pl[dv] = (sx + dx - 1.8, 177.8, 90)
+            # ILM is pin 7 (right side, next to GND pin 8): its resistor sits just above-right, pad 1 inboard (#34)
+            pl[ilm] = (sx + dx + 1.0, 177.0, 180); pl[dv] = (sx + dx - 1.8, 177.8, 90)
             pl[cin] = (sx + dx - 2.6, 173.0, 0); pl[co] = (sx + dx + 3.0, 177.4, 90)
         en = P.on(f"U{20 + k}_EN", "R")
         pl[en[0]] = (sx + 6.0, 172.6, 0); pl[en[1]] = (sx + 6.0, 174.4, 0)
@@ -373,14 +380,18 @@ def placement(P):
             pl[r] = (lx + 3.0, BD - 2.6, 0)
     # ---- 5 V buck (TPS62933 reference layout, SLUSEA4D 10-1), 3.3 V LDO, CM4IO feed ----
     bx, by = 213.0, 186.0
+    # SOT-583 pins (board y up): left 1 NC / 2 EN / 3 VIN / 4 GND top to bottom, right 8 FB / 7 SS / 6 BST / 5 SW.
+    # SW is a small F.Cu pour (BUCK_SW_ZONE) from pin 5 to the inductor and the boot cap; BST leaves pin 6 to the
+    # right, SS climbs past pin 8 to its cap, FB goes straight up to the divider, EN left to its divider (#34).
     pl["U2"] = (bx, by, 0)
-    pl["L1"] = (bx + 7.0, by + 0.5, 0)
-    pl["C8"] = (bx + 2.8, by + 2.6, 0)
-    pl["C9"] = (bx - 3.6, by + 3.6, 90); pl["C10"] = (bx - 5.6, by + 3.6, 90); pl["C11"] = (bx - 2.0, by + 2.4, 90)
+    pl["L1"] = (bx + 6.9, by + 1.05, 0)                        # clear of slot 4's test pads (y 183)
+    pl["C8"] = (bx + 2.32, by - 0.25, 0)                            # pad 1 BST beside pin 6, pad 2 on the SW pour
+    pl["C11"] = (bx - 2.4, by - 0.7, 180)                           # 100 nF VIN-GND right at pins 3 / 4
+    pl["C9"] = (bx - 4.4, by + 3.8, 90); pl["C10"] = (bx - 6.8, by + 3.8, 90)
     pl["C12"] = (bx + 7.0, by + 5.2, 0); pl["C13"] = (bx + 7.0, by + 7.4, 0); pl["C14"] = (bx + 3.8, by + 5.6, 90)
-    en = P.on("BUCK_EN", "R"); pl[en[0]] = (bx - 3.0, by - 3.0, 90); pl[en[1]] = (bx - 4.4, by - 3.0, 90)
-    pl[P.one("BUCK_SS", "C")] = (bx - 1.6, by - 3.0, 90)
-    fb = P.on("BUCK_FB", "R"); pl[fb[0]] = (bx + 1.6, by - 3.6, 90); pl[fb[1]] = (bx + 3.0, by - 3.6, 90)
+    en = P.on("BUCK_EN", "R"); pl[en[0]] = (bx - 3.6, by + 0.6, 0); pl[en[1]] = (bx - 2.1, by + 1.0, 90)
+    pl[P.one("BUCK_SS", "C")] = (bx + 2.32, by + 1.4, 0)
+    fb = P.on("BUCK_FB", "R"); pl[fb[0]] = (bx + 1.75, by + 3.0, 270); pl[fb[1]] = (bx + 0.75, by + 2.6, 90)
     pl[P.one("+5V", "TP")] = (bx - 7.0, by - 2.0, 0)
     pl["U3"] = (190.0, 214.0, 0); pl["C15"] = (186.4, 214.0, 90); pl["C16"] = (193.8, 214.0, 90)
     pl[P.one("+3V3", "TP")] = (190.0, 210.6, 0)
@@ -679,12 +690,37 @@ def rf_frontend(b, cu, fps, netinfo, P, ant):
         stubs.append((net, pc(fps, ref, P.pad_on(ref, net)[0])))
     rf_track(b, cu, netinfo, f"ANT_{ant}", [pin, (x0, dcb_a[1] - 0.9), dcb_a], W50)
     rf_track(b, cu, netinfo, f"LNA_{ant}_IN", [dcb_b, r0_a], W50)
-    rf_track(b, cu, netinfo, f"LNA_{ant}_RFIN", [r0_b, (r0_b[0], lin[1] - 0.6), (lin[0], lin[1] - 0.15), lin], W50 if abs(lin[0] - x0) > 0.5 else 0.25)
-    rf_track(b, cu, netinfo, f"LNA_{ant}_RFOUT", [lout, (lout[0], lout[1] + 0.15), (co_a[0], co_a[1] - 0.6), co_a], 0.25)
-    rf_track(b, cu, netinfo, f"LNA_{ant}_OUT", [co_b, (co_b[0], bin_[1] - 0.5), bin_], 0.25)
+    # 50 ohm right up to the QPL9057 / QPQ1907 pins: each line enters its pin straight along the pin axis, 0.2 mm from
+    # the GND pins either side (RF clearance 0.15); a diagonal into a 0.5 mm-pitch pin row would graze its neighbour
+    rf_track(b, cu, netinfo, f"LNA_{ant}_RFIN", [r0_b, (r0_b[0], lin[1] - 0.75), (lin[0], lin[1] - 0.6), lin], W50)
+    rf_track(b, cu, netinfo, f"LNA_{ant}_RFOUT", [lout, (lout[0], lout[1] + 0.6), (co_a[0], co_a[1] - 0.15), co_a], W50)
+    rf_track(b, cu, netinfo, f"LNA_{ant}_OUT", [co_b, (co_b[0], bin_[1] - 0.6), (bin_[0], bin_[1] - 0.3), bin_], W50)
     for net, p in stubs:
         rf_track(b, cu, netinfo, net, [(x0, p[1]), p], 0.25)
+    # LNA bias stub: pin 1 -> left -> the decoupling cap (and A's bias resistor); not RF, so not in RF_LOG
+    vb = f"LNA_{ant}_VBIAS"
+    p1 = pc(fps, c["lna"], "1")
+    cv = pc(fps, c["cvb"], P.pad_on(c["cvb"], vb)[0])
+    pts = [p1, (cv[0], p1[1]), cv]
+    HAND.update({(c["lna"], "1"), (c["cvb"], P.pad_on(c["cvb"], vb)[0])})
+    if ant == "A":
+        rbp = pc(fps, c["rb"], P.pad_on(c["rb"], vb)[0])
+        hand_track(b, cu, netinfo, vb, [(cv[0], p1[1]), rbp], 0.25)
+        HAND.add((c["rb"], P.pad_on(c["rb"], vb)[0]))
+    hand_track(b, cu, netinfo, vb, pts, 0.25)
     return bout
+
+
+HAND = set()          # (ref, pad) joined by hand-drawn copper: the router treats them as connected
+
+
+def hand_track(b, cu, netinfo, net, pts, w):
+    import pcbnew as P_
+    for a, c in zip(pts, pts[1:]):
+        if math.dist(a, c) < 1e-6:
+            continue
+        pk.add_track(b, netinfo[net], P_.F_Cu, a, c, w)
+        cu.seg(0, a, c, w, net)
 
 
 def divider(b, cu, fps, netinfo, P, ant, stage, idx, j, up, head_net):
@@ -945,7 +981,7 @@ def route_all(b, cu, nets, log):
     def on_via(net, v):
         pk.add_via(b, NETS[net], v)
     failed = {}
-    skip = {"GND", "CHASSIS"}
+    skip = {"GND", "CHASSIS", "BUCK_SW"}      # BUCK_SW: the F.Cu pour BUCK_SW_ZONE
     rf_or_skip = lambda n: is_rf(n) or n in skip or n.startswith("__")
     order = [n for n in AUDIO_NETS] + [n for n in BIG_NETS] + \
         [n for n in POWER_NETS if n not in BIG_NETS] + \
@@ -1007,6 +1043,7 @@ def zones(b):
         b.Add(z)
     for layer in (P_.F_Cu, P_.In1_Cu, P_.In2_Cu, P_.B_Cu):
         add(layer, "GND", OUTLINE, 0)
+    add(P_.F_Cu, "BUCK_SW", BUCK_SW_ZONE, 3, solid=True)
     for net, poly in ZONES_B.items():
         # the bus pours join their pads solidly: 0.4 mm spokes would neck a 0.5 A slot feed for nothing
         add(P_.B_Cu, net, poly, 2 if net != "CHASSIS" else 1, solid=net != "CHASSIS")
@@ -1119,6 +1156,7 @@ def mech_record(fps):
 def main(argv):
     import pcbnew as P_
     RF_LOG.clear()
+    HAND.clear()
     b, fps, netinfo, nets, P, pl = build()
     NETS.clear(); NETS.update(netinfo)
     bad = legalize(fps, pl)
@@ -1130,6 +1168,7 @@ def main(argv):
     cu, pads = refill_pads(cu, fps)
     log = []
     gnd_vias = []
+    cu.zone(0, BUCK_SW_ZONE, "BUCK_SW")
     print("placed, RF drawn", flush=True)
     nf = gnd_fanout(b, cu, pads, gnd_vias, log)
     print(f"GND fan-out {nf}", flush=True)
@@ -1168,6 +1207,9 @@ def refill_pads(cu, fps):
     cu2.items.extend(keep)
     for it in cu2.items:
         if it.kind == "pad" and is_rf(it.net):
+            it.conn = True
+    for key in HAND:
+        for it in pads.get(key, []):
             it.conn = True
     return cu2, pads
 

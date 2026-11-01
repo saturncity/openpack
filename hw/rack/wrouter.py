@@ -230,8 +230,12 @@ class Copper:
                 targets -= src
                 if not targets or not src:
                     continue
+                # a long hop (the host header to the rear bias eFuses is ~270 mm) runs out of expansions on near-ties
+                # long before it runs out of room: scale the budget with the window (#34)
+                span = (win[2] - win[0]) + (win[3] - win[1])
+                budget = max_expand * (12 if span > 150 else 1)
                 path = g.astar(src, targets, 1, cls, layers, forbid, via_cost=via_cost, layer_cost=layer_cost,
-                               max_expand=max_expand)
+                               max_expand=budget)
                 if path is None:
                     continue
                 segs, vias = g.to_segments(path, cls, 1, forbid)

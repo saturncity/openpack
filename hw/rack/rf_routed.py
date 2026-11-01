@@ -264,6 +264,29 @@ def summary(geo, ant, er=ER, ws=1.0):
             "rl_out_db": float(min((-db(S[:, j, j])).min() for j in range(1, 9))), **{k: round(v, 1) for k, v in stats.items()}}
 
 
+def frontend(geo, ant, f=2441.75e6):
+    """BNC centre pin -> ESD / bias-T -> DC block -> 0R -> QPL9057 -> 18 nH / DC block -> QPQ1907, as drawn: per net
+    the 50 ohm through-line length and its loss (MLine alpha, the solved Z0), and the shunt-part stubs"""
+    import skrf
+    from skrf.media import MLine
+    tab = solve_table(geo)
+    fr = skrf.Frequency.from_f([f], unit="hz")
+    out, tot_len, tot_db, stub = {}, 0.0, 0.0, 0.0
+    for net in (f"ANT_{ant}", f"LNA_{ant}_IN", f"LNA_{ant}_RFIN", f"LNA_{ant}_RFOUT", f"LNA_{ant}_OUT"):
+        runs = [t for t in geo["tracks"] if t.get("net") == net and "pts" in t]
+        line = [t for t in runs if t["w"] >= 0.34]
+        L = sum(poly_len(t["pts"]) for t in line) * 1e3
+        w = line[0]["w"] if line else 0.35
+        m = MLine(frequency=fr, w=w * 1e-3, h=H, t=T, ep_r=ER, tand=TAND, rough=ROUGH, z0_port=50)
+        a_db_mm = float(np.real(m.gamma[0])) * 8.686 / 1e3
+        key = min(tab, key=lambda k: abs(k[0] - w))
+        st = sum(poly_len(t["pts"]) for t in runs if t["w"] < 0.34) * 1e3
+        out[net] = {"w_mm": w, "z0": tab[key][0], "len_mm": round(L, 2), "loss_db": round(L * a_db_mm, 3),
+                    "stub_mm": round(st, 2)}
+        tot_len += L; tot_db += L * a_db_mm; stub += st
+    return {"nets": out, "len_mm": round(tot_len, 2), "loss_db": round(tot_db, 3), "stub_mm": round(stub, 2)}
+
+
 def main():
     geo = json.loads(GEO.read_text())
     res = {}
@@ -280,13 +303,17 @@ def main():
     worst_c = {k: max(res[a]["corners"][k] for a in "AB") if k == "il_db" else min(res[a]["corners"][k] for a in "AB")
                for k in ("il_db", "iso_db", "rl_in_db", "rl_out_db")}
     out = {"band_hz": [float(F[0]), float(F[-1])], "limits": LIMITS, "A": res["A"], "B": res["B"], "worst": worst,
-           "worst_tolerance": worst_c}
+           "worst_tolerance": worst_c, "frontend": {a: frontend(geo, a) for a in "AB"}}
     OUT.write_text(json.dumps(out, indent=1) + "\n")
     for a in "AB":
         r = res[a]
         print(f"tree {a}: IL {r['il_min_db']:.2f}-{r['il_db']:.2f} dB, isolation >= {r['iso_db']:.1f} dB, RL in {r['rl_in_db']:.1f} /"
               f" out {r['rl_out_db']:.1f} dB; dividers {r['divider']:.0f} mm, distribution {r['distribution']:.0f} mm,"
               f" {r['bends']:.0f} bends, {r['vias']:.0f} vias; tolerance corners {r['corners']}")
+    for a in "AB":
+        fe = out["frontend"][a]
+        print(f"front end {a}: 50 ohm line {fe['len_mm']:.1f} mm, {fe['loss_db']:.3f} dB; shunt stubs {fe['stub_mm']:.1f} mm; "
+              + ", ".join(f"{n} {v['len_mm']:.1f} mm" for n, v in fe["nets"].items()))
     return out
 
 

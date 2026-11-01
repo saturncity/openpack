@@ -33,12 +33,16 @@ CASE = {"part": "Hammond RM1U1913SBK", "ears_w": 482.61, "frame_w": 421.65, "h":
 
 # Panel parts that are not on the board (positions chosen in the gaps between the XLRs; data-sheet sizes)
 # Neutrik NE8FDP etherCON (D-size): cut-out Ø24 + 2 x M3 at (+-9.5, +-12) diagonal, flange 26 x 31 in front of the
-# panel, body behind it ~ Ø24 x 31 deep (est., D-series housing). Adafruit 4056 panel USB-C: M3 ears 20 mm apart,
-# socket opening ~ 9.2 x 3.4 (est. from the Adafruit photos; cut 10 x 4.2), body ~ 12 x 6 x 16 deep (est.).
+# panel, body behind it ~ Ø24 x 31 deep (est., D-series housing).
+# Adafruit 4056 panel USB-C (Premier Cable drawing C12984-001, 2018-12-05, cdn-shop.adafruit.com/product-files/4056/):
+# flange 28 x 8.5 with the two M3 x 12 screws 20 mm apart on its long axis, USB 3.1 Type-C receptacle in the middle
+# (shell 8.94 x 3.26, USB-C spec), overmold 13 x 13 running 40.5 mm back from the flange face, panel up to 6.35 mm.
+# Mounted upright (screws above and below the socket) behind the panel, so it fits between XLR 1 and XLR 2. Cut-out:
+# 4.0 x 9.6 slot (receptacle + 0.35 mm a side; round the ends with a 2.0 mm radius) and two 3.2 mm holes at z +-10.
 ETHERCON = {"x_board": 50.0, "z": 23.0, "cut_d": 24.0, "screws": [(-9.5, 12.0), (9.5, -12.0)], "screw_d": 3.2,
             "flange": (26.0, 31.0), "body": (24.0, 24.0, 31.0)}
-USBC = {"x_board": 102.0, "z": 20.0, "slot": (10.0, 4.2), "screws": [(-10.0, 0.0), (10.0, 0.0)], "screw_d": 3.2,
-        "body": (12.0, 7.0, 16.0)}
+USBC = {"x_board": 102.0, "z": 21.0, "slot": (4.0, 9.6), "screws": [(0.0, -10.0), (0.0, 10.0)], "screw_d": 3.2,
+        "flange": (8.5, 28.0, 4.5), "overmold": (13.0, 13.0, 40.5)}
 LED_HOLE_D = 2.5
 HEIGHTS = {  # mm above the main board top, for the box model (data-sheet body heights, rounded up)
     "socket": 8.5, "idc": 9.1, "vh": 9.4, "cp": 5.6, "srp5030": 3.0, "smb": 2.5, "soic": 1.8, "default": 2.0,
@@ -85,8 +89,9 @@ def solids(m):
                            e["z"] + e["body"][1] / 2), "panelconn"))
     u = USBC
     cx, _ = to(u["x_board"], 0)
-    S.append(("usbc", (cx - u["body"][0] / 2, 0.0, u["z"] - u["body"][1] / 2, cx + u["body"][0] / 2, u["body"][2],
-                       u["z"] + u["body"][1] / 2), "panelconn"))
+    (fw, fh, ft), (ow, oh, od) = u["flange"], u["overmold"]
+    S.append(("usbc_flange", (cx - fw / 2, 0.0, u["z"] - fh / 2, cx + fw / 2, ft, u["z"] + fh / 2), "panelconn"))
+    S.append(("usbc_overmold", (cx - ow / 2, ft, u["z"] - oh / 2, cx + ow / 2, od, u["z"] + oh / 2), "panelconn"))
     c = m["cm4io"]
     x0, y0 = to(c["rect"][0], c["rect"][1])
     x1, y1 = to(c["rect"][2], c["rect"][3])

@@ -1253,8 +1253,12 @@ if __name__ == "__main__":
               f" {g['near_radio'] - g['wanted_radio']:4.1f} dB -> C/I margin >= 6 MHz {g['ci_6mhz_margin']:+5.1f},"
               f" -4 MHz {g['ci_4mhz_margin']:+5.1f}")
         assert compression_margin(g) >= 0, f"no stage compresses with a pack {d} m on axis (BT40E, no pad)"
-    for d in (1.5, 4.0):
-        assert gain_plan(d, RX_MODULE, wil)["imd_margin"] >= 0, "PIMD holds once the pack is >= 1.5 m on axis"
+    imd_m = next(i / 10 for i in range(5, 100) if all(gain_plan(j / 10, RX_MODULE, wil)["imd_margin"] >= 0
+                                                      for j in range(i, 100, 5)))
+    print(f"  PIMD holds from {imd_m:.1f} m on axis (the 100 mm u.FL jumper, #34, gives the radio 0.5 dB more than the"
+          f" 200 mm one, and third-order IMD rises 3 dB per dB); the ADR-0021 rule keeps packs off axis")
+    for d in (2.0, 4.0):
+        assert gain_plan(d, RX_MODULE, wil)["imd_margin"] >= 0, "PIMD holds once the pack is >= 2 m on axis"
     bt40ne = gain_plan(NEAR_M[0], "BT40NE", wil)
     print(f"    BT40NE instead (nRF21540 always on): module margin {bt40ne['fem_margin']:+.1f} dB at 0.5 m -> why"
           f" ADR-0021 moved the receivers to the BT40E")
@@ -1284,3 +1288,14 @@ if __name__ == "__main__":
           f" (converted, hw/rx/out/bom.csv); antennas, coax, stands GBP {rp.ANTENNA_KIT_GBP:.2f} (hw/rack/prices.py ANTENNA_KIT)"
           f" -> rack GBP {tot:.2f} ex VAT. No cap in SPEC/AUDIT, so none asserted")
     assert all(r["uk_distributor"] and r["source"] for r in rk), "every rack BOM line needs a UK distributor and source"
+    # #34: the SC16IS752 crystal is now the AKER C3E-14.7456-18-3030-R (LCSC C6523919): ESR 100 ohm max, -20..+70 C.
+    # Pierce start-up: critical transconductance gm_crit = 4 ESR (2 pi f)^2 (C0 + CL)^2 (ST AN2867 eq. 3); a 5x
+    # gain margin is the usual rule. NXP gives no gm for the SC16IS752 oscillator, so the inverter figure is an estimate
+    # for an unbuffered 3.3 V CMOS Pierce stage and the margin is a bench item (insert 5 x ESR in series: still starts).
+    f_x, esr, c0, cl = 14.7456e6, 100.0, 3.0e-12, 22e-12 * 22e-12 / 44e-12 + 3e-12   # C0 est., 2 x 22 pF + 3 pF stray
+    gm_crit = 4 * esr * (2 * math.pi * f_x) ** 2 * (c0 + cl) ** 2
+    GM_EST = 8e-3                          # est.: unbuffered 3.3 V CMOS inverter gm, A/V
+    print(f"  SC16IS752 crystal (AKER, ESR {esr:.0f} ohm): CL {cl * 1e12:.0f} pF, gm_crit {gm_crit * 1e3:.2f} mA/V; 5x margin needs"
+          f" {5 * gm_crit * 1e3:.1f} mA/V, est. inverter {GM_EST * 1e3:.0f} mA/V -> margin {GM_EST / gm_crit:.1f}x (bench: start-up"
+          f" with {5 * esr:.0f} ohm in series); rated -20..+70 C covers a 0..40 C wing")
+    assert GM_EST / gm_crit >= 5.0, "crystal oscillator gain margin >= 5 (estimate; bench item)"
