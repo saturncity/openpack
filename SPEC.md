@@ -7,27 +7,31 @@
 | ID | Requirement | Verify |
 |---|---|---|
 | SYS-1 | 8 bodypacks → 1 receiver rack, 1U, 8 balanced analog outputs (R9) | Inspection |
-| SYS-2 | Mic-in to XLR-out latency: ≤ 3.0 ms target, ≤ 5.0 ms hard (R3). Design: 2.6 ms without time diversity, 4.6 ms with | bsim timestamps + logic analyzer |
+| SYS-2 | Mic-in to XLR-out latency: ≤ 3.0 ms target, ≤ 5.0 ms hard (R3). Design (§2, bsim (a) + datasheets): **time diversity off by default (ADR-0017): 2.65 ms** (2.27 ms with the PCM5102A FLT=1 strap on hw/rx). TD is a per-pack setting for hostile venues: 4.58 ms with FLT=1 (4.96 with FLT=0; d = 2, 81 B packets). Options: `docs/analysis/td-latency.md` (#26) | bsim timestamps + logic analyzer |
 | SYS-3 | Under the Q3 interference setup for 1 h: residual frame loss ≤ 0.1 %, ≤ 2 consecutive lost frames, ≤ 1 audible dropout event (R1) | bsim scenario (c), then Phase 5/6 |
 | SYS-4 | Audio: 48 kHz, 20 Hz–20 kHz ±0.5 dB, ViSQOL ≥ 4.0 vs 24-bit input on the Phase 1 corpus (R5) | ViSQOL |
-| SYS-5 | 2.4 GHz ISM only. Region from `host/channel_plan.yaml` `region` (ADR-0015). **UK (default):** Ofcom IR2030/7/1, ETSI EN 300 328 V2.2.2 non-adaptive non-FHSS, declared max **9 dBm EIRP** (below 10 dBm, so the Tx-gap/MU/adaptivity clauses 4.3.2.4–4.3.2.6 do not apply), PSD ≤ 10 dBm/MHz, 99 % OBW inside 2400–2483.5 MHz. **US:** FCC 15.247 DTS, ≤ 20 dBm EIRP | `audit.py` Audit 3 + ADR-0015 |
+| SYS-5 | 2.4 GHz ISM only. Region from `host/channel_plan.yaml` `region` (ADR-0015). **UK (default):** Ofcom IR2030/7/1, ETSI EN 300 328 V2.2.2 non-adaptive non-FHSS, declared max **9 dBm EIRP** (below 10 dBm, so the Tx-gap/MU/adaptivity clauses 4.3.2.4–4.3.2.6 do not apply), PSD ≤ 10 dBm/MHz, 99 % OBW inside 2400–2483.5 MHz (4.3.2.7), OOB ≤ −10/−20 dBm/MHz (4.3.2.8 Figure 3). The highest carrier is 2482: its OBW top edge is ≤ 2483.28 MHz and its OOB margin ≥ 6 dB (ADR-0016). **US:** FCC 15.247 DTS, ≤ 20 dBm EIRP, highest carrier 2480 (15.205 restricted band above 2483.5) | `audit.py` Audit 3/5 + ADR-0015/0016; 2482 OBW and OOB measured on a pack in Phase 5 |
 | SYS-6 | One RF carrier pair per pack (FDMA), no inter-pack sync | Design |
 | SYS-7 | No pack→rack link other than the audio uplink in v1; a 300 µs RX slot is reserved per frame (Q4) | Frame schedule test |
 
-## 2. Latency budget (design, per stage; sum = SYS-2)
+## 2. Latency budget (per stage; sum = SYS-2)
 
-| Stage | µs | Note |
-|---|---|---|
-| ADC decimation filter | 350 | PCM1840, *measured* Phase 5 |
-| Frame accumulation | 1000 | 48 samples |
-| Encode + IPC app→net core | 100 | Twister timing test |
-| Copy A on air | 200 | ~47 B at 2 Mbps |
-| Retune gap | 100 | parameter `T_GAP`, *measured* |
-| Copy B on air | 200 | |
-| Decode + jitter slot | 200 | fixed output deadline = copy B end + 200 |
-| DAC DMA block (8 samples) | 170 | parameter `DAC_BLOCK` |
-| DAC interpolation filter | 400 | PCM5102, *measured* |
-| **Total** | **2720** | time diversity adds 2000 |
+Corrected by #26 (`python3 audit.py`, `docs/analysis/td-latency.md`). The radio part (encode + IPC through output slot) is *measured* in bsim (a): 864 µs, 1176 µs at TD length. Filters are datasheet values at 48 kHz, *measured* in Phase 5.
+
+| Stage | µs (TD off) | µs (TD on) | Note |
+|---|---|---|---|
+| ADC decimation filter | 160 | 160 | PCM1840 low-latency filter, 7.7/fs (SBAS989 Table 18), MD0=1 (ADR-0012). Linear phase would be 356 |
+| Frame accumulation | 1000 | 1000 | 48 samples |
+| Encode + IPC app→net core | 100 | 100 | Twister timing test |
+| TX ramp-up, copy A | 41 | 41 | RADIO fast ramp-up (40 on silicon, 41 in bsim) |
+| Copy A on air | 212 | 368 | 53 B / 92 B on air (AIR-2 + 42 B / 81 B payload) at 2 Mbps |
+| Retune gap | 100 | 100 | parameter `T_GAP`, includes copy B ramp-up, *measured* |
+| Copy B on air | 212 | 368 | |
+| Decode + jitter slot | 200 | 200 | fixed output deadline = copy B end + 200 (ADR-0013: 125 setpoint) |
+| DAC DMA block (8 samples) | 167 | 167 | parameter `DAC_BLOCK` |
+| DAC interpolation filter | 458 | 458 | PCM5102A normal FIR, 22/fs (SLAS859C Table 4). FLT=1 low-latency IIR: 73 (3.5/fs, Table 7) |
+| Time diversity | 0 | 2000 | frame n is played after packet n+2 (AIR-3, RX-4) |
+| **Total** | **2650** | **4962** | was 2720 / 4720 in this table and 2.6 / 4.6 ms in SYS-2 |
 
 ## 3. Air interface
 
@@ -37,9 +41,9 @@
 | AIR-2 | Packet: 2 B preamble, 4 B access address = `0x8E89BED6 ^ (pack_id * 0x9E3779B1)`, 1 B header (RADIO S0: format version, 0 in v1), 1 B length, payload, 3 B CRC-24 (poly 0x00065B, address skipped), whitening on. This is the BLE 2M PDU layout, the only one the bsim RADIO model accepts (ADR-0009) |
 | AIR-3 | Payload (v1, ADPCM-6 shown; codec per ADR-0005): `seq u8` · `status u16` (bat 7 b, peak 6 b, flags 3 b: clip/lowbat/temp) · `codec_state` 3 B · `audio` 36 B · optional `td_audio` 39 B (frame n−2, Kconfig `OP_TIME_DIVERSITY`). Max 85 B |
 | AIR-4 | Frame period 1000 µs ±20 ppm (pack crystal). Schedule from frame start t0: copy A TX at t0, copy B TX at t0+T_A+T_GAP on channel B, RX slot at t0+700 µs for 300 µs (idle in v1) |
-| AIR-5 | Channel pair per pack from `host/channel_plan.yaml` (ADR-0015, #76): fA ∈ 2402–2440 MHz, fB ∈ [fA + 40, 2480]; 16 carriers, every one ≥ 3 MHz from every other; the 7 gap carriers that fit at 3 MHz (2423, 2426, 2448, 2451, 2473, 2476, 2479, clear of Wi-Fi 1/6/11) go one each to packs 2–8; pack 1 has two in-band carriers, each ≥ 5 MHz from all others; whichever pack stands next to an antenna, every other pack keeps one carrier ≥ 5 MHz from it. UK: where a venue runs Wi-Fi 13, 2473/2476/2479 are in-band (packs 6–8 lose their gap copy) |
+| AIR-5 | Channel pair per pack from `host/channel_plan.yaml` (ADR-0015, ADR-0016, #76): fA ∈ 2402–2440 MHz, fB ∈ [fA + 40, fmax], fmax = **2482 UK/EU, 2480 US** (validator, pack `chan`, Kconfig); 16 carriers, every one ≥ 3 MHz from every other; whichever pack stands next to an antenna, every other pack keeps one carrier ≥ 5 MHz from it. **UK:** 8 gap carriers clear of Wi-Fi 1/6/11 (2423, 2426, 2448, 2451, 2473, 2476, 2479, 2482), one per pack (pack 1: 2414/2482). **US** (`host/channel_plan_us.yaml`): the 7 below 2480 go to packs 2–8; pack 1 has two in-band carriers, each ≥ 5 MHz from all others. Where a venue runs Wi-Fi 13, 2473/2476/2479/2482 are lost (packs 1, 6–8 lose their gap copy) |
 | AIR-6 | TX power: software-set; region maximum enforced in firmware: **UK +7 dBm conducted** (9 dBm EIRP with the 2 dBi whip; nRF21540 at low gain, nRF5340 alone tops out at +3 dBm), **US +18 dBm** (20 dBm EIRP; BT40NE max +19.1 dBm, ADR-0007). Default region UK (ADR-0015) |
-| AIR-7 | Airtime per carrier ≤ 45 % of frame (two copies, time diversity on, at 2 Mbps) |
+| AIR-7 | Airtime per carrier ≤ 45 % of frame (two copies, time diversity on, at 2 Mbps; 25 % with TD off, the default, ADR-0017) |
 
 ## 4. Bodypack
 
@@ -79,7 +83,7 @@
 | ID | Requirement |
 |---|---|
 | RK-1 | 1U, external 12 V DC brick, rear: 8 XLR male, 2 BNC (antenna A/B) with switchable 12 V bias-T for active antennas, RJ45, USB-C (host service) (R9, R10) |
-| RK-2 | RF: per antenna input, LNA (NF ≤ 2 dB) → 1:8 splitter → 8 modules; coax loss budget 6 dB; antenna placement guidance in `docs/human/antennas.md` (stage wings, directional) |
+| RK-2 | RF: per antenna input, LNA (NF ≤ 2 dB, input P1dB ≥ −10 dBm, IIP3 ≥ 0 dBm) → 1:8 splitter → 8 modules; coax loss budget 6 dB. Antennas (ADR-0016): 2× L-com HG2409P-NF 8 dBi patch, each on 15.2 m of 400-series coax + BNC jumper (4.2 dB). Install rule `docs/human/antenna-install.md`: front of stage, aimed upstage, ≥ 6 m above the stage floor; Wi-Fi ≥ 4.5 m behind/beside, ≥ 12 m in front (R1 rests on it). **R10 verification note:** the 2 BNC stay; the link-on-a-body check (Phase 5/6) uses these antennas mounted per the rule, and Phase 5 also measures their real rear lobes (datasheet plot: −9 dB) |
 | RK-3 | Host: Raspberry Pi CM4 **without wireless** on the official CM4 IO Board (ADR-0018), ribbon to the main board; 8 module UARTs = CM4 UART0/3/4/5 + 2× SC16IS752 on SPI1, whose GPIOs drive every slot's nRESET/BOOT; Ethernet via a rear etherCON feedthrough; USB-C service = the CM4IO rpiboot port; boots to service ≤ 60 s |
 | RK-4 | Front: per channel, lock LED and audio peak LED; no display |
 | RK-5 | Main board (ADR-0018, `hw/rack/backplane.py`, Audit 6): per antenna, RF ESD + host-switched bias-T eFuse (off by default, 0.49 A) → DC block → QPL9057 LNA → QPQ1907 BAW → 3-stage microstrip Wilkinson (≤ 11 dB IL, ≥ 20 dB output isolation, ≥ 15 dB RL across 2400–2483.5 MHz on JLC04161H-7628). System NF at the antenna connector ≤ the 9.3 dB Audit 4 assumed, at the 6 dB coax budget, with the module nRF21540 LNA on (firmware bypasses it above −6 dBm at the radio). Per-slot eFuses on +12 V and +5 V; XLR pins 2/3 TVS ≥ 58 V standoff |

@@ -1,5 +1,7 @@
 # R1 under UK rules: can the receive side close the gap?
 
+> **Outcome (2026-11-01, ADR-0016/ADR-0017):** adopted 1a + 4a + 5 with TD off. EN 300 328 clause check: 2482 is compliant (Audit 5). The real antenna (L-com HG2409P-NF) has rear lobes at −9 dB, not the 15 dB F/B assumed below. Its rejection is 8.8 dB, so at the Q3 2 m geometry only 3/8 hold, and the install rule moves to **Wi-Fi ≥ 4.5 m behind/beside, antennas ≥ 6 m up**. bsim (c) at that distance: packs 2–8 0.000 % TD on and off. Install doc: `docs/human/antenna-install.md`.
+
 #89, part of #4. 2026-10-31. Follows ADR-0015 (PR #86). Numbers come from `python3 audit.py` (section "Audit 4") and from bsim (c) via `tests/bsim/scenarios/run.py` (PR #82) with the new `--rx-gain`, `--wifi-gain`, `--near-att`, `--busy` and `--c-secs` flags. This note recommends; the ADR is written separately.
 
 **Answer:** yes, in the twin, with conditions. Two directional rack antennas aimed at the stage, with the audience Wi-Fi behind them, bring every gap carrier to 0.000 % copy loss at 40 % Wi-Fi. An 8th gap carrier (2482 MHz, UK only) then gives pack 1 one too. In bsim, 7 of 8 packs pass SYS-3 at 40 % with TD **off**; pack 1 passes by equivalence (below), because bsim cannot transmit above 2480 MHz. That holds only if the install rule in §6 is followed. If the Wi-Fi sits beside the antennas at 2 m, the result drops to 3–4 of 8.

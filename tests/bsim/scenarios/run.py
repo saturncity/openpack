@@ -5,7 +5,9 @@ usage: run.py [--long] [--only abcde] [--build DIR] [--no-build] [--out DIR] [--
 needs BSIM_OUT_PATH, BSIM_COMPONENTS_PATH and a west workspace (ZEPHYR_BASE, Zephyr SDK) for the builds.
 
 Builds 5 images (pack, receiver, pack that goes silent after 3 s, and both at the time-diversity packet
-length) once; every pack id and carrier pair comes from host/channel_plan.yaml through the bsim-only
+length) once; every pack id and carrier pair comes from host/channel_plan_us.yaml (default --plan; the
+BabbleSim phy rejects centres above 2480 MHz, so the UK plan's 2482 carrier for pack 1 cannot run here,
+ADR-0016; packs 2-8 are identical in both plans) through the bsim-only
 -op_pack_id/-op_ch_a/-op_ch_b options (CONFIG_OP_TEST_BSIM_ARGS). Each scenario launches the 2G4 phy
 (multiatt channel, BLE_simple modem) + N packs + N receivers + optional 3 WLAN_actmod interferers on
 Wi-Fi 1/6/11, every process under `timeout` with -sim_length, all killed on exit (hands-off.md).
@@ -58,7 +60,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 BOARD = "nrf5340bsim/nrf5340/cpuapp"
-TD = ["-Dfw_net_CONFIG_OP_TEST_FRAME_LEN=81"]  # net core only: the app cores keep the v1 42 B frame (codec)
+TD = ["-Dfw_net_CONFIG_OP_TEST_FRAME_LEN=81"]  # net core only: the app cores keep the v1 42 B frame (codec); --td-len
 IMAGES = {  # name: west build -- args (sysbuild; fw = app core image, fw_net = net core image)
     "pack": [],
     "rx": ["-DSB_CONFIG_OP_ROLE_RX=y"],
@@ -83,8 +85,9 @@ def kconfig_default(sym):
 RAMP_TX = 41  # bsim TXEN -> on air, fast ramp-up (tests/bsim/sched/check.py)
 RAMP_RX = 40  # RXEN -> RX start
 ENC_IPC_US, OUT_SLOT_US = 100, 200  # SPEC section 2: encode + IPC; output deadline = copy B end + 200
-I2S_FILTERS_US = 1000 + 170 + 350 + 400  # frame accumulation, DAC DMA block, ADC and DAC filters (SPEC 2)
+I2S_FILTERS_US = 1000 + 167 + 160 + 458  # frame accumulation, DAC DMA block, ADC and DAC filters (SPEC 2, #26)
 TD_US = 2000  # time diversity: frame n is played after packet n+2 (SPEC 2)
+TD_OFFSETS = (1, 2, 3)  # reported TD offsets (frames), #26
 SYS2_SIM_MAX, LOCK_MAX = 1600, 2.0
 SYS3_LOSS, SYS3_RUN = 0.001, 2
 XF_PLAN = "#76"  # channel plan: 2 MHz-spaced carriers collide; near pack blocks 3 MHz neighbours
@@ -248,13 +251,17 @@ def link(sim, pdev, rdev, pid, fa, fb, t_from):
     ok, _ = rx_ok(sim.dumps / f"d_2G4_{rdev:02d}.Rx.csv", aa(pid))
     a = [got(ok, fa, x[0]) for x in fr]
     b = [got(ok, fb, x[2]) for x in fr]
-    n = len(fr) - 3  # frame n needs packet n+2 for TD; drop the tail
+    n = len(fr) - 3  # frame n needs packet n+TD_OFFSETS[-1] for TD; drop the tail
     if n <= 0:
         return {"frames": 0}, fr
     off = [not (a[i] or b[i]) for i in range(n)]
-    on = [off[i] and not (a[i + 2] or b[i + 2]) for i in range(n)]
     st = {"frames": n, "loss_a": 1 - sum(a[:n]) / n, "loss_b": 1 - sum(b[:n]) / n}
-    for k, v in (("off", off), ("on", on)):
+    # TD offset d: frame n also rides in packet n+d (AIR-3 has d = 2). "on" = the SPEC offset; on1/on2/on3 and
+    # on1a/on2a (d = 1/2, td_audio in copy A only) are post-processed from the same dumps for #26 (docs/analysis/td-latency.md).
+    td = {f"on{d}": [off[i] and not (a[i + d] or b[i + d]) for i in range(n)] for d in TD_OFFSETS}
+    td["on1a"] = [off[i] and not a[i + 1] for i in range(n)]
+    td["on2a"] = [off[i] and not a[i + 2] for i in range(n)]
+    for k, v in (("off", off), ("on", td["on2"])) + tuple(td.items()):
         r = runs(v)
         st[f"loss_{k}"] = sum(v) / n
         st[f"run_{k}"] = max(r, default=0)
@@ -346,6 +353,8 @@ class G2:
         return (f"    pack {k} {s['fA']}/{s['fB']}: {s['frames']} frames, copy loss A {s['loss_a']:.2%} B {s['loss_b']:.2%}"
                 f" | TD off {s['loss_off']:.3%} run {s['run_off']} ev/h {s['events_h_off']:.0f}"
                 f" | TD on {s['loss_on']:.3%} run {s['run_on']} ev/h {s['events_h_on']:.0f}"
+                f" | TD d=1 {s['loss_on1']:.3%} run {s['run_on1']}, d=1 A-only {s['loss_on1a']:.3%} run {s['run_on1a']}"
+                f", d=2 A-only {s['loss_on2a']:.3%} run {s['run_on2a']}, d=3 {s['loss_on3']:.3%} run {s['run_on3']}"
                 f" | fw lost {s['fw_lost']}/{s['fw_frames']} skips {s['fw_skips']} reacq {s['reacquire']}")
 
     # (a) 1 pack, clean channel: SYS-2 sim latency, RX-2 lock, zero loss; TD-length latency reported.
@@ -409,7 +418,7 @@ class G2:
                 assert sim.run(), f"sim {tag} failed"
                 per = self.measure(sim, links)
                 self.report(sc, f"busy{busy}_{'td_len' if td else 'v1_len'}", per)
-                print(f"  {tag}: {'TD-length 81 B' if td else 'v1 42 B'} packets, Wi-Fi {busy} % busy")
+                print(f"  {tag}: {TD[0].split('=')[1] + ' B TD-length' if td else 'v1 42 B'} packets, Wi-Fi {busy} % busy")
                 for k, s in per.items():
                     print(self.line(k, s))
                 key = "on" if td else "off"
@@ -523,8 +532,13 @@ def main():
                     help="rack antenna gain toward Wi-Fi, dB vs isotropic (patch behind: rx-gain - front-to-back)")
     ap.add_argument("--busy", default="", help="(c) Wi-Fi busy sets, e.g. 10,40 (default 40, --long 10,25,40)")
     ap.add_argument("--c-secs", type=float, default=0, help="(c) Wi-Fi run length in s (default 5, --long 60)")
-    ap.add_argument("--plan", default=str(REPO / "host/channel_plan.yaml"), help="channel plan for (b) and (c)")
+    ap.add_argument("--plan", default=str(REPO / "host/channel_plan_us.yaml"),
+                    help="channel plan for (b) and (c); bsim cannot run carriers above 2480 (UK pack 1, ADR-0016)")
+    ap.add_argument("--td-len", type=int, default=81,
+                    help="TD-length packet payload B (81 = full td_audio, AIR-3; e.g. 63 = ADPCM-3 td_audio, #26)")
     a = ap.parse_args()
+    TD[:] = [f"-Dfw_net_CONFIG_OP_TEST_FRAME_LEN={a.td_len}"]
+    IMAGES["pack_td"][0], IMAGES["rx_td"][1] = TD[0], TD[0]
     global ATT_PACK
     ATT_PACK = PL_10M - a.eirp
     WIFI_CH[:] = [int(x) for x in a.wifi.split(",")]

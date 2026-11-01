@@ -1,0 +1,12 @@
+# Test-only plan for docs/analysis/td-latency.md (#26): every carrier >= 3 MHz from every other (#76).
+# 7 gap carriers (2423/2426, 2448/2451, 2473/2476/2479); pack 8 has both copies under Wi-Fi (6 and 11),
+# the worst case a 3 MHz plan leaves, so (b) on pack 8 shows what TD buys. Not host/channel_plan.yaml.
+packs:
+  1: {fA: 2423, fB: 2463}
+  2: {fA: 2426, fB: 2466}
+  3: {fA: 2406, fB: 2448}
+  4: {fA: 2410, fB: 2451}
+  5: {fA: 2414, fB: 2473}
+  6: {fA: 2417, fB: 2476}
+  7: {fA: 2434, fB: 2479}
+  8: {fA: 2431, fB: 2471}
