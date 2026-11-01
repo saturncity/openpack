@@ -881,22 +881,33 @@ if __name__ == "__main__":
         print(f"  omni 3 dBi in the wings instead: worst {w:+.1f} dB (sees the audience as well as the stage)")
         assert w < -wg.MARGIN_DB
 
-    print("  rack chain (PR #95 / ADR-0018 draft gains, worst case, no coax): actor walking 0.5 m past the boom")
-    for eirp, reg in ((wg.EIRP_UK, "UK"), (wg.EIRP_US, "US")):
-        for ins, ax, lab in ((wg.RULE, False, "rule, 3.5 m boom"), (wg.RULE, True, "off-rule, 0.5 m on axis")):
-            _, nL, _ = wg.near(wg.STUDIO, ins, 0.5, eirp, ax)
-            wifi = wg.evaluate(wg.STUDIO, ins).iw["L"][0]
-            lna, mod, rad = wg.chain_levels(nL)
-            tot = wg.dbm_sum(lna, *[wifi - (nL - lna)] * 3)   # near pack + 3 Wi-Fi channels at the worst seat
-            _, _, byp = wg.chain_levels(nL, module_lna=False)
-            head = wg.CHAIN["lna_ip1db_min"] - tot
-            print(f"    {reg} {lab:<24} antenna {nL:6.1f} dBm -> rack LNA input {tot:6.1f} dBm with Wi-Fi"
-                  f" ({head:4.1f} dB under worst P1dB), every module's radio {rad:+5.1f} dBm (module LNA on) /"
-                  f" {byp:+5.1f} (bypassed)")
-            if not ax:
-                assert head >= 15 and rad <= wg.CHAIN["nrf5340_pmax"], "rule: no compression, module LNA may stay on"
-            elif reg == "UK":
-                assert head >= 10 and rad > 0 >= byp, "off-rule: rack LNA fine, other modules overload unless bypassed"
+    print("  rack chain (PR #95 / ADR-0018 draft, nRF21540 always on, no coax; total input >= 6 dB under each P1dB):")
+    for v in wg.VENUES:
+        e = wg.evaluate(v, wg.RULE)
+        _, n_l, _ = wg.near(v, wg.RULE)
+        wifi = e.iw["L"][0]
+        tot = wg.dbm_sum(n_l, *[wifi] * 3)              # near pack + Wi-Fi 1/6/11 at the worst seat, all on air
+        m0, m10 = wg.chain_margins(tot), wg.chain_margins(tot, pad_db=wg.PAD_DB)
+        ph = wg.phone_dbm(v, wg.RULE)
+        eq_n, eq_p = wg.on_axis_equiv_m(n_l, wg.EIRP_UK), wg.on_axis_equiv_m(ph, 23.0, f=2390.0)
+        print(f"    {v.name:<16} near pack {n_l:.1f} dBm (= {eq_n:.1f} m on axis), Wi-Fi {wifi:.1f} x3, B40 phone {ph:.1f}"
+              f" (= {eq_p:.1f} m on axis). Headroom LNA / nRF21540 / radio: no pad {m0[0]:+.1f} / {m0[1]:+.1f} /"
+              f" {m0[2]:+.1f}; {wg.PAD_DB:.0f} dB pad {m10[0]:+.1f} / {m10[1]:+.1f} / {m10[2]:+.1f}")
+        assert min(m10) >= 0, "ADR-0021 + 10 dB pad: nothing compresses"
+        assert eq_n >= 1.6 and eq_p >= 9.1, "inside PR #95's 10 dB-pad row (safe near pack 1.6 m, safe phone 9.1 m)"
+    m_studio = wg.chain_margins(wg.dbm_sum(*[wg.evaluate(wg.STUDIO, wg.RULE).iw["L"][0]] * 3))
+    assert m_studio[1] < 0, "studio audience Wi-Fi alone crowds the nRF21540 with no pad: the pad is needed"
+    _, n_ax, _ = wg.near(wg.STUDIO, wg.RULE, 0.5, wg.EIRP_UK, True)
+    print(f"    off-rule (pack 0.5 m on axis, {n_ax:.1f} dBm): nRF21540 headroom with the pad"
+          f" {wg.chain_margins(n_ax, pad_db=wg.PAD_DB)[1]:+.1f} dB (PR #95: a 20 dB pad would be needed)")
+    s_min = min(wg.summary(wg.evaluate(v, wg.RULE))["s_min"] for v in wg.VENUES)
+    c = s_min - 10.0 - 10.0                               # weakest pack, body 10 dB + fade 10 dB (as Audit 6)
+    nf_pad = 15.9                                         # PR #95's 10 dB-pad row at the 6 dB coax budget
+    noise = -174 + 10 * math.log10(2e6) + nf_pad
+    cost = 10 * math.log10(1 + 10 ** ((noise - (c - CI_REQ_DB - MARGIN_DB)) / 10))
+    print(f"    noise: weakest wing pack {s_min:.1f} dBm (-20 dB body + fade: {c:.1f}); with the pad NF {nf_pad} dB costs"
+          f" {cost:.2f} dB of the 3 dB R1 margin (stage ranges, not Audit 4's 10 m)")
+    assert cost <= 0.5
     # bsim (c), run.py --geometry docs/analysis/r1-wing/<case>.json --eirp 9 --plan host/channel_plan_us.yaml,
     # 20 s per run. Packs passing SYS-3 (<= 0.1 %, <= 2 in a row) of the 7 with a gap carrier below 2480 (pack 1's
     # is 2482: credited by equivalence, ADR-0016). Filled from the 2026-11-01 runs; see the analysis doc.

@@ -7,10 +7,10 @@
 - the worst point keeps **2.8 of the 3 dB** design margin;
 - bsim at 10 % and 40 % Wi-Fi gives **7 of 7** bsim-runnable packs passing SYS-3, TD off and TD on in all three venues, with an actor at a boom and the RX-5 probe every 1000 frames (§4: the old 100 cost 0.16 % for one pack with TD off). Pack 1 is credited by equivalence, as in ADR-0016.
 
-No hardware or gain change is needed, and the antennas, coax and 2482 carrier stay. What changes:
+The antennas, coax and 2482 carrier stay. What changes:
 - the mount: a 3.5 m lighting boom or stand in each wing;
 - one firmware default: the RX-5 probe every 1000 frames, not 100;
-- one firmware/host item recommended for PR #95's gain plan (§5).
+- one gain-plan change for PR #95: a fixed 10 dB pad after the rack BAW filter (§3). It resolves that PR's near-pack stop-and-ask under this rule, and its NF costs 0.15 dB of the R1 margin.
 
 ## 1. Model
 
@@ -73,20 +73,26 @@ With the W1 rule:
 - An actor walking past a boom is ≥ 2.35 m from the antenna, at −38.1 dBm (UK) at its connector. Packs on stage reach that antenna at −36 to −50 dBm, so the near pack is at most ~12 dB hotter. A 3 MHz neighbour can then lose its copy on that antenna only at the far corners, where the other wing's antenna holds it (near-far worst = Wi-Fi-only worst, extra 0–0.4 % of the stage).
 - On a 2 m stand (W1-lo), the actor is 0.94 m away at −27.6 dBm, and 12–13 % of the stage depends on the other wing. Every venue is then 0.5–0.7 dB under the twin threshold.
 
-Rack chain, with PR #95's gains (ADR-0018 draft, `8e5d0df`): QPL9057 22.4 dB, worst input P1dB −6.9 dBm; BAW 2.2 dB, Wilkinson 11.1, u.FL 1.0, sub-board 0.9; module nRF21540 +13 dB or bypassed −1 dB. No coax (worst). Wi-Fi is the worst seat on all three channels.
+Rack chain, with PR #95's latest plan (ADR-0018 draft at `01570d9`, Audit 6 there):
+- QPL9057: 23.0 dB, worst input P1dB −7.6 dBm.
+- Losses: BAW 2.2 dB, Wilkinson 11.1, u.FL 1.0, sub-board 0.9.
+- Module nRF21540: +13 dB, input P1dB **−18.0 dBm**, and **no bypass**.
+- nRF5340 PRX,MAX: 0 dBm.
 
-| case | antenna | rack LNA input (incl. Wi-Fi) | under worst P1dB | every module's radio, module LNA on / bypassed |
-|---|---|---|---|---|
-| UK, W1 rule | −38.1 | −28.5 | 21.6 dB | −18.8 / −32.8 |
-| US 20 dBm, W1 rule | −27.1 | −25.4 | 18.5 dB | −7.8 / −21.8 |
-| UK, off-rule 0.5 m on axis | −17.2 | −17.7 | 10.8 dB | **+2.1** / −11.9 |
-| US, off-rule 0.5 m on axis | −6.2 | −7.1 | **0.2 dB** | **+13.1** / −0.9 |
+"Headroom" follows PR #95's rule: total input at least 6 dB under each stage's worst P1dB. No coax (worst case). The near pack and Wi-Fi 1/6/11 come from the worst seat, all on air at once. PR #95's tables use on-axis free-space distances, so the levels are also given as the on-axis distance that would produce them.
 
-- **Under the rule:** nothing compresses. The nRF5340 0 dBm maximum is never reached, even in the US with the module LNA on, so PR #95's gains stand.
-- **At 0.5 m on axis** (an antenna at actor height, which the rule forbids):
-  - The rack LNA is fine in the UK and at P1dB in the US.
-  - The hot pack reaches **every** module on that antenna at +2.1 dBm (UK) with the module LNA on. ADR-0018's RSSI-driven bypass doesn't help here: each receiver measures only its own pack, so the other seven stay at full gain.
-  - bsim doesn't model compression. The `*-onaxis` runs (§4) show only the C/I side: RX-5 moves the blocked carriers to the other wing.
+| venue (W1 rule) | near pack at antenna | Wi-Fi per channel | B40 phone (23 dBm, 2390 MHz) | headroom LNA / nRF21540 / radio, no pad | with a 10 dB pad after the BAW |
+|---|---|---|---|---|---|
+| studio 6 m | −38.1 dBm (= 5.6 m on axis) | −32.8 | −29.6 (= 10.7 m) | +14.9 / **−3.3** / +1.7 | +14.9 / +6.7 / +11.7 |
+| proscenium 10 m | −38.1 (5.6 m) | −36.9 | −33.8 (17.3 m) | +18.5 / +0.3 / +5.3 | +18.5 / +10.3 / +15.3 |
+| proscenium 12 m | −38.1 (5.6 m) | −37.9 | −34.7 (19.3 m) | +19.2 / +1.0 / +6.0 | +19.2 / +11.0 / +16.0 |
+
+- **The rule answers PR #95's stop-and-ask on the near pack.** That item was option (c), "panels out of reach": the closest actor is 2.35 m away, and the pattern and tilt make it the same as 5.6 m on axis.
+- **Without a pad,** the studio's front-row Wi-Fi alone leaves the nRF21540 3.3 dB short of the back-off (PR #95: −2.8 dB at the ADR-0016 distances).
+- **A fixed 10 dB pad after the BAW** (PR #95's 10 dB row: safe near pack 1.6 m, safe phone 9.1 m, NF 15.9 dB at the 6 dB coax) clears every venue. Its NF costs **0.15 dB** of the R1 margin at stage ranges: the weakest pack is −47.4 dBm, −67.4 with 10 dB body loss and 10 dB fade. RK-5's NF ≤ 9.3 dB came from Audit 4's 10 m link and is not needed in the wings.
+- **Off-rule** (pack 0.5 m on axis, −17.2 dBm): the nRF21540 is still 3.7 dB short with the pad. That case needs PR #95's 20 dB pad, and the rule exists to prevent it.
+- **Crew phones** in the wings are closer than the 9.1 m safe-phone distance, so the install doc says airplane mode in the wings, not just Wi-Fi off.
+- bsim doesn't model compression. The `*-onaxis` runs (§4) show only the C/I side.
 
 ## 4. bsim
 
@@ -114,8 +120,8 @@ Pack placement per case (`wing_geometry.bsim_case`):
 
 ## 5. What changed, and what didn't
 
-- **Hardware:** no change. The same 2 × HG2409P-NF, CA3N050 and jumpers (£340.56 per rack, ADR-0016), plus a mount ≥ 3.2 m in each wing. Theatres keep lighting booms in the wings. If a venue has none, a wind-up lighting stand is part of the Phase 5 purchase (ADR-0019 list), not a new design item.
-- **Gain plan (PR #95):** no change under the rule. Recommended for robustness: make the module-LNA bypass **antenna-wide**. The host sees every receiver's RSSI per antenna (`op_rx_msg`). When any pack exceeds −16 dBm at the radio on antenna X, all modules bypass while listening on X. That removes the +2.1 dBm off-rule overload and costs nothing at stage ranges, where the noise is 50 dB below the wanted signal. It is posted on PR #95, not built here.
+- **Hardware:** antennas unchanged: the same 2 × HG2409P-NF, CA3N050 and jumpers (£340.56 per rack, ADR-0016), plus a mount ≥ 3.2 m in each wing. Theatres keep lighting booms in the wings. If a venue has none, a wind-up lighting stand is part of the Phase 5 purchase (ADR-0019 list), not a new design item.
+- **Gain plan (PR #95):** a fixed **10 dB pad after the QPQ1907** in each RF chain (§3). RK-5's NF ≤ 9.3 dB is relaxed for the wing install: NF 15.9 dB costs 0.15 dB of the R1 margin. PR #95 owns the part and the SPEC line; it is posted there, not built here.
 - **Firmware:** `OP_RX_ANT_PROBE_FRAMES` default 100 → 1000 (§4). RX-5 already chooses per carrier.
 - **Channel plan:** unchanged (W6).
 - **TD:** stays off by default (ADR-0017); on per pack for an actor who can't keep the rule.

@@ -313,17 +313,40 @@ def near_far(v: Venue, ins: Install, approach=0.5, eirp=EIRP_UK, plan=PLAN, on_a
             "extra_fail": max(fails.values()) - base, "strict_extra_fail": max(strict.values()) - base}
 
 
-# Rack chain from PR #95 (hw/rack, ADR-0018 draft, commit 8e5d0df; audit.py Audit 6 there). Worst-case values.
-CHAIN = {"conn_db": 0.5, "front_end_db": 0.4, "lna_gain": 22.4, "lna_ip1db_min": -6.9, "lna_iip3_min": 6.6,
-         "filter_db": 2.2, "splitter_db": 11.1, "ufl_db": 1.0, "subboard_db": 0.9, "mod_lna_gain": 13.0,
-         "mod_bypass_db": 1.0, "nrf5340_pmax": 0.0}
+# Rack chain from PR #95 (hw/rack, ADR-0018 draft at 01570d9/d7105bc; audit.py Audit 6 there). Worst-case values:
+# QPL9057 |S21| 23.0 dB at 2442 (datasheet table), input P1dB >= -7.6 dBm; QPQ1907 2.2 dB max; Wilkinson 10.61 +
+# 0.5 layout; u.FL 1.0; sub-board 0.9; module nRF21540 RX 13 dB, input P1dB -18.0 dBm min (OPS v0.5.2), NO bypass;
+# nRF5340 PRX,MAX 0 dBm. "Does not compress" = total input >= 6 dB under each stage's worst P1dB (PR #95's rule).
+CHAIN = {"conn_db": 0.5, "front_end_db": 0.4, "lna_gain": 23.0, "lna_ip1db_min": -7.6, "filter_db": 2.2,
+         "splitter_db": 11.1, "ufl_db": 1.0, "subboard_db": 0.9, "mod_lna_gain": 13.0, "mod_ip1db_min": -18.0,
+         "nrf5340_pmax": 0.0, "backoff": 6.0}
+PAD_DB = 10.0   # fixed pad after the BAW recommended to #33 under ADR-0021 (PR #95's 10 dB row: NF 15.9 dB at 6 dB coax)
 
 
-def chain_levels(p_ant, coax_db=0.0, module_lna=True, c=CHAIN):
-    """(rack LNA input, module input, nRF5340 input) dBm for p_ant dBm at the antenna connector."""
+def chain_levels(p_ant, coax_db=0.0, pad_db=0.0, c=CHAIN):
+    """(rack LNA input, nRF21540 input, nRF5340 input) dBm for p_ant dBm (total) at the antenna connector."""
     lna_in = p_ant - c["conn_db"] - coax_db - c["front_end_db"]
-    mod_in = lna_in + c["lna_gain"] - c["filter_db"] - c["splitter_db"] - c["ufl_db"] - c["subboard_db"]
-    return lna_in, mod_in, mod_in + (c["mod_lna_gain"] if module_lna else -c["mod_bypass_db"])
+    fem_in = lna_in + c["lna_gain"] - c["filter_db"] - pad_db - c["splitter_db"] - c["ufl_db"] - c["subboard_db"]
+    return lna_in, fem_in, fem_in + c["mod_lna_gain"]
+
+
+def chain_margins(p_ant, coax_db=0.0, pad_db=0.0, c=CHAIN):
+    """Headroom (dB, >= 0 passes) of the rack LNA, the module nRF21540 and the nRF5340 against P1dB / PRX,MAX - 6."""
+    lna_in, fem_in, radio = chain_levels(p_ant, coax_db, pad_db, c)
+    return (c["lna_ip1db_min"] - c["backoff"] - lna_in, c["mod_ip1db_min"] - c["backoff"] - fem_in,
+            c["nrf5340_pmax"] - c["backoff"] - radio)
+
+
+def on_axis_equiv_m(level_dbm, eirp_dbm, gain_dbi=8.0, f=F_MHZ):
+    """Distance at which a source of eirp_dbm straight in front of an 8 dBi panel gives level_dbm (PR #95's tables
+    are on-axis free-space distances)."""
+    return 10 ** ((eirp_dbm + gain_dbi - level_dbm - (20 * math.log10(f) - 27.55)) / 20)
+
+
+def phone_dbm(v, ins, ue_dbm=23.0, f=2390.0):
+    """Worst class-3 phone (LTE B40, unfiltered ahead of the LNA) in the audience at antenna L (envelope gain)."""
+    L = antennas(v, ins)[0]
+    return max(ue_dbm - fspl_db(dist(L[1], q), f) + gain(L, q, False) - wall_loss(v, L[1], q) for q in audience(v))
 
 
 def dbm_sum(*p):
