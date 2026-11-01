@@ -79,7 +79,7 @@ def tq2sa():
     b = pk._text("Reference", "REF**", 0, -bl / 2 - 1.0, "F.SilkS", size=0.8)
     b += pk._text("Value", "TQ2SA-12V", 0, 0, "F.Fab")
     b += pk._rect(-bw / 2, -bl / 2, bw / 2, bl / 2, "F.Fab")
-    b += pk._rect(-max(r + sx / 2, 5.75) - 0.25, -bl / 2 - 0.25, max(r + sx / 2, 5.75) + 0.25, bl / 2 + 0.25, "F.CrtYd", 0.05)
+    b += pk._rect(-(r + sx / 2) - 1.0, -bl / 2 - 0.25, max(r + sx / 2, 5.75) + 0.25, bl / 2 + 0.25, "F.CrtYd", 0.05)
     # silk: the body's short ends only (the pads reach under the body sides)
     b += pk._line(-bw / 2, -bl / 2 - 0.12, bw / 2, -bl / 2 - 0.12, "F.SilkS", 0.12)
     b += pk._line(-bw / 2, bl / 2 + 0.12, bw / 2, bl / 2 + 0.12, "F.SilkS", 0.12)
@@ -88,11 +88,46 @@ def tq2sa():
         y = -2 * p + k * p
         b += pk._smd(str(1 + k), -r, y, "rect", sx, sy)          # 1..5 down the left
         b += pk._smd(str(10 - k), r, y, "rect", sx, sy)          # 10..6 down the right (10 opposite 1)
-    b += f'  (fp_circle (center {-r:.3f} {-2 * p - 1.1:.3f}) (end {-r + 0.2:.3f} {-2 * p - 1.1:.3f}) (stroke (width 0.12) (type solid)) (fill yes) (layer "F.SilkS"))\n'
+    # pin 1 = coil + (polarized relay, #116 review S3): filled dot beyond pad 1's outer end, outside the body, and a "+"
+    dx = -(r + sx / 2) - 0.45
+    b += f'  (fp_circle (center {dx:.3f} {-2 * p:.3f}) (end {dx + 0.25:.3f} {-2 * p:.3f}) (stroke (width 0.12) (type solid)) (fill yes) (layer "F.SilkS"))\n'
+    b += pk._fp_text("+", dx, -2 * p - 1.4, "F.SilkS", 1.0)
     return pk._wrap("Panasonic_TQ2SA", "Panasonic TQ2SA DPDT relay, SA surface-mount terminals; TQ datasheet p.11 suggested mounting pad", b)
 
 
-FOOTPRINTS = {"Fanstel_BT40E": bt40e, "Panasonic_TQ2SA": tq2sa}
+# J1 key (ADR-0014, #116 review S1): the stock KiCad 2x13 header with pad 14 deleted, so there is no hole at 14 and a
+# full 26-pin header cannot be fitted. Pin 14 of the Samtec TSW-113-17-G-D is cut off before assembly, and the main-board
+# socket (#33) is the keyed Samtec SSW-113-01-G-D-14 (PK-06-N key in position 14, SSW drawing fig. 3).
+HDR_SRC = ("Connector_PinHeader_2.54mm.pretty", "PinHeader_2x13_P2.54mm_Vertical")
+
+
+def _drop_sexp(text, start):
+    """remove the balanced s-expression that begins at text[start] (a '('), and its line"""
+    depth = 0
+    for i in range(start, len(text)):
+        depth += {"(": 1, ")": -1}.get(text[i], 0)
+        if depth == 0:
+            a = text.rfind("\n", 0, start) + 1
+            b = text.find("\n", i)
+            return text[:a] + text[b + 1:]
+    raise ValueError("unbalanced")
+
+
+def header_key14():
+    import os
+    base = pathlib.Path(os.environ.get("KICAD10_FOOTPRINT_DIR", "/usr/share/kicad/footprints"))
+    t = (base / HDR_SRC[0] / f"{HDR_SRC[1]}.kicad_mod").read_text()
+    t = t.replace(f'(footprint "{HDR_SRC[1]}"', '(footprint "PinHeader_2x13_P2.54mm_Key14"', 1)
+    t = _drop_sexp(t, t.index('(pad "14"'))
+    assert '(pad "14"' not in t
+    # "KEY" printed in the empty position on both silk layers (pad 14 sat at (2.54, 15.24))
+    mark = "".join(f'\t(fp_text user "KEY" (at 2.54 15.24 90) (layer "{layer}")\n'
+                   f'\t\t(effects (font (size 0.8 0.8) (thickness 0.15)){" (justify mirror)" if layer[0] == "B" else ""}))\n'
+                   for layer in ("F.SilkS", "B.SilkS"))
+    return t.rstrip()[:-1] + mark + ")\n"
+
+
+FOOTPRINTS = {"Fanstel_BT40E": bt40e, "Panasonic_TQ2SA": tq2sa, "PinHeader_2x13_P2.54mm_Key14": header_key14}
 
 
 def write_lib():

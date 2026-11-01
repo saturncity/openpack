@@ -11,9 +11,12 @@ Model: finite differences on a uniform grid (5 um), L2 plane at y = 0, FR4 7628 
 (trace + coplanar grounds, which extend to the box sides), air above, grounded box 1.5 mm above the board.
 C with the dielectric and C0 in air give eeff = C / C0, Z0 = 1 / (c sqrt(C C0)). No solder mask (it lowers Z0 by
 about 1-2 ohm on JLC's LPI mask; inside JLC's +-10 % impedance tolerance).
-Grid check: 5 um -> 2.5 um lowers Z0 by 0.7 ohm, a 2x larger box raises it by 0.4 ohm. The microstrip case reads
-51.35 ohm against Hammerstad-Jensen's 50.0, so the solver's raw numbers carry a +1.35 ohm offset; CAL removes it.
-Result (2026-11-01, RESULTS): w = 0.31 mm with a 0.25 mm gap -> 51.48 raw, 50.1 ohm calibrated (0.30: 51.0, 0.32: 49.3).
+Grid check: 5 um -> 2.5 um lowers Z0 by 0.7 ohm; a 2x larger box raises it by 0.4 ohm. The 0.346 mm microstrip reads
+51.35 ohm here; Hammerstad-Jensen with the mixed-dielectric thickness correction gives about 50.9 (hw/pack/layout.py's
+50.0 applies the free-space correction to eeff too). An independent FD solver (#116 review) gave 52.4 ohm for the chosen
+line. So no calibration offset is applied (#116 review N1): the numbers below are raw, bare copper.
+Result (2026-11-01, RESULTS): w = 0.31 mm with a 0.25 mm gap -> 51.5 ohm bare copper; with JLC's ~15 um LPI mask
+(er 3.8) about 49.3 ohm (#116 review). The longest line is 4.6 mm (0.07 lambda), so either is fine.
 layout_rx.py takes RF_W / RF_GAP from here; tests/test_rx_layout.py checks the record (and re-solves when numpy exists).
 """
 import sys
@@ -25,13 +28,13 @@ C_LIGHT, EPS0 = 299792458.0, 8.8541878128e-12
 # (w, gap) -> raw (Z0 ohm, eeff) from solve() at DX = 5 um; gap None = no coplanar ground (microstrip)
 RESULTS = {(0.346, None): (51.35, 3.13), (0.30, 0.25): (52.33, 2.93), (0.31, 0.25): (51.48, 2.94), (0.32, 0.25): (50.66, 2.95),
            (0.33, 0.25): (49.87, 2.96), (0.39, 0.25): (45.63, 3.02), (0.35, 0.5): (50.17, 3.10), (0.31, 0.30): (52.26, 2.98)}
-HJ_MICROSTRIP_0346 = 50.0                      # hw/pack/layout.py microstrip_z0(0.346)
-CAL = RESULTS[(0.346, None)][0] - HJ_MICROSTRIP_0346
+Z_MASKED_REVIEW = 49.3                          # 0.31/0.25 with 15 um LPI mask, er 3.8 (#116 review, independent solver)
 RF_W, RF_GAP = 0.31, 0.25
 
 
-def z_cal(w, gap):
-    return RESULTS[(w, gap)][0] - CAL
+def z0(w, gap):
+    """raw bare-copper Z0 from the record"""
+    return RESULTS[(w, gap)][0]
 
 
 def solve(w, gap=None, half_width=1.6, top=1.5):
@@ -93,7 +96,7 @@ def solve(w, gap=None, half_width=1.6, top=1.5):
 def main():
     for (w, g), (zr, _) in RESULTS.items():
         z, ee = solve(w, g)
-        print(f"w {w:.3f} gap {g}: Z0 {z:.2f} ohm raw (recorded {zr}), {z - CAL:.1f} calibrated, eeff {ee:.2f}")
+        print(f"w {w:.3f} gap {g}: Z0 {z:.2f} ohm raw (recorded {zr}), eeff {ee:.2f}")
 
 
 if __name__ == "__main__":

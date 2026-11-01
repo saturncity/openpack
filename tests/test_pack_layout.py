@@ -138,3 +138,16 @@ def test_dru_rules_are_loaded(tmp_path):
     out = tmp_path / "drc.json"
     subprocess.run([KICAD, "pcb", "drc", "--format", "json", "-o", str(out), str(board)], check=True, capture_output=True)
     assert any(v["type"] == "track_width" for v in json.loads(out.read_text())["violations"])
+
+
+@needs_kicad
+def test_pour_gaps_at_least_netclass(tmp_path):
+    """#116 review M1: with the unconditional 0.09 mm JLC clearance rule gone, the committed fill keeps every gap
+    >= 0.125 mm (Default/Power 0.127). DRC without a refill measures the fill the gerbers carry."""
+    board = _copy_board(tmp_path)
+    (tmp_path / "pack.kicad_dru").write_text((PACK / "pack.kicad_dru").read_text() +
+                                             '\n(rule "probe gap"\n  (constraint clearance (min 0.125mm)))\n')
+    out = tmp_path / "drc.json"
+    subprocess.run([KICAD, "pcb", "drc", "--format", "json", "-o", str(out), str(board)], check=True, capture_output=True)
+    bad = [v["description"] for v in json.loads(out.read_text())["violations"] if v["type"] == "clearance"]
+    assert not bad, bad[:10]

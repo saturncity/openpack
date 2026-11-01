@@ -2,7 +2,7 @@
   (version "D")
   (design
     (source "rx.py")
-    (date "11/01/2026 04:16 AM")
+    (date "11/01/2026 05:45 AM")
     (tool "SKiDL (3.0.0)")
     (sheet
       (number 1)
@@ -1553,14 +1553,14 @@
       (ref "J1")
       (value "backplane 2x13")
       (description "Receiver backplane connector, 2x13 2.54 mm (ADR-0014)")
-      (footprint "Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical")
+      (footprint "openpack:PinHeader_2x13_P2.54mm_Key14")
       (fields
         (field
-          (name "MPN") "HDR_2x13_2.54_KEY14")
+          (name "MPN") "PZ254V-12-26P")
         (field
           (name "Description") "Receiver backplane connector, 2x13 2.54 mm (ADR-0014)")
         (field
-          (name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical")
+          (name "Footprint") "openpack:PinHeader_2x13_P2.54mm_Key14")
         (field
           (name "Datasheet"))
         (field

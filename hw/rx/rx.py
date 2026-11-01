@@ -88,8 +88,9 @@ def build():
         # ---- backplane connector (ADR-0014) + rail protection ----
         # THT header fitted on the underside (pins down into the main-board socket, #34 layout): a mezzanine wants
         # the through-hole pins for retention, and an underside SMD header would need a second reflow side.
-        j1 = part("Conn_Backplane", "J1", "backplane 2x13", "Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical",
-                  "HDR_2x13_2.54_KEY14")
+        # Key (#116 review S1): the footprint has no hole at 14, so pin 14 is cut off the header before it is fitted.
+        j1 = part("Conn_Backplane", "J1", "backplane 2x13", "openpack:PinHeader_2x13_P2.54mm_Key14",
+                  "PZ254V-12-26P")
         rails = {"GND": gnd, "+12V": v12, "+5V": v5}
         for num, name in symbols_rx.BACKPLANE.items():
             j1[str(num)] += NC if name == "KEY" else (rails.get(name) or bp[name])

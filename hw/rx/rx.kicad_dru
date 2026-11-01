@@ -6,8 +6,10 @@
 (rule "JLC track width"
   (constraint track_width (min 0.09mm)))
 
-(rule "JLC copper clearance"
-  (constraint clearance (min 0.09mm)))
+# No custom copper-clearance rule (#116 review M1): an unconditional one overrides every netclass clearance, and the
+# pours then fill at the fab minimum. The netclasses set it (rx.kicad_pro): Default 0.127, Power/Audio_I 0.15 (IPC-2221
+# B4 external coated 31-100 V asks 0.13 for the P48 nets), RF_50R 0.25; board min_clearance 0.1 is the floor, above JLC's
+# 0.09. tests/test_rx_layout.py test_pour_gaps_per_class checks the filled board.
 
 (rule "JLC via"
   (condition "A.Type == 'Via'")
@@ -36,17 +38,17 @@
   (constraint text_thickness (min 0.15mm)))
 
 # RF_50R: 50 ohm grounded coplanar waveguide on L1 over the L2 plane, JLC04161H-7628 (h 0.2104 mm, er 4.4), 0.25 mm gap
-# to the L1 GND pour: w = 0.31mm -> 50.1 ohm (hw/rx/rf_line.py field solve). The gap is the netclass clearance (rx.kicad_pro).
+# to the L1 GND pour: w = 0.31mm -> 51.5 ohm bare, ~49.3 with mask (hw/rx/rf_line.py field solve). The gap is the netclass clearance (rx.kicad_pro).
 (rule "RF_50R width"
   (condition "A.NetClass == 'RF_50R'")
   (constraint track_width (min 0.30mm) (opt 0.31mm) (max 0.32mm)))
 
 (rule "RF_50R gap"
   (condition "A.NetClass == 'RF_50R' || B.NetClass == 'RF_50R'")
-  (constraint clearance (min 0.24mm)))
+  (constraint clearance (min 0.25mm)))
 
 # rails, relay coil and the audio output legs (#104 review M1 lesson): never on the 15 um inner copper
 (rule "current paths on outer copper"
-  (condition "(A.NetClass == 'Power' || A.NetClass == 'Audio_I') && A.Type == 'Track' && A.Width > 0.25mm")
+  (condition "(A.NetClass == 'Power' || A.NetClass == 'Audio_I') && A.Type == 'Track'")
   (layer inner)
   (constraint disallow track))

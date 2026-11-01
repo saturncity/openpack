@@ -497,7 +497,7 @@
       (embedded_fonts no)))
   (symbol
     (lib_id "openpack_rx:TestPoint")
-    (at 132.08 105.41 0)
+    (at 121.92 105.41 0)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -506,37 +506,37 @@
     (fields_autoplaced yes)
     (uuid 8808ef01-2546-5b9e-94de-1cd13d3de4d6)
     (property "Reference" "TP1"
-      (at 132.08 102.86999999999999 0)
+      (at 121.92 102.86999999999999 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "+12V"
-      (at 132.08 107.95 0)
+      (at 121.92 107.95 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-      (at 132.08 105.41 0)
+      (at 121.92 105.41 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 132.08 105.41 0)
+      (at 121.92 105.41 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Test point"
-      (at 132.08 105.41 0)
+      (at 121.92 105.41 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "TP-pad"
-      (at 132.08 110.49 0)
+      (at 121.92 110.49 0)
       (effects
         (font
           (size 1.27 1.27))
@@ -545,12 +545,12 @@
       (uuid bdb56695-0521-5166-b8c4-c6c77c7eb0de))
     (instances
       (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
           (reference "TP1")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:TestPoint")
-    (at 158.75 111.76 0)
+    (at 113.03 111.76 0)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -559,37 +559,37 @@
     (fields_autoplaced yes)
     (uuid 4af1a014-6612-5bc1-a887-a49e94a776cc)
     (property "Reference" "TP10"
-      (at 158.75 109.22 0)
+      (at 113.03 109.22 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "I2S_SDOUT"
-      (at 158.75 114.30000000000001 0)
+      (at 113.03 114.30000000000001 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-      (at 158.75 111.76 0)
+      (at 113.03 111.76 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 158.75 111.76 0)
+      (at 113.03 111.76 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Test point"
-      (at 158.75 111.76 0)
+      (at 113.03 111.76 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "TP-pad"
-      (at 158.75 116.84 0)
+      (at 113.03 116.84 0)
       (effects
         (font
           (size 1.27 1.27))
@@ -598,220 +598,8 @@
       (uuid 4fb58d82-97e8-536d-8972-678ec59e8a91))
     (instances
       (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
           (reference "TP10")
-          (unit 1)))))
-  (symbol
-    (lib_id "openpack_rx:TestPoint")
-    (at 104.14 104.14 0)
-    (unit 1)
-    (exclude_from_sim no)
-    (in_bom yes)
-    (on_board yes)
-    (dnp no)
-    (fields_autoplaced yes)
-    (uuid 27d7f32c-b741-5856-ae49-b49ce49d6499)
-    (property "Reference" "TP11"
-      (at 104.14 101.6 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (justify left)))
-    (property "Value" "VCM"
-      (at 104.14 106.68 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (justify left)))
-    (property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-      (at 104.14 104.14 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (hide yes)))
-    (property "Datasheet" "~"
-      (at 104.14 104.14 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (hide yes)))
-    (property "Description" "Test point"
-      (at 104.14 104.14 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (hide yes)))
-    (property "MPN" "TP-pad"
-      (at 104.14 109.22 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (hide yes)))
-    (pin "1"
-      (uuid f3de558f-ec93-58fe-9b82-8c7f4593bd60))
-    (instances
-      (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
-          (reference "TP11")
-          (unit 1)))))
-  (symbol
-    (lib_id "openpack_rx:TestPoint")
-    (at 186.69 109.22 0)
-    (unit 1)
-    (exclude_from_sim no)
-    (in_bom yes)
-    (on_board yes)
-    (dnp no)
-    (fields_autoplaced yes)
-    (uuid 518967a2-250f-5401-a4b8-3a6a5169532e)
-    (property "Reference" "TP12"
-      (at 186.69 106.67999999999999 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (justify left)))
-    (property "Value" "ANT_SEL"
-      (at 186.69 111.76 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (justify left)))
-    (property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-      (at 186.69 109.22 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (hide yes)))
-    (property "Datasheet" "~"
-      (at 186.69 109.22 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (hide yes)))
-    (property "Description" "Test point"
-      (at 186.69 109.22 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (hide yes)))
-    (property "MPN" "TP-pad"
-      (at 186.69 114.3 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (hide yes)))
-    (pin "1"
-      (uuid 3127b361-e7bc-52ed-b04f-073a13ffd0b2))
-    (instances
-      (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
-          (reference "TP12")
-          (unit 1)))))
-  (symbol
-    (lib_id "openpack_rx:TestPoint")
-    (at 204.47 106.68 0)
-    (unit 1)
-    (exclude_from_sim no)
-    (in_bom yes)
-    (on_board yes)
-    (dnp no)
-    (fields_autoplaced yes)
-    (uuid 8243ff4a-1328-5e54-a93c-f35b5e214bff)
-    (property "Reference" "TP13"
-      (at 204.47 104.14 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (justify left)))
-    (property "Value" "RLY_G"
-      (at 204.47 109.22000000000001 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (justify left)))
-    (property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-      (at 204.47 106.68 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (hide yes)))
-    (property "Datasheet" "~"
-      (at 204.47 106.68 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (hide yes)))
-    (property "Description" "Test point"
-      (at 204.47 106.68 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (hide yes)))
-    (property "MPN" "TP-pad"
-      (at 204.47 111.76 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (hide yes)))
-    (pin "1"
-      (uuid 64fad9c5-7f65-5c36-80fa-c14560eef907))
-    (instances
-      (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
-          (reference "TP13")
-          (unit 1)))))
-  (symbol
-    (lib_id "openpack_rx:TestPoint")
-    (at 95.25 106.68 0)
-    (unit 1)
-    (exclude_from_sim no)
-    (in_bom yes)
-    (on_board yes)
-    (dnp no)
-    (fields_autoplaced yes)
-    (uuid 1753808c-9414-5186-9383-05c47e396eaa)
-    (property "Reference" "TP2"
-      (at 95.25 104.14 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (justify left)))
-    (property "Value" "+12VA"
-      (at 95.25 109.22000000000001 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (justify left)))
-    (property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-      (at 95.25 106.68 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (hide yes)))
-    (property "Datasheet" "~"
-      (at 95.25 106.68 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (hide yes)))
-    (property "Description" "Test point"
-      (at 95.25 106.68 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (hide yes)))
-    (property "MPN" "TP-pad"
-      (at 95.25 111.76 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (hide yes)))
-    (pin "1"
-      (uuid 347b0e14-5602-540d-b5e2-eee5ba0bb51f))
-    (instances
-      (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
-          (reference "TP2")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:TestPoint")
@@ -822,14 +610,14 @@
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 87511bf9-ef6f-5835-85c7-8906c9488402)
-    (property "Reference" "TP3"
+    (uuid 27d7f32c-b741-5856-ae49-b49ce49d6499)
+    (property "Reference" "TP11"
       (at 195.58 101.6 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
-    (property "Value" "+5V"
+    (property "Value" "VCM"
       (at 195.58 106.68 0)
       (effects
         (font
@@ -860,15 +648,227 @@
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
+      (uuid f3de558f-ec93-58fe-9b82-8c7f4593bd60))
+    (instances
+      (project "rx"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+          (reference "TP11")
+          (unit 1)))))
+  (symbol
+    (lib_id "openpack_rx:TestPoint")
+    (at 132.08 109.22 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (uuid 518967a2-250f-5401-a4b8-3a6a5169532e)
+    (property "Reference" "TP12"
+      (at 132.08 106.67999999999999 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left)))
+    (property "Value" "ANT_SEL"
+      (at 132.08 111.76 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left)))
+    (property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+      (at 132.08 109.22 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (property "Datasheet" "~"
+      (at 132.08 109.22 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (property "Description" "Test point"
+      (at 132.08 109.22 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (property "MPN" "TP-pad"
+      (at 132.08 114.3 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (pin "1"
+      (uuid 3127b361-e7bc-52ed-b04f-073a13ffd0b2))
+    (instances
+      (project "rx"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+          (reference "TP12")
+          (unit 1)))))
+  (symbol
+    (lib_id "openpack_rx:TestPoint")
+    (at 95.25 106.68 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (uuid 8243ff4a-1328-5e54-a93c-f35b5e214bff)
+    (property "Reference" "TP13"
+      (at 95.25 104.14 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left)))
+    (property "Value" "RLY_G"
+      (at 95.25 109.22000000000001 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left)))
+    (property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+      (at 95.25 106.68 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (property "Datasheet" "~"
+      (at 95.25 106.68 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (property "Description" "Test point"
+      (at 95.25 106.68 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (property "MPN" "TP-pad"
+      (at 95.25 111.76 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (pin "1"
+      (uuid 64fad9c5-7f65-5c36-80fa-c14560eef907))
+    (instances
+      (project "rx"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+          (reference "TP13")
+          (unit 1)))))
+  (symbol
+    (lib_id "openpack_rx:TestPoint")
+    (at 176.53 106.68 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (uuid 1753808c-9414-5186-9383-05c47e396eaa)
+    (property "Reference" "TP2"
+      (at 176.53 104.14 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left)))
+    (property "Value" "+12VA"
+      (at 176.53 109.22000000000001 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left)))
+    (property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+      (at 176.53 106.68 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (property "Datasheet" "~"
+      (at 176.53 106.68 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (property "Description" "Test point"
+      (at 176.53 106.68 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (property "MPN" "TP-pad"
+      (at 176.53 111.76 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (pin "1"
+      (uuid 347b0e14-5602-540d-b5e2-eee5ba0bb51f))
+    (instances
+      (project "rx"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+          (reference "TP2")
+          (unit 1)))))
+  (symbol
+    (lib_id "openpack_rx:TestPoint")
+    (at 204.47 104.14 0)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (uuid 87511bf9-ef6f-5835-85c7-8906c9488402)
+    (property "Reference" "TP3"
+      (at 204.47 101.6 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left)))
+    (property "Value" "+5V"
+      (at 204.47 106.68 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left)))
+    (property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+      (at 204.47 104.14 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (property "Datasheet" "~"
+      (at 204.47 104.14 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (property "Description" "Test point"
+      (at 204.47 104.14 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (property "MPN" "TP-pad"
+      (at 204.47 109.22 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (hide yes)))
+    (pin "1"
       (uuid ea061887-5014-59c7-ad0a-4485c6121a0f))
     (instances
       (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
           (reference "TP3")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:TestPoint")
-    (at 123.19 105.41 0)
+    (at 158.75 105.41 0)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -877,37 +877,37 @@
     (fields_autoplaced yes)
     (uuid 8d7505fb-6d55-5bf0-905f-acda65fa638a)
     (property "Reference" "TP4"
-      (at 123.19 102.86999999999999 0)
+      (at 158.75 102.86999999999999 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "+3V3"
-      (at 123.19 107.95 0)
+      (at 158.75 107.95 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-      (at 123.19 105.41 0)
+      (at 158.75 105.41 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 123.19 105.41 0)
+      (at 158.75 105.41 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Test point"
-      (at 123.19 105.41 0)
+      (at 158.75 105.41 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "TP-pad"
-      (at 123.19 110.49 0)
+      (at 158.75 110.49 0)
       (effects
         (font
           (size 1.27 1.27))
@@ -916,12 +916,12 @@
       (uuid 0904f88a-af0e-50fb-a5ad-4c40d8ab8204))
     (instances
       (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
           (reference "TP4")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:TestPoint")
-    (at 113.03 106.68 0)
+    (at 140.97 106.68 0)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -930,37 +930,37 @@
     (fields_autoplaced yes)
     (uuid 2c6c2283-2711-54dd-988a-0dce41400929)
     (property "Reference" "TP5"
-      (at 113.03 104.14 0)
+      (at 140.97 104.14 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "+3V3A"
-      (at 113.03 109.22000000000001 0)
+      (at 140.97 109.22000000000001 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-      (at 113.03 106.68 0)
+      (at 140.97 106.68 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 113.03 106.68 0)
+      (at 140.97 106.68 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Test point"
-      (at 113.03 106.68 0)
+      (at 140.97 106.68 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "TP-pad"
-      (at 113.03 111.76 0)
+      (at 140.97 111.76 0)
       (effects
         (font
           (size 1.27 1.27))
@@ -969,7 +969,7 @@
       (uuid c361884c-d2fc-54e0-8fb4-9254de744eff))
     (instances
       (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
           (reference "TP5")
           (unit 1)))))
   (symbol
@@ -1022,12 +1022,12 @@
       (uuid 3d1f70b1-022b-5569-ac9b-8ed6a153b4e2))
     (instances
       (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
           (reference "TP6")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:TestPoint")
-    (at 167.64 104.14 0)
+    (at 104.14 104.14 0)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -1036,37 +1036,37 @@
     (fields_autoplaced yes)
     (uuid d168cfb1-4542-52e7-8153-9d1bac368bf9)
     (property "Reference" "TP7"
-      (at 167.64 101.6 0)
+      (at 104.14 101.6 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "GND"
-      (at 167.64 106.68 0)
+      (at 104.14 106.68 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-      (at 167.64 104.14 0)
+      (at 104.14 104.14 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 167.64 104.14 0)
+      (at 104.14 104.14 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Test point"
-      (at 167.64 104.14 0)
+      (at 104.14 104.14 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "TP-pad"
-      (at 167.64 109.22 0)
+      (at 104.14 109.22 0)
       (effects
         (font
           (size 1.27 1.27))
@@ -1075,12 +1075,12 @@
       (uuid defa2e02-298f-5da0-a157-420ee50a9e86))
     (instances
       (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
           (reference "TP7")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:TestPoint")
-    (at 177.8 109.22 0)
+    (at 167.64 109.22 0)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -1089,37 +1089,37 @@
     (fields_autoplaced yes)
     (uuid 17225c62-2e91-51ce-8fd5-cdc684120a0a)
     (property "Reference" "TP8"
-      (at 177.8 106.67999999999999 0)
+      (at 167.64 106.67999999999999 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "I2S_BCK"
-      (at 177.8 111.76 0)
+      (at 167.64 111.76 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-      (at 177.8 109.22 0)
+      (at 167.64 109.22 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 177.8 109.22 0)
+      (at 167.64 109.22 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Test point"
-      (at 177.8 109.22 0)
+      (at 167.64 109.22 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "TP-pad"
-      (at 177.8 114.3 0)
+      (at 167.64 114.3 0)
       (effects
         (font
           (size 1.27 1.27))
@@ -1128,12 +1128,12 @@
       (uuid c6e78c98-13fb-5201-97b2-f9ace85dd510))
     (instances
       (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
           (reference "TP8")
           (unit 1)))))
   (symbol
     (lib_id "openpack_rx:TestPoint")
-    (at 140.97 110.49 0)
+    (at 186.69 110.49 0)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -1142,37 +1142,37 @@
     (fields_autoplaced yes)
     (uuid 12864a7f-faf7-595f-bada-383da16c3b05)
     (property "Reference" "TP9"
-      (at 140.97 107.94999999999999 0)
+      (at 186.69 107.94999999999999 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Value" "I2S_LRCK"
-      (at 140.97 113.03 0)
+      (at 186.69 113.03 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left)))
     (property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-      (at 140.97 110.49 0)
+      (at 186.69 110.49 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" "~"
-      (at 140.97 110.49 0)
+      (at 186.69 110.49 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Description" "Test point"
-      (at 140.97 110.49 0)
+      (at 186.69 110.49 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "MPN" "TP-pad"
-      (at 140.97 115.57 0)
+      (at 186.69 115.57 0)
       (effects
         (font
           (size 1.27 1.27))
@@ -1181,209 +1181,209 @@
       (uuid 989b0d6d-78bb-5916-9d87-c8b7d99700ab))
     (instances
       (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
           (reference "TP9")
           (unit 1)))))
   (symbol
     (lib_id "power:+12V")
-    (at 132.08 100.33 0.0)
+    (at 121.92 100.33 0.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 8716a142-a872-5623-9ef2-66bec50866bb)
+    (uuid 4479fe74-068d-543b-adbc-e03c64fdf9a4)
     (property "Reference" "#PWR110"
-      (at 132.08 99.06 0)
+      (at 121.92 99.06 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "+12V"
-      (at 132.08 96.52 0)
+      (at 121.92 96.52 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 132.08 100.33 0)
+      (at 121.92 100.33 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 132.08 100.33 0)
+      (at 121.92 100.33 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 3c9fea24-fc68-5561-97e6-990d999cd98f))
+      (uuid 33be8da7-05dd-5c2d-bf92-388a55d39402))
     (instances
       (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
           (reference "#PWR110")
           (unit 1)))))
   (global_label "I2S_SDOUT"
     (shape bidirectional)
-    (at 158.75 106.68 90)
+    (at 113.03 106.68 90)
     (effects
       (font
         (size 1.27 1.27))
       (justify left))
-    (uuid 8ec3f795-0fba-5184-a7ee-214e9241048a))
+    (uuid df36d3f5-67a7-5997-96d7-6612b0c997cc))
   (global_label "VCM"
     (shape bidirectional)
-    (at 104.14 99.06 90)
+    (at 195.58 99.06 90)
     (effects
       (font
         (size 1.27 1.27))
       (justify left))
-    (uuid ff90c757-f5ad-5ddd-9881-625c135753d2))
+    (uuid 6db36d14-4a85-59d2-be0c-f16e25ce332b))
   (global_label "ANT_SEL"
     (shape bidirectional)
-    (at 186.69 104.14 90)
+    (at 132.08 104.14 90)
     (effects
       (font
         (size 1.27 1.27))
       (justify left))
-    (uuid f0d6722b-8a82-5835-9fda-ff5a66a04854))
+    (uuid e1cd7fd4-efb3-56da-90a4-9a908e041c37))
   (global_label "RLY_G"
     (shape bidirectional)
-    (at 204.47 101.6 90)
+    (at 95.25 101.6 90)
     (effects
       (font
         (size 1.27 1.27))
       (justify left))
-    (uuid d06c3b8d-df31-5958-83f3-5f27f12a5f0e))
+    (uuid 6d77caaa-31e4-5a43-a2c1-7859986ed0de))
   (symbol
     (lib_id "power:+12VA")
-    (at 95.25 101.6 0.0)
+    (at 176.53 101.6 0.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid 79c2e81d-4bd3-5a68-b287-0d3abe94b268)
+    (uuid 3c7e4a71-241c-54d9-852f-3cbe9f4ecb5a)
     (property "Reference" "#PWR111"
-      (at 95.25 100.33 0)
+      (at 176.53 100.33 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "+12VA"
-      (at 95.25 97.78999999999999 0)
+      (at 176.53 97.78999999999999 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 95.25 101.6 0)
+      (at 176.53 101.6 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 95.25 101.6 0)
+      (at 176.53 101.6 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 15f682bf-338d-50cc-a5d2-ad3ee84b64a8))
+      (uuid cc80993a-3b98-5e5e-b2a2-955dbd46ec95))
     (instances
       (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
           (reference "#PWR111")
           (unit 1)))))
   (symbol
     (lib_id "power:+5V")
-    (at 195.58 99.06 0.0)
+    (at 204.47 99.06 0.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid c6041aec-ff2b-54f3-b31b-ea89988a2751)
+    (uuid 387f8ce7-22c8-51aa-a27a-b647adce4ddd)
     (property "Reference" "#PWR112"
-      (at 195.58 97.79 0)
+      (at 204.47 97.79 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "+5V"
-      (at 195.58 95.25 0)
+      (at 204.47 95.25 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 195.58 99.06 0)
+      (at 204.47 99.06 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 195.58 99.06 0)
+      (at 204.47 99.06 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid d9d6a385-84a4-56da-99df-ee7521e4913e))
+      (uuid 104bf20a-acf5-5231-a19c-dc25d03eab49))
     (instances
       (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
           (reference "#PWR112")
           (unit 1)))))
   (symbol
     (lib_id "power:+3V3")
-    (at 123.19 100.33 0.0)
+    (at 158.75 100.33 0.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid c7ad9177-b94d-5a0a-95e2-789b3fc1d85f)
+    (uuid 257f4d7b-6af2-593d-a147-b559f8ea9354)
     (property "Reference" "#PWR113"
-      (at 123.19 99.06 0)
+      (at 158.75 99.06 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "+3V3"
-      (at 123.19 96.52 0)
+      (at 158.75 96.52 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 123.19 100.33 0)
+      (at 158.75 100.33 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 123.19 100.33 0)
+      (at 158.75 100.33 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid 9b7b3495-3397-543e-880f-405f8150698e))
+      (uuid c4e80dc4-560b-576e-a0cf-79c16b3e4ed7))
     (instances
       (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
           (reference "#PWR113")
           (unit 1)))))
   (global_label "+3V3A"
     (shape bidirectional)
-    (at 113.03 101.6 90)
+    (at 140.97 101.6 90)
     (effects
       (font
         (size 1.27 1.27))
       (justify left))
-    (uuid ac06b0fa-1c63-58aa-9919-dbc9b41438bb))
+    (uuid a2c72651-183b-5c34-9a4e-aa9aec17ca70))
   (symbol
     (lib_id "power:GND")
     (at 149.86 99.06 180.0)
@@ -1421,62 +1421,62 @@
       (uuid 2be70607-a04e-5885-b55a-cdfc7a8f7579))
     (instances
       (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
           (reference "#PWR114")
           (unit 1)))))
   (symbol
     (lib_id "power:GND")
-    (at 167.64 99.06 180.0)
+    (at 104.14 99.06 180.0)
     (unit 1)
     (exclude_from_sim yes)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (fields_autoplaced yes)
-    (uuid f4653bd9-81c2-5e67-87fd-3b3fe7e4ed8f)
+    (uuid 1741ab45-8354-5d02-8e4c-4e3b0be1d21e)
     (property "Reference" "#PWR115"
-      (at 167.64 97.79 0)
+      (at 104.14 97.79 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Value" "GND"
-      (at 167.64 95.25 0)
+      (at 104.14 95.25 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property "Footprint" ""
-      (at 167.64 99.06 0)
+      (at 104.14 99.06 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (property "Datasheet" ""
-      (at 167.64 99.06 0)
+      (at 104.14 99.06 0)
       (effects
         (font
           (size 1.27 1.27))
         (hide yes)))
     (pin "1"
-      (uuid f0fb91a8-be80-5473-9c1d-247d71111829))
+      (uuid b1ab9e54-54ea-5d25-948d-5b02d26325f8))
     (instances
       (project "rx"
-        (path "/ff6c22cd-815b-4659-bc85-f637d1116b58/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
+        (path "/fce24482-2d3b-496c-b875-be00f3f9846a/fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b"
           (reference "#PWR115")
           (unit 1)))))
   (global_label "I2S_BCK"
     (shape bidirectional)
-    (at 177.8 104.14 90)
+    (at 167.64 104.14 90)
     (effects
       (font
         (size 1.27 1.27))
       (justify left))
-    (uuid 2a2a4ef0-c7f7-5fed-af5f-88849acd1776))
+    (uuid e84a7905-58a7-5c40-a0f6-7563ccb90abd))
   (global_label "I2S_LRCK"
     (shape bidirectional)
-    (at 140.97 105.41 90)
+    (at 186.69 105.41 90)
     (effects
       (font
         (size 1.27 1.27))
       (justify left))
-    (uuid ff2df3a0-9ca2-54dd-9c15-2381c8bc4f93)))
+    (uuid 976feabe-c00e-57d4-b295-c31bfa86a909)))

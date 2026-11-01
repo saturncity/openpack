@@ -57,11 +57,12 @@ H_L1L2, ER = 0.2104, 4.4
 
 # ---------------------------------------------------------------------------------------------------------------
 # 50 ohm grounded coplanar waveguide on L1 (0.25 mm gap to the L1 GND pour) over the L2 plane. Sized with a 2D field
-# solve of this stackup (hw/rx/rf_line.py: the closed-form CPW formula is off for gap > h), calibrated on the pack's
-# Hammerstad-Jensen microstrip: w = 0.31 mm -> 50.1 ohm.
+# solve of this stackup (hw/rx/rf_line.py: the closed-form CPW formula is off for gap > h), raw, no calibration:
+# w = 0.31 mm -> 51.5 ohm bare copper, ~49.3 ohm under the LPI mask.
 # ---------------------------------------------------------------------------------------------------------------
 rf_line = _load("hw_rx_rf_line", HERE / "rf_line.py")
 RF_W, RF_GAP = rf_line.RF_W, rf_line.RF_GAP
+RF_SOLID_GND = ("J3", "J4", "J5", "U2", "U1")    # u.FL grounds, PE4259 GND, BT40E grounds (castellation 10, LGA, H0-H3)
 RF_NETS = ("RF_A", "RF_B", "SW_RF1", "SW_RF2", "SW_RFC", "RF_OUT")
 FENCE_OFF, FENCE_PITCH = 1.0, 1.2              # via fence: centre 1.0 mm off the line, 1.2 mm pitch (lambda/28 in FR4)
 
@@ -116,11 +117,11 @@ PLACE = {
     "R43": (13.4, 58.6, 90), "R44": (14.8, 58.6, 90), "C42": (16.2, 58.6, 90),
     "C45": (12.5, 61.5, 90), "C46": (15.0, 62.4, 90),
     "C43": (21.6, 62.0, 0), "C49": (21.6, 55.6, 0), "R45": (26.8, 64.0, 90), "R46": (26.8, 61.0, 90), "R53": (26.8, 58.0, 90),
-    "C44": (16.8, 55.6, 90), "D8": (21.4, 50.6, 0), "TP11": (26.8, 52.4, 0),
+    "C44": (12.45, 56.6, 90), "D8": (21.4, 50.6, 0), "TP11": (26.8, 52.4, 0),
     # --- output legs: 22 R -> S1J clamps -> 47 uF BP -> relay ---
     "R50": (4.0, 54.9, 0), "R47": (11.6, 54.9, 0),
     "D6": (2.1, 49.8, 90), "D4": (5.9, 49.8, 90), "D3": (9.7, 49.8, 90), "D5": (13.5, 49.8, 90),
-    "C47": (3.2, 40.0, 0), "C48": (3.2, 29.0, 0), "R54": (12.4, 36.0, 90), "R55": (12.4, 25.4, 90),
+    "C47": (3.2, 40.5, 0), "C48": (3.2, 29.5, 0), "R54": (12.4, 36.0, 90), "R55": (12.4, 25.4, 90),
     "K1": (8.8, 16.8, 270), "R49": (2.0, 8.1, 90), "R52": (10.3, 8.0, 0), "R48": (4.2, 8.1, 90), "R51": (7.6, 8.0, 0),
     # --- +12 V entry, hold-up, coil drive, supervisor (middle column) ---
     "D1": (17.4, 9.6, 90), "D7": (18.2, 17.0, 270), "Q1": (18.8, 23.8, 0), "R62": (21.6, 22.0, 90), "R63": (23.0, 22.0, 90),
@@ -259,6 +260,12 @@ def build():
                 if p.GetNumber() == pin:
                     p.SetNet(netinfo[name]); hit += 1
             assert hit, (ref, pin)
+    # RF ground pads join the GND pours solidly, not through thermal spokes (#116 review S2): spokes add inductance right
+    # at the coplanar-line-to-connector transition. Every other pad keeps the zone's thermal relief.
+    for ref in RF_SOLID_GND:
+        for pad in fps[ref].Pads():
+            if pad.GetNetname() == "GND":
+                pad.SetLocalZoneConnection(P.ZONE_CONNECTION_FULL)
     for ref, (x, y) in REF_AT.items():
         fps[ref].Reference().SetPosition(V(x, y))
         fps[ref].Reference().SetTextAngleDegrees(0)
@@ -765,7 +772,7 @@ def main(argv):
     save(b)
     rep, errs, warns, unconn = drc()
     print(pk.summarize(errs, warns, unconn))
-    print(f"50 ohm GCPW L1/L2 (h {H_L1L2}, er {ER}): w {RF_W} mm, gap {RF_GAP} mm -> {rf_line.z_cal(RF_W, RF_GAP):.1f} ohm "
+    print(f"50 ohm GCPW L1/L2 (h {H_L1L2}, er {ER}): w {RF_W} mm, gap {RF_GAP} mm -> {rf_line.z0(RF_W, RF_GAP):.1f} ohm bare, ~{rf_line.Z_MASKED_REVIEW} with mask "
           f"(rf_line.py); microstrip would be {pk.width_for(50.0):.3f} mm")
     print("placement after legalize:", {k: v for k, v in PLACE.items()})
     if "--no-out" not in argv:

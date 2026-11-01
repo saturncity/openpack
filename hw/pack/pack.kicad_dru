@@ -6,8 +6,8 @@
 (rule "JLC track width"
   (constraint track_width (min 0.09mm)))
 
-(rule "JLC copper clearance"
-  (constraint clearance (min 0.09mm)))
+# No custom copper-clearance rule (#116 review M1): an unconditional one overrides the netclass clearances (Default and
+# Power 0.127 in pack.kicad_pro) and the pours would fill at the fab minimum. min_clearance 0.1 is the floor.
 
 (rule "JLC via"
   (condition "A.Type == 'Via'")

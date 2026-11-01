@@ -16,7 +16,7 @@ SMF15A,D1,D_SOD-123F,SMF15A,C123802,"LCSC/JLC record read 2026-11-01: MDD SMF15A
 BAT54,"D10,D8,D9",SOT-23,"BAT54,215",C85084,"LCSC/JLC record read 2026-11-01: Nexperia BAT54,215"
 SMF5.0A,D2,D_SOD-123F,SMF5.0A,C193402,"LCSC/JLC record read 2026-11-01: MDD SMF5.0A, SOD-123FL"
 S1J,"D3,D4,D5,D6,D7",D_SMA,S1J,C184326,"LCSC/JLC record read 2026-11-01: onsemi S1J, SMA, IFSM 30 A"
-backplane 2x13,J1,PinHeader_2x13_P2.54mm_Vertical,HDR_2x13_2.54_KEY14,DNP,"THT underside header, pin 14 pulled: hand-solder after reflow"
+backplane 2x13,J1,PinHeader_2x13_P2.54mm_Key14,PZ254V-12-26P,DNP,"THT underside header, hand-solder after reflow, pin 14 cut first: XFCN PZ254V-12-26P = LCSC C22465887 (JLC record 2026-11-01)"
 SWD,J2,,TC2030-pads,DNP,pads only
 ANT_A,J3,U.FL_Hirose_U.FL-R-SMT-1_Vertical,U.FL-R-SMT-1(10),C88374,"LCSC/JLC record read 2026-11-01: Hirose U.FL-R-SMT-1(80): same part, 80-piece-reel suffix"
 ANT_B,J4,U.FL_Hirose_U.FL-R-SMT-1_Vertical,U.FL-R-SMT-1(10),C88374,"LCSC/JLC record read 2026-11-01: Hirose U.FL-R-SMT-1(80): same part, 80-piece-reel suffix"

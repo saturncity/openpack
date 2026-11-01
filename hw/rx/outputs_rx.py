@@ -20,7 +20,20 @@ RENDER = HERE / "out" / "render"
 _spec = importlib.util.spec_from_file_location("hw_pack_outputs", HERE.parent / "pack" / "outputs.py")
 pko = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(pko)
-sh, svg_png, jlc_rot, GERBER_LAYERS = pko.sh, pko.svg_png, pko.jlc_rot, pko.GERBER_LAYERS
+sh, svg_png, GERBER_LAYERS = pko.sh, pko.svg_png, pko.GERBER_LAYERS
+# the pack's KiCad -> JLC rotation table, plus the relay (#116 review S3). KiCad's TQ2SA footprint has pin 1 top-left with
+# the pin rows vertical (as KiCad's SOIC); the Panasonic datasheet top view, which JLC/EasyEDA library parts follow,
+# has the rows horizontal with pin 1 bottom-left and 10 above it: the KiCad part turned +90 deg. So JLC = KiCad + 270,
+# the SOIC rule. EasyEDA's own footprint for C2684447 could not be fetched (403); check K1 first in JLC's CPL preview
+# against the "+"/dot at pin 1 (coil +).
+ROT_CORR = [(r"^Panasonic_TQ2SA", 270)] + pko.ROT_CORR
+
+
+def jlc_rot(fp_name, rot):
+    for pat, d in ROT_CORR:
+        if re.search(pat, fp_name):
+            return (rot + d) % 360
+    return rot % 360
 
 # every layer the fab sees gets a render (the #34 brief: "render every layer")
 LAYERS = {"L1_F.Cu": "F.Cu", "L2_In1.Cu": "In1.Cu", "L3_In2.Cu": "In2.Cu", "L4_B.Cu": "B.Cu",
@@ -60,7 +73,8 @@ LCSC = {
     "BT40E": ("CONSIGN", "Fanstel BT40E, not at LCSC: Digi-Key UK 13174285 (prices.py)"),
     "ALU_BP_47u_63V": ("DNP", "THT radial, hand-solder: Nichicon UEP1J470MPD bi-polar 10 x 16 mm (CAT.8100L), not at LCSC; "
                               "UK: Farnell / RS"),
-    "HDR_2x13_2.54_KEY14": ("DNP", "THT underside header, pin 14 pulled: hand-solder after reflow"),
+    "PZ254V-12-26P": ("DNP", "THT underside header, hand-solder after reflow, pin 14 cut first: XFCN PZ254V-12-26P = LCSC C22465887 "
+                              "(JLC record 2026-11-01)"),
     "TC2030-pads": ("DNP", "pads only"), "TP-pad": ("DNP", "pads only"), "DNP": ("DNP", "not fitted (R33-R35, ADR-0014)"),
 }
 

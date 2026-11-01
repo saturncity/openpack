@@ -128,12 +128,12 @@ def test_board_matches_netlist(lay):
 def test_rf_gcpw_50_ohm(lay):
     rf = lay.rf_line
     assert (lay.RF_W, lay.RF_GAP) == (0.31, 0.25)
-    # solver calibrated on the pack's Hammerstad-Jensen microstrip, and that check itself within 3 %
-    assert rf.HJ_MICROSTRIP_0346 == pytest.approx(lay.pk.microstrip_z0(0.346)[0], abs=0.1)
-    assert abs(rf.CAL) < 0.03 * 50
-    assert abs(rf.z_cal(lay.RF_W, lay.RF_GAP) - 50.0) < 0.5
-    # the chosen width sits between its neighbours (monotonic in w)
-    assert rf.z_cal(0.30, 0.25) > rf.z_cal(0.31, 0.25) > rf.z_cal(0.32, 0.25)
+    # raw bare-copper solve (no calibration, #116 review N1): within 2 ohm of 50, and 50 +-1 with the solder mask
+    assert abs(rf.z0(lay.RF_W, lay.RF_GAP) - 50.0) < 2.0 and abs(rf.Z_MASKED_REVIEW - 50.0) < 1.0
+    # the solver's microstrip check sits within 3 % of Hammerstad-Jensen (the pack's 0.346 mm line)
+    assert abs(rf.RESULTS[(0.346, None)][0] - lay.pk.microstrip_z0(0.346)[0]) < 0.03 * 50
+    # monotonic in w around the chosen width
+    assert rf.z0(0.30, 0.25) > rf.z0(0.31, 0.25) > rf.z0(0.32, 0.25)
     assert "0.31mm" in (RX / "rx.kicad_dru").read_text()
     pro = json.loads((RX / "rx.kicad_pro").read_text())
     rf = next(c for c in pro["net_settings"]["classes"] if c["name"] == "RF_50R")
@@ -230,4 +230,102 @@ def test_mech_record(lay):
     assert m["above_main_board"] == pytest.approx(m["header_stack"] + m["thickness"] + m["top_max_height"])
     assert m["above_main_board"] <= 35.0
     txt = (RX / "rx.kicad_pcb").read_text()
-    assert '(layer "B.Cu")' in txt.split('"Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical"')[1][:400]
+    assert '(layer "B.Cu")' in txt.split('"openpack:PinHeader_2x13_P2.54mm_Key14"')[1][:400]
+
+
+PROBE_GAPS = ('\n(rule "probe gap"\n  (constraint clearance (min 0.125mm)))\n'
+              '(rule "probe audio gap"\n  (condition "A.NetClass == \'Audio_I\' || B.NetClass == \'Audio_I\'")\n'
+              '  (constraint clearance (min 0.15mm)))\n')
+
+
+@needs_kicad
+def test_pour_gaps_per_class(tmp_path):
+    """#116 review M1: on the committed (filled) copper, every gap is >= 0.125 mm and every gap to an audio/phantom net
+    >= 0.15 mm (IPC-2221 B4, coated, 31-100 V: 0.13). Probe rules appended last override the file's own, and DRC runs
+    without a refill, so it measures the fill the gerbers carry. A 0.16 mm probe must fire (the probe is live)."""
+    rep = _drc(_copy_board(tmp_path, PROBE_GAPS), refill=False)
+    bad = [(v["description"], [i["description"][:50] for i in v["items"]]) for v in rep["violations"] if v["type"] == "clearance"]
+    assert not bad, bad[:10]
+    rep = _drc(_copy_board(tmp_path, '\n(rule "live"\n  (constraint clearance (min 0.16mm)))\n'), refill=False)
+    assert any(v["type"] == "clearance" for v in rep["violations"])
+
+
+def test_j1_key_has_no_hole_at_14(lay):
+    """#116 review S1: J1 has no pad (no hole) at 14, so a full 26-pin header cannot be fitted; the header and the keyed
+    main-board socket are real part numbers"""
+    pads = _board_pads(lay)
+    j1 = {num for ref, num in pads if ref == "J1"}
+    assert len(j1) == 25 and "14" not in j1
+    assert '(pad "14"' not in (RX / "openpack.pretty" / "PinHeader_2x13_P2.54mm_Key14.kicad_mod").read_text()
+    bom = {r["refs"]: r for r in csv.DictReader(open(RX / "out" / "bom.csv"))}
+    assert bom["J1"]["mpn"] == "PZ254V-12-26P"
+    assert "C22465887" in open(FAB / "bom_jlc.csv").read()
+    assert "SSW-113-01-G-D-14" in (ROOT / "docs" / "adr" / "0014-rx-backplane-connector.md").read_text()
+
+
+def test_rf_ground_pads_solid(lay):
+    """#116 review S2: GND pads of the u.FLs, the PE4259 and the BT40E connect to the pours solidly (zone_connect 2);
+    other GND pads keep thermal relief"""
+    root = lay.pk.sexp((RX / "rx.kicad_pcb").read_text())
+    solid, thermal = set(), set()
+    for fp in lay.pk._find(root, "footprint"):
+        ref = next(p[2] for p in lay.pk._find(fp, "property") if p[1] == "Reference")
+        for pad in lay.pk._find(fp, "pad"):
+            net = lay.pk._find(pad, "net")
+            if not net or net[0][-1] != "GND":
+                continue
+            zc = lay.pk._find(pad, "zone_connect")
+            (solid if zc and zc[0][1] == "2" else thermal).add((ref, pad[1]))
+    for ref in lay.RF_SOLID_GND:
+        assert any(r == ref for r, _ in solid), ref
+        assert not any(r == ref for r, _ in thermal), (ref, [k for k in thermal if k[0] == ref])
+    assert {r for r, _ in solid} >= set(lay.RF_SOLID_GND)       # (+ the LDO exposed pads, solid in KiCad's library)
+    assert len(thermal) > 30
+
+
+POLARIZED = ["K1", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "Q1", "C7", "C9", "C40", "C43", "C49",
+             "U1", "U2", "U3", "U4", "U5", "U6", "U7"]
+
+
+def test_polarized_parts_pin1_marker_and_cpl(lay, outp):
+    """#116 review S3: every polarized part (relay, diodes, electrolytics, ICs) has a silkscreen marker on its pin-1 side
+    (silk reaches further out past pad 1 than past the pad farthest from it, in footprint coordinates), and its CPL rotation is the board rotation
+    plus the JLC correction for its package (K1 included: TQ2SA +270)"""
+    root = lay.pk.sexp((RX / "rx.kicad_pcb").read_text())
+    F = lay.pk._find
+    cpl = {r["Designator"]: float(r["Rotation"]) for r in csv.DictReader(open(FAB / "cpl_jlc.csv"))}
+
+    def pts(item):
+        out = []
+        for key in ("start", "end", "center", "mid", "at"):
+            for e in F(item, key):
+                out.append((float(e[1]), float(e[2])))
+        for p_ in F(item, "pts"):
+            out += [(float(x[1]), float(x[2])) for x in F(p_, "xy")]
+        return out
+    for fp in F(root, "footprint"):
+        ref = next(p[2] for p in F(fp, "property") if p[1] == "Reference")
+        if ref not in POLARIZED:
+            continue
+        pads = {p[1]: (float(F(p, "at")[0][1]), float(F(p, "at")[0][2])) for p in F(fp, "pad")}
+        p1 = pads["1"]
+        far = max(pads.values(), key=lambda q: math.dist(q, p1))
+        silk = [q for kind in ("fp_line", "fp_circle", "fp_poly", "fp_rect", "fp_arc")
+                for it in F(fp, kind) if F(it, "layer") and F(it, "layer")[0][1] in ("F.SilkS", "F.Silkscreen") for q in pts(it)]
+        silk += [q for t in F(fp, "fp_text") if F(t, "layer")[0][1] in ("F.SilkS", "F.Silkscreen") and t[2] == "+" for q in pts(t)]
+        assert silk, ref
+        marks = [q for it in F(fp, "fp_poly") if F(it, "layer")[0][1] in ("F.SilkS", "F.Silkscreen") for q in pts(it)]
+        if marks:
+            # KiCad's filled pin-1 triangle (SOT, SOIC, TSSOP, HVSSOP): nearer pad 1 than the far pad
+            assert min(math.dist(q, p1) for q in marks) < min(math.dist(q, far) for q in marks), ref
+        else:
+            # cathode bar, "+", relay/module dot: the silk reaches further out past pad 1 than past the far pad
+            c = ((p1[0] + far[0]) / 2, (p1[1] + far[1]) / 2)
+            L = math.dist(p1, far)
+            u = ((p1[0] - far[0]) / L, (p1[1] - far[1]) / L)
+            proj = [(q[0] - c[0]) * u[0] + (q[1] - c[1]) * u[1] for q in silk]
+            assert max(proj) > -min(proj) + 0.05, (ref, round(max(proj), 2), round(-min(proj), 2))
+        fpname = F(fp, "footprint")[0][1] if F(fp, "footprint") else fp[1]
+        fpname = fpname.split(":")[-1]
+        assert cpl[ref] == outp.jlc_rot(fpname, lay.PLACE[ref][2]), (ref, fpname, cpl[ref])
+    assert cpl["K1"] == (lay.PLACE["K1"][2] + 270) % 360

@@ -118,6 +118,7 @@ Process (docs/agents/hands-off.md, "PCB layout review"): `kicad-cli` renders eve
 
 - **`pack.kicad_dru` was never loaded.** KiCad 10 drops the whole rules file when one rule does not parse, and gives no message. Here the culprit was `min_resolved_spokes`. So the "JLC minimums" in the DRC lines above were not being checked.
 - **Fix:** the rule is gone. With the real rules, the pack is still **0 errors and 0 unconnected**. It now has 12 extra `text_thickness` warnings, because the IC refdes are 0.12 mm against JLC's 0.15 mm (cosmetic).
+- **The JLC copper-clearance rule is gone too (#116 review M1).** Being unconditional, it overrode the netclass clearances, so a `kicad-cli` refill would have poured at 0.09 mm. The board-setup minimum of 0.1 mm is the floor, and the netclasses (0.127 mm) apply. Pack outputs are regenerated: DRC is 0 errors and 0 unconnected, and `test_pour_gaps_at_least_netclass` checks for gaps of at least 0.125 mm on the committed fill.
 - `test_dru_rules_are_loaded` appends a probe rule and checks that it fires.
 
 ## Receiver sub-board (`hw/rx`)
@@ -126,9 +127,9 @@ Process (docs/agents/hands-off.md, "PCB layout review"): `kicad-cli` renders eve
 
 | | |
 |---|---|
-| Board | **48.0 × 90.0 mm**, 4 layers, 1.6 mm, ENIG. Mezzanine on the rack main board (#33): J1 is a 2×13 2.54 mm THT header on the **underside**, pin 14 pulled (ADR-0014), with two M3 standoff holes at the far end. 115 parts, 595 tracks, 476 vias (339 GND). All SMD parts are on top |
+| Board | **48.0 × 90.0 mm**, 4 layers, 1.6 mm, ENIG. Mezzanine on the rack main board (#33): J1 is a 2×13 2.54 mm THT header on the **underside**, pin 14 pulled (ADR-0014), with two M3 standoff holes at the far end. 115 parts, 597 tracks, 478 vias (340 GND). All SMD parts are on top |
 | Stackup | JLC04161H-7628, as on the pack: L1 signal + GND pour / L2 solid GND / L3 GND pour + digital / L4 GND pour + a few links |
-| Rules | `hw/rx/rx.kicad_dru` adds three rules to the JLC minimums: `RF_50R` width 0.30–0.32 mm, RF gap ≥ 0.24 mm, and no Power/Audio_I track on inner copper. The router works to 0.15 mm clearance, 0.2 mm signal, 0.5 mm current paths and 0.6/0.3 mm vias |
+| Rules | `hw/rx/rx.kicad_dru` adds three rules to the JLC minimums: `RF_50R` width 0.30–0.32 mm, RF gap ≥ 0.25 mm, and no Power/Audio_I track on inner copper, at any width. It has **no custom copper-clearance rule** (#116 review M1), so the netclasses apply: Default 0.127 mm, Power/Audio_I 0.15 mm (IPC-2221 B4, coated, 31–100 V needs 0.13 for the P48 nets), RF 0.25 mm. The zones' own 0.2 mm clearance also holds. The router works to 0.15 mm clearance, 0.2 mm signal, 0.5 mm current paths and 0.6/0.3 mm vias |
 | Regenerate | `python3 hw/rx/layout_rx.py` (about 40 s). The run is deterministic apart from UUIDs. The zone fill is the one `kicad-cli` saves, so the gerbers carry the netclass RF gap |
 | Renders | `hw/rx/out/render/`: `L1_F.Cu` … `L4_B.Cu`, `F/B.Silkscreen`, `F/B.Mask`, `F/B.Paste`, `top_assembly`, `bottom_assembly`, `3d_top`, `3d_bottom`. All were looked at, plus 100 px/mm crops of the RF, relay/J1, driver and module areas |
 | Tests | `tests/test_rx_layout.py` (CI `pcb` job): DRC; rules loaded; saved fill = DRC fill; fresh fab outputs; gerbers regenerate identically; netlist ↔ pad parity; RF width/gap; current-path layers and widths; no digital net in the analog region; BOM/CPL coverage; CPL rotations; mech record |
@@ -156,7 +157,11 @@ Process (docs/agents/hands-off.md, "PCB layout review"): `kicad-cli` renders eve
 | Item | Finding | Status |
 |---|---|---|
 | **Module / keepout** | **BT40E footprint** (`footprints_rx.py`), from Fanstel p.11: 14 × 16 mm, 16 castellations at the module edges, 45 LGA pads at 1.5/1.2 mm pitch, H0–H3. The module sits in the top-right corner with its u.FL end 0.5 mm from the top edge, so the J5 → module jumper plugs in from the board edge.<br>The BT40E has **no PCB antenna** (u.FL only, ADR-0021), so there is no antenna copper keepout. Instead, L1 under the module is a GND pour with no tracks except the LGA fan-out stubs (`TAG_MODULE`). LGA signals leave through vias between the pad rows, on L3. | ✓ |
-| **RF line** | **50 Ω grounded coplanar waveguide on L1 over L2**, `RF_50R`: **w = 0.31 mm, gap 0.25 mm → 50.1 Ω** (εeff 2.94). It is sized with a 2D quasi-static field solve of this stackup (`hw/rx/rf_line.py`: FD Laplace, 5 µm grid, h 0.2104 mm, εr 4.4, 35 µm copper).<br>The closed-form conductor-backed CPW formula (Wadell/Ghione, also KiCad's calculator) was tried first and gave 0.39 mm. It is wrong for gap > h: at the microstrip limit it reads 57 Ω where Hammerstad–Jensen gives 50. The solver reads 51.35 Ω on the pack's 0.346 mm microstrip, and that +1.35 Ω offset is the calibration (grid check: 2.5 µm moves it 0.7 Ω). Neighbours: 0.30 mm → 51.0 Ω, 0.32 mm → 49.3 Ω. Solder mask is not modelled (about −1 to −2 Ω).<br>Route: J3/J4 → 10 pF → PE4259 RF2/RF1 → RFC → 10 pF → J5. The longest line is 4.6 mm (0.07 λ in FR4), so impedance control at the fab is not needed. | ✓ |
+| **RF line** | **50 Ω grounded coplanar waveguide on L1 over L2**, `RF_50R`: **w = 0.31 mm, gap 0.25 mm → 51.5 Ω bare copper, ≈ 49.3 Ω under JLC's LPI mask** (εeff 2.94). It is sized with a 2D quasi-static field solve of this stackup (`hw/rx/rf_line.py`: FD Laplace, 5 µm grid, h 0.2104 mm, εr 4.4, 35 µm copper).<br>The closed-form conductor-backed CPW formula (Wadell/Ghione, also KiCad's calculator) was tried first and gave 0.39 mm. It is wrong for gap > h: at the microstrip limit it reads 57 Ω where Hammerstad–Jensen gives 50. The numbers are **raw, with no calibration offset** (#116 review N1).
+  - The solver reads 51.35 Ω on the 0.346 mm microstrip. Hammerstad–Jensen with the mixed-dielectric thickness term gives ≈ 50.9 Ω, so the pack's own 0.346 mm line is ≈ 51 Ω, not 50.
+  - The reviewer's independent FD solve gives 52.4 Ω for this line, or 49.3 Ω with 15 µm of mask.
+  - Grid check: a 2.5 µm grid moves the result by 0.7 Ω.
+  - Neighbours, raw: 0.30 mm → 52.3 Ω, 0.32 mm → 50.7 Ω.<br>Route: J3/J4 → 10 pF → PE4259 RF2/RF1 → RFC → 10 pF → J5. The longest line is 4.6 mm (0.07 λ in FR4), so impedance control at the fab is not needed. | ✓ |
 | **Via fence** | 38 GND vias 1.0 mm off each RF line at 1.2 mm pitch (λ/28 in FR4). L1 has a perimeter fence at 3 mm pitch and stitching on a 4 mm grid. The u.FL ground pads and the PE4259 GND pin each have their own via. | ✓ |
 | **Analog / quiet ground** | The analog column (DAC analog side, driver, clamps, coupling caps, relay contacts, J1 audio pins) is a tagged region, **closed on all three routing layers** to every digital and switching net: I2S, UART, SWD, LEDs, slot straps, ANT_SEL, OUT_EN, XSMT_EN, RLY_G/RLY_COIL, raw +12 V, +5 V and +3V3 (`test_noisy_nets_outside_analog_region`). Under it, L2 is solid and L3/L4 are unbroken GND pours, so no digital return current flows under the audio path.<br>I2S reaches the DAC's right-hand pins on L3 (stripline between the L2 plane and the L4 pour). The +3V3A LDO (U5) sits 11 mm from the DAC, on purpose; it is the analog supply. | ✓ |
 | **Regulators / relay coil vs audio** | U4 (+3V3 LDO) is 27.5 mm from the op-amp and 32.6 mm from the DAC. Q1/D7 (coil drive) is 37 mm from the op-amp. The coil pins (1/10) are at K1's right-hand end. The coil current loop is +12 V J1 pins 7/8 → K1.1 → K1.10 → Q1 → GND vias, all outside the analog region.<br>The audio-leg tracks come within **2.0 mm** of the coil pins only inside K1's own footprint, where the contacts are. That cannot be avoided with a DPDT relay and is accepted. | ✓ |
@@ -181,6 +186,30 @@ Process (docs/agents/hands-off.md, "PCB layout review"): `kicad-cli` renders eve
 10. **The analog region left out the driver's feedback parts** (R43/R44/C42 at x 12.6–15.4). Fix: the region is widened and TP1 (+12 V) moved out of it.
 11. **Decoupling too far.** The OPA1656 V+ 100 nF was 4.8 mm away. The TLV76733 in/out caps were on the wrong sides (6 mm). The TPS3808 cap was 4.3 mm away. Fix: 1.9 mm, 2.0/2.6 mm and 1.5 mm.
 12. **Silk overlaps** (K1/D7, U6/C40, J3/U3 refdes over pads). Fix: refdes moved inside the bodies and the antenna labels added.
+
+### Independent review follow-ups (#116 review, 2026-11-01)
+
+- **M1, pour clearance (fixed).** The unconditional `JLC copper clearance` (0.09 mm) rule overrode every netclass. It produced 493 pour gaps of 0.0905 mm, 157 of them under 0.13 mm on the P48 audio nets.
+  - The rule is deleted in `rx.kicad_dru` and `pack.kicad_dru`, and both boards are refilled and regenerated.
+  - `test_pour_gaps_per_class` appends probe rules (≥ 0.125 mm everywhere, ≥ 0.15 mm to Audio_I) and runs DRC on the committed fill without a refill: 0 hits. A 0.16 mm control probe does fire.
+  - The outer-copper rule now catches any Power/Audio_I track on an inner layer, whatever its width (N6).
+- **S1, pin-14 key (fixed).**
+  - J1 is now `openpack:PinHeader_2x13_P2.54mm_Key14`: the stock footprint with **pad 14 deleted, so there is no hole**, and "KEY" silk at the empty position on both sides. A full 26-pin header cannot be fitted.
+  - The header is XFCN **PZ254V-12-26P** (LCSC C22465887, 2401 at JLC), with pin 14 cut before hand-soldering.
+  - The main-board socket (#33) must be **Samtec SSW-113-01-G-D-14**. That is the SSW polarizing option: a PK-06-N key in position 14, per the SSW drawing, fig. 3. It is ordered from Samtec direct (Samtec Europe, UK). ADR-0014 records it.
+  - `test_j1_key_has_no_hole_at_14` checks the footprint, the board, the BOM and the ADR.
+- **S2, RF grounds (fixed).** The GND pads of J3/J4/J5, the PE4259 and the BT40E (castellation 10, LGA, H0–H3) now have a **solid zone connection** (`zone_connect 2`). Every other GND pad keeps its thermal relief. `test_rf_ground_pads_solid` checks this. DRC is still 0/0/0.
+- **S3, K1 orientation (fixed, preview check kept).**
+  - The footprint has a filled dot and a "+" beyond pad 1 (coil +), outside the body.
+  - The CPL now adds **+270° for `Panasonic_TQ2SA`**, so K1 is at 180°. The reasoning: the datasheet top view (the drawing JLC/EasyEDA parts follow) has the pin rows horizontal, with pin 1 bottom-left and 10 above it. That is KiCad's part turned +90°, which is the SOIC rule.
+  - EasyEDA's own footprint for C2684447 could not be fetched (HTTP 403), so K1 is still the first part to check in JLC's CPL preview.
+  - `test_polarized_parts_pin1_marker_and_cpl` covers the relay, all diodes, Q1, the electrolytics and every IC. Each must have a silk marker on its pin-1 side (KiCad's pin-1 triangle, the cathode bar, "+" or a dot), and its CPL rotation must equal the board rotation plus its package correction.
+- **N1:** the calibration offset is dropped; raw and masked figures are recorded above.
+- **N2 (accepted):** the 44 vias under the BT40E LGA are tented, with about 0.36 mm from via edge to pad. Order JLC's "epoxy-filled and capped" via option if the DFM report flags them.
+- **N3 (fixed):** C44 (VCM 100 nF) is now 2.4 mm from U6 pin 5, down from 6.6 mm.
+- **N4 (noted):** the audio legs are not mirror images, a difference of about 10 mΩ and < 1 pF. The low-frequency balance is set by C47/C48 at ±20 %. That matters for 20–50 Hz CMRR, so the tolerance belongs in ADR-0014's numbers if it is ever specified.
+- **N5 (open):** there are no labelled pads on DRV_OUTA/B, XSMT or OUT_EN. Probe at K1's pads, the R37/R38 node and R62 for now, and add pads at the next schematic pass.
+- **N7 (noted):** `rx.py` emits its hierarchical sheets in a varying order. The netlist content is identical, and CI does not diff it.
 
 ### Mechanical record for the rack (#33)
 
