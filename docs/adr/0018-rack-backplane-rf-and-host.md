@@ -1,5 +1,5 @@
 # ADR-0018: Rack main board: LNA + BAW filter + 1:8 Wilkinson per antenna, fused slots, CM4 IO board as the host carrier
-Status: accepted for the schematic, with an RF **stop-and-ask on the gain plan** (item 1). 2026-11-01, amended after the #95 review and the owner's wing-antenna constraint. Issue #33. Schematic `hw/rack/backplane.py` (SKiDL, ERC 0/0). Splitter model `hw/rack/wilkinson.py`. Numbers `python3 audit.py` Audit 6. Tests `tests/test_backplane_sch.py`, `tests/test_rack_rf.py`.
+Status: accepted. 2026-11-01, amended after the #95 review, the owner's wing-antenna constraint and ADR-0021 (gain plan, BT40E receivers). Issue #33. Schematic `hw/rack/backplane.py` (SKiDL, ERC 0/0). Splitter model `hw/rack/wilkinson.py`. Numbers `python3 audit.py` Audit 6. Tests `tests/test_backplane_sch.py`, `tests/test_rack_rf.py`.
 - **Context:** RK-1..RK-3 fix the rear panel, the RF chain (LNA NF ≤ 2 dB, input P1dB ≥ −10 dBm, IIP3 ≥ 0 dBm, then a 1:8 splitter, with a 6 dB coax budget) and a CM4 host. ADR-0014 fixes the slot connector (key at 14). ADR-0016 fixes the antennas and the R1 margin. **New owner constraint (2026-11-01): the panels go in the wings**, so actors walk past them and the worst near pack is ~0.5 m from an 8 dBi panel (UK 9 dBm EIRP).
 - **Sources:**
   - Qorvo QPL9057 Rev. F: pins, EVB, |S21| table, spec table. The spec table is tested at 3.5 GHz only, so its values serve here as a worst-case proxy.
@@ -36,30 +36,25 @@ Status: accepted for the schematic, with an RF **stop-and-ask on the gain plan**
 - **Numbers** (Audit 6, worst-case limits):
   - **QPL9057 at 2442 MHz:** |S21| 23.1 dB (21.5 dB minimum proxy for NF), NF 0.48 typ / 0.90 max, IIP3 ≥ +5.9 dBm, input P1dB ≥ −7.6 dBm.
   - **Wilkinson:** 10.61 dB (scikit-rf 10.24), isolation ≥ 30.3 dB, RL 36/39 dB. It holds εr 4.2–4.6 and ±10 % etched width.
-  - **System NF, nRF21540 always on:**
-    - with the ADR-0016 coax (4.2 dB): 7.59 / 6.69 / 7.59 dB at 2403 / 2442 / 2482;
-    - at the 6 dB budget: **9.39 / 8.49 / 9.39 dB**, so the band edges miss 9.30 by 0.09 dB on the estimated skirt.
-  - **Gain plan, no pad.** Near pack in the wings, Wi-Fi at the ADR-0016 rule; margins against P1dB − 6 dB, PRX,MAX − 6 dB and PIMD:
+  - **System NF, receivers on the BT40E (ADR-0021), worst-case LNA:**
+    - with the ADR-0016 coax (4.2 dB): 9.68 / 8.12 / 9.68 dB at 2403 / 2442 / 2482;
+    - at the 6 dB budget: **11.48 / 9.92 / 11.48 dB**. The band edges include the 2 dB skirt estimate.
+    - RK-5's limit is now the **wing need of 21.1 dB** (Audit 7: noise costs ≤ 0.5 dB of the R1 margin for the weakest wing pack), not Audit 4's 9.30 dB, which assumed a 10 m front-of-stage pack.
+  - **Gain plan: no pad, BT40E** (ADR-0021).
+    - Assumptions: near pack UK 9 dBm **on axis** (worst; the ADR-0021 rule keeps it off axis); Wi-Fi ×3 at 6 m in the beam.
+    - Margins against P1dB − 6 dB, PRX,MAX − 6 dB and PIMD:
 
-| near pack | QPL9057 in (margin) | nRF21540 in (margin) | radio total (margin) | C/I margin ≥ 6 MHz / −4 MHz |
+| near pack | QPL9057 in (margin) | radio total (margin) | PIMD margin | C/I margin ≥ 6 MHz / −4 MHz |
 |---|---|---|---|---|
-| 0.5 m | −17.4 (+3.8) | −8.7 (−15.3) | +4.3 (−10.3) | +8.0 / −24.0 |
-| 1.0 m | −22.7 (+9.1) | −14.1 (−9.9) | −1.1 (−4.9) | +14.0 / −18.0 |
-| 1.5 m | −25.3 (+11.7) | −16.6 (−7.4) | −3.6 (−2.4) | +17.6 / −14.4 |
-| 4.0 m | −28.7 (+15.1) | −20.2 (−3.8) | −7.2 (+1.2) | +26.1 / −5.9 |
+| 0.5 m | −16.7 (+3.1) | −8.3 (+2.3) | −18.9 | +8.0 / −24.0 |
+| 1.0 m | −20.6 (+7.0) | −12.3 (+6.3) | −6.9 | +14.0 / −18.0 |
+| 1.5 m | −22.0 (+8.4) | −13.8 (+7.8) | +0.2 | +17.6 / −14.4 |
+| 4.0 m | −23.2 (+9.7) | −15.1 (+9.1) | +2.3 | +26.1 / −5.9 |
 
-  - **Fixed pad after the BAW** (worst-carrier NF at 6 dB coax; closest safe near pack; closest safe phone):
-
-| pad | NF | safe near pack | safe phone |
-|---|---|---|---|
-| 0 dB | 9.39 dB | none | none |
-| 10 dB | 15.9 dB | 1.6 m | 9.1 m |
-| 15 dB | 20.5 dB | 0.9 m | 6.2 m |
-| 20 dB | 25.3 dB | 0.5 m | 4.3 m |
-| 30 dB | 35.3 dB | 0.4 m | 2.6 m |
-
-    - Wi-Fi alone at the rule distance already leaves the nRF21540 at −2.8 dB with no pad.
-    - A class-3 phone (B40 at 2390 MHz, unfiltered ahead of the LNA) must stay ≥ 2.6 m from a panel whatever the pad.
+    - Nothing compresses even at 0.5 m on axis. PIMD holds from 1.5 m on axis, and under the rule (Audit 7: worst headroom +12.0 dB UK).
+    - The BT40NE's nRF21540 would sit at −16.0 dB at 0.5 m, which is why it was dropped.
+    - A class-3 phone (B40 at 2390 MHz, unfiltered ahead of the LNA) needs ≥ 2.7 m from a panel. ADR-0021's rule (crew phones in airplane mode in the wings) covers this.
+    - The −4 MHz C/I is a channel-plan / R1 matter, covered by ADR-0021's bsim runs.
   - **BOM, GBP ex VAT:** main board, host and cables **£426.32** (£113.26 of it estimates); 8 sub-boards £210.80; antennas £340.56; **rack £977.68**.
 - **Requirements check** (carrier and UART fan-out):
 
@@ -73,13 +68,9 @@ Status: accepted for the schematic, with an RF **stop-and-ask on the gain plan**
 | R12 | partial: +£26 board +£12 UARTs | ✓ | partial | partial |
 
 - **Consequences / open items:**
-  1. **STOP-AND-ASK (hands-off reason 5, R1/RK-5): no fixed gain plan meets both RK-5 NF and a 0.5 m pack.** The bottleneck is the module's nRF21540: its −18 dBm minimum P1dB sits behind ~7 dB of net rack gain, and it has no bypass.
-     - Pad 0 meets NF, except +0.09 dB at the band edges with the 6 dB coax, but compresses the nRF21540 even with no near pack.
-     - Pad 20 dB survives 0.5 m at an NF of 25 dB.
-     - Options for the owner: (a) a host-switched 0/20 dB pad per antenna, with antenna B covering while A is padded (needs a PE4259 pair and RX-5 support; not built); (b) receivers on the BT40E (no FEM) behind a higher-gain rack chain; (c) relax the 0.5 m case (panels out of reach).
-     - The issue-r1-wings agent reads these numbers.
+  1. **Gain plan: resolved by ADR-0021.** The receivers move to the BT40E (no FEM) with no pad, and the panels go on 4 m wing booms. Every stage stays ≥ 6 dB under P1dB, and system NF is 11.5 dB against the 21.1 dB wing need. The pad and switched-pad options are dropped; none was built. #95's stop-and-ask is closed.
   2. QPQ1907: get the S2P to replace the 2 dB skirt estimate at 2403/2482 and the 0 dB credit at 2370–2400. The ACPF-7A24 would be the better filter if a UK source appears.
-  3. The nRF21540 P1dB comes from the 2019 objective spec. Confirm it against PS v1.2, which docs.nordicsemi.com did not serve.
+  3. The nRF21540 P1dB (2019 objective spec) only matters for the pack now: the receivers have no FEM.
   4. Firmware and host:
      - config.txt: `enable_uart=1`, then one `dtoverlay=` line each for uart3, uart4, uart5 and spi1-2cs;
      - SC16IS752 overlays for CE0 and CE1 (the stock `sc16is752-spi1` overlay covers one chip, so the second needs a custom overlay), `spi-max-frequency` ≤ 4 MHz, IRQ 24/25, xtal 14745600;

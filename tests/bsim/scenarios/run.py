@@ -44,6 +44,13 @@ the front-to-back or off-axis rejection). Both shift the multiatt attenuations. 
 wanted signal and the interferer alike, so they are not modelled. --near-att sets how hot the near pack is.
 --busy and --c-secs pick the (c) Wi-Fi sets and run length. (a)/(d)/(e) use the
 Kconfig OP_CH_A_MHZ/OP_CH_B_MHZ defaults read from fw/Kconfig.
+Wing antennas (#101, ADR-0021, docs/analysis/r1-wing-antennas.md): --geometry FILE (written by
+sim/loss/wing_geometry.py --write) gives every pack and the Wi-Fi a per-antenna attenuation (antenna L, R). Each
+pack then gets two receivers, one per antenna, so the dumps hold what each antenna would have delivered. RX-5
+(ADR-0011: per-carrier antenna choice, probe every OP_RX_ANT_PROBE_FRAMES, 1 dB ageing per missed window,
+OP_RX_ANT_HYST_DB hysteresis; ADR-0021: miss-triggered switch OP_RX_ANT_MISS_DB with an OP_RX_ANT_HOLD_FRAMES hold) is replayed per frame on those outcomes, with the RSSI from the geometry: that is
+the "bsim with two path losses" of SPEC RX-5. (b) puts its pack at the file's "single" position (the stage
+point with the lowest margin). --rx-gain/--wifi-gain/--near/--near-att are ignored with --geometry.
 """
 import argparse
 import bisect
@@ -81,6 +88,10 @@ WLAN = {  # busy fraction -> actmod args, tests/bsim/wlan_params.yaml
 WIFI_CH = [1, 6, 11]  # --wifi
 
 
+def wifi_ch_mhz():
+    return [2407 + 5 * c for c in WIFI_CH]
+
+
 def kconfig_default(sym):
     m = re.search(rf"^config {sym}\n(?:\t.*\n)*?\tdefault (\d+)", (REPO / "fw/Kconfig").read_text(), re.M)
     return int(m[1])
@@ -95,6 +106,48 @@ TD_OFFSETS = (1, 2, 3)  # reported TD offsets (frames), #26
 SYS2_SIM_MAX, LOCK_MAX = 1600, 2.0
 SYS3_LOSS, SYS3_RUN = 0.001, 2
 XF_PLAN = "#76"  # channel plan: 2 MHz-spaced carriers collide; near pack blocks 3 MHz neighbours
+XF_2482 = "ADR-0016"  # pack 1 has no gap carrier below 2480 (its UK 2482 carrier cannot run in bsim)
+RX5 = {}  # RX-5 replay settings: fw/src/rx/Kconfig defaults, --rx5-probe overrides (set in main)
+
+
+def rx_kconfig(sym):
+    m = re.search(rf"^config {sym}\n(?:\t.*\n)*?\tdefault (\d+)", (REPO / "fw/src/rx/Kconfig").read_text(), re.M)
+    return int(m[1])
+
+
+def rx5_replay(ok, rssi, ch, probe=None, hyst=None, miss_db=None, hold=None):
+    """RX-5 (fw/src/rx/ant.c, ADR-0011 + ADR-0021 miss switch) on per-antenna outcomes of channel ch (0 = copy A,
+    1 = copy B). ok[ant][i]: the copy of frame i arrived on antenna ant; rssi[ant]: its RSSI there (dBm, static
+    geometry). The state starts converged (on the stronger antenna, both RSSIs known and last windows valid), as after
+    the first probes of a show; the lock transient is not counted. Returns (got[i], antenna used[i], switches)."""
+    probe = RX5["probe"] if probe is None else probe
+    hyst = RX5["hyst"] if hyst is None else hyst
+    miss_db = RX5["miss_db"] if miss_db is None else miss_db
+    hold = RX5["hold"] if hold is None else hold
+    cur = 0 if rssi[0] >= rssi[1] else 1
+    last, seen, okw, sw, left = [round(r) for r in rssi], [True, True], [True, True], 0, 0
+    got, used = [], []
+    for i in range(len(ok[0])):
+        ant = (1 - cur) if probe and i % probe == (0 if ch == 0 else probe // 2) else cur
+        v = ok[ant][i]
+        got.append(v)
+        used.append(ant)
+        okw[ant] = v
+        if v:
+            last[ant], seen[ant] = round(rssi[ant]), True
+        elif ant == cur and seen[cur] and last[cur] > -127:
+            last[cur] -= 1
+        if ant == cur and left:
+            left -= 1
+        other = 1 - cur
+        if not v and ant == cur and miss_db and seen[other] and okw[other] and last[other] >= last[cur] - miss_db:
+            cur, sw, left = other, sw + 1, hold
+            continue
+        if left:
+            continue
+        if seen[other] and (not seen[cur] or last[other] - last[cur] >= hyst):
+            cur, sw = other, sw + 1
+    return got, used, sw
 
 
 def crowded(links, near):
@@ -249,17 +302,32 @@ def runs(lost):
     return out
 
 
-def link(sim, pdev, rdev, pid, fa, fb, t_from):
-    """Per-copy outcomes pack pdev -> receiver rdev from the dumps, frames starting after t_from (us)."""
-    fr = [x for x in tx_frames(sim.dumps / f"d_2G4_{pdev:02d}.Tx.csv", fa, fb) if x[0] >= t_from]
+def copies(sim, fr, rdev, pid, fa, fb):
+    """Per-copy outcomes of the pack frames fr at receiver rdev, from its Rx dump."""
     ok, _ = rx_ok(sim.dumps / f"d_2G4_{rdev:02d}.Rx.csv", aa(pid))
-    a = [got(ok, fa, x[0]) for x in fr]
-    b = [got(ok, fb, x[2]) for x in fr]
+    return [got(ok, fa, x[0]) for x in fr], [got(ok, fb, x[2]) for x in fr]
+
+
+def link(sim, pdev, rdev, pid, fa, fb, t_from, rssi=None):
+    """Per-copy outcomes pack pdev -> receiver rdev from the dumps, frames starting after t_from (us).
+    rdev = (L, R) with rssi = (L, R): two antennas, RX-5 replayed per carrier (--geometry)."""
+    fr = [x for x in tx_frames(sim.dumps / f"d_2G4_{pdev:02d}.Tx.csv", fa, fb) if x[0] >= t_from]
+    extra = {}
+    if isinstance(rdev, tuple):
+        per_ant = [copies(sim, fr, r, pid, fa, fb) for r in rdev]
+        (a, ua, swa), (b, ub, swb) = (rx5_replay([per_ant[0][c], per_ant[1][c]], rssi, c) for c in (0, 1))
+        n0 = max(1, len(fr) - 3)
+        for k, (pa, pb) in zip("LR", per_ant):
+            extra[f"ant{k}"] = {"loss_a": 1 - sum(pa[:n0]) / n0, "loss_b": 1 - sum(pb[:n0]) / n0,
+                                "loss_off": sum(not (x or y) for x, y in zip(pa[:n0], pb[:n0])) / n0}
+        extra.update(rx5_switches=swa + swb, rx5_on_R_a=sum(ua) / max(1, len(ua)), rx5_on_R_b=sum(ub) / max(1, len(ub)))
+    else:
+        a, b = copies(sim, fr, rdev, pid, fa, fb)
     n = len(fr) - 3  # frame n needs packet n+TD_OFFSETS[-1] for TD; drop the tail
     if n <= 0:
         return {"frames": 0}, fr
     off = [not (a[i] or b[i]) for i in range(n)]
-    st = {"frames": n, "loss_a": 1 - sum(a[:n]) / n, "loss_b": 1 - sum(b[:n]) / n}
+    st = {"frames": n, "loss_a": 1 - sum(a[:n]) / n, "loss_b": 1 - sum(b[:n]) / n, **extra}
     # TD offset d: frame n also rides in packet n+d (AIR-3 has d = 2). "on" = the SPEC offset; on1/on2/on3 and
     # on1a/on2a (d = 1/2, td_audio in copy A only) are post-processed from the same dumps for #26 (docs/analysis/td-latency.md).
     td = {f"on{d}": [off[i] and not (a[i + d] or b[i + d]) for i in range(n)] for d in TD_OFFSETS}
@@ -292,6 +360,7 @@ def fw_stats(text, t_lock):
 class G2:
     def __init__(self, args, exes):
         self.a, self.exes, self.plan = args, exes, plan(args.plan)
+        self.geo = json.loads(Path(args.geometry).read_text()) if args.geometry else None
         self.results, self.ok, self.gate = {}, True, True
         self.out = Path(args.out).resolve()
 
@@ -311,10 +380,34 @@ class G2:
     def secs(self, ci, long):
         return long if self.a.long else ci
 
-    def packs(self, sim, ids, td, near=None, offsets=True):
-        """Add packs and their receivers (one receiver per pack, rack side). Returns [(pid, pdev, rdev, fa, fb)]."""
+    def geo_att(self, lab, single=False):
+        """--geometry: radio -> antenna (L, R) attenuation of pack lab, or of the (b) 'single' position."""
+        return (self.geo["single"] if single else self.geo["packs"][lab])["att"]
+
+    def packs(self, sim, ids, td, near=None, offsets=True, single=False):
+        """Add packs and their receivers (one receiver per pack, rack side; with --geometry two, one per antenna).
+        Returns [(label, pid, pdev, rdev or (rdev L, rdev R), fa, fb)]."""
         pk, rx = ("pack_td", "rx") if td else ("pack", "rx")
         out = []
+        if self.geo:
+            for i, k in enumerate(ids):
+                plan_id = isinstance(k, int)
+                fa, fb = self.plan[k] if plan_id else k
+                pid = k - 1 if plan_id else i
+                lab = str(k) if plan_id else f"{fa}_{fb}"
+                ch = [f"-op_pack_id={pid}", f"-op_ch_a={fa}", f"-op_ch_b={fb}"]
+                drift = (-20 + 40 * i / max(1, len(ids) - 1)) * 1e-6 if len(ids) > 1 else 20e-6
+                off = [f"-start_offset={(i * 7919 + 1301) % 9973}"] if offsets else []
+                pdev = sim.dev(self.exes[pk], ch + [f"-xo_drift={drift:.2e}"] + off, f"pack{lab}")
+                rd = tuple(sim.dev(self.exes[rx], ch + [f"-xo_drift={-drift / 2 - 10e-6:.2e}"], f"rx{lab}{n}")
+                           for n in "LR")
+                out.append((lab, pid, pdev, rd, fa, fb))
+            for lab, _, pdev, _, _, _ in out:
+                at = self.geo_att(lab, single)
+                for *_, rd, _, _ in out:
+                    for j, r in enumerate(rd):
+                        sim.att.append((pdev, r, at[j]))
+            return out
         for i, k in enumerate(ids):
             plan_id = isinstance(k, int)
             fa, fb = self.plan[k] if plan_id else k
@@ -335,15 +428,27 @@ class G2:
         for j in range(len(WIFI_CH)):
             w = sim.wlan(busy, j)
             for *_, rdev, _, _ in links:
-                sim.att.append((w, rdev, ATT_WLAN - self.a.wifi_gain))
+                if self.geo:
+                    for r, k in zip(rdev, "LR"):
+                        sim.att.append((w, r, self.geo["wifi"][k]["att"]))
+                else:
+                    sim.att.append((w, rdev, ATT_WLAN - self.a.wifi_gain))
 
-    def measure(self, sim, links, warm=0.3):
-        """Per pack: dump statistics + firmware RXAPP cross-check."""
+    def measure(self, sim, links, warm=0.3, single=False):
+        """Per pack: dump statistics + firmware RXAPP cross-check (--geometry: firmware of the antenna-L receiver)."""
         per = {}
         for k, pid, pdev, rdev, fa, fb in links:
-            locks, reacq, tot = fw_stats(sim.log(f"rx{k}"), 0)
+            rssi = None
+            if isinstance(rdev, tuple):
+                rssi = [-x for x in self.geo_att(k, single)]
+                lk = [fw_stats(sim.log(f"rx{k}{n}"), 0) for n in "LR"]
+                locks = [max(lk[0][0][0], lk[1][0][0])] if lk[0][0] and lk[1][0] else []
+                _, reacq, tot = lk[0]
+                reacq += lk[1][1]
+            else:
+                locks, reacq, tot = fw_stats(sim.log(f"rx{k}"), 0)
             t_from = (locks[0] + warm) * 1e6 if locks else 1e18
-            st, _ = link(sim, pdev, rdev, pid, fa, fb, t_from) if locks else ({"frames": 0}, [])
+            st, _ = link(sim, pdev, rdev, pid, fa, fb, t_from, rssi) if locks else ({"frames": 0}, [])
             st.update(lock_s=locks[0] if locks else None, reacquire=reacq, fw_frames=tot["frames"],
                       fw_lost=tot["lost"], fw_skips=tot["skips"], fw_td=tot["td"], fw_td_secs=tot["td_on"],
                       fw_td_rate=tot["td"] / tot["frames"] if tot["frames"] else None,
@@ -361,7 +466,10 @@ class G2:
                 f" | TD d=1 {s['loss_on1']:.3%} run {s['run_on1']}, d=1 A-only {s['loss_on1a']:.3%} run {s['run_on1a']}"
                 f", d=2 A-only {s['loss_on2a']:.3%} run {s['run_on2a']}, d=3 {s['loss_on3']:.3%} run {s['run_on3']}"
                 f" | fw lost {s['fw_lost']}/{s['fw_frames']} td-recovered {s['fw_td']} skips {s['fw_skips']}"
-                f" reacq {s['reacquire']}")
+                f" reacq {s['reacquire']}"
+                + (f" | RX-5: L only TD off {s['antL']['loss_off']:.3%} (B {s['antL']['loss_b']:.2%}), R only"
+                   f" {s['antR']['loss_off']:.3%} (B {s['antR']['loss_b']:.2%}), switches {s['rx5_switches']},"
+                   f" on R: A {s['rx5_on_R_a']:.0%} B {s['rx5_on_R_b']:.0%}" if "antL" in s else ""))
 
     # (a) 1 pack, clean channel: SYS-2 sim latency, RX-2 lock, zero loss; TD-length latency reported.
     def sc_a(self):
@@ -423,37 +531,43 @@ class G2:
                       f"{p1 / 1e3:.2f} ms with DAC FLT=1 (target 3.0, hard 5.0)")
             sim.cleanup(self.a.keep)
 
-    def loss_runs(self, sc, ids, busies, secs, near=None, assert_at=None, assert_rec=False):
+    def loss_runs(self, sc, ids, busies, secs, near=None, assert_at=None, assert_rec=False, single=False):
         for busy in busies:
             for td in (False, True) if busy else (False,):
                 tag = f"{sc}_{busy}{'_td' if td else ''}"
                 sim = Sim(tag, secs, self.out)
-                links = self.packs(sim, ids, td, near=near)
+                links = self.packs(sim, ids, td, near=near, single=single)
                 if busy:
                     self.wifi(sim, busy, links)
                 assert sim.run(), f"sim {tag} failed"
-                per = self.measure(sim, links)
+                per = self.measure(sim, links, single=single)
                 self.report(sc, f"busy{busy}_{'td' if td else 'v1_len'}", per)
                 print(f"  {tag}: {f'TD on, {TD_LEN} B' if td else 'v1 42 B'} packets, Wi-Fi {busy} % busy")
                 for k, s in per.items():
                     print(self.line(k, s))
                 key = "on" if td else "off"
-                hit = crowded(links, near)
+                hit = crowded(links, near) if not self.geo else set()
+                xf = {k: XF_PLAN for k in hit}
+                if self.geo:  # no static near pack: RX-5 must carry the 3 MHz neighbours; only a no-gap pack XFAILs
+                    xf = {k: XF_2482 for k, *_, fa, fb in links
+                          if all(min(abs(f - w) for w in wifi_ch_mhz()) < 10 for f in (fa, fb))}
                 if assert_at is not None and busy == assert_at and td:
                     for k, s in per.items():
                         self.check(sc, f"SYS-3 pack {k} at {busy} % Wi-Fi, TD on: loss <= 0.1 %, <= 2 consecutive",
                                    s.get("frames") and s[f"loss_{key}"] <= SYS3_LOSS and s[f"run_{key}"] <= SYS3_RUN,
                                    f"loss {s.get('loss_on', 1):.3%}, max run {s.get('run_on')}, "
                                    f"events/h {s.get('events_h_on', 0):.0f} (reported, ADR-0010)",
-                                   xfail=XF_PLAN if k in hit else None)
+                                   xfail=xf.get(k))
                 if busy == 0:
                     for k, s in per.items():
                         self.check(sc, f"no cross-pack collisions, pack {k} (no Wi-Fi, near pack {near})",
-                                   s.get("frames") and s["loss_a"] == 0 and s["loss_b"] == 0 and s["fw_lost"] == 0,
-                                   f"copy loss {s.get('loss_a', 1):.3%}/{s.get('loss_b', 1):.3%}, fw lost {s.get('fw_lost')}",
-                                   xfail=XF_PLAN if k in hit else None)
+                                   s.get("frames") and (s["loss_off"] == 0 if self.geo else  # probes may lose a copy
+                                                        s["loss_a"] == 0 and s["loss_b"] == 0 and s["fw_lost"] == 0),
+                                   f"copy loss {s.get('loss_a', 1):.3%}/{s.get('loss_b', 1):.3%}, fw lost {s.get('fw_lost')}"
+                                   + (f", frames lost (RX-5) {s.get('loss_off', 1):.3%}" if self.geo else ""),
+                                   xfail=xf.get(k))
                 for k, s in per.items():  # firmware merge (+ RX-4 recovery when TD) agrees with the dumps
-                    if s.get("frames") and s["fw_frames"]:
+                    if s.get("frames") and s["fw_frames"] and not self.geo:  # --geometry: fw sees one antenna only
                         d = abs(s["fw_loss"] - s[f"loss_{key}"])
                         self.check(sc, f"{tag} pack {k}: fw loss matches dumps (within 0.2 % abs or 5 % rel)",
                                    d <= max(0.002, 0.05 * s[f"loss_{key}"]),
@@ -464,7 +578,7 @@ class G2:
                                        "(within 0.2 % abs or 5 % rel)",
                                        s["fw_td_secs"] > 0 and abs(s["fw_td_rate"] - rec) <= max(0.002, 0.05 * rec),
                                        f"fw {s['fw_td']} frames ({s['fw_td_rate']:.3%}) vs dumps {rec:.3%}")
-                if td and assert_rec:
+                if td and assert_rec and not self.geo:
                     n = sum(s.get("fw_td", 0) for s in per.values())
                     self.check(sc, f"{tag}: frames lost on both copies are recovered from td_audio (RX-4)", n > 0,
                                f"{n} frames recovered by the firmware")
@@ -473,9 +587,10 @@ class G2:
     # (b) 1 pack, Wi-Fi 1/6/11 at 10/25/40 %.
     def sc_b(self):
         secs = self.secs(10, 120)
-        self.loss_runs("b", [8], (10, 25, 40), secs, assert_at=40)
-        self.loss_runs("b_inband", [tuple(int(x) for x in self.a.inband.split(","))], (10, 40) if not self.a.long else (10, 25, 40), secs,
-                       assert_rec=True)
+        g = bool(self.geo)
+        self.loss_runs("b", [8], (10, 25, 40), secs, assert_at=40, single=g)
+        self.loss_runs("b_inband", [tuple(int(x) for x in self.a.inband.split(","))],
+                       (10, 40) if not self.a.long else (10, 25, 40), secs, assert_rec=True, single=g)
 
     # (c) 8 packs + 8 receivers, Wi-Fi 1/6/11, one pack near the rack at -20 dBm.
     def sc_c(self):
@@ -561,7 +676,17 @@ def main():
     ap.add_argument("--c-secs", type=float, default=0, help="(c) Wi-Fi run length in s (default 5, --long 60)")
     ap.add_argument("--plan", default=str(REPO / "host/channel_plan_us.yaml"),
                     help="channel plan for (b) and (c); bsim cannot run carriers above 2480 (UK pack 1, ADR-0016)")
+    ap.add_argument("--geometry", default="",
+                    help="wing-antenna geometry JSON (sim/loss/wing_geometry.py --write): per-antenna attenuations,"
+                         " two receivers per pack, RX-5 replayed (#101)")
+    ap.add_argument("--rx5-miss-db", type=int, default=-1,
+                    help="--geometry: RX-5 miss-switch window for the replay, 0 = off (default: Kconfig OP_RX_ANT_MISS_DB)")
+    ap.add_argument("--rx5-probe", type=int, default=0,
+                    help="--geometry: RX-5 probe period in frames for the replay (default: Kconfig OP_RX_ANT_PROBE_FRAMES)")
     a = ap.parse_args()
+    RX5.update(probe=a.rx5_probe or rx_kconfig("OP_RX_ANT_PROBE_FRAMES"), hyst=rx_kconfig("OP_RX_ANT_HYST_DB"),
+               miss_db=rx_kconfig("OP_RX_ANT_MISS_DB") if a.rx5_miss_db < 0 else a.rx5_miss_db,
+               hold=rx_kconfig("OP_RX_ANT_HOLD_FRAMES"))
     global ATT_PACK
     ATT_PACK = PL_10M - a.eirp
     WIFI_CH[:] = [int(x) for x in a.wifi.split(",")]
@@ -580,8 +705,10 @@ def main():
             f"{' ' + c['xfail'] if c['xfail'] else ''} | {c['value']} |"
             for sc, r in g.results.items() for c in r.get("checks", [])]
     (g.out / "g2.md").write_text("### G2 bsim scenarios\n\n| sc | check | result | value |\n|---|---|---|---|\n" +
-                                 "\n".join(rows) + f"\n\nPack EIRP {a.eirp:g} dBm, Wi-Fi channels {a.wifi}, rx antenna gain {a.rx_gain:g} dB"
-                                 f" to packs / {a.wifi_gain:g} dB to Wi-Fi. G2 gate met: {g.gate}\n")
+                                 "\n".join(rows) + f"\n\nPack EIRP {a.eirp:g} dBm, Wi-Fi channels {a.wifi}, " +
+                                 (f"geometry {a.geometry}" if a.geometry else
+                                  f"rx antenna gain {a.rx_gain:g} dB to packs / {a.wifi_gain:g} dB to Wi-Fi") +
+                                 f". G2 gate met: {g.gate}\n")
     g.results["gate_met"] = g.gate
     (g.out / "g2.json").write_text(json.dumps(g.results, indent=1, default=str))
     print(f"G2 gate {'MET' if g.gate else 'NOT MET (see XFAIL)'}; run {'PASS' if g.ok else 'FAIL'} "

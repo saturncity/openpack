@@ -113,21 +113,20 @@ def test_baw_band_edges_and_rejection():
 
 
 def test_nf_at_every_carrier():
+    """RK-5 (ADR-0021): BT40E receivers, worst carrier (band edges with the BAW skirt allowance) at the 6 dB coax
+    budget, inside the wing NF need that Audit 7 derives."""
     wil = audit.wilkinson_db()
-    nfs = {f: audit.cascade_nf_db(audit.rack_chain(audit.COAX_ADR16_DB, f, 0.0, wil)) for f in audit.CARRIERS}
-    assert max(nfs.values()) <= audit.AUDIT4_SYS_NF_DB            # ADR-0016 coax: every carrier inside RK-5
-    assert audit.cascade_nf_db(audit.rack_chain(audit.COAX_BUDGET_DB, 2441.75, 0.0, wil)) <= audit.AUDIT4_SYS_NF_DB
-    assert audit.r1_noise_cost_db(max(nfs.values()))[0] <= 0.5
+    need = audit.nf_need_wings_db()
+    assert 20.0 <= need <= 22.0                                   # ADR-0021: 21.1 dB
+    nfs = {f: audit.cascade_nf_db(audit.rack_chain(audit.COAX_BUDGET_DB, f, "BT40E", wil)) for f in audit.CARRIERS}
+    assert max(nfs.values()) <= need and 11.0 <= max(nfs.values()) <= 12.0   # ADR-0021: 11.5 dB
 
 
-def test_gain_plan_stop_condition():
-    """ADR-0018 item 1: no fixed pad meets both RK-5 NF (6 dB coax) and a 0.5 m pack; the numbers the
-    stop-and-ask reports stay what the audit prints."""
+def test_gain_plan_bt40e():
+    """ADR-0021 gain plan: no pad, BT40E. Nothing compresses even with a pack 0.5 m on axis; PIMD holds from 1.5 m;
+    the BT40NE's always-on nRF21540 would compress (why it was dropped)."""
     wil = audit.wilkinson_db()
     for d in audit.NEAR_M:
-        g = audit.gain_plan(d, 0.0, wil)
-        assert g["lna_margin"] > 0                                # the QPL9057 itself survives a 0.5 m pack
-        assert g["fem_margin"] < 0 and g["radio_margin"] < 0      # the module behind it does not
-    assert audit.worst_nf(audit.COAX_BUDGET_DB, 20, wil) > audit.AUDIT4_SYS_NF_DB
-    assert audit.d_min_m(20, wil) <= 0.5 < audit.d_min_m(15, wil)
-
+        assert audit.compression_margin(audit.gain_plan(d, "BT40E", wil)) >= 0
+    assert audit.gain_plan(1.5, "BT40E", wil)["imd_margin"] >= 0
+    assert audit.gain_plan(0.5, "BT40NE", wil)["fem_margin"] < 0

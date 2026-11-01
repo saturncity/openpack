@@ -1,6 +1,6 @@
 # R1 under UK rules: can the receive side close the gap?
 
-> **Outcome (2026-11-01, ADR-0016/ADR-0017):** adopted 1a + 4a + 5 with TD off. EN 300 328 clause check: 2482 is compliant (Audit 5). The real antenna (L-com HG2409P-NF) has rear lobes at −9 dB, not the 15 dB F/B assumed below. Its rejection is 8.8 dB, so at the Q3 2 m geometry only 3/8 hold, and the install rule moves to **Wi-Fi ≥ 4.5 m behind/beside, antennas ≥ 6 m up**. bsim (c) at that distance: packs 2–8 0.000 % TD on and off. Install doc: `docs/human/antenna-install.md`.
+> **Outcome (2026-11-01, ADR-0016/ADR-0017):** adopted 1a + 4a + 5 with TD off. EN 300 328 clause check: 2482 is compliant (Audit 5). The real antenna (L-com HG2409P-NF) has rear lobes at −9 dB, not the 15 dB F/B assumed below. Its rejection is 8.8 dB, so at the Q3 2 m geometry only 3/8 hold, and the install rule moves to **Wi-Fi ≥ 4.5 m behind/beside, antennas ≥ 6 m up**. bsim (c) at that distance: packs 2–8 0.000 % TD on and off. Install doc: `docs/human/antenna-install.md`. **Superseded install (2026-11-01):** the owner allows antennas only in the wings; see `docs/analysis/r1-wing-antennas.md` and ADR-0021.
 
 #89, part of #4. 2026-10-31. Follows ADR-0015 (PR #86). Numbers come from `python3 audit.py` (section "Audit 4") and from bsim (c) via `tests/bsim/scenarios/run.py` (PR #82) with the new `--rx-gain`, `--wifi-gain`, `--near-att`, `--busy` and `--c-secs` flags. This note recommends; the ADR is written separately.
 

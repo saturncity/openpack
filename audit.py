@@ -682,7 +682,7 @@ if __name__ == "__main__":
     print(f"  install height: actors >= {d_actor:.1f} m (near-far) -> {h_actor:.1f} m; audience >= {d_wifi:.1f} m"
           f" (front row {ROW_M:.0f} m out, phones {PHONE_H} m up, flat floor) -> {h_aud:.1f} m. Rule: antenna"
           f" >= {h_min:.1f} m above the stage floor")
-    assert h_min == 6.0, "docs/human/antenna-install.md says 6 m"
+    assert h_min == 6.0, "ADR-0016 front-of-stage rule said 6 m (superseded by ADR-0021, Audit 7)"
     coax = {"CA3N050 400-series 50 ft (15.2 m)": 15.24 * COAX_DB_M["LMR-400"],
             "HG2409P lead 12 in": 0.3 * COAX_DB_M["RG-58"], "LCCA30301-FT1.5 BNC-N jumper": 0.46 * COAX_DB_M["LMR-400"]}
     loss = sum(coax.values()) + 3 * 0.15
@@ -834,9 +834,128 @@ if __name__ == "__main__":
     assert 41 + 2 * air_us(63) + 100 <= 750
 
 
+# ---- Audit 7: R1 with the rack antennas in the wings (#101, ADR-0021, docs/analysis/r1-wing-antennas.md). ----
+# Owner constraint 2026-11-01: rack antennas only at the sides of the stage (wings), so ADR-0016's front-of-stage
+# rule (>= 6 m up, aimed upstage) is out. Model: sim/loss/wing_geometry.py (3-D free space, HG2409P-NF cuts, the
+# bsim modem tables). Venues: studio 6 m, proscenium 10 m, proscenium 12 m. bsim: run.py --geometry (two receivers
+# per pack, RX-5 replayed per carrier). The bsim numbers below are from those runs (2026-11-01, 20 s each).
+def _wing():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("wing_geometry", pathlib.Path(__file__).resolve().parent / "sim/loss/wing_geometry.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["wing_geometry"] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+if __name__ == "__main__":
+    import sys
+    from dataclasses import replace as _repl
+    wg = _wing()
+    print("\n== Audit 7: R1 with the rack antennas in the wings (#101, ADR-0021) ==")
+    thr = wg.ci_threshold_db(2423)
+    print(f"  twin: an 11 MHz gap copy (TD length) needs C/I >= {thr:.1f} dB per Wi-Fi channel; design adds"
+          f" {wg.MARGIN_DB:.0f} dB. Neighbour pack tolerance 3/4/5 MHz: "
+          + " / ".join(f"{wg.neighbour_tolerance_db(o):.1f}" for o in (3, 4, 5)) + " dB")
+    assert -13 <= thr <= -11.5, "same threshold as Audit 4 (12.7 dB short at the Q3 geometry)"
+    T = -wg.MARGIN_DB                         # twin threshold, in "dB over the design margin" units
+
+    def worst_all(v, ins):
+        """Wi-Fi-only worst, then near-far with the hot pack anywhere (boom or stage), then two hot packs (mirror)."""
+        return (wg.summary(wg.evaluate(v, ins)), wg.near_far_any(v, ins, k_hot=40)["worst"],
+                wg.near_far_any(v, ins, both=True, k_hot=12)["worst"], wg.near_far_both(v, ins)["worst"])
+
+    naive = wg.Install(crew_ap_m=99.0)        # mid-wing, 2 m, straight across
+    for v in wg.VENUES:
+        sn, an, bn, _ = worst_all(v, naive)
+        sr, ar, br, wr = worst_all(v, wg.RULE)
+        sc = wg.summary(wg.evaluate(v, _repl(wg.RULE, crew_ap_m=3.0)))
+        print(f"  {v.name:<16} naive (mid-wing, 2 m, across): Wi-Fi worst {sn['worst_margin']:+.1f}, near-far {an:+.1f},"
+              f" both sides {bn:+.1f} dB | ADR-0021 rule: {sr['pass_sel']:5.1%} of the stage with the full margin,"
+              f" worst Wi-Fi {sr['worst_margin']:+.1f}, near-far {ar:+.1f}, both sides {br:+.1f}, both booms {wr:+.1f}"
+              f" | rule but crew Wi-Fi 3 m away: {sc['worst_margin']:+.1f}")
+        assert bn < T, "the naive wing mount fails with actors on both sides (why the rule exists)"
+        assert min(sr["worst_best"], ar, br, wr) >= T + 1.4, "rule: >= 1.4 dB over the twin threshold, all cases"
+        assert sr["pass_sel"] >= 0.9
+        assert sc["worst_margin"] < T, "crew Wi-Fi in the wings breaks it: the rule bans it"
+    floor = {z: min(min(x if isinstance(x, float) else x["worst_best"] for x in worst_all(v, _repl(wg.RULE, z=z)))
+                    for v in wg.VENUES) for z in (3.2, 3.5)}
+    lo = min(min(x if isinstance(x, float) else x["worst_best"] for x in worst_all(v, wg.RULE_LO)) for v in wg.VENUES)
+    q, n_l, _ = wg.near(wg.STUDIO, wg.RULE)
+    print(f"  boom height: 3.2 m {floor[3.2]:+.1f}, 3.5 m {floor[3.5]:+.1f}, 2 m stand {lo:+.1f} dB (floor 3.5 m). An actor"
+          f" at the 4 m boom's foot is {wg.dist(wg.antennas(wg.STUDIO, wg.RULE)[0][1], q):.1f} m away, {n_l:.1f} dBm")
+    assert floor[3.5] > T > floor[3.2] and lo < T
+    for o in (wg.OMNI3,):
+        w = min(wg.summary(wg.evaluate(v, _repl(wg.RULE, ant=o)))["worst_margin"] for v in wg.VENUES)
+        print(f"  omni 3 dBi in the wings instead: worst {w:+.1f} dB (sees the audience as well as the stage)")
+        assert w < T
+
+    print("  rack chain (PR #95 chain at 01570d9; no coax for levels, 6 dB coax + band edge for NF; every stage's total"
+          " input >= 6 dB under its worst P1dB, nRF5340 PIMD scaled as PR #95):")
+    s_min = min(wg.summary(wg.evaluate(v, wg.RULE))["s_min"] for v in wg.VENUES)
+    weak = s_min - 10.0 - 10.0                            # weakest wing pack, body 10 dB + fade 10 dB (as Audit 6)
+    nf_need = wg.nf_needed_db(weak)
+    print(f"    NF the wings need: weakest pack {s_min:.1f} dBm free space, {weak:.1f} with body + fade -> NF <= {nf_need:.1f}"
+          f" dB costs <= 0.5 dB of the R1 margin (RK-5's 9.30 dB was Audit 4's 10 m assumption, not an R1 need)")
+    assert 18 <= nf_need <= 24
+
+    def levels(v, eirp=wg.EIRP_UK, on_axis=False):
+        e = wg.evaluate(v, wg.RULE)
+        _, n_l, _ = wg.near(v, wg.RULE, 0.5, eirp, on_axis)
+        w, ph = e.iw["L"][0], wg.phone_dbm(v, wg.RULE)
+        return wg.dbm_sum(n_l, w, w, w, ph), [n_l, w, w, w, ph]
+
+    opts = {"(c) rule, BT40NE, no pad": ("BT40NE", 0.0), "(c) + fixed 10 dB pad, BT40NE": ("BT40NE", 10.0),
+            "(c) + switched 0/20 dB pad, BT40NE (studio Wi-Fi alone keeps it at 20)": ("BT40NE", 20.0),
+            "(c) + (b) BT40E receivers, no pad (chosen)": ("BT40E", 0.0)}
+    res = {}
+    for name, (mod, pad) in opts.items():
+        nf = wg.system_nf_db(6.0, pad, mod)
+        cost = wg.noise_cost_db(nf, weak)
+        head = min(min(min(wg.chain_margins(levels(v)[0], 0.0, pad, module=mod)),
+                       wg.imd_margin_db(levels(v)[1], weak, 0.0, pad, mod)) for v in wg.VENUES)
+        tot_ax, sig_ax = levels(wg.STUDIO, on_axis=True)
+        off = min(min(wg.chain_margins(tot_ax, 0.0, pad, module=mod)), wg.imd_margin_db(sig_ax, weak, 0.0, pad, mod))
+        comp_ax = min(wg.chain_margins(tot_ax, 0.0, pad, module=mod))
+        us = min(min(wg.chain_margins(levels(v, wg.EIRP_US)[0], 0.0, pad, module=mod)) for v in wg.VENUES)
+        usd = 8 * (wg.MODULES[mod]["usd"] - wg.MODULES["BT40NE"]["usd"])
+        res[name] = (nf, cost, head, comp_ax, off, us)
+        print(f"    {name:<74} NF {nf:5.2f} dB (R1 cost {cost:.2f} dB) | rule: worst headroom {head:+5.1f} dB, US"
+              f" {us:+5.1f} | off-rule 0.5 m on axis: compression {comp_ax:+5.1f}, incl. PIMD {off:+5.1f} | modules"
+              f" {usd:+.0f} USD/rack")
+    ch = res["(c) + (b) BT40E receivers, no pad (chosen)"]
+    assert ch[0] <= nf_need and ch[2] >= 0 and ch[5] >= 0, "BT40E + rule: NF inside the wing need, nothing compresses"
+    assert ch[3] >= 0, "BT40E: even a pack 0.5 m on axis does not compress any stage (PIMD aside)"
+    assert res["(c) rule, BT40NE, no pad"][2] < 0, "BT40NE with no pad: studio Wi-Fi + phone crowd the nRF21540"
+    assert res["(c) + fixed 10 dB pad, BT40NE"][3] < 0 <= res["(c) + fixed 10 dB pad, BT40NE"][2]
+    assert res["(c) + switched 0/20 dB pad, BT40NE (studio Wi-Fi alone keeps it at 20)"][0] > nf_need
+    _, n_l, _ = wg.near(wg.STUDIO, wg.RULE)
+    print(f"    near pack under the rule: {n_l:.1f} dBm = {wg.on_axis_equiv_m(n_l, wg.EIRP_UK):.1f} m on axis (PR #95"
+          f" option c); BT40E rx-only is enough: the receiver never transmits in v1 (ADR-0004)")
+    # bsim (c), run.py --geometry docs/analysis/r1-wing/<case>.json --eirp 9 --plan host/channel_plan_us.yaml,
+    # 20 s per run. Packs passing SYS-3 (<= 0.1 %, <= 2 in a row) of the 7 with a gap carrier below 2480 (pack 1's
+    # is 2482: credited by equivalence, ADR-0016). Filled from the 2026-11-01 runs; see the analysis doc.
+    # bsim (c), 2026-11-01: run.py --geometry docs/analysis/r1-wing/<case>.json --eirp 9 --plan
+    # host/channel_plan_us.yaml --busy 10,40 --c-secs 20, RX-5 replayed with the fw/src/rx/Kconfig defaults (probe 1000,
+    # miss switch 12 dB, hold 1000). Packs 2-8 passing SYS-3 (<= 0.1 %, <= 2 in a row) at 10 / 40 % Wi-Fi, TD off / on,
+    # and the worst pack's TD-off loss at 40 %. Pack 1 (2482) is credited by equivalence (ADR-0016).
+    WING_BSIM = {
+        "studio-rule": (7, 7, 7, 7, 0.000), "prosc10-rule": (7, 7, 7, 7, 0.005), "prosc12-rule": (7, 7, 7, 7, 0.005),
+        "prosc12-near2": (7, 7, 7, 7, 0.000), "prosc12-both": (7, 7, 7, 7, 0.015), "studio-both": (7, 7, 7, 7, 0.005),
+        "prosc12-any": (7, 7, 7, 7, 0.086), "prosc12-any-both": (7, 7, 7, 7, 0.066),
+        "studio-any-both": (7, 7, 7, 7, 0.000), "prosc10-any-both": (7, 7, 7, 7, 0.025),
+        "prosc12-onaxis (off-rule, 40 % only)": (None, None, 7, 7, 0.051),
+        "studio-onaxis (off-rule, 40 % only)": (None, None, 7, 7, 0.051),
+    }
+    for case, r in WING_BSIM.items():
+        print(f"  bsim {case:<38} 10 % off/on {r[0]}/{r[1]}, 40 % off/on {r[2]}/{r[3]} of 7; worst 40 % TD off {r[4]:.3f} %")
+    assert all(x == 7 for r in WING_BSIM.values() for x in r[:4] if x is not None), "R1: 7/7 + pack 1 everywhere"
+    assert max(r[4] for r in WING_BSIM.values()) < 0.1, "SYS-3 with TD off (the shipping default, ADR-0017)"
+
+
 # ---- Audit 6: rack RF chain, gain plan and backplane BOM (#33, ADR-0018). hw/rack/backplane.py, wilkinson.py ----
-# Antenna connector -> coax -> BNC/ESD/bias-T/DC block -> QPL9057 LNA -> QPQ1907 BAW -> [pad] -> 1:8 Wilkinson ->
-# u.FL cable -> sub-board (DC block, PE4259, u.FL jumper) -> BT40NE: nRF21540 LNA -> nRF5340.
+# Antenna connector -> coax -> BNC/ESD/bias-T/DC block -> QPL9057 LNA -> QPQ1907 BAW -> 1:8 Wilkinson ->
+# u.FL cable -> sub-board (DC block, PE4259, u.FL jumper) -> BT40E (no FEM, ADR-0021) -> nRF5340.
 # Sources (numbers below carry their row):
 #   QPL9057 datasheet Rev. F (2020-09-20): S-parameters at the device pins (|S21| 14.058 at 2.4 GHz = 22.96 dB);
 #     EVB typ 1800/2600 MHz: NF 0.50/0.47, OP1dB 17.1, OIP3 33.8/37.8; spec table, tested at 3.5 GHz ONLY (used here
@@ -868,7 +987,10 @@ BAW_REJ = ((925, 960, 34), (1559, 1606, 34), (2110, 2170, 44), (2300, 2370, 38),
 WILK_LAYOUT_DB = 0.5     # est.: T-junctions, bends, resistor pads (not in the wilkinson.py model; #34)
 UFL_CABLE_DB = 1.0       # est.: 200 mm 1.13 mm coax ~3.5 dB/m + two mated u.FL pairs
 SUBBOARD_DB = 0.9        # ADR-0014: PE4259 0.5 dB, u.FL jumper ~0.3 dB, three 10 pF blocks ~0.1 dB
-NRF21540 = {"g": 13.0, "nf": 2.7, "ip1db_min": -18.0}
+NRF21540 = {"g": 13.0, "nf": 2.7, "ip1db_min": -18.0}   # BT40NE FEM, for reference (ADR-0021 dropped it on rx)
+RX_MODULES = {"BT40E": {"g": -0.3, "nf": 0.3, "ip1db_min": None},   # u.FL straight to the nRF5340 (est. 0.3 dB)
+              "BT40NE": NRF21540}
+RX_MODULE = "BT40E"      # ADR-0021: receivers on the BT40E, no pad
 NRF5340 = {"nf": 7.0, "prx_max": 0.0, "sens_2m": -95.0, "ci_test_wanted": -67.0, "pimd": -22.0, "pimd_wanted": -64.0,
            "ci": {0: 7.1, -2: -2.0, 2: -11.0, -4: -22.0, 4: -47.0, 6: -54.0}}   # NRF5340["nf"] est. (Audit 3)
 BACKOFF_DB = 6.0         # "does not compress": every stage's total input >= 6 dB below its worst-case input P1dB
@@ -921,34 +1043,37 @@ def wilkinson_db():
     return wk.summary(5)["il_db"] + WILK_LAYOUT_DB
 
 
-def rack_chain(coax_db, f_mhz=F_RX_MHZ, pad_db=0.0, splitter_db=None):
+def rack_chain(coax_db, f_mhz=F_RX_MHZ, module=RX_MODULE, splitter_db=None):
     """[(gain dB, NF dB), ...] from the antenna connector to the nRF5340, worst case (21.5 dB / 0.9 dB proxy)."""
     splitter_db = wilkinson_db() if splitter_db is None else splitter_db
     lossy = lambda d: (-d, d)
-    return [lossy(coax_db), lossy(FRONT_END_DB), (LNA["g_nf"], LNA["nf_max"]), lossy(baw_db(f_mhz)), lossy(pad_db),
-            lossy(splitter_db), lossy(UFL_CABLE_DB), lossy(SUBBOARD_DB), (NRF21540["g"], NRF21540["nf"]),
-            (0.0, NRF5340["nf"])]
+    m = RX_MODULES[module]
+    return [lossy(coax_db), lossy(FRONT_END_DB), (LNA["g_nf"], LNA["nf_max"]), lossy(baw_db(f_mhz)),
+            lossy(splitter_db), lossy(UFL_CABLE_DB), lossy(SUBBOARD_DB), (m["g"], m["nf"]), (0.0, NRF5340["nf"])]
 
 
-def worst_nf(coax_db, pad_db=0.0, wil=None):
-    return max(cascade_nf_db(rack_chain(coax_db, f, pad_db, wil)) for f in CARRIERS)
+def worst_nf(coax_db, module=RX_MODULE, wil=None):
+    return max(cascade_nf_db(rack_chain(coax_db, f, module, wil)) for f in CARRIERS)
 
 
-def r1_noise_cost_db(nf_sys):
-    """ADR-0016 holds R1 with MARGIN_DB of C/I margin. Receiver noise adds to the interference: dB of that margin
-    used up at the Q3 geometry (UK pack 10 m, body 10 dB, fade 10 dB, patch antenna)."""
-    c = REGIONS["UK"]["eirp_dbm"] - 10.0 - 10.0 + PATCH_DBI - (40.2 + 20)
-    i_lim = c - CI_REQ_DB - MARGIN_DB
-    n = -174 + 10 * math.log10(2e6) + nf_sys
-    return 10 * math.log10(1 + 10 ** ((n - i_lim) / 10)), c, n
+import sys  # noqa: E402  (Audit 7's _wing() registers its module in sys.modules; it is imported only under __main__)
+
+
+def nf_need_wings_db():
+    """ADR-0021 / Audit 7: the largest system NF whose noise costs <= 0.5 dB of the R1 margin for the weakest pack
+    under the wing rule (free-space minimum over the three venues, minus 10 dB body and 10 dB fade)."""
+    wg = _wing()
+    s_min = min(wg.summary(wg.evaluate(v, wg.RULE))["s_min"] for v in wg.VENUES)
+    return wg.nf_needed_db(s_min - 10.0 - 10.0)
 
 
 def signals_at_lna(d_near, eirp=None, ue_m=None):
-    """[(name, f MHz, dBm at the LNA input, in-band?)]: the near pack, Wi-Fi 1/6/11 at the ADR-0016 rule, and (if
-    ue_m) one class-3 phone per UK uplink band at ue_m in front of the panel."""
+    """[(name, f MHz, dBm at the LNA input, in-band?)]: the near pack ON AXIS (worst; ADR-0021's rule puts it well
+    off axis), Wi-Fi 1/6/11 at the ADR-0021 6 m backstage distance in the main beam (worst), and (if ue_m) one class-3
+    phone per UK uplink band at ue_m in front of the panel."""
     eirp = REGIONS["UK"]["eirp_dbm"] if eirp is None else eirp
     s = [("near pack", 2426.0, eirp - fspl_db(d_near) + PATCH_DBI - CONN_DB, True)]
-    wifi = max(20.0 - fspl_db(4.4) + PATCH_DBI - 9.0, 20.0 - fspl_db(12.2) + PATCH_DBI) - CONN_DB
+    wifi = 20.0 - fspl_db(6.0) + PATCH_DBI - CONN_DB
     s += [(f"Wi-Fi {c}", w, wifi, True) for c, w in ((1, 2412.0), (6, 2437.0), (11, 2462.0))]
     if ue_m:
         s += [(f"UE {b}", f, UE_DBM - fspl_db(ue_m, f) + g - CONN_DB, False) for b, (f, g) in UE_BANDS.items()]
@@ -960,41 +1085,41 @@ def wanted_at_lna():
     return REGIONS["UK"]["eirp_dbm"] - (40.2 + 20) + PATCH_DBI - 10.0 - 10.0 - CONN_DB
 
 
-def gain_plan(d_near, pad_db=0.0, wil=None, eirp=None, ue_m=None):
-    """Stage-by-stage headroom (dB, >= 0 passes) with a near pack at d_near and optional phones at ue_m."""
+def gain_plan(d_near, module=RX_MODULE, wil=None, eirp=None, ue_m=None):
+    """Stage-by-stage headroom (dB, >= 0 passes): rack LNA, module LNA (none on a BT40E), nRF5340 PRX,MAX, PIMD."""
     wil = wilkinson_db() if wil is None else wil
-    post = lambda f: -baw_db(f) - pad_db - wil - UFL_CABLE_DB - SUBBOARD_DB     # LNA output -> nRF21540 input
+    m = RX_MODULES[module]
+    post = lambda f: -baw_db(f) - wil - UFL_CABLE_DB - SUBBOARD_DB     # LNA output -> module input
     sig = signals_at_lna(d_near, eirp, ue_m)
     lna_in = dbm_sum(*[p for _, _, p, _ in sig])
     lna = lna_at()
-    fem = [(n, f, p + lna_gain_db(f) + post(f)) for n, f, p, _ in sig]
-    fem_in = dbm_sum(*[p for _, _, p in fem])
-    radio = sorted(((p + NRF21540["g"], n) for n, _, p in fem), reverse=True)
+    mod = [(n, f, p + lna_gain_db(f) + post(f)) for n, f, p, _ in sig]
+    mod_in = dbm_sum(*[p for _, _, p in mod])
+    radio = sorted(((p + m["g"], n) for n, _, p in mod), reverse=True)
     total = dbm_sum(*[p for p, _ in radio])
-    w = wanted_at_lna() + lna_gain_db(F_RX_MHZ) + post(F_RX_MHZ) + NRF21540["g"]
+    w = wanted_at_lna() + lna_gain_db(F_RX_MHZ) + post(F_RX_MHZ) + m["g"]
     a, b = radio[0][0], radio[1][0]
     im_allowed = NRF5340["pimd"] + (w - NRF5340["pimd_wanted"]) / 3      # 3rd order: IMD rises 3 dB per dB
     near = next(p for p, n in radio if n == "near pack")
-    return {"lna_in": lna_in, "lna_margin": lna["ip1db_min"] - BACKOFF_DB - lna_in,
-            "fem_in": fem_in, "fem_margin": NRF21540["ip1db_min"] - BACKOFF_DB - fem_in,
+    return {"lna_in": lna_in, "lna_margin": lna["ip1db_min"] - BACKOFF_DB - lna_in, "fem_in": mod_in,
+            "fem_margin": math.inf if m["ip1db_min"] is None else m["ip1db_min"] - BACKOFF_DB - mod_in,
             "radio_total": total, "radio_margin": NRF5340["prx_max"] - BACKOFF_DB - total,
             "imd_margin": 3 * im_allowed - (2 * a + b),
             "wanted_radio": w, "near_radio": near, "strongest": radio[0][1],
             "ci_6mhz_margin": -NRF5340["ci"][6] - (near - w), "ci_4mhz_margin": -NRF5340["ci"][-4] - (near - w)}
 
 
-def headroom(g):
-    return min(g["lna_margin"], g["fem_margin"], g["radio_margin"], g["imd_margin"])
+def compression_margin(g):
+    return min(g["lna_margin"], g["fem_margin"], g["radio_margin"])
 
 
-def d_min_m(pad, wil, ue_m=None):
-    """Closest near pack (UK 9 dBm) for which every stage keeps its headroom (0.1 m steps, up to 40 m)."""
-    return next((i / 10 for i in range(1, 400) if headroom(gain_plan(i / 10, pad, wil, ue_m=ue_m)) >= 0), float("inf"))
-
-
-def ue_min_m(pad, wil):
-    """Closest crew phone (all UK uplink bands at once) with the near pack at 10 m."""
-    return next((i / 10 for i in range(1, 400) if headroom(gain_plan(10.0, pad, wil, ue_m=i / 10)) >= 0), float("inf"))
+def r1_noise_cost_db(nf_sys):
+    """ADR-0016 holds R1 with MARGIN_DB of C/I margin. Receiver noise adds to the interference: dB of that margin
+    used up at the Q3 geometry (UK pack 10 m, body 10 dB, fade 10 dB, patch antenna)."""
+    c = REGIONS["UK"]["eirp_dbm"] - 10.0 - 10.0 + PATCH_DBI - (40.2 + 20)
+    i_lim = c - CI_REQ_DB - MARGIN_DB
+    n = -174 + 10 * math.log10(2e6) + nf_sys
+    return 10 * math.log10(1 + 10 ** ((n - i_lim) / 10)), c, n
 
 
 def bom_rack():
@@ -1005,7 +1130,7 @@ def bom_rack():
 
 
 if __name__ == "__main__":
-    print("\n== Audit 6: rack RF chain (#33, ADR-0018): antenna -> coax -> LNA -> BAW -> 1:8 Wilkinson -> sub-board ==")
+    print("\n== Audit 6: rack RF chain (#33, ADR-0018/0021): antenna -> coax -> LNA -> BAW -> 1:8 Wilkinson -> BT40E ==")
     lna = lna_at()
     print(f"  {LNA['part']} at {F_RX_MHZ:.0f} MHz: |S21| {lna['gain']:.1f} dB (21.5 min, 3.5 GHz proxy, for NF),"
           f" NF {lna['nf']:.2f} typ / {lna['nf_max']:.2f} max, IIP3 >= {lna['iip3_min']:+.1f} dBm,"
@@ -1016,51 +1141,38 @@ if __name__ == "__main__":
     print(f"  1:8 Wilkinson {wil - WILK_LAYOUT_DB:.2f} dB + {WILK_LAYOUT_DB} layout; QPQ1907 at the carriers: "
           + ", ".join(f"{f:.0f} {baw_db(f):.1f} dB" for f in CARRIERS)
           + f" (2403/2482 reach past the specified 2402.5-2481.5 MHz: +{BAW_SKIRT_EST_DB} dB est.)")
-    print(f"  system NF at the antenna connector, nRF21540 always on (no bypass), worst-case LNA, by carrier:")
+    nf_need = nf_need_wings_db()
+    print(f"  system NF at the antenna connector, receivers on the {RX_MODULE} (ADR-0021), worst-case LNA, by carrier"
+          f" (RK-5: <= {nf_need:.1f} dB, the wing need from Audit 7):")
     for coax in (COAX_ADR16_DB, COAX_BUDGET_DB):
-        nfs = [cascade_nf_db(rack_chain(coax, f, 0.0, wil)) for f in CARRIERS]
-        print(f"    coax {coax} dB: " + ", ".join(f"{f:.0f}: {n:.2f}" for f, n in zip(CARRIERS, nfs))
-              + f" dB (RK-5 / Audit 4: <= {AUDIT4_SYS_NF_DB:.2f})")
-    nf_adr16, nf_budget = worst_nf(COAX_ADR16_DB, 0.0, wil), worst_nf(COAX_BUDGET_DB, 0.0, wil)
-    nf_mid = cascade_nf_db(rack_chain(COAX_BUDGET_DB, F_RX_MHZ, 0.0, wil))
-    assert nf_adr16 <= AUDIT4_SYS_NF_DB, "ADR-0016 coax: every carrier inside RK-5"
-    assert nf_mid <= AUDIT4_SYS_NF_DB < nf_budget, "6 dB budget: centre passes, a band-edge carrier does not"
-    print(f"    -> at the 6 dB budget the band-edge carriers miss RK-5 by {nf_budget - AUDIT4_SYS_NF_DB:.2f} dB (est. skirt);"
-          f" with the 4.2 dB ADR-0016 coax all carriers pass. R1 noise cost {r1_noise_cost_db(nf_budget)[0]:.2f} dB")
+        nfs = [cascade_nf_db(rack_chain(coax, f, RX_MODULE, wil)) for f in CARRIERS]
+        print(f"    coax {coax} dB: " + ", ".join(f"{f:.0f}: {n:.2f}" for f, n in zip(CARRIERS, nfs)) + " dB")
+    nf_worst = worst_nf(COAX_BUDGET_DB, RX_MODULE, wil)
+    assert nf_worst <= nf_need, "RK-5: every carrier, band edges with the skirt allowance, inside the wing NF need"
+    print(f"    -> worst {nf_worst:.2f} dB at the 6 dB budget, {nf_need - nf_worst:.1f} dB inside the need"
+          f" (BT40NE would give {worst_nf(COAX_BUDGET_DB, 'BT40NE', wil):.2f} dB, but its FEM compresses: ADR-0021)")
 
-    print("  gain plan (no pad), near pack UK 9 dBm in the wings + Wi-Fi at the ADR-0016 rule; margins vs worst-case"
-          f" P1dB - {BACKOFF_DB:.0f} dB, nRF5340 PRX,MAX - {BACKOFF_DB:.0f} dB and PIMD scaled to the wanted (>= 0 passes):")
-    rows = {}
+    print(f"  stage headroom, near pack UK 9 dBm ON AXIS (worst; the rule keeps it off axis), Wi-Fi x3 at 6 m in the"
+          f" beam; margins vs P1dB - {BACKOFF_DB:.0f} dB, PRX,MAX - {BACKOFF_DB:.0f} dB, PIMD scaled to the wanted:")
     for d in NEAR_M + (4.0,):
-        g = rows[d] = gain_plan(d, 0.0, wil)
-        print(f"    {d:>3} m: LNA in {g['lna_in']:6.1f} dBm ({g['lna_margin']:+5.1f}); nRF21540 in {g['fem_in']:6.1f}"
-              f" ({g['fem_margin']:+5.1f}); radio {g['radio_total']:6.1f} ({g['radio_margin']:+5.1f}); IMD"
-              f" {g['imd_margin']:+6.1f}; near/wanted {g['near_radio'] - g['wanted_radio']:4.1f} dB -> C/I margin"
-              f" >= 6 MHz {g['ci_6mhz_margin']:+5.1f}, -4 MHz {g['ci_4mhz_margin']:+5.1f}")
-    ue = gain_plan(10.0, 0.0, wil, ue_m=2.0)
-    print(f"    crew phones (B40 2390, B7, B1, B3, n78 at 23 dBm) 2 m in front, pack at 10 m: LNA in {ue['lna_in']:.1f} dBm"
-          f" ({ue['lna_margin']:+.1f}), nRF21540 ({ue['fem_margin']:+.1f}), radio ({ue['radio_margin']:+.1f}),"
-          f" strongest {ue['strongest']}: B40 2370-2400 has no stated QPQ1907 rejection, so it gets none")
-    print("  fixed pad after the BAW: worst-carrier NF at 4.2 / 6 dB coax; closest safe near pack; closest safe phone:")
-    plans = []
-    for pad in (0, 5, 10, 15, 20, 25, 30, 35):
-        p = (pad, worst_nf(COAX_ADR16_DB, pad, wil), worst_nf(COAX_BUDGET_DB, pad, wil), d_min_m(pad, wil), ue_min_m(pad, wil))
-        plans.append(p)
-        print(f"    pad {pad:2d} dB: NF {p[1]:5.2f} / {p[2]:5.2f} dB; near pack >= {p[3]:4.1f} m; phone >= {p[4]:4.1f} m")
-    assert all(min(rows[d]["fem_margin"], rows[d]["radio_margin"]) < 0 for d in NEAR_M), "no pad: 0.5-1.5 m compresses"
-    nf_ok = [p for p in plans if p[2] <= AUDIT4_SYS_NF_DB]
-    near_ok = [p for p in plans if p[3] <= NEAR_M[0]]
-    assert not [p for p in nf_ok if p in near_ok], "a fixed plan meeting NF and 0.5 m would be adopted"
-    wifi_only = gain_plan(40.0, 0.0, wil)
-    ue_lna_m = next(i / 10 for i in range(1, 400) if gain_plan(10.0, 0.0, wil, ue_m=i / 10)["lna_margin"] >= 0)
-    print(f"  Wi-Fi alone at the rule distance (pack at 40 m), no pad: nRF21540 {wifi_only['fem_margin']:+.1f} dB,"
-          f" IMD {wifi_only['imd_margin']:+.1f} dB, so with no pad no near-pack distance is safe")
-    print(f"  STOP-AND-ASK (ADR-0018 item 1): no fixed gain plan meets both. NF <= {AUDIT4_SYS_NF_DB:.2f} at 6 dB coax"
-          f" needs pad 0 (and fails at the band edges by {nf_budget - AUDIT4_SYS_NF_DB:.2f} dB), which compresses the"
-          f" nRF21540 even with no near pack; the smallest pad safe at 0.5 m is {near_ok[0][0]} dB, NF"
-          f" {near_ok[0][2]:.1f} dB. The QPL9057 holds a 0.5 m pack ({rows[0.5]['lna_margin']:+.1f} dB) but a class-3"
-          f" phone must stay >= {ue_lna_m:.1f} m from a panel (B40 2370-2400 is unfiltered ahead of the LNA)")
-    assert near_ok and ue_lna_m > 2.0
+        g = gain_plan(d, RX_MODULE, wil)
+        print(f"    {d:>3} m: LNA in {g['lna_in']:6.1f} dBm ({g['lna_margin']:+5.1f}); radio {g['radio_total']:6.1f}"
+              f" ({g['radio_margin']:+5.1f}); PIMD {g['imd_margin']:+6.1f}; near/wanted"
+              f" {g['near_radio'] - g['wanted_radio']:4.1f} dB -> C/I margin >= 6 MHz {g['ci_6mhz_margin']:+5.1f},"
+              f" -4 MHz {g['ci_4mhz_margin']:+5.1f}")
+        assert compression_margin(g) >= 0, f"no stage compresses with a pack {d} m on axis (BT40E, no pad)"
+    for d in (1.5, 4.0):
+        assert gain_plan(d, RX_MODULE, wil)["imd_margin"] >= 0, "PIMD holds once the pack is >= 1.5 m on axis"
+    bt40ne = gain_plan(NEAR_M[0], "BT40NE", wil)
+    print(f"    BT40NE instead (nRF21540 always on): module margin {bt40ne['fem_margin']:+.1f} dB at 0.5 m -> why"
+          f" ADR-0021 moved the receivers to the BT40E")
+    assert bt40ne["fem_margin"] < 0
+    ue = gain_plan(10.0, RX_MODULE, wil, ue_m=2.0)
+    ue_lna_m = next(i / 10 for i in range(1, 400) if gain_plan(10.0, RX_MODULE, wil, ue_m=i / 10)["lna_margin"] >= 0)
+    print(f"  class-3 phones (B40 2390, B7, B1, B3, n78) 2 m in front of a panel: LNA {ue['lna_margin']:+.1f} dB, radio"
+          f" {ue['radio_margin']:+.1f} dB (B40 2370-2400 unfiltered ahead of the LNA): phones keep >= {ue_lna_m:.1f} m,"
+          f" which ADR-0021's crew-airplane-mode rule covers in the wings; the audience phone case is in Audit 7")
+    assert 2.0 < ue_lna_m <= 3.0
 
 
     print("\n== Audit 6: rack BOM (one rack, GBP ex VAT; hw/rack/out/bom.csv + 8 sub-boards + ADR-0016 antennas) ==")
