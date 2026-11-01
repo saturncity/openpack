@@ -2,47 +2,10 @@
   (version "D")
   (design
     (source "backplane.py")
-    (date "11/01/2026 12:47 AM")
+    (date "")
     (tool "SKiDL (3.0.0)")
     (sheet
       (number 1)
-      (name "/host1/")
-      (tstamps "/bc9ad6e0-5c6a-5337-b58a-5c9894dfbd20/")
-      (title_block
-        (title)
-        (company)
-        (rev)
-        (date)
-        (source "out/backplane.py")
-        (comment
-          (number "1")
-          (value ""))
-        (comment
-          (number "2")
-          (value ""))
-        (comment
-          (number "3")
-          (value ""))
-        (comment
-          (number "4")
-          (value ""))
-        (comment
-          (number "5")
-          (value ""))
-        (comment
-          (number "6")
-          (value ""))
-        (comment
-          (number "7")
-          (value ""))
-        (comment
-          (number "8")
-          (value ""))
-        (comment
-          (number "9")
-          (value ""))))
-    (sheet
-      (number 2)
       (name "/power1/")
       (tstamps "/1c71258b-4a63-53c3-96a6-ba5ec56f90dd/")
       (title_block
@@ -79,7 +42,7 @@
           (number "9")
           (value ""))))
     (sheet
-      (number 3)
+      (number 2)
       (name "/rf_a1/")
       (tstamps "/8f22d44a-a812-5cfb-ae4c-bc110307adc4/")
       (title_block
@@ -116,9 +79,9 @@
           (number "9")
           (value ""))))
     (sheet
-      (number 4)
-      (name "/")
-      (tstamps "/")
+      (number 3)
+      (name "/rf_b1/")
+      (tstamps "/167d1d07-85b9-5bf4-93c9-ada5834ea12c/")
       (title_block
         (title)
         (company)
@@ -153,7 +116,7 @@
           (number "9")
           (value ""))))
     (sheet
-      (number 5)
+      (number 4)
       (name "/slots1/")
       (tstamps "/fd6c834b-2630-545f-9eba-2a7e12b4fedf/")
       (title_block
@@ -190,9 +153,46 @@
           (number "9")
           (value ""))))
     (sheet
+      (number 5)
+      (name "/host1/")
+      (tstamps "/bc9ad6e0-5c6a-5337-b58a-5c9894dfbd20/")
+      (title_block
+        (title)
+        (company)
+        (rev)
+        (date)
+        (source "out/backplane.py")
+        (comment
+          (number "1")
+          (value ""))
+        (comment
+          (number "2")
+          (value ""))
+        (comment
+          (number "3")
+          (value ""))
+        (comment
+          (number "4")
+          (value ""))
+        (comment
+          (number "5")
+          (value ""))
+        (comment
+          (number "6")
+          (value ""))
+        (comment
+          (number "7")
+          (value ""))
+        (comment
+          (number "8")
+          (value ""))
+        (comment
+          (number "9")
+          (value ""))))
+    (sheet
       (number 6)
-      (name "/rf_b1/")
-      (tstamps "/167d1d07-85b9-5bf4-93c9-ada5834ea12c/")
+      (name "/")
+      (tstamps "/")
       (title_block
         (title)
         (company)
@@ -244,7 +244,7 @@
         (field
           (name "SKiDL Tag") "C1")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "CP"))
@@ -270,7 +270,7 @@
         (field
           (name "SKiDL Tag") "C10")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -296,7 +296,7 @@
         (field
           (name "SKiDL Tag") "C11")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -322,7 +322,7 @@
         (field
           (name "SKiDL Tag") "C12")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -348,7 +348,7 @@
         (field
           (name "SKiDL Tag") "C13")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -374,7 +374,7 @@
         (field
           (name "SKiDL Tag") "C14")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -400,7 +400,7 @@
         (field
           (name "SKiDL Tag") "C15")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -426,7 +426,7 @@
         (field
           (name "SKiDL Tag") "C16")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -452,7 +452,7 @@
         (field
           (name "SKiDL Tag") "C17")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -478,7 +478,7 @@
         (field
           (name "SKiDL Tag") "C18")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -504,7 +504,7 @@
         (field
           (name "SKiDL Tag") "C19")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -530,7 +530,7 @@
         (field
           (name "SKiDL Tag") "C2")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -556,7 +556,7 @@
         (field
           (name "SKiDL Tag") "C20")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -582,7 +582,7 @@
         (field
           (name "SKiDL Tag") "C21")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -608,7 +608,7 @@
         (field
           (name "SKiDL Tag") "C22")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -634,7 +634,7 @@
         (field
           (name "SKiDL Tag") "C23")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -660,7 +660,7 @@
         (field
           (name "SKiDL Tag") "C24")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -686,7 +686,7 @@
         (field
           (name "SKiDL Tag") "C25")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -712,7 +712,7 @@
         (field
           (name "SKiDL Tag") "C26")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -738,7 +738,7 @@
         (field
           (name "SKiDL Tag") "C27")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -764,7 +764,7 @@
         (field
           (name "SKiDL Tag") "C28")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -790,7 +790,7 @@
         (field
           (name "SKiDL Tag") "C29")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -816,7 +816,7 @@
         (field
           (name "SKiDL Tag") "C3")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -842,7 +842,7 @@
         (field
           (name "SKiDL Tag") "C30")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -868,7 +868,7 @@
         (field
           (name "SKiDL Tag") "C31")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -894,7 +894,7 @@
         (field
           (name "SKiDL Tag") "C32")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -920,7 +920,7 @@
         (field
           (name "SKiDL Tag") "C33")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -946,7 +946,7 @@
         (field
           (name "SKiDL Tag") "C34")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -972,7 +972,7 @@
         (field
           (name "SKiDL Tag") "C35")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -998,7 +998,7 @@
         (field
           (name "SKiDL Tag") "C36")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1024,7 +1024,7 @@
         (field
           (name "SKiDL Tag") "C37")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1050,7 +1050,7 @@
         (field
           (name "SKiDL Tag") "C38")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1076,7 +1076,7 @@
         (field
           (name "SKiDL Tag") "C39")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1102,7 +1102,7 @@
         (field
           (name "SKiDL Tag") "C4")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1128,7 +1128,7 @@
         (field
           (name "SKiDL Tag") "C40")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1154,7 +1154,7 @@
         (field
           (name "SKiDL Tag") "C41")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1180,7 +1180,7 @@
         (field
           (name "SKiDL Tag") "C42")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1206,7 +1206,7 @@
         (field
           (name "SKiDL Tag") "C43")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1232,7 +1232,7 @@
         (field
           (name "SKiDL Tag") "C44")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1258,7 +1258,7 @@
         (field
           (name "SKiDL Tag") "C45")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1284,7 +1284,7 @@
         (field
           (name "SKiDL Tag") "C46")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1310,7 +1310,7 @@
         (field
           (name "SKiDL Tag") "C47")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1336,7 +1336,7 @@
         (field
           (name "SKiDL Tag") "C48")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1362,7 +1362,7 @@
         (field
           (name "SKiDL Tag") "C49")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1388,7 +1388,7 @@
         (field
           (name "SKiDL Tag") "C5")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1414,7 +1414,7 @@
         (field
           (name "SKiDL Tag") "C50")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1440,7 +1440,7 @@
         (field
           (name "SKiDL Tag") "C51")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1466,7 +1466,7 @@
         (field
           (name "SKiDL Tag") "C52")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1492,7 +1492,7 @@
         (field
           (name "SKiDL Tag") "C53")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1518,7 +1518,7 @@
         (field
           (name "SKiDL Tag") "C54")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1544,7 +1544,7 @@
         (field
           (name "SKiDL Tag") "C55")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1570,7 +1570,7 @@
         (field
           (name "SKiDL Tag") "C56")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1596,7 +1596,7 @@
         (field
           (name "SKiDL Tag") "C57")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1622,7 +1622,7 @@
         (field
           (name "SKiDL Tag") "C58")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1648,7 +1648,7 @@
         (field
           (name "SKiDL Tag") "C59")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1674,7 +1674,7 @@
         (field
           (name "SKiDL Tag") "C6")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "CP"))
@@ -1700,7 +1700,7 @@
         (field
           (name "SKiDL Tag") "C60")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1726,7 +1726,7 @@
         (field
           (name "SKiDL Tag") "C61")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1752,7 +1752,7 @@
         (field
           (name "SKiDL Tag") "C62")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1778,7 +1778,7 @@
         (field
           (name "SKiDL Tag") "C63")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1804,7 +1804,7 @@
         (field
           (name "SKiDL Tag") "C64")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1830,7 +1830,7 @@
         (field
           (name "SKiDL Tag") "C65")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1856,7 +1856,7 @@
         (field
           (name "SKiDL Tag") "C66")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1882,7 +1882,7 @@
         (field
           (name "SKiDL Tag") "C67")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1908,7 +1908,7 @@
         (field
           (name "SKiDL Tag") "C68")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1934,7 +1934,7 @@
         (field
           (name "SKiDL Tag") "C69")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1960,7 +1960,7 @@
         (field
           (name "SKiDL Tag") "C7")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -1986,7 +1986,7 @@
         (field
           (name "SKiDL Tag") "C70")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2012,7 +2012,7 @@
         (field
           (name "SKiDL Tag") "C71")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2038,7 +2038,7 @@
         (field
           (name "SKiDL Tag") "C72")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2064,7 +2064,7 @@
         (field
           (name "SKiDL Tag") "C73")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2090,7 +2090,7 @@
         (field
           (name "SKiDL Tag") "C74")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2116,7 +2116,7 @@
         (field
           (name "SKiDL Tag") "C75")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2142,7 +2142,7 @@
         (field
           (name "SKiDL Tag") "C76")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2168,7 +2168,7 @@
         (field
           (name "SKiDL Tag") "C77")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2194,7 +2194,7 @@
         (field
           (name "SKiDL Tag") "C78")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2220,7 +2220,7 @@
         (field
           (name "SKiDL Tag") "C79")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2246,7 +2246,7 @@
         (field
           (name "SKiDL Tag") "C8")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2272,7 +2272,7 @@
         (field
           (name "SKiDL Tag") "C80")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2298,7 +2298,7 @@
         (field
           (name "SKiDL Tag") "C81")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2324,7 +2324,7 @@
         (field
           (name "SKiDL Tag") "C82")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2350,7 +2350,7 @@
         (field
           (name "SKiDL Tag") "C83")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2376,7 +2376,7 @@
         (field
           (name "SKiDL Tag") "C84")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2402,7 +2402,7 @@
         (field
           (name "SKiDL Tag") "C85")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2428,7 +2428,7 @@
         (field
           (name "SKiDL Tag") "C86")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2454,7 +2454,7 @@
         (field
           (name "SKiDL Tag") "C87")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2480,7 +2480,7 @@
         (field
           (name "SKiDL Tag") "C88")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2506,7 +2506,7 @@
         (field
           (name "SKiDL Tag") "C89")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2532,7 +2532,7 @@
         (field
           (name "SKiDL Tag") "C9")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2558,7 +2558,7 @@
         (field
           (name "SKiDL Tag") "C90")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2584,7 +2584,7 @@
         (field
           (name "SKiDL Tag") "C91")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2610,7 +2610,7 @@
         (field
           (name "SKiDL Tag") "C92")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2636,7 +2636,7 @@
         (field
           (name "SKiDL Tag") "C93")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2662,7 +2662,7 @@
         (field
           (name "SKiDL Tag") "C94")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2688,7 +2688,7 @@
         (field
           (name "SKiDL Tag") "C95")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2714,7 +2714,7 @@
         (field
           (name "SKiDL Tag") "C96")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2740,7 +2740,7 @@
         (field
           (name "SKiDL Tag") "C97")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "C"))
@@ -2766,7 +2766,7 @@
         (field
           (name "SKiDL Tag") "D1")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "Diode"))
@@ -2792,7 +2792,7 @@
         (field
           (name "SKiDL Tag") "D10")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -2808,7 +2808,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603_GREEN")
+          (name "MPN") "LTST-C191KGKT")
         (field
           (name "Description") "LED")
         (field
@@ -2818,7 +2818,7 @@
         (field
           (name "SKiDL Tag") "D11")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "LED"))
@@ -2834,7 +2834,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603_RED")
+          (name "MPN") "LTST-C191KRKT")
         (field
           (name "Description") "LED")
         (field
@@ -2844,7 +2844,7 @@
         (field
           (name "SKiDL Tag") "D12")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "LED"))
@@ -2870,7 +2870,7 @@
         (field
           (name "SKiDL Tag") "D13")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -2896,7 +2896,7 @@
         (field
           (name "SKiDL Tag") "D14")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -2912,7 +2912,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603_GREEN")
+          (name "MPN") "LTST-C191KGKT")
         (field
           (name "Description") "LED")
         (field
@@ -2922,7 +2922,7 @@
         (field
           (name "SKiDL Tag") "D15")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "LED"))
@@ -2938,7 +2938,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603_RED")
+          (name "MPN") "LTST-C191KRKT")
         (field
           (name "Description") "LED")
         (field
@@ -2948,7 +2948,7 @@
         (field
           (name "SKiDL Tag") "D16")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "LED"))
@@ -2974,7 +2974,7 @@
         (field
           (name "SKiDL Tag") "D17")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -3000,7 +3000,7 @@
         (field
           (name "SKiDL Tag") "D18")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -3016,7 +3016,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603_GREEN")
+          (name "MPN") "LTST-C191KGKT")
         (field
           (name "Description") "LED")
         (field
@@ -3026,7 +3026,7 @@
         (field
           (name "SKiDL Tag") "D19")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "LED"))
@@ -3052,7 +3052,7 @@
         (field
           (name "SKiDL Tag") "D1")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -3078,7 +3078,7 @@
         (field
           (name "SKiDL Tag") "D2")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TVS"))
@@ -3094,7 +3094,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603_RED")
+          (name "MPN") "LTST-C191KRKT")
         (field
           (name "Description") "LED")
         (field
@@ -3104,7 +3104,7 @@
         (field
           (name "SKiDL Tag") "D20")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "LED"))
@@ -3130,7 +3130,7 @@
         (field
           (name "SKiDL Tag") "D21")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -3156,7 +3156,7 @@
         (field
           (name "SKiDL Tag") "D22")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -3172,7 +3172,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603_GREEN")
+          (name "MPN") "LTST-C191KGKT")
         (field
           (name "Description") "LED")
         (field
@@ -3182,7 +3182,7 @@
         (field
           (name "SKiDL Tag") "D23")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "LED"))
@@ -3198,7 +3198,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603_RED")
+          (name "MPN") "LTST-C191KRKT")
         (field
           (name "Description") "LED")
         (field
@@ -3208,7 +3208,7 @@
         (field
           (name "SKiDL Tag") "D24")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "LED"))
@@ -3234,7 +3234,7 @@
         (field
           (name "SKiDL Tag") "D25")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -3260,7 +3260,7 @@
         (field
           (name "SKiDL Tag") "D26")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -3276,7 +3276,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603_GREEN")
+          (name "MPN") "LTST-C191KGKT")
         (field
           (name "Description") "LED")
         (field
@@ -3286,7 +3286,7 @@
         (field
           (name "SKiDL Tag") "D27")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "LED"))
@@ -3302,7 +3302,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603_RED")
+          (name "MPN") "LTST-C191KRKT")
         (field
           (name "Description") "LED")
         (field
@@ -3312,7 +3312,7 @@
         (field
           (name "SKiDL Tag") "D28")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "LED"))
@@ -3338,7 +3338,7 @@
         (field
           (name "SKiDL Tag") "D29")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -3364,7 +3364,7 @@
         (field
           (name "SKiDL Tag") "D2")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TVS"))
@@ -3390,7 +3390,7 @@
         (field
           (name "SKiDL Tag") "D3")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -3416,7 +3416,7 @@
         (field
           (name "SKiDL Tag") "D30")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -3432,7 +3432,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603_GREEN")
+          (name "MPN") "LTST-C191KGKT")
         (field
           (name "Description") "LED")
         (field
@@ -3442,7 +3442,7 @@
         (field
           (name "SKiDL Tag") "D31")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "LED"))
@@ -3458,7 +3458,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603_RED")
+          (name "MPN") "LTST-C191KRKT")
         (field
           (name "Description") "LED")
         (field
@@ -3468,7 +3468,7 @@
         (field
           (name "SKiDL Tag") "D32")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "LED"))
@@ -3494,7 +3494,7 @@
         (field
           (name "SKiDL Tag") "D33")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -3520,7 +3520,7 @@
         (field
           (name "SKiDL Tag") "D34")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -3536,7 +3536,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603_GREEN")
+          (name "MPN") "LTST-C191KGKT")
         (field
           (name "Description") "LED")
         (field
@@ -3546,7 +3546,7 @@
         (field
           (name "SKiDL Tag") "D35")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "LED"))
@@ -3562,7 +3562,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603_RED")
+          (name "MPN") "LTST-C191KRKT")
         (field
           (name "Description") "LED")
         (field
@@ -3572,7 +3572,7 @@
         (field
           (name "SKiDL Tag") "D36")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "LED"))
@@ -3598,7 +3598,7 @@
         (field
           (name "SKiDL Tag") "D37")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -3624,7 +3624,7 @@
         (field
           (name "SKiDL Tag") "D38")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -3650,7 +3650,7 @@
         (field
           (name "SKiDL Tag") "D4")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -3676,7 +3676,7 @@
         (field
           (name "SKiDL Tag") "D5")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TVS"))
@@ -3702,7 +3702,7 @@
         (field
           (name "SKiDL Tag") "D6")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -3718,7 +3718,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603_GREEN")
+          (name "MPN") "LTST-C191KGKT")
         (field
           (name "Description") "LED")
         (field
@@ -3728,7 +3728,7 @@
         (field
           (name "SKiDL Tag") "D7")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "LED"))
@@ -3744,7 +3744,7 @@
       (footprint "LED_SMD:LED_0603_1608Metric")
       (fields
         (field
-          (name "MPN") "LED_0603_RED")
+          (name "MPN") "LTST-C191KRKT")
         (field
           (name "Description") "LED")
         (field
@@ -3754,7 +3754,7 @@
         (field
           (name "SKiDL Tag") "D8")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "LED"))
@@ -3780,7 +3780,7 @@
         (field
           (name "SKiDL Tag") "D9")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "ESD_Bidir"))
@@ -3789,6 +3789,32 @@
         (tstamps "/fd6c834b-2630-545f-9eba-2a7e12b4fedf/"))
       (component_classes)
       (tstamps "e077fbd4-89a8-5b51-94b8-80e05c8aeb8f"))
+    (comp
+      (ref "F1")
+      (value "4A fast")
+      (description "Chip fuse")
+      (footprint "Fuse:Fuse_Littelfuse_NANO2_451_453")
+      (fields
+        (field
+          (name "MPN") "0451004.MRL")
+        (field
+          (name "Description") "Chip fuse")
+        (field
+          (name "Footprint") "Fuse:Fuse_Littelfuse_NANO2_451_453")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "F1")
+        (field
+          (name "SKiDL Line") "backplane.py:80"))
+      (libsource
+        (lib "openpack_rack")
+        (part "Fuse"))
+      (sheetpath
+        (names "/power1/")
+        (tstamps "/1c71258b-4a63-53c3-96a6-ba5ec56f90dd/"))
+      (component_classes)
+      (tstamps "af8a4084-94ea-53b2-87ad-b47689031995"))
     (comp
       (ref "FB1")
       (value "600R@100M")
@@ -3806,7 +3832,7 @@
         (field
           (name "SKiDL Tag") "FB1")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "L"))
@@ -3832,7 +3858,7 @@
         (field
           (name "SKiDL Tag") "FB2")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "L"))
@@ -3858,7 +3884,7 @@
         (field
           (name "SKiDL Tag") "J1")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "DC_Jack"))
@@ -3874,7 +3900,7 @@
       (footprint "Connector_PinSocket_2.54mm:PinSocket_2x13_P2.54mm_Vertical")
       (fields
         (field
-          (name "MPN") "PPPC132LFBN-RC")
+          (name "MPN") "M20-7831346")
         (field
           (name "Description") "Receiver slot socket 2x13 2.54 mm, position 14 plugged (ADR-0014 key)")
         (field
@@ -3884,7 +3910,7 @@
         (field
           (name "SKiDL Tag") "J10")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "Conn_Slot"))
@@ -3900,7 +3926,7 @@
       (footprint "Connector_PinSocket_2.54mm:PinSocket_2x13_P2.54mm_Vertical")
       (fields
         (field
-          (name "MPN") "PPPC132LFBN-RC")
+          (name "MPN") "M20-7831346")
         (field
           (name "Description") "Receiver slot socket 2x13 2.54 mm, position 14 plugged (ADR-0014 key)")
         (field
@@ -3910,7 +3936,7 @@
         (field
           (name "SKiDL Tag") "J11")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "Conn_Slot"))
@@ -3926,7 +3952,7 @@
       (footprint "Connector_PinSocket_2.54mm:PinSocket_2x13_P2.54mm_Vertical")
       (fields
         (field
-          (name "MPN") "PPPC132LFBN-RC")
+          (name "MPN") "M20-7831346")
         (field
           (name "Description") "Receiver slot socket 2x13 2.54 mm, position 14 plugged (ADR-0014 key)")
         (field
@@ -3936,7 +3962,7 @@
         (field
           (name "SKiDL Tag") "J12")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "Conn_Slot"))
@@ -3952,7 +3978,7 @@
       (footprint "Connector_PinSocket_2.54mm:PinSocket_2x13_P2.54mm_Vertical")
       (fields
         (field
-          (name "MPN") "PPPC132LFBN-RC")
+          (name "MPN") "M20-7831346")
         (field
           (name "Description") "Receiver slot socket 2x13 2.54 mm, position 14 plugged (ADR-0014 key)")
         (field
@@ -3962,7 +3988,7 @@
         (field
           (name "SKiDL Tag") "J13")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "Conn_Slot"))
@@ -3978,7 +4004,7 @@
       (footprint "Connector_PinSocket_2.54mm:PinSocket_2x13_P2.54mm_Vertical")
       (fields
         (field
-          (name "MPN") "PPPC132LFBN-RC")
+          (name "MPN") "M20-7831346")
         (field
           (name "Description") "Receiver slot socket 2x13 2.54 mm, position 14 plugged (ADR-0014 key)")
         (field
@@ -3988,7 +4014,7 @@
         (field
           (name "SKiDL Tag") "J14")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "Conn_Slot"))
@@ -4004,7 +4030,7 @@
       (footprint "Connector_PinSocket_2.54mm:PinSocket_2x13_P2.54mm_Vertical")
       (fields
         (field
-          (name "MPN") "PPPC132LFBN-RC")
+          (name "MPN") "M20-7831346")
         (field
           (name "Description") "Receiver slot socket 2x13 2.54 mm, position 14 plugged (ADR-0014 key)")
         (field
@@ -4014,7 +4040,7 @@
         (field
           (name "SKiDL Tag") "J15")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "Conn_Slot"))
@@ -4030,7 +4056,7 @@
       (footprint "Connector_PinSocket_2.54mm:PinSocket_2x13_P2.54mm_Vertical")
       (fields
         (field
-          (name "MPN") "PPPC132LFBN-RC")
+          (name "MPN") "M20-7831346")
         (field
           (name "Description") "Receiver slot socket 2x13 2.54 mm, position 14 plugged (ADR-0014 key)")
         (field
@@ -4040,7 +4066,7 @@
         (field
           (name "SKiDL Tag") "J16")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "Conn_Slot"))
@@ -4056,7 +4082,7 @@
       (footprint "Connector_PinSocket_2.54mm:PinSocket_2x13_P2.54mm_Vertical")
       (fields
         (field
-          (name "MPN") "PPPC132LFBN-RC")
+          (name "MPN") "M20-7831346")
         (field
           (name "Description") "Receiver slot socket 2x13 2.54 mm, position 14 plugged (ADR-0014 key)")
         (field
@@ -4066,7 +4092,7 @@
         (field
           (name "SKiDL Tag") "J17")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "Conn_Slot"))
@@ -4092,7 +4118,7 @@
         (field
           (name "SKiDL Tag") "J2")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "Conn_Host40"))
@@ -4118,7 +4144,7 @@
         (field
           (name "SKiDL Tag") "J20")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "XLR3_Male"))
@@ -4144,7 +4170,7 @@
         (field
           (name "SKiDL Tag") "J21")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "XLR3_Male"))
@@ -4170,7 +4196,7 @@
         (field
           (name "SKiDL Tag") "J22")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "XLR3_Male"))
@@ -4196,7 +4222,7 @@
         (field
           (name "SKiDL Tag") "J23")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "XLR3_Male"))
@@ -4222,7 +4248,7 @@
         (field
           (name "SKiDL Tag") "J24")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "XLR3_Male"))
@@ -4248,7 +4274,7 @@
         (field
           (name "SKiDL Tag") "J25")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "XLR3_Male"))
@@ -4274,7 +4300,7 @@
         (field
           (name "SKiDL Tag") "J26")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "XLR3_Male"))
@@ -4300,7 +4326,7 @@
         (field
           (name "SKiDL Tag") "J27")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "XLR3_Male"))
@@ -4326,7 +4352,7 @@
         (field
           (name "SKiDL Tag") "J3")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "BNC"))
@@ -4352,7 +4378,7 @@
         (field
           (name "SKiDL Tag") "J30")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "UFL"))
@@ -4378,7 +4404,7 @@
         (field
           (name "SKiDL Tag") "J31")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "UFL"))
@@ -4404,7 +4430,7 @@
         (field
           (name "SKiDL Tag") "J32")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "UFL"))
@@ -4430,7 +4456,7 @@
         (field
           (name "SKiDL Tag") "J33")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "UFL"))
@@ -4456,7 +4482,7 @@
         (field
           (name "SKiDL Tag") "J34")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "UFL"))
@@ -4482,7 +4508,7 @@
         (field
           (name "SKiDL Tag") "J35")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "UFL"))
@@ -4508,7 +4534,7 @@
         (field
           (name "SKiDL Tag") "J36")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "UFL"))
@@ -4534,7 +4560,7 @@
         (field
           (name "SKiDL Tag") "J37")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "UFL"))
@@ -4560,7 +4586,7 @@
         (field
           (name "SKiDL Tag") "J4")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "BNC"))
@@ -4586,7 +4612,7 @@
         (field
           (name "SKiDL Tag") "J40")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "UFL"))
@@ -4612,7 +4638,7 @@
         (field
           (name "SKiDL Tag") "J41")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "UFL"))
@@ -4638,7 +4664,7 @@
         (field
           (name "SKiDL Tag") "J42")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "UFL"))
@@ -4664,7 +4690,7 @@
         (field
           (name "SKiDL Tag") "J43")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "UFL"))
@@ -4690,7 +4716,7 @@
         (field
           (name "SKiDL Tag") "J44")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "UFL"))
@@ -4716,7 +4742,7 @@
         (field
           (name "SKiDL Tag") "J45")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "UFL"))
@@ -4742,7 +4768,7 @@
         (field
           (name "SKiDL Tag") "J46")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "UFL"))
@@ -4768,7 +4794,7 @@
         (field
           (name "SKiDL Tag") "J47")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "UFL"))
@@ -4794,7 +4820,7 @@
         (field
           (name "SKiDL Tag") "J5")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "Conn_01x02"))
@@ -4820,7 +4846,7 @@
         (field
           (name "SKiDL Tag") "L1")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "L"))
@@ -4846,7 +4872,7 @@
         (field
           (name "SKiDL Tag") "L1")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "L"))
@@ -4872,7 +4898,7 @@
         (field
           (name "SKiDL Tag") "L2")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "L"))
@@ -4898,7 +4924,7 @@
         (field
           (name "SKiDL Tag") "L3")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "L"))
@@ -4924,7 +4950,7 @@
         (field
           (name "SKiDL Tag") "L4")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "L"))
@@ -4950,7 +4976,7 @@
         (field
           (name "SKiDL Tag") "NT1")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "NetTie"))
@@ -4976,7 +5002,7 @@
         (field
           (name "SKiDL Tag") "Q1")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "PMOS_SO8"))
@@ -4994,6 +5020,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5002,7 +5030,7 @@
         (field
           (name "SKiDL Tag") "R1")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5020,6 +5048,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5028,7 +5058,7 @@
         (field
           (name "SKiDL Tag") "R10")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5046,6 +5076,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5054,7 +5086,7 @@
         (field
           (name "SKiDL Tag") "R11")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5072,6 +5104,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5080,7 +5114,7 @@
         (field
           (name "SKiDL Tag") "R12")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5098,6 +5132,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5106,7 +5142,7 @@
         (field
           (name "SKiDL Tag") "R13")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5124,6 +5160,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5132,7 +5170,7 @@
         (field
           (name "SKiDL Tag") "R14")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5150,6 +5188,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5158,7 +5198,7 @@
         (field
           (name "SKiDL Tag") "R15")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5176,6 +5216,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5184,7 +5226,7 @@
         (field
           (name "SKiDL Tag") "R16")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5195,22 +5237,24 @@
       (tstamps "e5dcfbea-0ec7-5013-b76d-bc6d50b6dda5"))
     (comp
       (ref "R17")
-      (value "10")
+      (value "1")
       (description "Resistor")
-      (footprint "Resistor_SMD:R_0402_1005Metric")
+      (footprint "Resistor_SMD:R_2512_6332Metric")
       (fields
         (field
-          (name "MPN") "R_0402_1%")
+          (name "MPN") "R_2512_1R_1W")
+        (field
+          (name "P_W") "1.0")
         (field
           (name "Description") "Resistor")
         (field
-          (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+          (name "Footprint") "Resistor_SMD:R_2512_6332Metric")
         (field
           (name "Datasheet"))
         (field
           (name "SKiDL Tag") "R17")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5228,6 +5272,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5236,7 +5282,7 @@
         (field
           (name "SKiDL Tag") "R18")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5254,6 +5300,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5262,7 +5310,7 @@
         (field
           (name "SKiDL Tag") "R19")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5280,6 +5328,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5288,7 +5338,7 @@
         (field
           (name "SKiDL Tag") "R2")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5306,6 +5356,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5314,7 +5366,7 @@
         (field
           (name "SKiDL Tag") "R20")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5332,6 +5384,8 @@
         (field
           (name "MPN") "R_0402_0R")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5340,7 +5394,7 @@
         (field
           (name "SKiDL Tag") "R21")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5358,6 +5412,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5366,7 +5422,7 @@
         (field
           (name "SKiDL Tag") "R22")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5384,6 +5440,8 @@
         (field
           (name "MPN") "R_0402_100R_TF")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5392,7 +5450,7 @@
         (field
           (name "SKiDL Tag") "R23")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5410,6 +5468,8 @@
         (field
           (name "MPN") "R_0402_100R_TF")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5418,7 +5478,7 @@
         (field
           (name "SKiDL Tag") "R24")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5436,6 +5496,8 @@
         (field
           (name "MPN") "R_0402_100R_TF")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5444,7 +5506,7 @@
         (field
           (name "SKiDL Tag") "R25")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5462,6 +5524,8 @@
         (field
           (name "MPN") "R_0402_100R_TF")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5470,7 +5534,7 @@
         (field
           (name "SKiDL Tag") "R26")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5488,6 +5552,8 @@
         (field
           (name "MPN") "R_0402_100R_TF")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5496,7 +5562,7 @@
         (field
           (name "SKiDL Tag") "R27")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5514,6 +5580,8 @@
         (field
           (name "MPN") "R_0402_100R_TF")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5522,7 +5590,7 @@
         (field
           (name "SKiDL Tag") "R28")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5540,6 +5608,8 @@
         (field
           (name "MPN") "R_0402_100R_TF")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5548,7 +5618,7 @@
         (field
           (name "SKiDL Tag") "R29")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5566,6 +5636,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5574,7 +5646,7 @@
         (field
           (name "SKiDL Tag") "R3")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5585,22 +5657,24 @@
       (tstamps "f8849213-0be1-5a44-9236-04d66813ccb6"))
     (comp
       (ref "R30")
-      (value "10")
+      (value "1")
       (description "Resistor")
-      (footprint "Resistor_SMD:R_0402_1005Metric")
+      (footprint "Resistor_SMD:R_2512_6332Metric")
       (fields
         (field
-          (name "MPN") "R_0402_1%")
+          (name "MPN") "R_2512_1R_1W")
+        (field
+          (name "P_W") "1.0")
         (field
           (name "Description") "Resistor")
         (field
-          (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+          (name "Footprint") "Resistor_SMD:R_2512_6332Metric")
         (field
           (name "Datasheet"))
         (field
           (name "SKiDL Tag") "R30")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5618,6 +5692,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5626,7 +5702,7 @@
         (field
           (name "SKiDL Tag") "R31")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5644,6 +5720,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5652,7 +5730,7 @@
         (field
           (name "SKiDL Tag") "R32")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5670,6 +5748,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5678,7 +5758,7 @@
         (field
           (name "SKiDL Tag") "R33")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5696,6 +5776,8 @@
         (field
           (name "MPN") "R_0402_0R")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5704,7 +5786,7 @@
         (field
           (name "SKiDL Tag") "R34")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5722,6 +5804,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5730,7 +5814,7 @@
         (field
           (name "SKiDL Tag") "R35")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5748,6 +5832,8 @@
         (field
           (name "MPN") "R_0402_100R_TF")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5756,7 +5842,7 @@
         (field
           (name "SKiDL Tag") "R36")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5774,6 +5860,8 @@
         (field
           (name "MPN") "R_0402_100R_TF")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5782,7 +5870,7 @@
         (field
           (name "SKiDL Tag") "R37")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5800,6 +5888,8 @@
         (field
           (name "MPN") "R_0402_100R_TF")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5808,7 +5898,7 @@
         (field
           (name "SKiDL Tag") "R38")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5826,6 +5916,8 @@
         (field
           (name "MPN") "R_0402_100R_TF")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5834,7 +5926,7 @@
         (field
           (name "SKiDL Tag") "R39")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5852,6 +5944,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5860,7 +5954,7 @@
         (field
           (name "SKiDL Tag") "R4")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5878,6 +5972,8 @@
         (field
           (name "MPN") "R_0402_100R_TF")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5886,7 +5982,7 @@
         (field
           (name "SKiDL Tag") "R40")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5904,6 +6000,8 @@
         (field
           (name "MPN") "R_0402_100R_TF")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5912,7 +6010,7 @@
         (field
           (name "SKiDL Tag") "R41")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5930,6 +6028,8 @@
         (field
           (name "MPN") "R_0402_100R_TF")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5938,7 +6038,7 @@
         (field
           (name "SKiDL Tag") "R42")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5956,6 +6056,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5964,7 +6066,7 @@
         (field
           (name "SKiDL Tag") "R43")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -5982,6 +6084,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -5990,7 +6094,7 @@
         (field
           (name "SKiDL Tag") "R44")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6008,6 +6112,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6016,7 +6122,7 @@
         (field
           (name "SKiDL Tag") "R45")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6034,6 +6140,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6042,7 +6150,7 @@
         (field
           (name "SKiDL Tag") "R46")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6060,6 +6168,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6068,7 +6178,7 @@
         (field
           (name "SKiDL Tag") "R47")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6086,6 +6196,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6094,7 +6206,7 @@
         (field
           (name "SKiDL Tag") "R48")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6112,6 +6224,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6120,7 +6234,7 @@
         (field
           (name "SKiDL Tag") "R49")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6138,6 +6252,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6146,7 +6262,7 @@
         (field
           (name "SKiDL Tag") "R5")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6164,6 +6280,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6172,7 +6290,7 @@
         (field
           (name "SKiDL Tag") "R50")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6190,6 +6308,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6198,7 +6318,7 @@
         (field
           (name "SKiDL Tag") "R51")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6216,6 +6336,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6224,7 +6346,7 @@
         (field
           (name "SKiDL Tag") "R52")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6242,6 +6364,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6250,7 +6374,7 @@
         (field
           (name "SKiDL Tag") "R53")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6268,6 +6392,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6276,7 +6402,7 @@
         (field
           (name "SKiDL Tag") "R54")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6294,6 +6420,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6302,7 +6430,7 @@
         (field
           (name "SKiDL Tag") "R55")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6320,6 +6448,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6328,7 +6458,7 @@
         (field
           (name "SKiDL Tag") "R56")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6346,6 +6476,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6354,7 +6486,7 @@
         (field
           (name "SKiDL Tag") "R57")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6372,6 +6504,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6380,7 +6514,7 @@
         (field
           (name "SKiDL Tag") "R58")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6398,6 +6532,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6406,7 +6542,7 @@
         (field
           (name "SKiDL Tag") "R59")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6424,6 +6560,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6432,7 +6570,7 @@
         (field
           (name "SKiDL Tag") "R6")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6450,6 +6588,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6458,7 +6598,7 @@
         (field
           (name "SKiDL Tag") "R60")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6476,6 +6616,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6484,7 +6626,7 @@
         (field
           (name "SKiDL Tag") "R61")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6502,6 +6644,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6510,7 +6654,7 @@
         (field
           (name "SKiDL Tag") "R62")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6528,6 +6672,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6536,7 +6682,7 @@
         (field
           (name "SKiDL Tag") "R63")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6554,6 +6700,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6562,7 +6710,7 @@
         (field
           (name "SKiDL Tag") "R64")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6580,6 +6728,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6588,7 +6738,7 @@
         (field
           (name "SKiDL Tag") "R65")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6606,6 +6756,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6614,7 +6766,7 @@
         (field
           (name "SKiDL Tag") "R66")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6632,6 +6784,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6640,7 +6794,7 @@
         (field
           (name "SKiDL Tag") "R67")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6658,6 +6812,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6666,7 +6822,7 @@
         (field
           (name "SKiDL Tag") "R68")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6684,6 +6840,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6692,7 +6850,7 @@
         (field
           (name "SKiDL Tag") "R69")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6710,6 +6868,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6718,7 +6878,7 @@
         (field
           (name "SKiDL Tag") "R7")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6736,6 +6896,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6744,7 +6906,7 @@
         (field
           (name "SKiDL Tag") "R70")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6762,6 +6924,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6770,7 +6934,7 @@
         (field
           (name "SKiDL Tag") "R71")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6788,6 +6952,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6796,7 +6962,7 @@
         (field
           (name "SKiDL Tag") "R72")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6814,6 +6980,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6822,7 +6990,7 @@
         (field
           (name "SKiDL Tag") "R73")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6840,6 +7008,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6848,7 +7018,7 @@
         (field
           (name "SKiDL Tag") "R74")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6866,6 +7036,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6874,7 +7046,7 @@
         (field
           (name "SKiDL Tag") "R75")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6892,6 +7064,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6900,7 +7074,7 @@
         (field
           (name "SKiDL Tag") "R76")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6918,6 +7092,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6926,7 +7102,7 @@
         (field
           (name "SKiDL Tag") "R77")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6944,6 +7120,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6952,7 +7130,7 @@
         (field
           (name "SKiDL Tag") "R78")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6970,6 +7148,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -6978,7 +7158,7 @@
         (field
           (name "SKiDL Tag") "R79")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -6996,6 +7176,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7004,7 +7186,7 @@
         (field
           (name "SKiDL Tag") "R8")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7022,6 +7204,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7030,7 +7214,7 @@
         (field
           (name "SKiDL Tag") "R80")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7048,6 +7232,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7056,7 +7242,7 @@
         (field
           (name "SKiDL Tag") "R81")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7074,6 +7260,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7082,7 +7270,7 @@
         (field
           (name "SKiDL Tag") "R82")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7100,6 +7288,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7108,7 +7298,7 @@
         (field
           (name "SKiDL Tag") "R83")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7126,6 +7316,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7134,7 +7326,7 @@
         (field
           (name "SKiDL Tag") "R84")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7152,6 +7344,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7160,7 +7354,7 @@
         (field
           (name "SKiDL Tag") "R85")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7178,6 +7372,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7186,7 +7382,7 @@
         (field
           (name "SKiDL Tag") "R86")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7204,6 +7400,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7212,7 +7410,7 @@
         (field
           (name "SKiDL Tag") "R87")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7230,6 +7428,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7238,7 +7438,7 @@
         (field
           (name "SKiDL Tag") "R88")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7256,6 +7456,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7264,7 +7466,7 @@
         (field
           (name "SKiDL Tag") "R89")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7282,6 +7484,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7290,7 +7494,7 @@
         (field
           (name "SKiDL Tag") "R9")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7308,6 +7512,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7316,7 +7522,7 @@
         (field
           (name "SKiDL Tag") "R90")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7334,6 +7540,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7342,7 +7550,7 @@
         (field
           (name "SKiDL Tag") "R91")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7360,6 +7568,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7368,7 +7578,7 @@
         (field
           (name "SKiDL Tag") "R92")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7386,6 +7596,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7394,7 +7606,7 @@
         (field
           (name "SKiDL Tag") "R93")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7412,6 +7624,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7420,7 +7634,7 @@
         (field
           (name "SKiDL Tag") "R94")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7438,6 +7652,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7446,7 +7662,7 @@
         (field
           (name "SKiDL Tag") "R95")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7464,6 +7680,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7472,7 +7690,7 @@
         (field
           (name "SKiDL Tag") "R96")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7490,6 +7708,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7498,7 +7718,7 @@
         (field
           (name "SKiDL Tag") "R97")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7516,6 +7736,8 @@
         (field
           (name "MPN") "R_0402_1%")
         (field
+          (name "P_W") "0.0625")
+        (field
           (name "Description") "Resistor")
         (field
           (name "Footprint") "Resistor_SMD:R_0402_1005Metric")
@@ -7524,7 +7746,7 @@
         (field
           (name "SKiDL Tag") "R98")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "R"))
@@ -7550,7 +7772,7 @@
         (field
           (name "SKiDL Tag") "TL1")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -7576,7 +7798,7 @@
         (field
           (name "SKiDL Tag") "TL10")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -7602,7 +7824,7 @@
         (field
           (name "SKiDL Tag") "TL11")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -7628,7 +7850,7 @@
         (field
           (name "SKiDL Tag") "TL12")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -7654,7 +7876,7 @@
         (field
           (name "SKiDL Tag") "TL13")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -7680,7 +7902,7 @@
         (field
           (name "SKiDL Tag") "TL14")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -7706,7 +7928,7 @@
         (field
           (name "SKiDL Tag") "TL15")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -7732,7 +7954,7 @@
         (field
           (name "SKiDL Tag") "TL16")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -7758,7 +7980,7 @@
         (field
           (name "SKiDL Tag") "TL17")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -7784,7 +8006,7 @@
         (field
           (name "SKiDL Tag") "TL18")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -7810,7 +8032,7 @@
         (field
           (name "SKiDL Tag") "TL19")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -7836,7 +8058,7 @@
         (field
           (name "SKiDL Tag") "TL2")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -7862,7 +8084,7 @@
         (field
           (name "SKiDL Tag") "TL20")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -7888,7 +8110,7 @@
         (field
           (name "SKiDL Tag") "TL21")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -7914,7 +8136,7 @@
         (field
           (name "SKiDL Tag") "TL22")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -7940,7 +8162,7 @@
         (field
           (name "SKiDL Tag") "TL23")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -7966,7 +8188,7 @@
         (field
           (name "SKiDL Tag") "TL24")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -7992,7 +8214,7 @@
         (field
           (name "SKiDL Tag") "TL25")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8018,7 +8240,7 @@
         (field
           (name "SKiDL Tag") "TL26")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8044,7 +8266,7 @@
         (field
           (name "SKiDL Tag") "TL27")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8070,7 +8292,7 @@
         (field
           (name "SKiDL Tag") "TL28")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8096,7 +8318,7 @@
         (field
           (name "SKiDL Tag") "TL29")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8122,7 +8344,7 @@
         (field
           (name "SKiDL Tag") "TL3")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8148,7 +8370,7 @@
         (field
           (name "SKiDL Tag") "TL30")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8174,7 +8396,7 @@
         (field
           (name "SKiDL Tag") "TL31")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8200,7 +8422,7 @@
         (field
           (name "SKiDL Tag") "TL32")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8226,7 +8448,7 @@
         (field
           (name "SKiDL Tag") "TL33")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8252,7 +8474,7 @@
         (field
           (name "SKiDL Tag") "TL34")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8278,7 +8500,7 @@
         (field
           (name "SKiDL Tag") "TL35")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8304,7 +8526,7 @@
         (field
           (name "SKiDL Tag") "TL36")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8330,7 +8552,7 @@
         (field
           (name "SKiDL Tag") "TL37")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8356,7 +8578,7 @@
         (field
           (name "SKiDL Tag") "TL38")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8382,7 +8604,7 @@
         (field
           (name "SKiDL Tag") "TL39")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8408,7 +8630,7 @@
         (field
           (name "SKiDL Tag") "TL4")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8434,7 +8656,7 @@
         (field
           (name "SKiDL Tag") "TL40")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8460,7 +8682,7 @@
         (field
           (name "SKiDL Tag") "TL41")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8486,7 +8708,7 @@
         (field
           (name "SKiDL Tag") "TL42")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8512,7 +8734,7 @@
         (field
           (name "SKiDL Tag") "TL43")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8538,7 +8760,7 @@
         (field
           (name "SKiDL Tag") "TL44")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8564,7 +8786,7 @@
         (field
           (name "SKiDL Tag") "TL5")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8590,7 +8812,7 @@
         (field
           (name "SKiDL Tag") "TL6")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8616,7 +8838,7 @@
         (field
           (name "SKiDL Tag") "TL7")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8642,7 +8864,7 @@
         (field
           (name "SKiDL Tag") "TL8")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8668,7 +8890,7 @@
         (field
           (name "SKiDL Tag") "TL9")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TL"))
@@ -8694,7 +8916,7 @@
         (field
           (name "SKiDL Tag") "U1")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -8720,7 +8942,7 @@
         (field
           (name "SKiDL Tag") "U10")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -8746,7 +8968,7 @@
         (field
           (name "SKiDL Tag") "U11")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -8772,7 +8994,7 @@
         (field
           (name "SKiDL Tag") "U12")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -8798,7 +9020,7 @@
         (field
           (name "SKiDL Tag") "U2")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS62933"))
@@ -8824,7 +9046,7 @@
         (field
           (name "SKiDL Tag") "U20")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -8850,7 +9072,7 @@
         (field
           (name "SKiDL Tag") "U21")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -8876,7 +9098,7 @@
         (field
           (name "SKiDL Tag") "U22")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -8902,7 +9124,7 @@
         (field
           (name "SKiDL Tag") "U23")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -8928,7 +9150,7 @@
         (field
           (name "SKiDL Tag") "U24")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -8954,7 +9176,7 @@
         (field
           (name "SKiDL Tag") "U25")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -8980,7 +9202,7 @@
         (field
           (name "SKiDL Tag") "U26")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -9006,7 +9228,7 @@
         (field
           (name "SKiDL Tag") "U27")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -9032,7 +9254,7 @@
         (field
           (name "SKiDL Tag") "U3")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TLV76733"))
@@ -9058,7 +9280,7 @@
         (field
           (name "SKiDL Tag") "U30")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -9084,7 +9306,7 @@
         (field
           (name "SKiDL Tag") "U31")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -9110,7 +9332,7 @@
         (field
           (name "SKiDL Tag") "U32")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -9136,7 +9358,7 @@
         (field
           (name "SKiDL Tag") "U33")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -9162,7 +9384,7 @@
         (field
           (name "SKiDL Tag") "U34")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -9188,7 +9410,7 @@
         (field
           (name "SKiDL Tag") "U35")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -9214,7 +9436,7 @@
         (field
           (name "SKiDL Tag") "U36")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -9240,7 +9462,7 @@
         (field
           (name "SKiDL Tag") "U37")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "TPS2595"))
@@ -9266,7 +9488,7 @@
         (field
           (name "SKiDL Tag") "U4")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "SC16IS752"))
@@ -9292,7 +9514,7 @@
         (field
           (name "SKiDL Tag") "U5")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "SC16IS752"))
@@ -9318,7 +9540,7 @@
         (field
           (name "SKiDL Tag") "U6")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "QPL9057"))
@@ -9344,7 +9566,7 @@
         (field
           (name "SKiDL Tag") "U7")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "QPL9057"))
@@ -9356,21 +9578,21 @@
     (comp
       (ref "U8")
       (value "QPQ1907")
-      (description "Qorvo QPQ1907 2.4 GHz ISM BAW band-pass filter (pinout est.)")
-      (footprint "openpack:Qorvo_QPQ1907_1.4x1.2mm")
+      (description "Qorvo QPQ1907 2.4 GHz Wi-Fi/LTE coexistence BAW band-pass filter")
+      (footprint "openpack:Qorvo_QPQ1907_LGA5_1.4x1.2mm_datasheet_land_pattern")
       (fields
         (field
           (name "MPN") "QPQ1907SR")
         (field
-          (name "Description") "Qorvo QPQ1907 2.4 GHz ISM BAW band-pass filter (pinout est.)")
+          (name "Description") "Qorvo QPQ1907 2.4 GHz Wi-Fi/LTE coexistence BAW band-pass filter")
         (field
-          (name "Footprint") "openpack:Qorvo_QPQ1907_1.4x1.2mm")
+          (name "Footprint") "openpack:Qorvo_QPQ1907_LGA5_1.4x1.2mm_datasheet_land_pattern")
         (field
           (name "Datasheet"))
         (field
           (name "SKiDL Tag") "U8")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "QPQ1907"))
@@ -9382,21 +9604,21 @@
     (comp
       (ref "U9")
       (value "QPQ1907")
-      (description "Qorvo QPQ1907 2.4 GHz ISM BAW band-pass filter (pinout est.)")
-      (footprint "openpack:Qorvo_QPQ1907_1.4x1.2mm")
+      (description "Qorvo QPQ1907 2.4 GHz Wi-Fi/LTE coexistence BAW band-pass filter")
+      (footprint "openpack:Qorvo_QPQ1907_LGA5_1.4x1.2mm_datasheet_land_pattern")
       (fields
         (field
           (name "MPN") "QPQ1907SR")
         (field
-          (name "Description") "Qorvo QPQ1907 2.4 GHz ISM BAW band-pass filter (pinout est.)")
+          (name "Description") "Qorvo QPQ1907 2.4 GHz Wi-Fi/LTE coexistence BAW band-pass filter")
         (field
-          (name "Footprint") "openpack:Qorvo_QPQ1907_1.4x1.2mm")
+          (name "Footprint") "openpack:Qorvo_QPQ1907_LGA5_1.4x1.2mm_datasheet_land_pattern")
         (field
           (name "Datasheet"))
         (field
           (name "SKiDL Tag") "U9")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "QPQ1907"))
@@ -9422,7 +9644,7 @@
         (field
           (name "SKiDL Tag") "Y1")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "Crystal"))
@@ -9448,7 +9670,7 @@
         (field
           (name "SKiDL Tag") "Y2")
         (field
-          (name "SKiDL Line") "backplane.py:76"))
+          (name "SKiDL Line") "backplane.py:80"))
       (libsource
         (lib "openpack_rack")
         (part "Crystal"))
@@ -9688,6 +9910,18 @@
         (pintype "POWER-OUT")))
     (net
       (code 3)
+      (name "+12V_IN")
+      (class "Default")
+      (node
+        (ref "F1")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "J1")
+        (pin "1")
+        (pintype "PASSIVE")))
+    (net
+      (code 4)
       (name "+12V_PROT")
       (class "Default")
       (node
@@ -9727,12 +9961,12 @@
         (pin "4")
         (pintype "POWER-IN")))
     (net
-      (code 4)
+      (code 5)
       (name "+12V_RAW")
       (class "Default")
       (node
-        (ref "J1")
-        (pin "1")
+        (ref "F1")
+        (pin "2")
         (pintype "PASSIVE"))
       (node
         (ref "Q1")
@@ -9751,7 +9985,7 @@
         (pin "8")
         (pintype "PASSIVE")))
     (net
-      (code 5)
+      (code 6)
       (name "+12V_S0")
       (class "Default")
       (node
@@ -9771,7 +10005,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 6)
+      (code 7)
       (name "+12V_S1")
       (class "Default")
       (node
@@ -9791,7 +10025,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 7)
+      (code 8)
       (name "+12V_S2")
       (class "Default")
       (node
@@ -9811,7 +10045,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 8)
+      (code 9)
       (name "+12V_S3")
       (class "Default")
       (node
@@ -9831,7 +10065,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 9)
+      (code 10)
       (name "+12V_S4")
       (class "Default")
       (node
@@ -9851,7 +10085,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 10)
+      (code 11)
       (name "+12V_S5")
       (class "Default")
       (node
@@ -9871,7 +10105,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 11)
+      (code 12)
       (name "+12V_S6")
       (class "Default")
       (node
@@ -9891,7 +10125,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 12)
+      (code 13)
       (name "+12V_S7")
       (class "Default")
       (node
@@ -9911,7 +10145,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 13)
+      (code 14)
       (name "+3V3")
       (class "Default")
       (node
@@ -9971,7 +10205,7 @@
         (pin "8")
         (pintype "POWER-IN")))
     (net
-      (code 14)
+      (code 15)
       (name "+5V")
       (class "Default")
       (node
@@ -10143,7 +10377,7 @@
         (pin "4")
         (pintype "POWER-IN")))
     (net
-      (code 15)
+      (code 16)
       (name "+5V_LNA_A")
       (class "Default")
       (node
@@ -10171,7 +10405,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 16)
+      (code 17)
       (name "+5V_LNA_B")
       (class "Default")
       (node
@@ -10199,7 +10433,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 17)
+      (code 18)
       (name "+5V_S0")
       (class "Default")
       (node
@@ -10219,7 +10453,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 18)
+      (code 19)
       (name "+5V_S1")
       (class "Default")
       (node
@@ -10239,7 +10473,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 19)
+      (code 20)
       (name "+5V_S2")
       (class "Default")
       (node
@@ -10259,7 +10493,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 20)
+      (code 21)
       (name "+5V_S3")
       (class "Default")
       (node
@@ -10279,7 +10513,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 21)
+      (code 22)
       (name "+5V_S4")
       (class "Default")
       (node
@@ -10299,7 +10533,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 22)
+      (code 23)
       (name "+5V_S5")
       (class "Default")
       (node
@@ -10319,7 +10553,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 23)
+      (code 24)
       (name "+5V_S6")
       (class "Default")
       (node
@@ -10339,7 +10573,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 24)
+      (code 25)
       (name "+5V_S7")
       (class "Default")
       (node
@@ -10359,7 +10593,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 25)
+      (code 26)
       (name "ANT_A")
       (class "Default")
       (node
@@ -10379,7 +10613,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 26)
+      (code 27)
       (name "ANT_B")
       (class "Default")
       (node
@@ -10399,7 +10633,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 27)
+      (code 28)
       (name "BIAS_A_DC")
       (class "Default")
       (node
@@ -10419,7 +10653,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 28)
+      (code 29)
       (name "BIAS_A_RF")
       (class "Default")
       (node
@@ -10439,7 +10673,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 29)
+      (code 30)
       (name "BIAS_B_DC")
       (class "Default")
       (node
@@ -10459,7 +10693,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 30)
+      (code 31)
       (name "BIAS_B_RF")
       (class "Default")
       (node
@@ -10479,7 +10713,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 31)
+      (code 32)
       (name "BUCK_BST")
       (class "Default")
       (node
@@ -10491,7 +10725,7 @@
         (pin "6")
         (pintype "PASSIVE")))
     (net
-      (code 32)
+      (code 33)
       (name "BUCK_EN")
       (class "Default")
       (node
@@ -10507,7 +10741,7 @@
         (pin "2")
         (pintype "INPUT")))
     (net
-      (code 33)
+      (code 34)
       (name "BUCK_FB")
       (class "Default")
       (node
@@ -10523,7 +10757,7 @@
         (pin "8")
         (pintype "INPUT")))
     (net
-      (code 34)
+      (code 35)
       (name "BUCK_SS")
       (class "Default")
       (node
@@ -10535,7 +10769,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 35)
+      (code 36)
       (name "BUCK_SW")
       (class "Default")
       (node
@@ -10551,7 +10785,7 @@
         (pin "5")
         (pintype "POWER-OUT")))
     (net
-      (code 36)
+      (code 37)
       (name "CHASSIS")
       (class "Default")
       (node
@@ -10687,7 +10921,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 37)
+      (code 38)
       (name "GND")
       (class "Default")
       (node
@@ -11948,7 +12182,7 @@
         (pintype "PASSIVE"))
       (node
         (ref "U8")
-        (pin "4")
+        (pin "3")
         (pintype "PASSIVE"))
       (node
         (ref "U8")
@@ -11960,14 +12194,14 @@
         (pintype "PASSIVE"))
       (node
         (ref "U9")
-        (pin "4")
+        (pin "3")
         (pintype "PASSIVE"))
       (node
         (ref "U9")
         (pin "5")
         (pintype "PASSIVE")))
     (net
-      (code 38)
+      (code 39)
       (name "HOST_GPIO12")
       (class "Default")
       (node
@@ -11979,7 +12213,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 39)
+      (code 40)
       (name "HOST_GPIO13")
       (class "Default")
       (node
@@ -11991,7 +12225,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 40)
+      (code 41)
       (name "HOST_GPIO14")
       (class "Default")
       (node
@@ -12003,7 +12237,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 41)
+      (code 42)
       (name "HOST_GPIO15")
       (class "Default")
       (node
@@ -12015,7 +12249,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 42)
+      (code 43)
       (name "HOST_GPIO17")
       (class "Default")
       (node
@@ -12027,7 +12261,7 @@
         (pin "10")
         (pintype "INPUT")))
     (net
-      (code 43)
+      (code 44)
       (name "HOST_GPIO18")
       (class "Default")
       (node
@@ -12039,7 +12273,7 @@
         (pin "10")
         (pintype "INPUT")))
     (net
-      (code 44)
+      (code 45)
       (name "HOST_GPIO19")
       (class "Default")
       (node
@@ -12055,7 +12289,7 @@
         (pin "12")
         (pintype "TRISTATE")))
     (net
-      (code 45)
+      (code 46)
       (name "HOST_GPIO20")
       (class "Default")
       (node
@@ -12071,7 +12305,7 @@
         (pin "11")
         (pintype "INPUT")))
     (net
-      (code 46)
+      (code 47)
       (name "HOST_GPIO21")
       (class "Default")
       (node
@@ -12087,7 +12321,7 @@
         (pin "13")
         (pintype "INPUT")))
     (net
-      (code 47)
+      (code 48)
       (name "HOST_GPIO22")
       (class "Default")
       (node
@@ -12103,7 +12337,7 @@
         (pin "2")
         (pintype "INPUT")))
     (net
-      (code 48)
+      (code 49)
       (name "HOST_GPIO23")
       (class "Default")
       (node
@@ -12119,7 +12353,7 @@
         (pin "2")
         (pintype "INPUT")))
     (net
-      (code 49)
+      (code 50)
       (name "HOST_GPIO24")
       (class "Default")
       (node
@@ -12135,7 +12369,7 @@
         (pin "15")
         (pintype "OPEN-COLLECTOR")))
     (net
-      (code 50)
+      (code 51)
       (name "HOST_GPIO25")
       (class "Default")
       (node
@@ -12151,7 +12385,7 @@
         (pin "15")
         (pintype "OPEN-COLLECTOR")))
     (net
-      (code 51)
+      (code 52)
       (name "HOST_GPIO26")
       (class "Default")
       (node
@@ -12167,7 +12401,7 @@
         (pin "6")
         (pintype "OPEN-COLLECTOR")))
     (net
-      (code 52)
+      (code 53)
       (name "HOST_GPIO27")
       (class "Default")
       (node
@@ -12183,7 +12417,7 @@
         (pin "6")
         (pintype "OPEN-COLLECTOR")))
     (net
-      (code 53)
+      (code 54)
       (name "HOST_GPIO4")
       (class "Default")
       (node
@@ -12195,7 +12429,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 54)
+      (code 55)
       (name "HOST_GPIO5")
       (class "Default")
       (node
@@ -12207,7 +12441,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 55)
+      (code 56)
       (name "HOST_GPIO6")
       (class "Default")
       (node
@@ -12291,7 +12525,7 @@
         (pin "6")
         (pintype "OPEN-COLLECTOR")))
     (net
-      (code 56)
+      (code 57)
       (name "HOST_GPIO8")
       (class "Default")
       (node
@@ -12303,7 +12537,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 57)
+      (code 58)
       (name "HOST_GPIO9")
       (class "Default")
       (node
@@ -12315,7 +12549,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 58)
+      (code 59)
       (name "LNA_A_IN")
       (class "Default")
       (node
@@ -12331,7 +12565,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 59)
+      (code 60)
       (name "LNA_A_OUT")
       (class "Default")
       (node
@@ -12343,7 +12577,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 60)
+      (code 61)
       (name "LNA_A_RFIN")
       (class "Default")
       (node
@@ -12355,7 +12589,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 61)
+      (code 62)
       (name "LNA_A_RFOUT")
       (class "Default")
       (node
@@ -12371,7 +12605,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 62)
+      (code 63)
       (name "LNA_A_VBIAS")
       (class "Default")
       (node
@@ -12387,7 +12621,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 63)
+      (code 64)
       (name "LNA_B_IN")
       (class "Default")
       (node
@@ -12403,7 +12637,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 64)
+      (code 65)
       (name "LNA_B_OUT")
       (class "Default")
       (node
@@ -12415,7 +12649,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 65)
+      (code 66)
       (name "LNA_B_RFIN")
       (class "Default")
       (node
@@ -12427,7 +12661,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 66)
+      (code 67)
       (name "LNA_B_RFOUT")
       (class "Default")
       (node
@@ -12443,7 +12677,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 67)
+      (code 68)
       (name "LNA_B_VBIAS")
       (class "Default")
       (node
@@ -12459,7 +12693,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 68)
+      (code 69)
       (name "Q1_G")
       (class "Default")
       (node
@@ -12475,7 +12709,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 69)
+      (code 70)
       (name "RF_A0")
       (class "Default")
       (node
@@ -12487,7 +12721,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 70)
+      (code 71)
       (name "RF_A1")
       (class "Default")
       (node
@@ -12499,7 +12733,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 71)
+      (code 72)
       (name "RF_A2")
       (class "Default")
       (node
@@ -12511,7 +12745,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 72)
+      (code 73)
       (name "RF_A3")
       (class "Default")
       (node
@@ -12523,7 +12757,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 73)
+      (code 74)
       (name "RF_A4")
       (class "Default")
       (node
@@ -12535,7 +12769,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 74)
+      (code 75)
       (name "RF_A5")
       (class "Default")
       (node
@@ -12547,7 +12781,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 75)
+      (code 76)
       (name "RF_A6")
       (class "Default")
       (node
@@ -12559,7 +12793,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 76)
+      (code 77)
       (name "RF_A7")
       (class "Default")
       (node
@@ -12571,7 +12805,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 77)
+      (code 78)
       (name "RF_B0")
       (class "Default")
       (node
@@ -12583,7 +12817,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 78)
+      (code 79)
       (name "RF_B1")
       (class "Default")
       (node
@@ -12595,7 +12829,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 79)
+      (code 80)
       (name "RF_B2")
       (class "Default")
       (node
@@ -12607,7 +12841,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 80)
+      (code 81)
       (name "RF_B3")
       (class "Default")
       (node
@@ -12619,7 +12853,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 81)
+      (code 82)
       (name "RF_B4")
       (class "Default")
       (node
@@ -12631,7 +12865,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 82)
+      (code 83)
       (name "RF_B5")
       (class "Default")
       (node
@@ -12643,7 +12877,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 83)
+      (code 84)
       (name "RF_B6")
       (class "Default")
       (node
@@ -12655,7 +12889,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 84)
+      (code 85)
       (name "RF_B7")
       (class "Default")
       (node
@@ -12667,7 +12901,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 85)
+      (code 86)
       (name "S0_AUD_COLD")
       (class "Default")
       (node
@@ -12683,7 +12917,7 @@
         (pin "3")
         (pintype "PASSIVE")))
     (net
-      (code 86)
+      (code 87)
       (name "S0_AUD_HOT")
       (class "Default")
       (node
@@ -12699,7 +12933,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 87)
+      (code 88)
       (name "S0_BP_BOOT")
       (class "Default")
       (node
@@ -12711,7 +12945,7 @@
         (pin "19")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 88)
+      (code 89)
       (name "S0_BP_LED_LOCK")
       (class "Default")
       (node
@@ -12723,7 +12957,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 89)
+      (code 90)
       (name "S0_BP_LED_LOCK_A")
       (class "Default")
       (node
@@ -12735,7 +12969,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 90)
+      (code 91)
       (name "S0_BP_LED_PEAK")
       (class "Default")
       (node
@@ -12747,7 +12981,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 91)
+      (code 92)
       (name "S0_BP_LED_PEAK_A")
       (class "Default")
       (node
@@ -12759,7 +12993,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 92)
+      (code 93)
       (name "S0_BP_UART_RX")
       (class "Default")
       (node
@@ -12771,7 +13005,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 93)
+      (code 94)
       (name "S0_BP_UART_TX")
       (class "Default")
       (node
@@ -12783,7 +13017,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 94)
+      (code 95)
       (name "S0_BP_nRESET")
       (class "Default")
       (node
@@ -12795,7 +13029,7 @@
         (pin "18")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 95)
+      (code 96)
       (name "S1_AUD_COLD")
       (class "Default")
       (node
@@ -12811,7 +13045,7 @@
         (pin "3")
         (pintype "PASSIVE")))
     (net
-      (code 96)
+      (code 97)
       (name "S1_AUD_HOT")
       (class "Default")
       (node
@@ -12827,7 +13061,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 97)
+      (code 98)
       (name "S1_BP_BOOT")
       (class "Default")
       (node
@@ -12839,7 +13073,7 @@
         (pin "21")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 98)
+      (code 99)
       (name "S1_BP_LED_LOCK")
       (class "Default")
       (node
@@ -12851,7 +13085,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 99)
+      (code 100)
       (name "S1_BP_LED_LOCK_A")
       (class "Default")
       (node
@@ -12863,7 +13097,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 100)
+      (code 101)
       (name "S1_BP_LED_PEAK")
       (class "Default")
       (node
@@ -12875,7 +13109,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 101)
+      (code 102)
       (name "S1_BP_LED_PEAK_A")
       (class "Default")
       (node
@@ -12887,7 +13121,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 102)
+      (code 103)
       (name "S1_BP_UART_RX")
       (class "Default")
       (node
@@ -12899,7 +13133,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 103)
+      (code 104)
       (name "S1_BP_UART_TX")
       (class "Default")
       (node
@@ -12911,7 +13145,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 104)
+      (code 105)
       (name "S1_BP_nRESET")
       (class "Default")
       (node
@@ -12923,7 +13157,7 @@
         (pin "20")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 105)
+      (code 106)
       (name "S2_AUD_COLD")
       (class "Default")
       (node
@@ -12939,7 +13173,7 @@
         (pin "3")
         (pintype "PASSIVE")))
     (net
-      (code 106)
+      (code 107)
       (name "S2_AUD_HOT")
       (class "Default")
       (node
@@ -12955,7 +13189,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 107)
+      (code 108)
       (name "S2_BP_BOOT")
       (class "Default")
       (node
@@ -12967,7 +13201,7 @@
         (pin "26")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 108)
+      (code 109)
       (name "S2_BP_LED_LOCK")
       (class "Default")
       (node
@@ -12979,7 +13213,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 109)
+      (code 110)
       (name "S2_BP_LED_LOCK_A")
       (class "Default")
       (node
@@ -12991,7 +13225,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 110)
+      (code 111)
       (name "S2_BP_LED_PEAK")
       (class "Default")
       (node
@@ -13003,7 +13237,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 111)
+      (code 112)
       (name "S2_BP_LED_PEAK_A")
       (class "Default")
       (node
@@ -13015,7 +13249,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 112)
+      (code 113)
       (name "S2_BP_UART_RX")
       (class "Default")
       (node
@@ -13027,7 +13261,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 113)
+      (code 114)
       (name "S2_BP_UART_TX")
       (class "Default")
       (node
@@ -13039,7 +13273,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 114)
+      (code 115)
       (name "S2_BP_nRESET")
       (class "Default")
       (node
@@ -13051,7 +13285,7 @@
         (pin "25")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 115)
+      (code 116)
       (name "S3_AUD_COLD")
       (class "Default")
       (node
@@ -13067,7 +13301,7 @@
         (pin "3")
         (pintype "PASSIVE")))
     (net
-      (code 116)
+      (code 117)
       (name "S3_AUD_HOT")
       (class "Default")
       (node
@@ -13083,7 +13317,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 117)
+      (code 118)
       (name "S3_BP_BOOT")
       (class "Default")
       (node
@@ -13095,7 +13329,7 @@
         (pin "28")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 118)
+      (code 119)
       (name "S3_BP_LED_LOCK")
       (class "Default")
       (node
@@ -13107,7 +13341,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 119)
+      (code 120)
       (name "S3_BP_LED_LOCK_A")
       (class "Default")
       (node
@@ -13119,7 +13353,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 120)
+      (code 121)
       (name "S3_BP_LED_PEAK")
       (class "Default")
       (node
@@ -13131,7 +13365,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 121)
+      (code 122)
       (name "S3_BP_LED_PEAK_A")
       (class "Default")
       (node
@@ -13143,7 +13377,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 122)
+      (code 123)
       (name "S3_BP_UART_RX")
       (class "Default")
       (node
@@ -13155,7 +13389,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 123)
+      (code 124)
       (name "S3_BP_UART_TX")
       (class "Default")
       (node
@@ -13167,7 +13401,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 124)
+      (code 125)
       (name "S3_BP_nRESET")
       (class "Default")
       (node
@@ -13179,7 +13413,7 @@
         (pin "27")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 125)
+      (code 126)
       (name "S4_AUD_COLD")
       (class "Default")
       (node
@@ -13195,7 +13429,7 @@
         (pin "3")
         (pintype "PASSIVE")))
     (net
-      (code 126)
+      (code 127)
       (name "S4_AUD_HOT")
       (class "Default")
       (node
@@ -13211,7 +13445,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 127)
+      (code 128)
       (name "S4_BP_BOOT")
       (class "Default")
       (node
@@ -13223,7 +13457,7 @@
         (pin "19")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 128)
+      (code 129)
       (name "S4_BP_LED_LOCK")
       (class "Default")
       (node
@@ -13235,7 +13469,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 129)
+      (code 130)
       (name "S4_BP_LED_LOCK_A")
       (class "Default")
       (node
@@ -13247,7 +13481,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 130)
+      (code 131)
       (name "S4_BP_LED_PEAK")
       (class "Default")
       (node
@@ -13259,7 +13493,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 131)
+      (code 132)
       (name "S4_BP_LED_PEAK_A")
       (class "Default")
       (node
@@ -13271,7 +13505,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 132)
+      (code 133)
       (name "S4_BP_UART_RX")
       (class "Default")
       (node
@@ -13283,7 +13517,7 @@
         (pin "3")
         (pintype "OUTPUT")))
     (net
-      (code 133)
+      (code 134)
       (name "S4_BP_UART_TX")
       (class "Default")
       (node
@@ -13295,7 +13529,7 @@
         (pin "4")
         (pintype "INPUT")))
     (net
-      (code 134)
+      (code 135)
       (name "S4_BP_nRESET")
       (class "Default")
       (node
@@ -13307,7 +13541,7 @@
         (pin "18")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 135)
+      (code 136)
       (name "S5_AUD_COLD")
       (class "Default")
       (node
@@ -13323,7 +13557,7 @@
         (pin "3")
         (pintype "PASSIVE")))
     (net
-      (code 136)
+      (code 137)
       (name "S5_AUD_HOT")
       (class "Default")
       (node
@@ -13339,7 +13573,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 137)
+      (code 138)
       (name "S5_BP_BOOT")
       (class "Default")
       (node
@@ -13351,7 +13585,7 @@
         (pin "21")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 138)
+      (code 139)
       (name "S5_BP_LED_LOCK")
       (class "Default")
       (node
@@ -13363,7 +13597,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 139)
+      (code 140)
       (name "S5_BP_LED_LOCK_A")
       (class "Default")
       (node
@@ -13375,7 +13609,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 140)
+      (code 141)
       (name "S5_BP_LED_PEAK")
       (class "Default")
       (node
@@ -13387,7 +13621,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 141)
+      (code 142)
       (name "S5_BP_LED_PEAK_A")
       (class "Default")
       (node
@@ -13399,7 +13633,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 142)
+      (code 143)
       (name "S5_BP_UART_RX")
       (class "Default")
       (node
@@ -13411,7 +13645,7 @@
         (pin "23")
         (pintype "OUTPUT")))
     (net
-      (code 143)
+      (code 144)
       (name "S5_BP_UART_TX")
       (class "Default")
       (node
@@ -13423,7 +13657,7 @@
         (pin "24")
         (pintype "INPUT")))
     (net
-      (code 144)
+      (code 145)
       (name "S5_BP_nRESET")
       (class "Default")
       (node
@@ -13435,7 +13669,7 @@
         (pin "20")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 145)
+      (code 146)
       (name "S6_AUD_COLD")
       (class "Default")
       (node
@@ -13451,7 +13685,7 @@
         (pin "3")
         (pintype "PASSIVE")))
     (net
-      (code 146)
+      (code 147)
       (name "S6_AUD_HOT")
       (class "Default")
       (node
@@ -13467,7 +13701,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 147)
+      (code 148)
       (name "S6_BP_BOOT")
       (class "Default")
       (node
@@ -13479,7 +13713,7 @@
         (pin "26")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 148)
+      (code 149)
       (name "S6_BP_LED_LOCK")
       (class "Default")
       (node
@@ -13491,7 +13725,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 149)
+      (code 150)
       (name "S6_BP_LED_LOCK_A")
       (class "Default")
       (node
@@ -13503,7 +13737,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 150)
+      (code 151)
       (name "S6_BP_LED_PEAK")
       (class "Default")
       (node
@@ -13515,7 +13749,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 151)
+      (code 152)
       (name "S6_BP_LED_PEAK_A")
       (class "Default")
       (node
@@ -13527,7 +13761,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 152)
+      (code 153)
       (name "S6_BP_UART_RX")
       (class "Default")
       (node
@@ -13539,7 +13773,7 @@
         (pin "3")
         (pintype "OUTPUT")))
     (net
-      (code 153)
+      (code 154)
       (name "S6_BP_UART_TX")
       (class "Default")
       (node
@@ -13551,7 +13785,7 @@
         (pin "4")
         (pintype "INPUT")))
     (net
-      (code 154)
+      (code 155)
       (name "S6_BP_nRESET")
       (class "Default")
       (node
@@ -13563,7 +13797,7 @@
         (pin "25")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 155)
+      (code 156)
       (name "S7_AUD_COLD")
       (class "Default")
       (node
@@ -13579,7 +13813,7 @@
         (pin "3")
         (pintype "PASSIVE")))
     (net
-      (code 156)
+      (code 157)
       (name "S7_AUD_HOT")
       (class "Default")
       (node
@@ -13595,7 +13829,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 157)
+      (code 158)
       (name "S7_BP_BOOT")
       (class "Default")
       (node
@@ -13607,7 +13841,7 @@
         (pin "28")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 158)
+      (code 159)
       (name "S7_BP_LED_LOCK")
       (class "Default")
       (node
@@ -13619,7 +13853,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 159)
+      (code 160)
       (name "S7_BP_LED_LOCK_A")
       (class "Default")
       (node
@@ -13631,7 +13865,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 160)
+      (code 161)
       (name "S7_BP_LED_PEAK")
       (class "Default")
       (node
@@ -13643,7 +13877,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 161)
+      (code 162)
       (name "S7_BP_LED_PEAK_A")
       (class "Default")
       (node
@@ -13655,7 +13889,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 162)
+      (code 163)
       (name "S7_BP_UART_RX")
       (class "Default")
       (node
@@ -13667,7 +13901,7 @@
         (pin "23")
         (pintype "OUTPUT")))
     (net
-      (code 163)
+      (code 164)
       (name "S7_BP_UART_TX")
       (class "Default")
       (node
@@ -13679,7 +13913,7 @@
         (pin "24")
         (pintype "INPUT")))
     (net
-      (code 164)
+      (code 165)
       (name "S7_BP_nRESET")
       (class "Default")
       (node
@@ -13691,7 +13925,7 @@
         (pin "27")
         (pintype "BIDIRECTIONAL")))
     (net
-      (code 165)
+      (code 166)
       (name "SPL_A_IN")
       (class "Default")
       (node
@@ -13704,10 +13938,10 @@
         (pintype "PASSIVE"))
       (node
         (ref "U8")
-        (pin "3")
+        (pin "4")
         (pintype "PASSIVE")))
     (net
-      (code 166)
+      (code 167)
       (name "SPL_B_IN")
       (class "Default")
       (node
@@ -13720,10 +13954,10 @@
         (pintype "PASSIVE"))
       (node
         (ref "U9")
-        (pin "3")
+        (pin "4")
         (pintype "PASSIVE")))
     (net
-      (code 167)
+      (code 168)
       (name "U10_DVDT")
       (class "Default")
       (node
@@ -13735,7 +13969,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 168)
+      (code 169)
       (name "U10_ILM")
       (class "Default")
       (node
@@ -13747,7 +13981,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 169)
+      (code 170)
       (name "U11_DVDT")
       (class "Default")
       (node
@@ -13759,7 +13993,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 170)
+      (code 171)
       (name "U11_ILM")
       (class "Default")
       (node
@@ -13771,7 +14005,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 171)
+      (code 172)
       (name "U12_DVDT")
       (class "Default")
       (node
@@ -13783,7 +14017,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 172)
+      (code 173)
       (name "U12_EN")
       (class "Default")
       (node
@@ -13799,7 +14033,7 @@
         (pin "2")
         (pintype "INPUT")))
     (net
-      (code 173)
+      (code 174)
       (name "U12_ILM")
       (class "Default")
       (node
@@ -13811,7 +14045,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 174)
+      (code 175)
       (name "U1_DVDT")
       (class "Default")
       (node
@@ -13823,7 +14057,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 175)
+      (code 176)
       (name "U1_EN")
       (class "Default")
       (node
@@ -13839,7 +14073,7 @@
         (pin "2")
         (pintype "INPUT")))
     (net
-      (code 176)
+      (code 177)
       (name "U1_ILM")
       (class "Default")
       (node
@@ -13851,7 +14085,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 177)
+      (code 178)
       (name "U20_DVDT")
       (class "Default")
       (node
@@ -13863,7 +14097,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 178)
+      (code 179)
       (name "U20_EN")
       (class "Default")
       (node
@@ -13879,7 +14113,7 @@
         (pin "2")
         (pintype "INPUT")))
     (net
-      (code 179)
+      (code 180)
       (name "U20_ILM")
       (class "Default")
       (node
@@ -13891,7 +14125,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 180)
+      (code 181)
       (name "U21_DVDT")
       (class "Default")
       (node
@@ -13903,7 +14137,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 181)
+      (code 182)
       (name "U21_EN")
       (class "Default")
       (node
@@ -13919,7 +14153,7 @@
         (pin "2")
         (pintype "INPUT")))
     (net
-      (code 182)
+      (code 183)
       (name "U21_ILM")
       (class "Default")
       (node
@@ -13931,7 +14165,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 183)
+      (code 184)
       (name "U22_DVDT")
       (class "Default")
       (node
@@ -13943,7 +14177,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 184)
+      (code 185)
       (name "U22_EN")
       (class "Default")
       (node
@@ -13959,7 +14193,7 @@
         (pin "2")
         (pintype "INPUT")))
     (net
-      (code 185)
+      (code 186)
       (name "U22_ILM")
       (class "Default")
       (node
@@ -13971,7 +14205,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 186)
+      (code 187)
       (name "U23_DVDT")
       (class "Default")
       (node
@@ -13983,7 +14217,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 187)
+      (code 188)
       (name "U23_EN")
       (class "Default")
       (node
@@ -13999,7 +14233,7 @@
         (pin "2")
         (pintype "INPUT")))
     (net
-      (code 188)
+      (code 189)
       (name "U23_ILM")
       (class "Default")
       (node
@@ -14011,7 +14245,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 189)
+      (code 190)
       (name "U24_DVDT")
       (class "Default")
       (node
@@ -14023,7 +14257,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 190)
+      (code 191)
       (name "U24_EN")
       (class "Default")
       (node
@@ -14039,7 +14273,7 @@
         (pin "2")
         (pintype "INPUT")))
     (net
-      (code 191)
+      (code 192)
       (name "U24_ILM")
       (class "Default")
       (node
@@ -14051,7 +14285,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 192)
+      (code 193)
       (name "U25_DVDT")
       (class "Default")
       (node
@@ -14063,7 +14297,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 193)
+      (code 194)
       (name "U25_EN")
       (class "Default")
       (node
@@ -14079,7 +14313,7 @@
         (pin "2")
         (pintype "INPUT")))
     (net
-      (code 194)
+      (code 195)
       (name "U25_ILM")
       (class "Default")
       (node
@@ -14091,7 +14325,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 195)
+      (code 196)
       (name "U26_DVDT")
       (class "Default")
       (node
@@ -14103,7 +14337,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 196)
+      (code 197)
       (name "U26_EN")
       (class "Default")
       (node
@@ -14119,7 +14353,7 @@
         (pin "2")
         (pintype "INPUT")))
     (net
-      (code 197)
+      (code 198)
       (name "U26_ILM")
       (class "Default")
       (node
@@ -14131,7 +14365,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 198)
+      (code 199)
       (name "U27_DVDT")
       (class "Default")
       (node
@@ -14143,7 +14377,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 199)
+      (code 200)
       (name "U27_EN")
       (class "Default")
       (node
@@ -14159,7 +14393,7 @@
         (pin "2")
         (pintype "INPUT")))
     (net
-      (code 200)
+      (code 201)
       (name "U27_ILM")
       (class "Default")
       (node
@@ -14171,7 +14405,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 201)
+      (code 202)
       (name "U30_DVDT")
       (class "Default")
       (node
@@ -14183,7 +14417,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 202)
+      (code 203)
       (name "U30_ILM")
       (class "Default")
       (node
@@ -14195,7 +14429,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 203)
+      (code 204)
       (name "U31_DVDT")
       (class "Default")
       (node
@@ -14207,7 +14441,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 204)
+      (code 205)
       (name "U31_ILM")
       (class "Default")
       (node
@@ -14219,7 +14453,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 205)
+      (code 206)
       (name "U32_DVDT")
       (class "Default")
       (node
@@ -14231,7 +14465,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 206)
+      (code 207)
       (name "U32_ILM")
       (class "Default")
       (node
@@ -14243,7 +14477,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 207)
+      (code 208)
       (name "U33_DVDT")
       (class "Default")
       (node
@@ -14255,7 +14489,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 208)
+      (code 209)
       (name "U33_ILM")
       (class "Default")
       (node
@@ -14267,7 +14501,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 209)
+      (code 210)
       (name "U34_DVDT")
       (class "Default")
       (node
@@ -14279,7 +14513,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 210)
+      (code 211)
       (name "U34_ILM")
       (class "Default")
       (node
@@ -14291,7 +14525,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 211)
+      (code 212)
       (name "U35_DVDT")
       (class "Default")
       (node
@@ -14303,7 +14537,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 212)
+      (code 213)
       (name "U35_ILM")
       (class "Default")
       (node
@@ -14315,7 +14549,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 213)
+      (code 214)
       (name "U36_DVDT")
       (class "Default")
       (node
@@ -14327,7 +14561,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 214)
+      (code 215)
       (name "U36_ILM")
       (class "Default")
       (node
@@ -14339,7 +14573,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 215)
+      (code 216)
       (name "U37_DVDT")
       (class "Default")
       (node
@@ -14351,7 +14585,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 216)
+      (code 217)
       (name "U37_ILM")
       (class "Default")
       (node
@@ -14363,7 +14597,7 @@
         (pin "7")
         (pintype "PASSIVE")))
     (net
-      (code 217)
+      (code 218)
       (name "U4_RST")
       (class "Default")
       (node
@@ -14379,7 +14613,7 @@
         (pin "5")
         (pintype "INPUT")))
     (net
-      (code 218)
+      (code 219)
       (name "U4_XTAL1")
       (class "Default")
       (node
@@ -14395,7 +14629,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 219)
+      (code 220)
       (name "U4_XTAL2")
       (class "Default")
       (node
@@ -14411,7 +14645,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 220)
+      (code 221)
       (name "U5_RST")
       (class "Default")
       (node
@@ -14427,7 +14661,7 @@
         (pin "5")
         (pintype "INPUT")))
     (net
-      (code 221)
+      (code 222)
       (name "U5_XTAL1")
       (class "Default")
       (node
@@ -14443,7 +14677,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 222)
+      (code 223)
       (name "U5_XTAL2")
       (class "Default")
       (node
@@ -14459,7 +14693,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 223)
+      (code 224)
       (name "WK_A_10a")
       (class "Default")
       (node
@@ -14479,7 +14713,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 224)
+      (code 225)
       (name "WK_A_10b")
       (class "Default")
       (node
@@ -14499,7 +14733,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 225)
+      (code 226)
       (name "WK_A_20a")
       (class "Default")
       (node
@@ -14519,7 +14753,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 226)
+      (code 227)
       (name "WK_A_20b")
       (class "Default")
       (node
@@ -14539,7 +14773,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 227)
+      (code 228)
       (name "WK_A_21a")
       (class "Default")
       (node
@@ -14559,7 +14793,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 228)
+      (code 229)
       (name "WK_A_21b")
       (class "Default")
       (node
@@ -14579,7 +14813,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 229)
+      (code 230)
       (name "WK_A_30a")
       (class "Default")
       (node
@@ -14595,7 +14829,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 230)
+      (code 231)
       (name "WK_A_30b")
       (class "Default")
       (node
@@ -14611,7 +14845,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 231)
+      (code 232)
       (name "WK_A_31a")
       (class "Default")
       (node
@@ -14627,7 +14861,7 @@
         (pin "2")
         (pintype "PASSIVE")))
     (net
-      (code 232)
+      (code 233)
       (name "WK_A_31b")
       (class "Default")
       (node
@@ -14643,7 +14877,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 233)
+      (code 234)
       (name "WK_A_32a")
       (class "Default")
       (node
@@ -14659,7 +14893,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 234)
+      (code 235)
       (name "WK_A_32b")
       (class "Default")
       (node
@@ -14675,7 +14909,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 235)
+      (code 236)
       (name "WK_A_33a")
       (class "Default")
       (node
@@ -14691,7 +14925,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 236)
+      (code 237)
       (name "WK_A_33b")
       (class "Default")
       (node
@@ -14707,7 +14941,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 237)
+      (code 238)
       (name "WK_B_10a")
       (class "Default")
       (node
@@ -14727,7 +14961,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 238)
+      (code 239)
       (name "WK_B_10b")
       (class "Default")
       (node
@@ -14747,7 +14981,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 239)
+      (code 240)
       (name "WK_B_20a")
       (class "Default")
       (node
@@ -14767,7 +15001,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 240)
+      (code 241)
       (name "WK_B_20b")
       (class "Default")
       (node
@@ -14787,7 +15021,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 241)
+      (code 242)
       (name "WK_B_21a")
       (class "Default")
       (node
@@ -14807,7 +15041,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 242)
+      (code 243)
       (name "WK_B_21b")
       (class "Default")
       (node
@@ -14827,7 +15061,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 243)
+      (code 244)
       (name "WK_B_30a")
       (class "Default")
       (node
@@ -14843,7 +15077,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 244)
+      (code 245)
       (name "WK_B_30b")
       (class "Default")
       (node
@@ -14859,7 +15093,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 245)
+      (code 246)
       (name "WK_B_31a")
       (class "Default")
       (node
@@ -14875,7 +15109,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 246)
+      (code 247)
       (name "WK_B_31b")
       (class "Default")
       (node
@@ -14891,7 +15125,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 247)
+      (code 248)
       (name "WK_B_32a")
       (class "Default")
       (node
@@ -14907,7 +15141,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 248)
+      (code 249)
       (name "WK_B_32b")
       (class "Default")
       (node
@@ -14923,7 +15157,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 249)
+      (code 250)
       (name "WK_B_33a")
       (class "Default")
       (node
@@ -14939,7 +15173,7 @@
         (pin "1")
         (pintype "PASSIVE")))
     (net
-      (code 250)
+      (code 251)
       (name "WK_B_33b")
       (class "Default")
       (node

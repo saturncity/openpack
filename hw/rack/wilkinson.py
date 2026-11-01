@@ -132,11 +132,13 @@ class _Net:
         return Y[1:, 1:]
 
 
-def build_tree(stages=3, s=STACKUP, r_iso=R_ISO, l_iso=L_ISO, feeds=None):
+def build_tree(stages=3, s=STACKUP, r_iso=R_ISO, l_iso=L_ISO, feeds=None, w_scale=1.0):
     """Corporate 1:2^stages Wilkinson tree. Returns (net, port nodes [input, out1..outN]), widths used."""
     feeds = feeds or (FEED_IN_M, FEED_12_M, FEED_23_M, FEED_OUT_M)
+    # w_scale: etched width error (the lambda/4 length stays as cut for the nominal width)
     w50, w70 = width_for(Z0_PORT, s), width_for(Z0_PORT * math.sqrt(2), s)
     lq = quarter_wave_m(w70, F0_HZ, s)
+    w50, w70 = w50 * w_scale, w70 * w_scale
     net = _Net()
     p_in = net.node()
     a = net.node()

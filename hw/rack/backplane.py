@@ -15,7 +15,7 @@ Blocks:
   slot0..7     ADR-0014 socket (key 14 plugged), per-slot eFuses on +12 V and +5 V, slot-ID straps, front LEDs,
                XLR male with >= 58 V TVS on pins 2/3 (phantom), two u.FL from the splitters
 """
-import csv, importlib.util, math, pathlib, sys
+import csv, importlib.util, math, pathlib, re, sys
 
 HERE = pathlib.Path(__file__).resolve().parent
 
@@ -51,6 +51,10 @@ HOST = {"SPI1_CE0": "GPIO18", "SPI1_CE1": "GPIO17", "SPI1_MISO": "GPIO19", "SPI1
 # EN/UVLO rises at 1.2 V typ (1.13-1.27), falls at 1.1 V, max 6 V.
 R_ILM = {"input": 576, "cm4": 1370, "slot": 4420, "bias": 4420}
 UVLO_12 = (73.2e3, 10e3)   # +12 V eFuses turn on at 1.2 x 8.32 = 9.98 V, off at 9.15 V
+I_LIM_MAX_4420 = 0.52      # SLVSE57C 7.5: R_ILM = 4420 ohm -> 0.46 / 0.49 / 0.52 A (min / typ / max)
+# Package power ratings (W, 70 C; Yageo RC / Vishay CRCW class values) for the resistor footprints used here
+R_POWER_W = {"Resistor_SMD:R_0402_1005Metric": 0.0625, "Resistor_SMD:R_0603_1608Metric": 0.1,
+             "Resistor_SMD:R_1206_3216Metric": 0.25, "Resistor_SMD:R_2512_6332Metric": 1.0}
 
 
 def i_lim(r):
@@ -83,8 +87,11 @@ def build():
             "33n": "C_33n_0402", "10n": "C_10n_0402", "100p": "C_100p_0402_C0G", "22p": "C_22p_0402_C0G",
             "10u 25V": "C_10u_1206_25V_X7R", "22u 25V": "C_22u_1206_25V_X5R"}
 
-    def R(val, a, b, mpn="R_0402_1%", rf=None):
-        r = part("R", rf or ref("R"), val, R0402, mpn); r[1] += a; r[2] += b; return r
+    def R(val, a, b, mpn="R_0402_1%", rf=None, fp=R0402):
+        """Every resistor carries its package power rating (R_POWER_W) so tests can check dissipation."""
+        r = part("R", rf or ref("R"), val, fp, mpn); r[1] += a; r[2] += b
+        r.fields["P_W"] = str(R_POWER_W[fp])
+        return r
 
     def C(val, a, b, rf=None):
         mpn = CMPN[val]
@@ -126,10 +133,15 @@ def build():
     pwr_flt = host(HOST["PWR_FLT"])      # wire-OR of every power eFuse fault (open drain), to the host
 
     with Group("power"):
-        # ---- 12 V entry: brick jack -> P-FET reverse polarity -> SMBJ12A -> TPS259541 (13.7 V OV clamp) ----
+        # ---- 12 V entry: brick jack -> 4 A fast fuse -> P-FET reverse polarity -> SMBJ12A -> TPS259541 ----
+        # The fuse sits ahead of the TVS: a wrong (15-24 V) brick makes the SMBJ12A conduct and the fuse open,
+        # instead of the TVS failing or 24 V reaching the TPS2595 (20 V abs max). Load ~1.6-2.6 A (ADR-0018).
         j1 = part("DC_Jack", "J1", "12V IN", "Connector_BarrelJack:BarrelJack_CUI_PJ-063AH_Horizontal", "PJ-063AH")
-        j1["+"] += v12raw; j1["SLEEVE"] += gnd; j1["SW"] += NC
-        # AO4407A: drain at the jack, source to the load, gate to GND via 10k; the body diode conducts first, then
+        v12in = power("+12V_IN")
+        j1["+"] += v12in; j1["SLEEVE"] += gnd; j1["SW"] += NC
+        f1 = part("Fuse", "F1", "4A fast", "Fuse:Fuse_Littelfuse_NANO2_451_453", "0451004.MRL")
+        f1[1] += v12in; f1[2] += v12raw
+        # AO4407A: drain at the fuse, source to the load, gate to GND via 10k; the body diode conducts first, then
         # Vgs = -12 V turns it on. Reversed brick: body diode blocks, Vgs = 0. BZT52C12 clamps Vgs (AO4407A +-25 V).
         q1 = part("PMOS_SO8", "Q1", "AO4407A", "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm", "AO4407A")
         q1["D"] += v12raw; q1["S"] += v12p
@@ -217,7 +229,9 @@ def build():
             lc = part("L", ref("L"), "39n", "Inductor_SMD:L_0603_1608Metric", "LQW18AN39NG80D")   # choke, SRF 3.28 GHz
             lc[1] += ant_n; lc[2] += bias_rf
             C("100p", bias_rf, gnd); C("10n", bias_rf, gnd)
-            R("10", bias_rf, bias_dc)                         # damps the choke, limits surge into the clamp
+            # 1 ohm 2512 (1 W): damps the choke and limits surge into the clamp; at the 0.52 A worst-case eFuse limit
+            # (shorted antenna or cable) it dissipates 0.27 W, 27 % of its rating (an 0402 would open at 79 mA)
+            R("1", bias_rf, bias_dc, "R_2512_1R_1W", fp="Resistor_SMD:R_2512_6332Metric")
             tv = part("TVS", ref("D"), "SMF12A", "Diode_SMD:D_SOD-123F", "SMF12A"); tv["K"] += bias_dc; tv["A"] += gnd
             # bias eFuse: off unless the host sets BIAS_x_EN (100k pull-down); 0.49 A limit protects a shorted
             # (DC-grounded) passive antenna or cable; FLT to the host
@@ -245,9 +259,9 @@ def build():
             C("100p", rf_o, lna_out)                          # EVB C2
             # ---- band-pass: QPQ1907 BAW (2402.5-2481.5 MHz), after the LNA so its loss barely touches NF ----
             spl = Net(f"SPL_{ant}_IN")
-            f = part("QPQ1907", flt, "QPQ1907", "openpack:Qorvo_QPQ1907_1.4x1.2mm", "QPQ1907SR")
+            f = part("QPQ1907", flt, "QPQ1907", "openpack:Qorvo_QPQ1907_LGA5_1.4x1.2mm_datasheet_land_pattern", "QPQ1907SR")
             f["RF_IN"] += lna_out; f["RF_OUT"] += spl
-            for p in ("GND2", "GND4", "GND5"):
+            for p in ("GND2", "GND3", "GND5"):
                 f[p] += gnd
             # ---- 1:8 Wilkinson (3 stages, 7 dividers): 70.7 ohm lambda/4 arms + 100 ohm thin-film resistor ----
             heads = [spl]
@@ -268,9 +282,10 @@ def build():
 
     with Group("slots"):
         for k in range(N_SLOTS):
-            # ---- ADR-0014 socket. Position 14 is plugged (no contact): the sub-board's missing pin 14 keys it ----
+            # ---- ADR-0014 socket (Harwin M20-7831346). Position 14 takes a Harwin M20-003 polarising key (BOM EXTRAS),
+            # so the sub-board, whose pin 14 is pulled, only goes in one way ----
             js = part("Conn_Slot", f"J{10 + k}", f"SLOT {k}", "Connector_PinSocket_2.54mm:PinSocket_2x13_P2.54mm_Vertical",
-                      "PPPC132LFBN-RC")
+                      "M20-7831346")
             v12s, v5s = power(f"+12V_S{k}"), power(f"+5V_S{k}")
             s = {name: Net(f"S{k}_{name}") for name in set(symbols_rack.BACKPLANE.values())
                  if name not in ("GND", "+12V", "+5V", "KEY") and not name.startswith(("BP_I2S", "BP_SLOT"))}
@@ -298,7 +313,7 @@ def build():
             for sig, col in (("BP_LED_LOCK", "GREEN"), ("BP_LED_PEAK", "RED")):
                 a = Net(f"S{k}_{sig}_A")
                 R("560", s[sig], a)
-                d = part("LED", ref("D"), col.lower(), "LED_SMD:LED_0603_1608Metric", f"LED_0603_{col}")
+                d = part("LED", ref("D"), col.lower(), "LED_SMD:LED_0603_1608Metric", {"GREEN": "LTST-C191KGKT", "RED": "LTST-C191KRKT"}[col])
                 d["A"] += a; d["K"] += gnd
             # ---- XLR male (RX-8): pin 2 hot, 3 cold, 1 + shell to chassis; SMAJ58CA (VRWM 58 V >= P48 52 V max) ----
             jx = part("XLR3_Male", f"J{20 + k}", f"OUT {k + 1}", "openpack:Neutrik_NC3MAH", "NC3MAH")
@@ -359,6 +374,8 @@ def main(argv):
     (OUT / "erc.txt").write_text(f"SKiDL ERC: {errs} errors, {warns} warnings\n")
     print(f"ERC: {errs} errors, {warns} warnings")
     skidl.generate_netlist(file_=str(OUT / "backplane.net"))
+    net = OUT / "backplane.net"   # drop the build timestamp so CI's stale-output diff is meaningful
+    net.write_text(re.sub(r'\(date "[^"]*"\)', '(date "")', net.read_text()))
     rows = bom_rows(builtins.default_circuit)
     with open(OUT / "bom.csv", "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)

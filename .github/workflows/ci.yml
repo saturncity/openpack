@@ -9,12 +9,15 @@ jobs:
         with:
           python-version: "3.12"
       - run: sudo apt-get install -y ngspice
-      - run: pip install pytest numpy pyyaml -r host/requirements.txt cadquery trimesh rtree skidl==3.0.0
+      - run: pip install pytest numpy pyyaml -r host/requirements.txt cadquery trimesh rtree skidl==3.0.0 scikit-rf
       - run: python3 audit.py
       - run: |
           pytest -q -rP || [ $? -eq 5 ]
       # hw/pack/pack.py build() regenerates these; a diff means the committed copies are stale
       - run: git diff --exit-code hw/pack/openpack.kicad_sym hw/pack/out/bom.csv
+      # hw/rack: regenerate the symbol library, netlist, BOM and ERC report, then require no diff
+      - run: python3 hw/rack/backplane.py --no-sch
+      - run: git diff --exit-code hw/rack/openpack_rack.kicad_sym hw/rack/out/backplane.net hw/rack/out/bom.csv hw/rack/out/erc.txt
   # enabled in phase 2
   twister:
     if: ${{ false }}

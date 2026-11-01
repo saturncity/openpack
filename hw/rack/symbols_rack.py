@@ -39,11 +39,10 @@ RACK_SYMBOLS = {
     "QPL9057": ("U", [("2", "RF_IN", P, "L"), ("1", "VBIAS", P, "L"), ("6", "SD", I, "L"), ("3", "NC3", P, "L"),
                       ("4", "NC4", P, "L"), ("7", "RF_OUT", P, "R"), ("5", "NC5", P, "R"), ("8", "NC8", P, "R"),
                       ("9", "GND", PI, "R")], "Qorvo QPL9057 0.6-4.2 GHz ultra-low-noise LNA"),
-    # Qorvo QPQ1907 BAW band-pass (2402.5-2481.5 MHz), 1.4 x 1.2 mm 5-pad laminate. PIN TABLE NOT READ FROM THE
-    # DATASHEET (qorvo.com rate-limited, 2026-11-01): the usual Qorvo 5-pad single-ended layout is assumed (1 in,
-    # 3 out, 2/4/5 ground). ADR-0018 open item: confirm before layout (#34).
-    "QPQ1907": ("U", [("1", "RF_IN", P, "L"), ("2", "GND2", P, "L"), ("4", "GND4", P, "R"), ("3", "RF_OUT", P, "R"),
-                      ("5", "GND5", P, "R")], "Qorvo QPQ1907 2.4 GHz ISM BAW band-pass filter (pinout est.)"),
+    # Qorvo QPQ1907 BAW band-pass, 1.4 x 1.2 mm 5-pad laminate: "QPQ1907 Data Sheet 040820", Pin Configuration and
+    # Description: 1 INPUT, 2 GND, 3 GND, 4 OUTPUT, 5 GND; note 6: pin 1 must be used for input.
+    "QPQ1907": ("U", [("1", "RF_IN", P, "L"), ("2", "GND2", P, "L"), ("3", "GND3", P, "L"), ("4", "RF_OUT", P, "R"),
+                      ("5", "GND5", P, "R")], "Qorvo QPQ1907 2.4 GHz Wi-Fi/LTE coexistence BAW band-pass filter"),
     # TI TPS2595x0/1 WSON-8 (DSG): SLVSE57C section 6, Pin Functions: 1 dVdt, 2 EN/UVLO, 3/4 IN, 5 OUT, 6 FLT (open
     # drain), 7 ILM, 8 GND, PAD GND.
     "TPS2595": ("U", [("3", "IN", PI, "L"), ("4", "IN", PI, "L"), ("2", "EN/UVLO", I, "L"), ("1", "dVdt", P, "L"),

@@ -44,6 +44,9 @@ def test_band_performance_and_stackup_tolerance():
     for er in (4.2, 4.6):                                     # FR-4 er spread: the cut lengths still work
         t = wk.summary(5, s={**wk.STACKUP, "er": er},)
         assert t["iso_db"] >= 20 and t["rl_in_db"] >= 15 and t["il_db"] <= 11.2, er
+    for ws in (0.9, 1.1):                                     # +-10 % etched width (#95 S5), lengths as cut
+        t = wk.summary(5, w_scale=ws)
+        assert t["iso_db"] >= 20 and t["rl_in_db"] >= 15 and t["il_db"] <= 11.2, ws
 
 
 def test_matches_scikit_rf():

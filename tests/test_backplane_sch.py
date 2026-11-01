@@ -52,7 +52,7 @@ def test_erc_and_bom(built):
     assert [{k: str(v) for k, v in r.items()} for r in rows] == committed, "run python hw/rack/backplane.py --no-sch"
     for r in rows:                      # UK owner: every line has a UK distributor, a GBP price and a labelled source
         assert r["uk_distributor"] and float(r["unit_gbp"]) >= 0
-        assert r["source"].startswith(("est.", "DigiKey UK", "copper")), r
+        assert r["source"].startswith(("est.", "DigiKey UK", "copper", "The Pi Hut")), r
 
 
 def test_no_skidl_calls_in_comments():
@@ -71,7 +71,7 @@ def test_slot_sockets_follow_adr0014(built):
         assert re.search(rf"\|\s*{n}\s*\|\s*`{re.escape(name)}`\s*\|", adr), (n, name)
     for k in range(bp.N_SLOTS):
         j = f"J{10 + k}"
-        assert parts[j].fields["MPN"] == "PPPC132LFBN-RC"
+        assert parts[j].fields["MPN"] == "M20-7831346"
         got = {n: net[j, str(n)] for n in table}
         assert got[14] == "__NOCONNECT"                        # key: position 14 plugged
         for n, name in table.items():
@@ -103,12 +103,13 @@ def test_slot_power_protection(built):
     assert 9.5 <= 1.2 * (top + bot) / bot <= 10.5 and 20.0 * bot / (top + bot) <= 6.0
     # the sub-board supervisor trips at 10.78 V (ADR-0014): the slot eFuse keeps the rail on above 9.15 V
     assert 1.1 * (top + bot) / bot < 10.78
-    assert {bp.i_lim(v) for v in bp.R_ILM.values()} and 3.4 <= bp.i_lim(bp.R_ILM["input"]) <= 3.6
+    assert 3.4 <= bp.i_lim(bp.R_ILM["input"]) <= 3.6 and all(487 <= v <= 5000 for v in bp.R_ILM.values())
 
 
 def test_power_entry(built):
     bp, _, _, net, parts = built
-    assert (net["J1", "1"], net["J1", "2"]) == ("+12V_RAW", "GND")
+    assert (net["J1", "1"], net["J1", "2"]) == ("+12V_IN", "GND")
+    assert pair(net, "F1") == {"+12V_IN", "+12V_RAW"} and parts["F1"].fields["MPN"] == "0451004.MRL"   # fuse ahead of TVS
     # P-FET: drain at the jack, source to the load (body diode blocks a reversed brick), gate to GND, Vgs clamp
     assert {net["Q1", p] for p in "5678"} == {"+12V_RAW"} and {net["Q1", p] for p in "123"} == {"+12V_PROT"}
     assert (net["D1", "1"], net["D1", "2"]) == ("+12V_PROT", "Q1_G")
@@ -134,7 +135,9 @@ def test_rf_chain(built):
         assert net[lna, "7"] == f"LNA_{ant}_RFOUT" and net[lna, "1"] == f"LNA_{ant}_VBIAS"
         choke = next(r for r, _ in on_net(net, f"LNA_{ant}_RFOUT") if parts[r].value == "18n")
         assert pair(net, choke) == {f"LNA_{ant}_RFOUT", f"+5V_LNA_{ant}"}
-        assert (net[flt, "1"], net[flt, "3"]) == (f"LNA_{ant}_OUT", f"SPL_{ant}_IN")
+        # QPQ1907 Data Sheet 040820: 1 INPUT, 2/3/5 GND, 4 OUTPUT
+        assert (net[flt, "1"], net[flt, "4"]) == (f"LNA_{ant}_OUT", f"SPL_{ant}_IN")
+        assert {net[flt, p] for p in "235"} == {"GND"}
         # bias-T eFuse: host enable with pull-down (off by default), 0.49 A limit, fault to the host
         efb = "U10" if ant == "A" else "U11"
         assert net[efb, "5"] == f"BIAS_{ant}_DC" and net[efb, "2"] == f"HOST_{bp.HOST[f'BIAS_{ant}_EN']}"
@@ -175,7 +178,8 @@ def test_host_interface(built):
         "GPIO14", "GPIO15", "GPIO18", "GPIO19", "GPIO20", "GPIO21", "GPIO0", "GPIO1")
     for n, name in hdr.items():
         got = net["J2", str(n)]
-        assert got == ("GND" if name == "GND" else got), n
+        if name == "GND":
+            assert got == "GND", n
         if name in ("3V3", "5V", "GPIO0", "GPIO1"):
             assert got == "__NOCONNECT", n                            # no rail tie, HAT ID pins left alone
     for k, (tx, rx) in bp.SLOT_UART.items():
@@ -208,3 +212,49 @@ def test_rear_panel_and_esd(built):
         for leg in ("AUD_HOT", "AUD_COLD"):                           # >= 58 V standoff TVS (ADR-0014 item 1)
             tvs = [r for r, _ in on_net(net, f"S{k}_{leg}") if parts[r].value == "SMAJ58CA"]
             assert len(tvs) == 1 and "CHASSIS" in pair(net, tvs[0])
+
+
+def test_rf_path_is_continuous(built):
+    """#95 M1: walk BNC -> DC block -> LNA -> output block -> BAW -> Wilkinson -> slot u.FL through series elements
+    only. A pin swapped onto ground (as the first QPQ1907 pinout did) breaks the walk or puts GND on the path."""
+    bp, _, _, net, parts = built
+    through = {"U6": ("2", "7"), "U7": ("2", "7"), "U8": ("1", "4"), "U9": ("1", "4")}   # LNA in/out, BAW in/out
+    edges = collections.defaultdict(set)
+    for p in parts.values():
+        series = (p.ref.startswith("TL") or (p.ref.startswith("C") and p.value == "100p")
+                  or (p.ref.startswith("R") and p.value == "0"))
+        pins = through.get(p.ref) or (("1", "2") if series else None)
+        if pins:
+            a, b = net[p.ref, pins[0]], net[p.ref, pins[1]]
+            edges[a].add(b); edges[b].add(a)
+    for ant in "AB":
+        seen, todo = {f"ANT_{ant}"}, [f"ANT_{ant}"]
+        while todo:
+            for m in edges[todo.pop()] - seen - {"GND"}:
+                seen.add(m); todo.append(m)
+        order = [f"ANT_{ant}", f"LNA_{ant}_IN", f"LNA_{ant}_RFIN", f"LNA_{ant}_RFOUT", f"LNA_{ant}_OUT", f"SPL_{ant}_IN"]
+        assert set(order) <= seen, (ant, set(order) - seen)
+        assert {f"RF_{ant}{k}" for k in range(8)} <= seen
+        assert not any(n.startswith("+") for n in seen)          # the walk never lands on a supply rail
+        for n in order:                                          # and no RF node is shorted to ground
+            assert n != "GND"
+
+
+def test_bias_t_resistor_dissipation(built):
+    """#95 M4: the bias-T series resistor survives the eFuse's worst-case current limit at <= 50 % of its rating."""
+    bp, _, _, net, parts = built
+    for ant in "AB":
+        r = next(p for p in parts.values()
+                 if p.ref.startswith("R") and pair(net, p.ref) == {f"BIAS_{ant}_RF", f"BIAS_{ant}_DC"})
+        watts = bp.I_LIM_MAX_4420 ** 2 * float(r.value)
+        assert watts <= 0.5 * float(r.fields["P_W"]), (r.ref, watts, r.fields["P_W"])
+    for p in parts.values():                                     # every resistor carries a rating
+        if p.ref.startswith("R"):
+            assert float(p.fields["P_W"]) > 0
+
+
+def test_slot_key_plugs():
+    """#95 S3: position 14 is physically blocked by a polarising key in every slot socket."""
+    pr = _load("hw_rack_prices_t", RACK / "prices.py")
+    key = [e for e in pr.EXTRAS if "M20-003" in e[0]]
+    assert len(key) == 1 and key[0][1] == 8

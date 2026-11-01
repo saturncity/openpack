@@ -1,70 +1,94 @@
 # ADR-0018: Rack main board: LNA + BAW filter + 1:8 Wilkinson per antenna, fused slots, CM4 IO board as the host carrier
-Status: accepted. 2026-11-01. Issue #33. Schematic `hw/rack/backplane.py` (SKiDL, ERC 0/0). Splitter model `hw/rack/wilkinson.py`. Numbers `python3 audit.py` Audit 6. Tests `tests/test_backplane_sch.py`, `tests/test_rack_rf.py`.
-- **Context:** RK-1..RK-3 fix the rear panel (8 XLR, 2 BNC with switchable 12 V bias-T, RJ45, USB-C service, 12 V brick), the RF chain (LNA NF ≤ 2 dB → 1:8 splitter → 8 modules, 6 dB coax budget) and a CM4 host. ADR-0014 fixes the slot connector (key at 14). ADR-0016 (PR #93) fixes the antennas: 2 × 8 dBi patch on 15.2 m coax (4.2 dB), install rule ≥ 4 m to actors, Wi-Fi ≥ 4.4 m behind / ≥ 12.2 m in front, 3 dB R1 C/I margin. Open: the parts, the splitter, the power tree, how 8 UARTs reach the CM4, and the carrier. The owner is UK-based.
-- **Sources:** Qorvo QPL9057 datasheet Rev. F (pins, EVB, S/noise parameters, abs max). TI TPS2595 SLVSE57C (pins, Eq. 4 R_ILM = 2000/(I − 0.04), UVLO 1.2/1.1 V, EN ≤ 6 V, variants). TI TPS62933 SLUSEA4D (pins, 5 V/3 A reference design). NXP SC16IS752 Rev. 9.1 Table 2 (TSSOP-28 pins, SPI mode, IRQ 1 kΩ). Infineon ESD101-B1 datasheet (±5.5 V, 0.1 pF). ESD103-B1 (±15 V, 0.09 pF): from Infineon's datasheet v2.0 as quoted by Farnell/LCSC listings; the PDF itself was not read. Raspberry Pi CM4 datasheet (Table 1 alt functions, 5 UARTs) and CM4IO datasheet (12 V jack, on-board 5 V, J2 nRPIBOOT, micro-USB rpiboot, 40-way J8). DigiKey UK pages (GBP, stock) on 2026-11-01. JLCPCB JLC04161H-7628 stackup.
+Status: accepted for the schematic, with an RF **stop-and-ask on the gain plan** (item 1). 2026-11-01, amended after the #95 review and the owner's wing-antenna constraint. Issue #33. Schematic `hw/rack/backplane.py` (SKiDL, ERC 0/0). Splitter model `hw/rack/wilkinson.py`. Numbers `python3 audit.py` Audit 6. Tests `tests/test_backplane_sch.py`, `tests/test_rack_rf.py`.
+- **Context:** RK-1..RK-3 fix the rear panel, the RF chain (LNA NF ≤ 2 dB, input P1dB ≥ −10 dBm, IIP3 ≥ 0 dBm, then a 1:8 splitter, with a 6 dB coax budget) and a CM4 host. ADR-0014 fixes the slot connector (key at 14). ADR-0016 fixes the antennas and the R1 margin. **New owner constraint (2026-11-01): the panels go in the wings**, so actors walk past them and the worst near pack is ~0.5 m from an 8 dBi panel (UK 9 dBm EIRP).
+- **Sources:**
+  - Qorvo QPL9057 Rev. F: pins, EVB, |S21| table, spec table. The spec table is tested at 3.5 GHz only, so its values serve here as a worst-case proxy.
+  - Qorvo **QPQ1907 Data Sheet 040820**: pins **1 IN, 2/3/5 GND, 4 OUT**; IL by Wi-Fi channel over 2402.5–2481.5 MHz; attenuation table.
+  - **nRF21540 OPS v0.5.2**: RX P1dB −18.0 dBm minimum. Nordic's 2022 nRF21540 webinar: "no bypass mode support".
+  - **nRF5340 PS v1.1** §7.26.16.5–7: PRX,MAX 0 dBm; C/I 2M BLE ±4 MHz −22/−47 dB, ≥ 6 MHz −54 dB; PIMD,2M,BLE −22 dBm. The PS gives no out-of-band blocking figure.
+  - TI TPS2595 SLVSE57C; TI TPS62933 SLUSEA4D; NXP SC16IS752 Rev. 9.1; Infineon ESD101-B1; Raspberry Pi CM4 and CM4IO datasheets; pSemi PE4259.
+  - DigiKey UK and The Pi Hut pages, read 2026-11-01.
 - **Decision:**
-  - **RF chain, per antenna** (`rf_a`, `rf_b`): BNC (Amphenol 112487, 4 GHz) → **ESD103-B1-02EL** (±15 V, 0.09 pF; survives the bias) → **bias-T**: 39 nH LQW18AN (SRF 3.28 GHz, 1 A) to 100 pF + 10 nF, 10 Ω, SMF12A, fed by a **TPS259541 eFuse** (0.49 A limit, 13.7 V clamp). EN is a host GPIO with a 100 k pull-down, so the bias is **off by default** (the HG2409P is passive) and a DC-shorted antenna trips the eFuse; FLT goes to the host → **100 pF DC block** → **ESD101-B1-02EL** at 0 V (the LNA is HBM class 1B) → **QPL9057** per its EVB (5.1 k bias, 18 nH choke, 100 pF blocks, SD tied low) → **QPQ1907 BAW band-pass** (2402.5–2481.5 MHz, ≤ 2.2 dB), after the LNA so its loss barely costs NF → 1:8 Wilkinson → 8 u.FL → 200 mm u.FL cables to each sub-board's J3 (A) / J4 (B).
-  - **Splitter:** a 3-stage corporate Wilkinson in L1 microstrip over L2 on JLC04161H-7628 (h 0.2104 mm, εr 4.4 per JLCPCB, tan δ 0.02 est.). 50 Ω = 0.387 mm; 70.7 Ω arms = 0.196 mm × 17.76 mm (λ/4 at 2441.75 MHz); 100 Ω 0402 thin-film isolation resistors (7 per tree); compact tree (feeds 5/10/6/5 mm). The arms are `TL` parts (net-tie copper) so the netlist keeps each divider explicit.
-  - **Power:** 2.1 mm jack (PJ-063AH) → AO4407A P-FET reverse protection (12 V Vgs zener) → SMBJ12A (VC 19.9 V, under the TPS2595 20 V abs max) → **TPS259541 input eFuse**: 3.5 A, UVLO on at 9.98 V / off at 9.15 V. Then:
-    - TPS62933 5 V / 3 A (TI reference design);
-    - TLV76733 3.3 V;
-    - **per slot, a TPS259541 on +12 V and a TPS259531 (5.7 V clamp) on +5 V**, 0.49 A each, dV/dt 22 nF (≈ 0.2 A inrush). A shorted sub-board trips only its own eFuses, auto-retries, and the other seven keep running;
-    - a 1.5 A eFuse to the CM4IO over a JST VH pigtail.
-    - All power FLT pins are wire-ORed to one host GPIO.
-    - Load (est.): slots 8 × 42 mA at 12 V, CM4IO 0.75 A (its 9 W budget), the 5 V rail ~1.1 A (0.5 A from 12 V), so ~1.6 A, or 2.6 A with both bias-Ts at their limit. That is under the 3.5 A input limit and the 5 A brick.
-    - Chassis (XLR pin 1 and shells) bonds to GND once, at NT1.
-  - **Slots:** the ADR-0014 socket (Sullins PPPC132LFBN-RC; position 14 plugged), slot-ID straps (bit 0 = GND, 1 = open), I2S NC, front LEDs (560 Ω, ~2 mA, green lock / red peak) and an XLR NC3MAH. Pin 2 is hot, pin 3 cold; pin 1 and the shell go to chassis. **SMAJ58CA on pins 2 and 3** (VRWM 58 V ≥ P48 52 V max).
-  - **Host carrier: the official Raspberry Pi CM4 IO Board (SC0326)** with a **CM4 without wireless** (CM4002008 = SC0680), on a 40-way ribbon (pin n to pin n) to the main board's J2.
-    - UARTs: CM4 UART0/3/4/5 (GPIO14/15, 4/5, 8/9, 12/13) serve slots 0–3. Two SC16IS752 on SPI1 (CE0/CE1, IRQ GPIO24/25, 14.7456 MHz) serve slots 4–7.
-    - The SC16IS752s' 16 GPIOs drive every slot's nRESET/BOOT as **software open drain**: they reset to inputs (released), and the host drives output-low to assert.
-    - Bias EN/FLT on GPIO22/23/26/27, power fault on GPIO6. HAT-ID GPIO0/1 and the CM4IO rails are left unconnected.
-    - Ethernet: the CM4IO RJ45, by a 0.3 m patch to a rear **Neutrik NE8FDP etherCON** feedthrough.
-    - RK-1 "USB-C service": a panel USB-C to micro-USB lead into the CM4IO rpiboot port (plugging it in disables the hub; J2 nRPIBOOT forces USB boot).
-  - **Module LNA stays on (BT40NE on the receivers).** At the 6 dB coax budget, with the nRF21540 bypassed, system NF is 10.27 dB, worse than the 9.30 dB Audit 4 / ADR-0016 used. With it on, NF is 8.50 dB. Firmware therefore keeps it on and bypasses it on RSSI (radio input > −6 dBm, back on below −12 dBm). This retires ADR-0015's "BT40E on the rx modules" option.
-- **Numbers** (`audit.py` Audit 6, worst-case datasheet limits unless marked typ):
-  - **QPL9057 at 2442 MHz:** gain 22.4 dB, NF 0.48 typ / **0.90 max** (RK-2 ≤ 2 dB), IIP3 +14.6 typ / **+6.6 dBm worst**, input P1dB −4.3 typ / **−6.9 dBm worst** (RK-2 per PR #93: ≥ −10 / ≥ 0). Abs max +27 dBm.
-  - **Wilkinson 1:8, 2400–2483.5 MHz:** IL 10.56–10.61 dB (ideal 9.03; scikit-rf MLine 10.24), imbalance 0.00 dB, output-to-output isolation ≥ 30.3 dB, RL in 36.3 / out 39.2 dB. εr 4.2–4.6 keeps isolation ≥ 20 dB and RL ≥ 15 dB. Audit 6 adds 0.5 dB for junctions and bends.
-  - **System NF at the antenna connector**, module LNA on (bypassed): **6.70 (8.47) dB** with the ADR-0016 4.2 dB coax, **8.50 (10.27) dB** at the 6 dB budget. The worst case gives −92.5 dBm sensitivity and a 44 m indoor range at UK 9 dBm. Receiver noise uses **0.01 dB of the 3 dB R1 margin**.
-  - **Compression:**
-    - Install rule (near pack at 4 m at US 20 dBm, 3 Wi-Fi channels and a B40 phone at rule distance, short coax): −22.9 dBm at the LNA input, **16.0 dB below P1dB**.
-    - Everything off-rule (pack at 1 m; Wi-Fi 1/6/11 and a B40 phone 2 m in front): −9.1 dBm, 2.3 dB below the worst P1dB (4.9 below typical).
-    - IM3 is −84 dBm per 2 MHz, against a −43 dBm wanted signal.
-    - The near pack reaches the radio at −4.6 dBm (rule, module LNA on) and −6.5 dBm (off-rule, bypassed), against a 0 dBm maximum.
-  - **BOM, one rack, GBP ex VAT:**
-    - main board, host and cables **£396.88** (£112.98 of it estimates);
-    - 8 sub-boards £210.80 (converted USD);
-    - antennas £340.56 (ADR-0016);
-    - **rack £948.24**. No cap is set.
-- **Requirements check** (carrier and UART fan-out: no QUESTIONS.md default covers them):
+  - **RF, per antenna.** The chain is:
+    1. BNC (Amphenol 112487) → ESD103 (±15 V, 0.09 pF);
+    2. bias-T: 39 nH LQW18AN choke, 100 pF + 10 nF, **1 Ω 2512 (1 W)**, SMF12A;
+    3. TPS259541 bias eFuse: 0.46–0.52 A, off by default, EN and FLT on host GPIOs;
+    4. 100 pF DC block → ESD101 → **QPL9057** (EVB values) → **QPQ1907 BAW** → 3-stage microstrip Wilkinson → 8 u.FL.
+    - The 1 Ω 2512 dissipates 0.27 W at the worst-case limit, 27 % of its rating; the test asserts ≤ 50 %.
+    - The QPQ1907 pinout is now the datasheet's. A test walks the RF path through series elements only, from BNC to every slot port.
+  - **Filter choice.** No UK-stocked 2.4 GHz filter was found that specifies IL over all of 2400–2483.5 MHz *and* rejection over 2370–2400 MHz:
+    - The Qorvo QPQ1907 and 885128 and the Akoustis A10424 specify IL only over 2402.5–2481.5 and rejection only over 2300–2370.
+    - The Broadcom ACPF-7A24 specifies IL over 2401–2480 (≤ 2.9 dB), ≥ 35 dB over 2300–2370 and 25 dB typical over 2370–2380, but no UK distributor lists it.
+    - The QPQ1907 stays: DigiKey UK, £2.82, 7,548 in stock. Audit 6 charges the 2403 and 2482 carriers 2.2 dB plus a 2 dB skirt allowance (estimate, S2P not read) and credits 0 dB of rejection at 2370–2400.
+  - **Power:**
+    - **4 A fast fuse (0451004.MRL) ahead of** the reverse-polarity P-FET and the SMBJ12A. A 15–24 V brick then opens the fuse, rather than failing the TVS or putting 24 V on the TPS2595.
+    - Then the TPS259541 input eFuse (3.5 A, UVLO 9.98/9.15 V), TPS62933 5 V, TLV76733 3.3 V, per-slot TPS259541 (+12 V) and TPS259531 (+5 V) at 0.49 A, and a 1.5 A CM4IO feed.
+    - The NT1 tie and the BNC bulkhead bodies both bond GND to the panel.
+  - **Slots:**
+    - **Harwin M20-7831346** socket with a **Harwin M20-003 polarising key in position 14** (8 per rack in the BOM).
+    - Slot-ID straps, LEDs (Lite-On LTST-C191KGKT and KRKT, 560 Ω), XLR NC3MAH with SMAJ58CA on pins 2/3.
+  - **Host:**
+    - **CM4002008 (SC0680, no wireless) from The Pi Hut UK, £79.20, qty 1.** SC0681 (16 GB) at the same price is the drop-in alternative. DigiKey UK had 0 in stock.
+    - The official CM4IO (SC0326) on a 40-way ribbon.
+    - CM4 UART0/3/4/5 for slots 0–3, plus two SC16IS752 on SPI1 for slots 4–7. Their GPIOs drive nRESET/BOOT as software open drain.
+    - Ethernet through an etherCON NE8FDP; USB-C service through a lead to the CM4IO rpiboot port.
+  - **CI:** scikit-rf is installed, and the cross-check fails rather than skips under `CI`. `backplane.py --no-sch` is re-run and the symbol library, netlist (build timestamp stripped), BOM and ERC report must not change.
+- **Numbers** (Audit 6, worst-case limits):
+  - **QPL9057 at 2442 MHz:** |S21| 23.1 dB (21.5 dB minimum proxy for NF), NF 0.48 typ / 0.90 max, IIP3 ≥ +5.9 dBm, input P1dB ≥ −7.6 dBm.
+  - **Wilkinson:** 10.61 dB (scikit-rf 10.24), isolation ≥ 30.3 dB, RL 36/39 dB. It holds εr 4.2–4.6 and ±10 % etched width.
+  - **System NF, nRF21540 always on:**
+    - with the ADR-0016 coax (4.2 dB): 7.59 / 6.69 / 7.59 dB at 2403 / 2442 / 2482;
+    - at the 6 dB budget: **9.39 / 8.49 / 9.39 dB**, so the band edges miss 9.30 by 0.09 dB on the estimated skirt.
+  - **Gain plan, no pad.** Near pack in the wings, Wi-Fi at the ADR-0016 rule; margins against P1dB − 6 dB, PRX,MAX − 6 dB and PIMD:
 
-| R-id | CM4IO + ribbon, CM4 UARTs + 2× SC16IS752 (chosen) | CM4 on the main board (custom carrier) | CM4IO + USB hub + 2× FT4232H | Pi 4/5 SBC instead of a CM4 |
+| near pack | QPL9057 in (margin) | nRF21540 in (margin) | radio total (margin) | C/I margin ≥ 6 MHz / −4 MHz |
 |---|---|---|---|---|
-| R1 dropouts | ✓ CM4 without radio; host crash leaves audio running (slots power on without it) | ✓ | ✓ | partial: on-board Wi-Fi must be disabled in software |
-| R9 1U, 8 XLR | ✓ 160 × 90 mm board beside the main board, ~25 mm tall (est., item 5) | ✓ smaller | ✓ | partial: USB/Ethernet face the wrong way, 2 extra cables |
-| R11 remote mgmt | ✓ GbE, every slot UART + reset + boot | ✓ | ✓ | ✓ |
-| R13 sim/design first | ✓ the vendor board needs no new design; the SC16IS752 pinout was read from its datasheet | partial: Ethernet magnetics, CM4 pinout and power are new, unverified design | ✗ the FT4232H datasheet could not be read (ftdichip.com 403); 64-pin part | ✓ |
-| RK-3 boot ≤ 60 s | ✓ eMMC | ✓ | ✓ | partial: SD card |
-| R12 cost (rack; no cap) | partial: +£26.15 board +£11.84 UARTs | ✓ cheapest | partial: +~£15 | partial |
+| 0.5 m | −17.4 (+3.8) | −8.7 (−15.3) | +4.3 (−10.3) | +8.0 / −24.0 |
+| 1.0 m | −22.7 (+9.1) | −14.1 (−9.9) | −1.1 (−4.9) | +14.0 / −18.0 |
+| 1.5 m | −25.3 (+11.7) | −16.6 (−7.4) | −3.6 (−2.4) | +17.6 / −14.4 |
+| 4.0 m | −28.7 (+15.1) | −20.2 (−3.8) | −7.2 (+1.2) | +26.1 / −5.9 |
+
+  - **Fixed pad after the BAW** (worst-carrier NF at 6 dB coax; closest safe near pack; closest safe phone):
+
+| pad | NF | safe near pack | safe phone |
+|---|---|---|---|
+| 0 dB | 9.39 dB | none | none |
+| 10 dB | 15.9 dB | 1.6 m | 9.1 m |
+| 15 dB | 20.5 dB | 0.9 m | 6.2 m |
+| 20 dB | 25.3 dB | 0.5 m | 4.3 m |
+| 30 dB | 35.3 dB | 0.4 m | 2.6 m |
+
+    - Wi-Fi alone at the rule distance already leaves the nRF21540 at −2.8 dB with no pad.
+    - A class-3 phone (B40 at 2390 MHz, unfiltered ahead of the LNA) must stay ≥ 2.6 m from a panel whatever the pad.
+  - **BOM, GBP ex VAT:** main board, host and cables **£426.32** (£113.26 of it estimates); 8 sub-boards £210.80; antennas £340.56; **rack £977.68**.
+- **Requirements check** (carrier and UART fan-out):
+
+| R-id | CM4IO + ribbon, CM4 UARTs + 2× SC16IS752 (chosen) | CM4 on the main board | CM4IO + USB hub + 2× FT4232H | Pi 4/5 SBC |
+|---|---|---|---|---|
+| R1 | ✓ no-wireless CM4; audio runs without the host | ✓ | ✓ | partial: Wi-Fi off in software |
+| R9 | ✓ 160 × 90 mm beside the main board | ✓ | ✓ | partial: cabling |
+| R11 | ✓ GbE, every UART + reset + boot | ✓ | ✓ | ✓ |
+| R13 | ✓ vendor board; SC16IS752 pins from its datasheet | partial: new Ethernet/power design | ✗ FT4232H datasheet unreadable (403) | ✓ |
+| RK-3 | ✓ eMMC | ✓ | ✓ | partial: SD card |
+| R12 | partial: +£26 board +£12 UARTs | ✓ | partial | partial |
 
 - **Consequences / open items:**
-  1. **QPQ1907: the pinout (assumed 1 in / 3 out / 2, 4, 5 GND) and the stop-band rejection at 2390 MHz were not read** (qorvo.com rate-limited). Confirm both before layout (#34). With no filter credit, an LTE B40 phone reaches the radio at −11.2 dBm (rule) to +4.6 dBm (off-rule), and the nRF5340 blocking limit for that offset is unverified. If either fails: add a second BAW or pick a B40-coexistence part.
-  2. **Stock (DigiKey UK, 2026-11-01):**
-     - CM4 SC0680 is 0 in stock; the fallback is 4 GB SC0684/5 at £85.93, no-wireless status to be verified;
-     - TPS259541 stock was not shown (20-week lead);
-     - DMP3013SFV is 0 in stock, hence the AO4407A;
-     - no panel USB-C to micro-USB lead was found (£8 est.).
-     - Confirm all of these before #40.
-  3. **Firmware and host:**
-     - nRF21540 LNA on, with the RSSI bypass above;
-     - config.txt: `enable_uart=1`, `dtoverlay=uart3,uart4,uart5`, `spi1-2cs`, and two SC16IS75x overlays (IRQ 24/25, xtal 14745600); drop `console=serial0` from cmdline.txt, since UART0 is slot 0;
-     - the host drives the SC16IS752 GPIOs as open drain (never output-high).
-     - Slot k = UART map `SLOT_UART` in `backplane.py`.
-  4. Layout (#34):
-     - the Wilkinson junctions and resistor pads (0.5 dB allowed);
-     - the two trees kept apart;
-     - QPL9057 input match (S11 −7.5 dB at 2.4 GHz unmatched; R 0 Ω pad left for tuning);
-     - the CM4IO and SC16IS752 clocks kept away from the LNAs.
-     - Then VNA-measure IL and isolation in Phase 4/5.
-  5. Mechanical: check the 1U fit of the CM4IO beside the main board, ADR-0014 item 6 (sub-board heights), and the LED light pipes to the front panel.
-  6. Bias-T: 0.49 A is the TPS2595 minimum limit. An active antenna drawing more than ~0.4 A at 12 V is out of scope.
-  7. The tan δ, the u.FL cable loss (1.0 dB) and the front-end loss (0.4 dB) are estimates; the VNA check in item 4 replaces them.
+  1. **STOP-AND-ASK (hands-off reason 5, R1/RK-5): no fixed gain plan meets both RK-5 NF and a 0.5 m pack.** The bottleneck is the module's nRF21540: its −18 dBm minimum P1dB sits behind ~7 dB of net rack gain, and it has no bypass.
+     - Pad 0 meets NF, except +0.09 dB at the band edges with the 6 dB coax, but compresses the nRF21540 even with no near pack.
+     - Pad 20 dB survives 0.5 m at an NF of 25 dB.
+     - Options for the owner: (a) a host-switched 0/20 dB pad per antenna, with antenna B covering while A is padded (needs a PE4259 pair and RX-5 support; not built); (b) receivers on the BT40E (no FEM) behind a higher-gain rack chain; (c) relax the 0.5 m case (panels out of reach).
+     - The issue-r1-wings agent reads these numbers.
+  2. QPQ1907: get the S2P to replace the 2 dB skirt estimate at 2403/2482 and the 0 dB credit at 2370–2400. The ACPF-7A24 would be the better filter if a UK source appears.
+  3. The nRF21540 P1dB comes from the 2019 objective spec. Confirm it against PS v1.2, which docs.nordicsemi.com did not serve.
+  4. Firmware and host:
+     - config.txt: `enable_uart=1`, then one `dtoverlay=` line each for uart3, uart4, uart5 and spi1-2cs;
+     - SC16IS752 overlays for CE0 and CE1 (the stock `sc16is752-spi1` overlay covers one chip, so the second needs a custom overlay), `spi-max-frequency` ≤ 4 MHz, IRQ 24/25, xtal 14745600;
+     - drop `console=serial0`.
+  5. Layout (#34):
+     - Take the Wilkinson widths from JLC's calculator with solder mask, or open the mask over the tree;
+     - give the TL net-ties real track geometry;
+     - check that the 200 mm u.FL cables reach slots 0 and 7;
+     - the QPL9057 input match;
+     - follow the QPQ1907 land pattern from the datasheet.
+  6. Confirm that the M20-003 key seats in the M20-78 dual-row socket on the first unit (Harwin lists it for M20 female families).
+  7. No panel USB-C to micro-USB lead was found (£8 estimate). TPS259541 has a 20-week lead time.
