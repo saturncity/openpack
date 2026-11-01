@@ -6,7 +6,7 @@ One purchase, bought once, after all design is done (ADR-0019). **Everything exc
 
 | Basket | Ex VAT (GBP) | VAT 20 % | Inc VAT |
 |---|---:|---:|---:|
-| Digi-Key UK | 600.40 | 120.08 | 720.48 |
+| Digi-Key UK | 451.56 | 90.31 | 541.87 |
 | Mouser UK | 6.55 | 1.31 | 7.86 |
 | Farnell UK | 31.78 | 6.36 | 38.14 |
 | RS UK | 89.37 | 17.87 | 107.24 |
@@ -20,11 +20,11 @@ One purchase, bought once, after all design is done (ADR-0019). **Everything exc
 | The Debug Store | 51.00 | 10.20 | 61.20 |
 | Knives and Tools UK | 24.92 | 4.98 | 29.90 |
 | 123-3D UK | 15.67 | 3.13 | 18.80 |
-| **Grand total (required, no rack)** | **1,814.99** | **363.00** | **2,177.99** |
-| Optional items (not in total) | 385.00 | 77.00 | 462.00 |
+| **Grand total (required, no rack)** | **1,666.15** | **333.23** | **1,999.38** |
+| Optional items (not in total) | 533.84 | 106.77 | 640.61 |
 | RACK (pending #34) | TBD | TBD | TBD |
 
-Of the required total, GBP 1,439.70 ex VAT is **quoted** and the rest, GBP 375.29, is **estimated** (including shipping). Estimated prices are marked `estimated` in every table; none can be called a quote.
+Of the required total, GBP 1,290.86 ex VAT is **quoted** and the rest, GBP 375.29, is **estimated** (including shipping). Estimated prices are marked `estimated` in every table; none can be called a quote.
 
 ## How prices were read
 
@@ -44,13 +44,13 @@ Of the required total, GBP 1,439.70 ex VAT is **quoted** and the rest, GBP 375.2
 
 ## Basket: Digi-Key UK
 
-**Basket total: GBP 600.40 ex VAT, VAT 120.08, GBP 720.48 inc VAT.**
+**Basket total: GBP 451.56 ex VAT, VAT 90.31, GBP 541.87 inc VAT.**
 
 | Item | Part number | Qty | Unit (GBP ex VAT) | Line total | Price | Link | Reason / what it unblocks |
 |---|---|---:|---:|---:|---|---|---|
 | PCM5102A I2S DAC breakout board (Adafruit 6250) | Adafruit 6250 | 1 | 3.7000 | 3.70 | quoted 2026-11-01 | [link](https://www.digikey.co.uk/en/products/result?keywords=1528-6250-ND) | #38 I2S backend and the DAC output chain on the bench; FLT/XSMT strap tests (ADR-0017). Digi-Key UK 2026-11-01: GBP 3.70 ex VAT (4.44 inc), 494 in stock. The Pi Hut search found no PCM5102 board. |
 | u.FL to SMA female pigtail 150 mm (GCT) | CABLE 348 RF-150-A-1 | 2 | 2.1900 | 4.38 | quoted 2026-11-01 | [link](https://www.digikey.co.uk/en/products/result?keywords=U.FL%20to%20SMA%20cable%20assembly) | Connects the pack/receiver u.FL (and the DK RF connector) to the SMA attenuator and analyser. Digi-Key UK 2026-11-01: GBP 2.19 ex VAT, 1,228 in stock; U.FL (MHF1) to SMA, 5.9 in. Check the SMA end is a jack (listing does not say) before ordering. |
-| TI PCM1840 evaluation module | PCM1840EVM | 1 | 148.8400 | 148.84 | quoted 2026-11-01 | [link](https://www.digikey.co.uk/en/products/result?keywords=PCM1840EVM) | #38 ADC delay and noise measured before the pack is populated (ADR-0019 mitigation). Digi-Key UK 2026-11-01: GBP 148.84 ex VAT (178.61 inc), 2 in stock, 12 week factory lead time, purchase limit applies. Was estimated at 55: nearly 3x higher. Order early; Mouser UK page timed out. |
+| TI PCM1840 evaluation module | PCM1840EVM | 1 | 148.8400 | 148.84 | quoted 2026-11-01, OPTIONAL | [link](https://www.digikey.co.uk/en/products/result?keywords=PCM1840EVM) | #38 ADC delay and noise measured before the pack is populated (ADR-0019 mitigation). Digi-Key UK 2026-11-01: GBP 148.84 ex VAT (178.61 inc), 2 in stock, 12 week factory lead time, purchase limit applies. Was estimated at 55: nearly 3x higher. Order early; Mouser UK page timed out. OPTIONAL: under the single-purchase plan (ADR-0019) the PCM1840 arrives on our own pack boards at the same time, so a separate eval board adds no earlier test step. |
 | 8-channel 24 MHz USB logic analyser (Cypress FX2, sigrok fx2lafw), SparkFun | SparkFun 18627 | 1 | 20.4400 | 20.44 | quoted 2026-11-01 | [link](https://www.digikey.co.uk/en/products/result?keywords=logic%20analyzer%20USB%208%20channel) | #38 end-to-end latency via GPIO toggles; I2S and frame-clock phasing (ADR-0020/0022). 24 MHz sampling is 40 ns against ms-scale latency. Digi-Key UK 2026-11-01: GBP 20.44 ex VAT, 968 in stock; the SparkFun unit is documented for sigrok PulseView. The Pi Hut lists the same unit at GBP 26.30 inc VAT (21.92 ex) but SOLD OUT 2026-11-01. |
 | SMA attenuator 10 dB 2 W DC-6 GHz (Mini-Circuits) | VAT-10W2+ | 1 | 28.1800 | 28.18 | quoted 2026-11-01 | [link](https://www.digikey.co.uk/en/products/result?keywords=attenuator%20SMA%2010dB) | Stacks to 30 dB for the nRF21540 +20 dBm case if the FEM is fitted. Digi-Key UK 2026-11-01: GBP 28.18 ex VAT, 455 in stock. Cheaper DC-4 GHz Cinch part exists (GBP 17.95) but would not cover harmonics. |
 | SMA attenuator 20 dB 2 W DC-6 GHz (Mini-Circuits) | VAT-20W2+ | 1 | 33.6300 | 33.63 | quoted 2026-11-01 | [link](https://www.digikey.co.uk/en/products/result?keywords=attenuator%20SMA%2020dB%202W) | Protects the tinySA input while measuring conducted TX power at the pack u.FL (limit +7 dBm, ADR-0016/design-log). Digi-Key UK 2026-11-01: GBP 33.63 ex VAT, 137 in stock. |
@@ -265,7 +265,7 @@ Do not buy these yet. Pull in the numbers from the rack layout PR (#34) when it 
 
 | Category | Ex VAT | VAT 20 % | Inc VAT |
 |---|---:|---:|---:|
-| Bench kit | 615.50 | 123.10 | 738.60 |
+| Bench kit | 466.66 | 93.33 | 559.99 |
 | Packs x4 | 137.11 | 27.42 | 164.53 |
 | Packs x4 + Receivers x4 | 17.84 | 3.57 | 21.41 |
 | Receivers x4 | 104.50 | 20.90 | 125.40 |
@@ -273,6 +273,6 @@ Do not buy these yet. Pull in the numbers from the rack layout PR (#34) when it 
 | Mechanical and cells | 117.67 | 23.53 | 141.20 |
 | PCB fabrication | 80.00 | 16.00 | 96.00 |
 | Antennas, coax, stands | 620.58 | 124.12 | 744.70 |
-| **Total** | **1,814.99** | **363.00** | **2,177.99** |
+| **Total** | **1,666.15** | **333.23** | **1,999.38** |
 
 Shipping is its own category. Optional items are excluded. The RACK section is excluded (placeholder).

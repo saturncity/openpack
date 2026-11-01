@@ -59,7 +59,7 @@ MANUAL = [
          "Digi-Key UK 2026-11-01: GBP 80.17 ex VAT (96.20 inc), 1,798 in stock."),
     line("Digi-Key UK", CAT_BENCH, "TI PCM1840 evaluation module", "PCM1840EVM", 1, 148.84, Q, SEARCH["Digi-Key UK"] + "PCM1840EVM", D_NOW,
          "#38 ADC delay and noise measured before the pack is populated (ADR-0019 mitigation).",
-         "Digi-Key UK 2026-11-01: GBP 148.84 ex VAT (178.61 inc), 2 in stock, 12 week factory lead time, purchase limit applies. Was estimated at 55: nearly 3x higher. Order early; Mouser UK page timed out."),
+         "Digi-Key UK 2026-11-01: GBP 148.84 ex VAT (178.61 inc), 2 in stock, 12 week factory lead time, purchase limit applies. Was estimated at 55: nearly 3x higher. Order early; Mouser UK page timed out. OPTIONAL: under the single-purchase plan (ADR-0019) the PCM1840 arrives on our own pack boards at the same time, so a separate eval board adds no earlier test step.", False),
     line("The Debug Store", CAT_BENCH, "Tag-Connect TC2030-IDC-NL cable (2x5 1.27 mm to TC2030 no-legs)", "TC2030-IDC-NL", 1, 46.00, Q,
          "https://thedebugstore.com/products/tag-connect-tc2030-idc-nl-cable-uk", D_NOW,
          "Programs and debugs the pack and receiver boards (both carry TC2030 pads only, no header). Not in either BOM, so a missing item.",
