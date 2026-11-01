@@ -1,6 +1,6 @@
 """RK-2 (#33, ADR-0018): the 1:8 Wilkinson model (hw/rack/wilkinson.py) and the rack RF cascade (audit.py Audit 6).
-numpy only; the scikit-rf cross-check runs where scikit-rf is installed (`pip install scikit-rf`, proposed for CI)."""
-import importlib.util, math, pathlib
+The model is numpy only; the scikit-rf cross-check is required in CI and skips locally without scikit-rf."""
+import importlib.util, math, os, pathlib
 import numpy as np
 import pytest
 
@@ -47,7 +47,10 @@ def test_band_performance_and_stackup_tolerance():
 
 
 def test_matches_scikit_rf():
-    rf = pytest.importorskip("skrf")
+    if os.environ.get("CI"):
+        import skrf as rf  # CI installs scikit-rf (ci.yml): a skip there would hide a broken splitter model
+    else:
+        rf = pytest.importorskip("skrf")
     from skrf.circuit import Circuit
     from skrf.media import MLine
     s = wk.STACKUP
@@ -95,13 +98,33 @@ def test_lna_meets_rk2():
     lna = audit.lna_at()
     assert lna["nf_max"] <= 2.0                                   # RK-2 / issue #33: NF <= 2 dB (worst case 0.9)
     assert lna["ip1db_min"] >= -10 and lna["iip3_min"] >= 0       # RK-2 input P1dB / IIP3 (worst case)
-    assert 21 <= lna["gain"] <= 23
+    assert 22.5 <= lna["gain"] <= 23.5                            # |S21| at 2.44 GHz, datasheet table
 
 
-def test_cascade_keeps_the_r1_margin():
+def test_baw_band_edges_and_rejection():
+    assert audit.baw_db(2441.75) == 1.3                           # CH3-11 max IL
+    for f in (2403.0, 2482.0):                                    # past 2402.5 / 2481.5: spec IL + skirt allowance
+        assert audit.baw_db(f) == 2.2 + audit.BAW_SKIRT_EST_DB
+    assert audit.baw_db(2390.0) == 0.0                            # 2370-2400 not specified: no credit
+    assert audit.baw_db(2350.0) == 38 and audit.baw_db(2535.0) == 40
+
+
+def test_nf_at_every_carrier():
     wil = audit.wilkinson_db()
-    nf_on = audit.cascade_nf_db(audit.rack_chain(audit.COAX_BUDGET_DB, True, True, wil))
-    nf_byp = audit.cascade_nf_db(audit.rack_chain(audit.COAX_BUDGET_DB, False, True, wil))
-    assert nf_on <= audit.AUDIT4_SYS_NF_DB < nf_byp               # module LNA on is required at the 6 dB budget
-    assert audit.cascade_nf_db(audit.rack_chain(audit.COAX_ADR16_DB, False, True, wil)) <= audit.AUDIT4_SYS_NF_DB
-    assert audit.r1_noise_cost_db(nf_on)[0] <= 0.5
+    nfs = {f: audit.cascade_nf_db(audit.rack_chain(audit.COAX_ADR16_DB, f, 0.0, wil)) for f in audit.CARRIERS}
+    assert max(nfs.values()) <= audit.AUDIT4_SYS_NF_DB            # ADR-0016 coax: every carrier inside RK-5
+    assert audit.cascade_nf_db(audit.rack_chain(audit.COAX_BUDGET_DB, 2441.75, 0.0, wil)) <= audit.AUDIT4_SYS_NF_DB
+    assert audit.r1_noise_cost_db(max(nfs.values()))[0] <= 0.5
+
+
+def test_gain_plan_stop_condition():
+    """ADR-0018 item 1: no fixed pad meets both RK-5 NF (6 dB coax) and a 0.5 m pack; the numbers the
+    stop-and-ask reports stay what the audit prints."""
+    wil = audit.wilkinson_db()
+    for d in audit.NEAR_M:
+        g = audit.gain_plan(d, 0.0, wil)
+        assert g["lna_margin"] > 0                                # the QPL9057 itself survives a 0.5 m pack
+        assert g["fem_margin"] < 0 and g["radio_margin"] < 0      # the module behind it does not
+    assert audit.worst_nf(audit.COAX_BUDGET_DB, 20, wil) > audit.AUDIT4_SYS_NF_DB
+    assert audit.d_min_m(20, wil) <= 0.5 < audit.d_min_m(15, wil)
+
