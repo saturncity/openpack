@@ -100,6 +100,23 @@ def test_rx_status_10hz(rx):
     assert time.time() - t0 < 4.0
 
 
+def test_rx_stats_real_counters(rx):
+    """#25 item 1: status/stats come from the app core's counters (#24), not a stub. No pack on air: nothing locked, all zero."""
+    f = kv(modules.request(rx, "status"))
+    assert f["locked"] == "0" and f["rssi"] == "0" and f["loss"] == "0.000" and f["batt"] == "0"
+    s = kv(modules.request(rx, "stats"))
+    assert set(s) == {"frames", "valid", "lost", "plc", "a_ok", "b_ok", "skips", "td_rec", "under", "over",
+                      "fill_milli", "ppb"}
+    assert all(v == "0" for v in s.values())
+
+
+def test_dfu_refused_without_mcuboot(rx):
+    """#25 `dfu`: bsim has no MCUboot, so both forms are refused with an early err (the host never streams a payload)."""
+    for cmd in ("dfu", "dfu 1024"):
+        with pytest.raises(modules.ModuleError, match="^err dfu"):
+            modules.request(rx, cmd)
+
+
 def test_rx_commands(rx):
     assert modules.request(rx, "pair 3 2424 2473") == ""
     assert modules.request(rx, "trim -3.5") == ""

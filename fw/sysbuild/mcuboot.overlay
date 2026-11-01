@@ -1,0 +1,6 @@
+/* Replaces MCUboot's boot/zephyr/app.overlay (an app's own overlay wins), so its one line is repeated here. */
+/ {
+	chosen {
+		zephyr,code-partition = &boot_partition;
+	};
+};

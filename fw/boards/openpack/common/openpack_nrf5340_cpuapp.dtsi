@@ -64,5 +64,23 @@
 	status = "okay";
 };
 
+/* #25 `dfu`: the app sets this one retained byte and resets; MCUboot (serial recovery, fw/sysbuild/mcuboot.conf)
+ * reads it. Same node as the nRF5340 DK. */
+/ {
+	chosen {
+		zephyr,boot-mode = &boot_mode0;
+	};
+};
+
+&gpregret1 {
+	status = "okay";
+
+	boot_mode0: boot_mode@0 {
+		compatible = "zephyr,retention";
+		status = "okay";
+		reg = <0x0 0x1>;
+	};
+};
+
 /* Default MCUboot layout: mcuboot 64 kB, slot0/slot1 464 kB each, storage 32 kB; SRAM split and IPC shared SRAM. */
 #include <nordic/nrf5340_cpuapp_partition.dtsi>

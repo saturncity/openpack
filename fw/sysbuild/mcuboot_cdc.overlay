@@ -1,0 +1,6 @@
+/* MCUboot serial recovery on USB CDC ACM (pack board, PK-9: the only host link is the recessed USB-C). */
+&zephyr_udc0 {
+	cdc_acm_uart0: cdc_acm_uart0 {
+		compatible = "zephyr,cdc-acm-uart";
+	};
+};

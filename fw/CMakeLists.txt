@@ -7,6 +7,8 @@ target_sources(app PRIVATE src/td/op_td.c) # AIR-3 / RX-4 time diversity (pack a
 target_sources(app PRIVATE src/proto/proto.c src/proto/proto_rx.c src/proto/proto_pack.c)
 if(CONFIG_OP_NRF5340 AND NOT CONFIG_SOC_COMPATIBLE_NRF5340_CPUNET)
   target_sources(app PRIVATE src/proto/proto_uart.c)
+  target_sources_ifdef(CONFIG_OP_PERSIST app PRIVATE src/proto/op_store.c)
+  target_sources_ifdef(CONFIG_OP_DFU app PRIVATE src/proto/op_dfu.c)
 endif()
 target_sources_ifdef(CONFIG_OP_NRF5340 app PRIVATE src/ipc.c)
 if(CONFIG_OP_FEM_NRF21540 AND CONFIG_SOC_COMPATIBLE_NRF5340_CPUNET)

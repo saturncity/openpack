@@ -72,6 +72,25 @@ static const char *c_td(void *c, int argc, char **argv, char *out, size_t n)
 	return NULL;
 }
 
+/* Diagnostic counters (not in host/PROTOCOL.md; the host ignores them): merge, PLC, jitter slot, clock recovery. */
+static const char *c_stats(void *c, int argc, char **argv, char *out, size_t n)
+{
+	struct op_rx_state *s = c;
+	const struct op_rx_snap *k;
+
+	if (s->sample) {
+		s->sample(s);
+	}
+	k = &s->snap;
+	snprintf(out, n,
+		 " frames=%u valid=%u lost=%u plc=%u a_ok=%u b_ok=%u skips=%u td_rec=%u under=%u over=%u "
+		 "fill_milli=%d ppb=%d",
+		 (unsigned)k->frames, (unsigned)k->valid, (unsigned)k->lost, (unsigned)k->plc, (unsigned)k->a_ok,
+		 (unsigned)k->b_ok, (unsigned)k->skips, (unsigned)k->td_rec, (unsigned)k->under,
+		 (unsigned)k->over, k->fill_milli, k->ppb);
+	return NULL;
+}
+
 static const char *c_scan(void *c, int argc, char **argv, char *out, size_t n)
 {
 	/* stub until the radio is up (#23): empty band at -100 dBm */
@@ -83,28 +102,44 @@ static const char *c_scan(void *c, int argc, char **argv, char *out, size_t n)
 	return NULL;
 }
 
-static const char *c_dfu(void *c, int argc, char **argv, char *out, size_t n)
-{
-	return "dfu not implemented"; /* MCUboot serial DFU, not this task */
-}
-
 const struct op_cmd op_rx_cmds[] = {
 	{"info", c_info}, {"status", c_status}, {"pair", c_pair},
-	{"trim", c_trim}, {"scan", c_scan},     {"dfu", c_dfu},
-	{"td", c_td},
+	{"trim", c_trim}, {"scan", c_scan},     {"dfu", op_c_dfu},
+	{"td", c_td},       {"stats", c_stats},
 };
 const size_t op_rx_ncmds = sizeof(op_rx_cmds) / sizeof(op_rx_cmds[0]);
 
-/* Stub telemetry until #23/#24: deterministic, exercises every field. */
-void op_rx_stub_sample(struct op_rx_state *s)
+void op_loss_win_init(struct op_loss_win *w)
 {
-	static unsigned k;
+	w->n = w->lost = 0;
+	w->last = -1;
+}
 
-	k++;
-	s->locked = 1;
-	s->rssi_dbm = -50 - (int)(k % 5);
-	s->loss_permille = 0;
-	s->telem.bat_pct = 87;
-	s->telem.peak_dbfs = -12;
-	s->telem.flags = 0;
+void op_loss_win_frame(struct op_loss_win *w, int lost)
+{
+	w->n++;
+	w->lost += !!lost;
+	if (w->n >= OP_LOSS_WIN) {
+		w->last = (int)(w->lost * 1000 / w->n);
+		w->n = w->lost = 0;
+	}
+}
+
+int op_loss_win_permille(const struct op_loss_win *w)
+{
+	if (w->last >= 0) {
+		return w->last;
+	}
+	return w->n ? (int)(w->lost * 1000 / w->n) : 0;
+}
+
+/* Telemetry for `status`: the app core's snapshot, the pack's AIR-3 status word decoded (PK-10). */
+void op_rx_state_from_snap(struct op_rx_state *s, const struct op_rx_snap *n)
+{
+	s->snap = *n;
+	s->locked = n->locked;
+	s->rssi_dbm = n->rssi_dbm;
+	s->loss_permille = n->loss_permille;
+	s->td = n->td;
+	op_status_unpack(n->status_word, &s->telem);
 }

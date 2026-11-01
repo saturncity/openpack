@@ -1,2 +1,2 @@
-/* App-level devicetree for the receiver board (#118): the same icmsg IPC as the DK. Pins are in the board. */
-#include "nrf5340dk_nrf5340_cpuapp.overlay"
+/* App-level devicetree for the receiver board (#118): the same icmsg IPC as the DK. Its host link is the uart0 header (no USB on the rack receiver), so no CDC. Pins are in the board. */
+#include "ipc_icmsg_cpuapp.dtsi"

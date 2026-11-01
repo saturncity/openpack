@@ -21,6 +21,7 @@
 #include "op_clk.h"
 #include "op_jslot.h"
 #include "op_plc.h"
+#include "proto.h"
 
 #define HDR    3 /* AIR-3: seq u8, status u16; then codec_state + audio = one ADPCM-6 frame */
 #define TARGET CONFIG_OP_RX_SLOT_TARGET_SAMPLES
@@ -46,6 +47,11 @@ static int32_t ppb;
 static bool audio_ok;
 static uint64_t dac_samples;
 
+/* Cumulative, for the console (`status`, `stats`); st above is cleared every second for RXAPP. */
+static struct op_rx_snap tot;
+static struct op_loss_win lw;
+static uint32_t last_frame_ms;
+
 static void stats_clear(struct stats *s)
 {
 	*s = (struct stats){.fill_min = INT32_MAX, .fill_max = INT32_MIN};
@@ -58,6 +64,11 @@ static void dac_out(const int16_t *blk, uint16_t n, void *ctx)
 	if (audio_ok) {
 		(void)op_audio_write_block(blk);
 	}
+}
+
+static int32_t milli(int64_t q16)
+{
+	return (int32_t)(q16 * 1000 / 65536);
 }
 
 static void on_frame(const uint8_t *data, size_t len)
@@ -98,7 +109,21 @@ static void on_frame(const uint8_t *data, size_t len)
 		last_valid = false;
 	}
 	td_on = m->flags & OP_RX_TD;
+	last_frame_ms = k_uptime_get_32();
+	tot.frames++;
+	tot.fill_milli = milli(fill);
+	tot.ppb = ppb;
+	tot.under = slot.under;
+	tot.over = slot.over;
+	op_loss_win_frame(&lw, !valid);
 	if (valid) {
+		tot.valid++;
+		tot.td_rec += !!(m->flags & OP_RX_TD_REC);
+		tot.a_ok += !!(m->flags & OP_RX_A_OK);
+		tot.b_ok += !!(m->flags & OP_RX_B_OK);
+		tot.rssi_dbm = m->rssi;
+		tot.status_word = m->frame[1] | (m->frame[2] << 8); /* AIR-3: status u16 LE */
+		tot.skips += last_valid && (uint8_t)(m->frame[0] - last_seq) > 1;
 		st.valid++;
 		st.td += !!(m->flags & OP_RX_TD_REC);
 		st.a_ok += !!(m->flags & OP_RX_A_OK);
@@ -108,16 +133,13 @@ static void on_frame(const uint8_t *data, size_t len)
 		last_seq = m->frame[0];
 		last_valid = true;
 	} else {
+		tot.lost++;
+		tot.plc++;
 		st.lost++;
 		st.plc++;
 		last_valid = false;
 	}
 	irq_unlock(key);
-}
-
-static int32_t milli(int64_t q16)
-{
-	return (int32_t)(q16 * 1000 / 65536);
 }
 
 static void report(struct k_work *w)
@@ -151,6 +173,17 @@ static void expiry(struct k_timer *t)
 
 static K_TIMER_DEFINE(report_timer, expiry, NULL);
 
+void op_rx_app_snapshot(struct op_rx_snap *n)
+{
+	unsigned int key = irq_lock();
+
+	*n = tot;
+	n->locked = tot.frames && (k_uptime_get_32() - last_frame_ms) < 100; /* a frame per 1 ms while locked */
+	n->loss_permille = op_loss_win_permille(&lw);
+	n->td = td_on;
+	irq_unlock(key);
+}
+
 int op_rx_app_td(void)
 {
 	return td_on;
@@ -161,6 +194,7 @@ int op_rx_app_start(void)
 	int err;
 
 	stats_clear(&st);
+	op_loss_win_init(&lw);
 	op_jslot_init(&slot, TARGET, TARGET + 2 * OP_JSLOT_FRAME);
 	op_plc_init(&plc);
 	op_clk_init(&pi, CONFIG_OP_RX_CLK_KP_PPB, CONFIG_OP_RX_CLK_KI_PPB, CONFIG_OP_RX_CLK_LIM_PPB);
