@@ -6,7 +6,7 @@ Context: `AUDIT-2.md`. The owner has delegated these (`docs/agents/hands-off.md`
 
 | Q | Default | Why |
 |---|---|---|
-| Q1 latency vs dropouts | Time diversity is a build/runtime option. Phase 2 measures both. Rule: if the R1 dropout gate passes without it at the Phase 1 busy fraction, ship it **off** (~2.6 ms, meets R3 target); otherwise ship it **on** (~4.6 ms, within R3's 5 ms hard limit) and record the R1-over-R3 trade in ADR-0001. | `REQUIREMENTS.md` ranks R1 above R3; R3's hard limit is 5 ms |
+| Q1 latency vs dropouts | Time diversity is a build/runtime option. Phase 2 measures both. Rule: if the R1 dropout gate passes without it at the Phase 1 busy fraction, ship it **off** (~2.6 ms, meets R3 target); otherwise ship it **on** (~4.6 ms, within R3's 5 ms hard limit) and record the R1-over-R3 trade in ADR-0001. **Decided 2026-11-01 (ADR-0017, supersedes ADR-0001):** off by default (2.65 ms), on as a per-pack setting for hostile venues (4.58 ms with DAC FLT=1). | `REQUIREMENTS.md` ranks R1 above R3; R3's hard limit is 5 ms |
 | Q2 pack count | 8 packs firm; accept Wi-Fi overlap for ≥6 of 16 carriers | Stated goal |
 | Q3 pass numbers | Residual loss ≤ 0.1 %, ≤ 2 consecutive lost frames, ≤ 1 audible dropout event/h, over 1 h, interferers: laptop + 2 phones running iperf on Wi-Fi 1/6/11 at 2 m from the receiver antenna, pack at 10 m. The event/h number is asserted on hardware (G5/G6) and only reported in simulation (G2); see PLAN.md Phase 2 gate and ADR-0010 | AUDIT-2 suggestion; loss-model inputs unmeasured until Phase 5 |
 | Q4 downlink | One-way in v1; 300 µs RX slot reserved in the frame; channel/ID over USB-C when docked | Gain and mute don't need it |
