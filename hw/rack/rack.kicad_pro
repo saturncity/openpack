@@ -1,0 +1,572 @@
+{
+  "board": {
+    "design_settings": {
+      "defaults": {
+        "board_outline_line_width": 0.1,
+        "copper_line_width": 0.2
+      },
+      "rules": {
+        "min_clearance": 0.1,
+        "min_track_width": 0.1,
+        "min_via_diameter": 0.45,
+        "min_via_annular_width": 0.1,
+        "min_through_hole_diameter": 0.2,
+        "min_hole_to_hole": 0.25,
+        "min_copper_edge_clearance": 0.3,
+        "min_hole_clearance": 0.15,
+        "min_silk_clearance": 0.0,
+        "min_text_height": 0.6,
+        "min_text_thickness": 0.1,
+        "solder_mask_to_copper_clearance": 0.0
+      },
+      "rule_severities": {
+        "lib_footprint_issues": "ignore",
+        "lib_footprint_mismatch": "ignore",
+        "silk_overlap": "warning",
+        "silk_over_copper": "warning",
+        "silk_edge_clearance": "warning",
+        "text_height": "warning",
+        "text_thickness": "warning",
+        "footprint_type_mismatch": "ignore",
+        "missing_courtyard": "warning",
+        "isolated_copper": "warning",
+        "solder_mask_bridge": "warning",
+        "padstack": "warning",
+        "via_dangling": "warning",
+        "track_dangling": "warning",
+        "starved_thermal": "warning",
+        "courtyards_overlap": "error"
+      },
+      "track_widths": [
+        0.0,
+        0.2,
+        0.3,
+        0.17,
+        0.35,
+        0.5,
+        1.5
+      ],
+      "via_dimensions": [
+        {
+          "diameter": 0.0,
+          "drill": 0.0
+        },
+        {
+          "diameter": 0.6,
+          "drill": 0.3
+        }
+      ]
+    }
+  },
+  "net_settings": {
+    "classes": [
+      {
+        "name": "Default",
+        "clearance": 0.127,
+        "track_width": 0.2,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "diff_pair_width": 0.2,
+        "diff_pair_gap": 0.2,
+        "diff_pair_via_gap": 0.25,
+        "wire_width": 6,
+        "bus_width": 12,
+        "line_style": 0,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 2147483647
+      },
+      {
+        "name": "Power",
+        "clearance": 0.15,
+        "track_width": 0.5,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "diff_pair_width": 0.2,
+        "diff_pair_gap": 0.2,
+        "diff_pair_via_gap": 0.25,
+        "wire_width": 6,
+        "bus_width": 12,
+        "line_style": 0,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 1
+      },
+      {
+        "name": "Big",
+        "clearance": 0.15,
+        "track_width": 1.5,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "diff_pair_width": 0.2,
+        "diff_pair_gap": 0.2,
+        "diff_pair_via_gap": 0.25,
+        "wire_width": 6,
+        "bus_width": 12,
+        "line_style": 0,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 0
+      },
+      {
+        "name": "Audio_I",
+        "clearance": 0.15,
+        "track_width": 0.5,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "diff_pair_width": 0.2,
+        "diff_pair_gap": 0.2,
+        "diff_pair_via_gap": 0.25,
+        "wire_width": 6,
+        "bus_width": 12,
+        "line_style": 0,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 2
+      },
+      {
+        "name": "RF",
+        "clearance": 0.15,
+        "track_width": 0.35,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "diff_pair_width": 0.2,
+        "diff_pair_gap": 0.2,
+        "diff_pair_via_gap": 0.25,
+        "wire_width": 6,
+        "bus_width": 12,
+        "line_style": 0,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 3
+      }
+    ],
+    "meta": {
+      "version": 4
+    },
+    "netclass_patterns": [
+      {
+        "netclass": "Power",
+        "pattern": "+12V_BUS"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+12V_HOST"
+      },
+      {
+        "netclass": "Big",
+        "pattern": "+12V_IN"
+      },
+      {
+        "netclass": "Big",
+        "pattern": "+12V_PROT"
+      },
+      {
+        "netclass": "Big",
+        "pattern": "+12V_RAW"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+12V_S0"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+12V_S1"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+12V_S2"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+12V_S3"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+12V_S4"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+12V_S5"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+12V_S6"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+12V_S7"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+3V3"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+5V"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+5V_LNA_A"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+5V_LNA_B"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+5V_S0"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+5V_S1"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+5V_S2"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+5V_S3"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+5V_S4"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+5V_S5"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+5V_S6"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+5V_S7"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "ANT_A"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "ANT_B"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "BIAS_A_DC"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "BIAS_A_RF"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "BIAS_B_DC"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "BIAS_B_RF"
+      },
+      {
+        "netclass": "Big",
+        "pattern": "BUCK_SW"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "LNA_A_IN"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "LNA_A_OUT"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "LNA_A_RFIN"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "LNA_A_RFOUT"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "LNA_B_IN"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "LNA_B_OUT"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "LNA_B_RFIN"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "LNA_B_RFOUT"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "RF_A0"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "RF_A1"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "RF_A2"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "RF_A3"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "RF_A4"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "RF_A5"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "RF_A6"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "RF_A7"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "RF_B0"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "RF_B1"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "RF_B2"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "RF_B3"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "RF_B4"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "RF_B5"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "RF_B6"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "RF_B7"
+      },
+      {
+        "netclass": "Audio_I",
+        "pattern": "S0_AUD_COLD"
+      },
+      {
+        "netclass": "Audio_I",
+        "pattern": "S0_AUD_HOT"
+      },
+      {
+        "netclass": "Audio_I",
+        "pattern": "S1_AUD_COLD"
+      },
+      {
+        "netclass": "Audio_I",
+        "pattern": "S1_AUD_HOT"
+      },
+      {
+        "netclass": "Audio_I",
+        "pattern": "S2_AUD_COLD"
+      },
+      {
+        "netclass": "Audio_I",
+        "pattern": "S2_AUD_HOT"
+      },
+      {
+        "netclass": "Audio_I",
+        "pattern": "S3_AUD_COLD"
+      },
+      {
+        "netclass": "Audio_I",
+        "pattern": "S3_AUD_HOT"
+      },
+      {
+        "netclass": "Audio_I",
+        "pattern": "S4_AUD_COLD"
+      },
+      {
+        "netclass": "Audio_I",
+        "pattern": "S4_AUD_HOT"
+      },
+      {
+        "netclass": "Audio_I",
+        "pattern": "S5_AUD_COLD"
+      },
+      {
+        "netclass": "Audio_I",
+        "pattern": "S5_AUD_HOT"
+      },
+      {
+        "netclass": "Audio_I",
+        "pattern": "S6_AUD_COLD"
+      },
+      {
+        "netclass": "Audio_I",
+        "pattern": "S6_AUD_HOT"
+      },
+      {
+        "netclass": "Audio_I",
+        "pattern": "S7_AUD_COLD"
+      },
+      {
+        "netclass": "Audio_I",
+        "pattern": "S7_AUD_HOT"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "SPL_A_IN"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "SPL_B_IN"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_A_10a"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_A_10b"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_A_20a"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_A_20b"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_A_21a"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_A_21b"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_A_30a"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_A_30b"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_A_31a"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_A_31b"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_A_32a"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_A_32b"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_A_33a"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_A_33b"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_B_10a"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_B_10b"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_B_20a"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_B_20b"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_B_21a"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_B_21b"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_B_30a"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_B_30b"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_B_31a"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_B_31b"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_B_32a"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_B_32b"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_B_33a"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "WK_B_33b"
+      }
+    ]
+  },
+  "meta": {
+    "filename": "rack.kicad_pro",
+    "version": 3
+  }
+}

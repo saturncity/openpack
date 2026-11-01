@@ -248,3 +248,40 @@ There is no rack mechanics yet, so this layout defines it (`layout_rx.MECH` → 
 7. **No 3D models are installed** (as on the pack), so the STEP is the bare board.
 8. **PE4259 isolation (ADR-0014 item 5):** the two input lines are 1.3 mm apart only at the switch pins, with the GND pin via between them. Measure A↔B isolation on the bench.
 9. **Fab DFM (end of project):** upload `hw/rx/out/fab/gerber` and attach the report.
+
+## Rack main board (`hw/rack`)
+
+**Result: DRC 0 errors, 0 unconnected against the JLCPCB rules (`rack.kicad_dru`, proven loaded). Fit check passes (box model and CadQuery).** Fab DFM upload is still to do (end of project). Design reasoning: `docs/design-log.md` RK-7a–k.
+
+| | |
+|---|---|
+| Board | **412.0 × 321.5 mm**, 4 layers, 1.6 mm, in a Hammond RM1U1913SBK (inside 415.30 × 323.85 × 40.09 mm; 2.35 mm front gap, #126 review). 444 footprints, 2288 tracks, 6267 vias (5574 GND: fan-out, RF fences, 6 mm stitching grid) |
+| Stackup | JLC04161H-7628: L1 RF + parts + GND pour / L2 solid GND / L3 GND pour + digital / L4 power pours (+12V_BUS strips, +5V pocket), chassis strip, GND pour |
+| Rules | No custom copper-clearance rule (#116 review M1). Netclasses: Default 0.127, Power / Audio_I 0.15, Big 0.15, RF 0.15 mm; "RF pour gap" 0.5 mm to zones; RF width 0.16–0.36 mm; Power / Big / Audio_I tracks barred from inner copper |
+| Regenerate | `python3 hw/rack/layout.py` (system python with pcbnew, about 35 min), then `.ws/.venv/bin/python hw/rack/rf_routed.py` and `python3 mech/rack.py` |
+| Tests | `tests/test_rack_layout.py` (CI `pcb` job), `tests/test_rack_rf.py`, `tests/mech/test_rack_fit.py` (CadQuery, CI `check` job) |
+
+### Checklist
+
+| Item | Finding | Status |
+|---|---|---|
+| **RF lines** | 50 Ω = 0.35 mm, 70.7 Ω = 0.17 mm near-microstrip, 0.5 mm pour gap (field solve, `hw/rx/rf_line.py`). BNC to BAW is 50 Ω all the way, entering every pin along its axis (0.2 mm to the GND pins). Via fences both sides at 1.5 mm. RF GND pads join the pours solidly; the QPL9057 GND pins go to its pad, and the QPQ1907 GND pads to vias | ✓ |
+| **Wilkinson as routed** | 13.66 dB worst port (A), 13.47 dB (B), isolation ≥ 39.4 dB, RL ≥ 28.2 dB; 13.85 / 32.2 / 22.6 at the tolerance corners (`out/rf_routed.json`). Inside the ≤ 14 dB limit (SPEC RK-5 / ADR-0018 amended in #126); NF 8.2 dB inside the need (design log RK-7c, RK-7i) | ✓ (bench VNA) |
+| **Current paths** | 12 V entry 1.5 mm on outer copper; +12V_BUS / +5V on B.Cu pours; buck SW an F.Cu pour; slot feeds 0.5 mm with ≤ 3 mm of 0.3 mm necks at 0402/0603 pads | ✓ |
+| **Buck** | TI fig. 10-1 style: SW pour, boot cap at pin 6, SS and FB escaping up, 100 nF at VIN/GND | ✓ (bench ripple) |
+| **eFuses** | Every TPS2595 has the same cluster: ILM resistor at pin 7, dV/dt cap at pin 1, input cap below, output cap above-right; pin 8 to its pad; FLT escapes to a via (slots: an In2 trunk for the wire-OR) | ✓ |
+| **Slots** | Keyed BOOMELE 2×13 footprint (no hole at 14) pin for pin on each receiver's J1 (`hw/rx/out/fab/mech.json`) | ✓ |
+| **Panel** | XLR / BNC / DC jack positions and axis heights go to `out/fab/mech.json`; `mech/rack.py` drills the rear panel, plus the etherCON and the upright Adafruit 4056 USB-C (drawing C12984-001) | ✓ |
+| **Fit** | Lid over receivers 3.39 mm, over CM4IO 5.89 mm, side walls 1.65 mm, 4.0 mm between receivers, 2.35 mm front gap (LED lenses 2.35 mm behind their holes), u.FL path 40.8 of 100 mm. The Hammond side-extrusion cover-screw lugs may reach the board edge: dry fit (design log RK-7a) | ✓ (dry fit) |
+
+### Accepted warnings
+
+199, all cosmetic: silk overlap / over copper / edge (138), text thickness on refdes (16), missing courtyard on test pads and holes (44), 1 starved thermal on the DC jack's GND pin (B.Cu pour, the pin is also on L1). `prune_dangling` removes the escape vias and stubs the router did not need.
+
+### Open items (must close before ordering)
+
+1. **VNA one Wilkinson tree** and the bias-T; compare with `out/rf_routed.json`.
+2. **Bench:** 5 V ripple at full load; SC16IS752 crystal (HCI, 60 Ω) start-up with 300 Ω in series; the BOOMELE contact-14 pull; bare-board dry fit in the case (side lugs).
+3. **CPL rotations** for SOT-583, WSON-8, TSSOP-28, CP_Elec and SMB come from `ROT_CORR`; check them in JLC's CPL preview.
+4. **No 3D models are installed**, so the STEP is the bare board.
+5. **Fab DFM (end of project):** upload `hw/rack/out/fab/gerber`; replace the £300 order estimate with a JLC quote.
