@@ -7,7 +7,7 @@ Every nRF5340 pin number in fw/boards/openpack/ comes from here, never by hand:
 
   python3 fw/boards/openpack/gen_pins.py            rewrite the *-pins.dtsi files
   python3 fw/boards/openpack/gen_pins.py --check    exit 1 if they are stale (CI, tests/test_fw_board_pins.py)
-  python3 fw/boards/openpack/gen_pins.py --check-dts BUILD_DIR...   check compiled zephyr.dts files against the netlist
+  python3 fw/boards/openpack/gen_pins.py --check-dts BUILD_DIR...   check every openpack zephyr.dts below them against the netlist
 
 The generator refuses (exit 2) a pin choice the nRF5340 cannot take: a role net missing from the module, a signal net on
 the module with no firmware role (so a schematic change can't slip past), two roles on one pin, the battery sense off an
@@ -319,42 +319,199 @@ def outputs():
 
 
 # ---- compiled devicetree check ------------------------------------------------------------------------------------------
-FUN = {0: "UART_TX", 1: "UART_RX", 13: "I2S_SCK_M", 15: "I2S_LRCK_M", 17: "I2S_SDIN", 18: "I2S_SDOUT"}
+# A build's zephyr.dts is the merged devicetree the firmware really gets (board dts + common dtsi + app overlays), so a
+# hand-written overlay that moves a pin, or a stray SoC/DK node on a board pin, shows up here even if the -pins.dtsi
+# files are current.
+FUN = {"UART_TX": 0, "UART_RX": 1, "I2S_SCK_M": 13, "I2S_LRCK_M": 15, "I2S_SDIN": 17, "I2S_SDOUT": 18}
+_TOK = re.compile(r'"(?:\\.|[^"\\])*"|<[^>]*>|\[[^\]]*\]|[{};=]|[^\s{};=<"\[]+')  # names keep commas
 
 
-def compiled_pins(dts_text):
-    """zephyr.dts -> {(kind, name): [(port, pin)]}: pinctrl functions per device, and every <&gpioN pin flags>."""
-    found = {}
-    for m in re.finditer(r"(\w+): (\w+)_default \{(.*?)\n\t\t\};", dts_text, re.S):
-        dev = m.group(2)
-        for v in re.findall(r"psels = <([^>]*)>", m.group(3)):
-            for word in v.split():
-                x = int(word, 0)
-                fn, pin = x >> 24, x & 0x1FF
-                found.setdefault(("psel", f"{dev}.{FUN.get(fn, fn)}"), []).append((pin // 32, pin % 32))
-    for m in re.finditer(r"([\w-]+)-gpios = ((?:<&gpio[01] 0x[0-9a-f]+ 0x[0-9a-f]+>(?:, )?)+);", dts_text):
-        for p, n in re.findall(r"<&gpio([01]) (0x[0-9a-f]+) 0x[0-9a-f]+>", m.group(2)):
-            found.setdefault(("gpio", m.group(1)), []).append((int(p), int(n, 16)))
-    for m in re.finditer(r"(\w+) \{\n\t+gpios = <&gpio([01]) (0x[0-9a-f]+) 0x[0-9a-f]+>;", dts_text):
-        found.setdefault(("gpio", m.group(1)), []).append((int(m.group(2)), int(m.group(3), 16)))
-    for m in re.finditer(r"zephyr,input-positive = <(0x[0-9a-f]+)>", dts_text):
-        found.setdefault(("ain", "adc"), []).append(int(m.group(1), 16))
-    return found
+class Node:
+    def __init__(self, name, labels):
+        self.name, self.labels, self.props, self.children = name, labels, {}, []
+
+    def walk(self):
+        yield self
+        for c in self.children:
+            yield from c.walk()
 
 
-def net_pins(board):
-    """{net: (port, pin, ain)} for every module pad on a net, plus the FEM props."""
-    cfg = BOARDS[board]
-    nets, comps = parse_netlist(ROOT / cfg["net"])
-    pads = parse_symbol_pins(ROOT / cfg["sym"], comps[cfg["module"]][1])
-    out = {}
-    for net, nodes in nets.items():
-        for ref, pad in nodes:
-            if ref == cfg["module"] and gpio(pads[pad]):
-                out[net] = gpio(pads[pad])
-    for prop, pad in cfg["fem"].items():
-        out["FEM:" + prop] = gpio(pads[pad])
+def parse_dts(text):
+    """Merged zephyr.dts text -> root Node. Property values are kept as token lists ('<...>' cells, '"str"')."""
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+    text = re.sub(r"//[^\n]*", "", text)
+    toks = _TOK.findall(text)
+    root, stack, stmt = Node("", []), [], []
+    cur = root
+    for tok in toks:
+        if tok == "{":
+            labels = [s[:-1] for s in stmt if s.endswith(":")]
+            names = [s for s in stmt if not s.endswith(":")]
+            name = names[-1] if names else ""
+            if name == "/" and not stack:
+                node = root
+            else:
+                node = Node(name, labels)
+                cur.children.append(node)
+            stack.append(cur)
+            cur, stmt = node, []
+        elif tok == "}":
+            cur, stmt = stack.pop(), []
+        elif tok == ";":
+            if stmt and not stmt[0].startswith("/"):
+                name = stmt[0]
+                cur.props[name] = [v for v in stmt[2:] if v != ","] if len(stmt) > 1 and stmt[1] == "=" else []
+            stmt = []
+        else:
+            stmt.append(tok)
+    return root
+
+
+def _cells(vals):
+    return [c for v in vals if v.startswith("<") for c in v[1:-1].split()]
+
+
+def _int(s):
+    return int(s, 0)
+
+
+def _gpio_specs(vals):
+    """['< &gpio1 0x5 0x0 >', ...] -> [(port, pin, flags)]."""
+    cells, out = _cells(vals), []
+    i = 0
+    while i < len(cells):
+        m = re.fullmatch(r"&gpio([01])", cells[i])
+        if m and i + 2 < len(cells):
+            out.append((int(m.group(1)), _int(cells[i + 1]), _int(cells[i + 2])))
+            i += 3
+        else:
+            i += 1
     return out
+
+
+def expectations(board, core):
+    """What the netlist says the compiled devicetree must contain, for one board and core."""
+    cfg = BOARDS[board]
+    pins, pads, nets, comps = resolve(board)
+    e = {"psel": {}, "led": {}, "key": {}, "user": {}, "ain": [], "fwd": [], "fem": {}, "netuser": {}}
+    for net, pad, name, role in pins:
+        p, n, ain = gpio(name)
+        kind = role[0]
+        if kind == "psel":
+            e["psel"].setdefault(role[1], {})[role[2]] = (p, n, net)
+        elif kind in ("led", "key"):
+            e[kind][role[1]] = (p, n, net)
+        elif kind == "user":
+            e["user"].setdefault(role[1], []).append((net, p, n))
+        elif kind == "ain":
+            full, out, _, _ = divider(board, net, role[2], nets, comps)
+            e["ain"].append((role[1], ain, out, full, p, n, net))
+        elif kind == "fwd":
+            e["fwd"].append((p, n, net))
+            e["netuser"][role[1]] = (p, n, net)
+    for prop, pad in cfg["fem"].items():
+        p, n, _ = gpio(pads[pad])
+        e["fem"][prop] = (p, n, f"nRF21540 {prop}")
+    e["fwd"] = [(p, n, c) for p, n, c in ([(*v[:2], v[2]) for v in e["fem"].values()] + e["fwd"])]
+    for k in e["user"]:
+        e["user"][k] = [(p, n, net) for net, p, n in sorted(e["user"][k])]
+    allowed = {(p, n) for kind in ("led", "key") for p, n, _ in e[kind].values()}
+    allowed |= {(p, n) for d in e["psel"].values() for p, n, _ in d.values()}
+    allowed |= {(p, n) for v in e["user"].values() for p, n, _ in v}
+    allowed |= {(p, n) for _, _, _, _, p, n, _ in e["ain"]}
+    allowed |= {(p, n) for p, n, _ in e["fwd"]}
+    e["allowed"] = allowed
+    return e
+
+
+def check_compiled(text):
+    """Errors in one merged zephyr.dts against the netlist, or None if it is not an openpack board."""
+    root = parse_dts(text)
+    compat = " ".join(root.props.get("compatible", []))
+    m = re.search(r"openpack,openpack-(pack|rx)-nrf5340-(cpuapp|cpunet)", compat)
+    if not m:
+        return None
+    board, core = m.groups()
+    e = expectations(board, core)
+    errs = []
+    by_label = {lab: nd for nd in root.walk() for lab in nd.labels}
+    tag = f"openpack_{board}/{core}"
+
+    def want(what, got, exp):
+        if got != exp:
+            errs.append(f"{tag}: {what}: devicetree {got}, netlist {exp}")
+
+    used = set()
+    for nd in root.walk():  # every GPIO and pinctrl pin the firmware can touch
+        for prop, vals in nd.props.items():
+            if prop.endswith("gpios") or prop == "gpios":
+                used |= {(p, n) for p, n, _ in _gpio_specs(vals)}
+            if prop == "psels":
+                for c in _cells(vals):
+                    pin = _int(c) & 0x1FF
+                    used.add((pin // 32, pin % 32))
+    for p, n in sorted(used - e["allowed"]):
+        errs.append(f"{tag}: P{p}.{n:02d} is used in the devicetree but the netlist gives it no firmware role")
+
+    if core == "cpuapp":
+        for dev, fns in e["psel"].items():
+            nd = by_label.get(dev)
+            if nd is None:
+                errs.append(f"{tag}: no {dev} node")
+                continue
+            want(f"{dev} status", nd.props.get("status"), ['"okay"'])
+            for i, state in enumerate(("default", "sleep")):
+                ref = _cells(nd.props.get(f"pinctrl-{i}", []))
+                st = by_label.get(ref[0][1:]) if ref else None
+                if st is None:
+                    errs.append(f"{tag}: {dev} has no pinctrl-{i} ({state})")
+                    continue
+                got = {}
+                for g in st.children:
+                    for c in _cells(g.props.get("psels", [])):
+                        x = _int(c)
+                        got[x >> 24] = ((x & 0x1FF) // 32, (x & 0x1FF) % 32)
+                exp = {FUN[fn]: (p, n) for fn, (p, n, _) in fns.items()}
+                want(f"{dev} {state} psels (function: (port, pin))", got, exp)
+        for kind, flag in (("led", 0), ("key", 1)):
+            for lab, (p, n, net) in e[kind].items():
+                nd = by_label.get(lab)
+                got = _gpio_specs(nd.props.get("gpios", [])) if nd else None
+                want(f"{lab} ({net})", got, [(p, n, flag)])
+        user = next((nd for nd in root.children if nd.name == "zephyr,user"), None)
+        for prop, lst in e["user"].items():
+            got = [(p, n) for p, n, _ in _gpio_specs(user.props.get(f"{prop}-gpios", []))] if user else None
+            want(f"zephyr,user {prop}-gpios ({', '.join(c for *_, c in lst)})", got, [(p, n) for p, n, _ in lst])
+        for lab, ain, out, full, p, n, net in e["ain"]:
+            nd = by_label.get(lab)
+            if nd is None:
+                errs.append(f"{tag}: no {lab} voltage-divider node")
+                continue
+            want(f"{lab} output/full ohms", (_int(_cells(nd.props["output-ohms"])[0]),
+                                             _int(_cells(nd.props["full-ohms"])[0])), (out, full))
+            ch = _cells(nd.props.get("io-channels", []))
+            adc = by_label.get("adc")
+            chan = next((c for c in adc.children if _cells(c.props.get("reg", []))[:1] == [ch[1]]), None) \
+                if adc and len(ch) == 2 else None
+            got = _int(_cells(chan.props["zephyr,input-positive"])[0]) if chan else None
+            want(f"{lab} SAADC input ({net}, P{p}.{n:02d})", got, ain)
+            want("adc status", adc.props.get("status") if adc else None, ['"okay"'])
+        fwd = by_label.get("gpio_fwd")
+        if e["fwd"]:
+            got = sorted((p, n) for c in (fwd.children if fwd else []) for p, n, _ in _gpio_specs(c.props["gpios"]))
+            want("gpio forwarder (net-core pins)", got, sorted((p, n) for p, n, _ in e["fwd"]))
+    else:
+        fem = by_label.get("nrf_radio_fem")
+        if e["fem"]:
+            got = {k: _gpio_specs(fem.props.get(k, []))[0][:2] for k in e["fem"]} if fem else None
+            want("nRF21540 FEM pins", got, {k: (p, n) for k, (p, n, _) in e["fem"].items()})
+        elif fem is not None and fem.props.get("status") != ['"disabled"']:
+            errs.append(f"{tag}: nRF21540 node present on a board without the FEM")
+        user = next((nd for nd in root.children if nd.name == "zephyr,user"), None)
+        for prop, (p, n, net) in e["netuser"].items():
+            got = [s[:2] for s in _gpio_specs(user.props.get(f"{prop}-gpios", []))] if user else None
+            want(f"net zephyr,user {prop}-gpios ({net})", got, [(p, n)])
+    return errs
 
 
 def main(argv=None):
@@ -368,12 +525,12 @@ def main(argv=None):
         print(f"gen_pins: impossible or unmapped pin choice:\n{e}", file=sys.stderr)
         return 2
     if a.check_dts:
-        sys.path.insert(0, str(ROOT / "tests"))
-        from test_fw_board_pins import check_compiled  # one expectation table, in the test
-        bad = 0
-        files = [f for d in a.check_dts for f in sorted(pathlib.Path(d).rglob("zephyr/zephyr.dts"))]
-        for f in files:
+        bad, files = 0, []
+        for f in (f for d in a.check_dts for f in sorted(pathlib.Path(d).rglob("zephyr/zephyr.dts"))):
             errs = check_compiled(f.read_text())
+            if errs is None:
+                continue  # not an openpack board (native_sim, bsim, DK)
+            files.append(f)
             print(f"{f}: {'OK' if not errs else 'FAIL'}" + "".join(f"\n  {e}" for e in errs))
             bad += bool(errs)
         if not files:
