@@ -404,6 +404,7 @@ int op_rx_start(void)
 		return err;
 	}
 	op_ant_init(&ant, CONFIG_OP_RX_ANT_PROBE_FRAMES, CONFIG_OP_RX_ANT_HYST_DB);
+	op_ant_set_miss(&ant, CONFIG_OP_RX_ANT_MISS_DB, CONFIG_OP_RX_ANT_HOLD_FRAMES);
 	radio_init();
 	IRQ_CONNECT(RADIO_IRQn, 0, radio_isr, NULL, 0);
 	irq_enable(RADIO_IRQn);
