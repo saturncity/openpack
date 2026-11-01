@@ -19,11 +19,11 @@ int main(void)
 		if (err == 0) {
 			err = op_ipc_init(op_sched_put);
 		}
-	} else {
-		err = op_ipc_init(NULL);
 		if (err == 0) {
-			err = op_framesrc_start();
+			err = op_sched_sync();
 		}
+	} else {
+		err = op_pack_start();
 	}
 	printk("OpenPack %s pipeline %s (%d)\n", CORE, err ? "FAILED" : "up", err);
 #elif defined(CONFIG_OP_NRF5340) && defined(CONFIG_OP_ROLE_RX)

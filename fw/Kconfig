@@ -62,6 +62,48 @@ config OP_TEST_BSIM_ARGS
 	  bsim net core only (never on silicon): one build serves all 8 packs and receivers of the G2
 	  scenarios (tests/bsim/scenarios, #27). Without the options the Kconfig values above apply.
 
+config OP_PACK_FRAME_LEAD_US
+	int "Pack: audio frame clock to net-core payload latch (us) = the frame thread's deadline (#87)"
+	default 100
+	range 1 499
+	help
+	  The app core places its 1 ms audio frame clock this far before the net core's latch (the
+	  DISABLED interrupt after copy B), from a sync the net core sends at start (ADR-0019). Read +
+	  ADPCM-6 encode + IPC must finish inside it; then no frame is ever skipped. Every us here is
+	  SYS-2 latency: 100 = SPEC section 2 "Encode + IPC". < 500: the net core's margin report takes
+	  a frame within half a frame after its latch as late.
+
+config OP_PACK_FRAME_PRIO
+	int "Pack: frame thread priority (cooperative, above the system workqueue)"
+	default -2
+
+config OP_TEST_SCHED_REPORT
+	bool "Test only: net core prints a PACK_IPC line per second (latch margin, counters)"
+	default y if OP_TEST_BSIM_ARGS
+	help
+	  tests/bsim/sched/check.py reads the margin (latch - frame arrival). bsim only, never silicon.
+
+config OP_TEST_APP_LOAD_PERIOD_US
+	int "Test only: app-core load thread wakes every this many us, 0 = off (tests/bsim/sched, #87)"
+	default 0
+	help
+	  Stress for FW-2: an unrelated app-core thread that wakes periodically and busy-works for
+	  OP_TEST_APP_LOAD_BUSY_US. The pack must not skip a frame. Never set in a shipped build.
+
+config OP_TEST_APP_LOAD_BUSY_US
+	int "Test only: busy time per load-thread wake (us)"
+	default 0
+
+config OP_TEST_APP_LOAD_PRIO
+	int "Test only: load thread priority"
+	default 7
+
+config OP_TEST_PROTO_POLL_MS
+	int "Test only: console thread polls its RX semaphore every this many ms, 0 = wait forever (#87)"
+	default 0
+	help
+	  Brings back the 50 ms console poll that exposed #87. The shipped build waits forever.
+
 # FW-2: the nRF5340 builds split work across cores over ipc0.
 config OP_NRF5340
 	bool
