@@ -64,11 +64,13 @@ jobs:
         timeout-minutes: 15
         run: |
           export ZEPHYR_SDK_INSTALL_DIR="${ZEPHYR_SDK_INSTALL_DIR:-$(find /opt/toolchains -maxdepth 1 -name 'zephyr-sdk-*' | head -1)}"
-          pip install pytest pyserial
+          pip install pytest pytest-timeout pyserial pyyaml -r openpack/host/requirements.txt
           west build -p -b nrf5340bsim/nrf5340/cpuapp openpack/fw -d b_proto_pack --sysbuild
           west build -p -b nrf5340bsim/nrf5340/cpuapp openpack/fw -d b_proto_rx --sysbuild -- -DSB_CONFIG_OP_ROLE_RX=y
           FW_PACK_EXE=$PWD/b_proto_pack/fw/zephyr/zephyr.exe FW_RX_EXE=$PWD/b_proto_rx/fw/zephyr/zephyr.exe \
             pytest -q openpack/tests/bsim/proto
+          # G3 (#30): the FastAPI host against bsim receiver ptys, incl. a receiver reset
+          FW_RX_EXE=$PWD/b_proto_rx/fw/zephyr/zephyr.exe pytest -q openpack/tests/bsim/host
       - name: radio probe (no Wi-Fi), expect zero loss
         if: ${{ !cancelled() }}
         timeout-minutes: 5

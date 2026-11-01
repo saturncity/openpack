@@ -15,3 +15,5 @@ Receiver `n` (1..8) is on its own UART and serves pack `n`.
 | `dfu <bytes>` + that many raw bytes | `ok` |
 
 Failure: `err <reason>`. No reply within the timeout means the module is down (HTTP 504).
+
+Host behaviour (`modules.request()`, #30): `timeout` bounds the whole call; lines that are not `ok`/`err` (boot banner, log lines) and unterminated partial lines are not replies; a receiver that answers `err` is HTTP 502 (also an unparseable `ok` reply), a silent, absent or busy one is 504, a slot with no port is 503. For `dfu` the payload is sent only if no immediate `err` arrives after the request line (0.25 s), so a refusing receiver never parses the payload as commands.
