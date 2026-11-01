@@ -308,7 +308,7 @@ def placement(P):
         pl[c["esd1"]] = (x0 + s * 0.86, 13.6, ("shunt", f"ANT_{ant}", x0))
         pl[c["choke"]] = (x0 + s * 1.2, 15.4, ("shunt", f"ANT_{ant}", x0))
         pl[c["dcb"]] = (x0, 17.0, ("series", f"ANT_{ant}", f"LNA_{ant}_IN"))
-        pl[c["esd2"]] = (x0 - s * 0.86, 18.4, ("shunt", f"LNA_{ant}_IN", x0))
+        pl[c["esd2"]] = (x0 - s * 1.5, 18.4, ("shunt", f"LNA_{ant}_IN", x0))   # 1.5: clear of the 0R's courtyard
         pl[c["r0"]] = (x0, 19.8, ("series", f"LNA_{ant}_IN", f"LNA_{ant}_RFIN"))
         pl[c["lna"]] = (x0, 22.3, ("face", ("2",), ("7",), (0, 1)))
         pl[c["lch"]] = (x0 - s * 1.4, 24.6, ("shunt", f"LNA_{ant}_RFOUT", x0))
@@ -335,7 +335,7 @@ def placement(P):
         # mirror): its cap goes beside it and rf_frontend() draws the stub; the router cannot leave a pad that close
         # to an RF line. A's resistor shares the stub; B's stays on its supply side and the router joins it on In2.
         pl[c["cvb"]] = (x0 - 1.9, 22.45, 90)
-        pl[c["rb"]] = (x0 - 1.9, 19.9, 90) if ant == "A" else (x0 + 2.7, 21.2, 90)
+        pl[c["rb"]] = (x0 - 1.9, 20.1, 90) if ant == "A" else (x0 + 2.7, 21.2, 90)
         pl[c["tps"][0]] = (x0 + s * 13.0, 19.6, 0)
         pl[c["tps"][1]] = (x0 - s * 10.6, 29.4, 0)
     # ---- power entry behind the DC jack ----
@@ -351,7 +351,7 @@ def placement(P):
     en = P.on("U1_EN", "R")
     pl[en[0]] = (x + 5.4, 36.0, 90); pl[en[1]] = (x + 6.8, 36.0, 90)
     pl["C5"] = (x + 3.0, 42.6, 0); pl["C6"] = (x - 4.0, 44.0, 0)    # +12V_BUS bulk at the eFuse output, by the spine
-    pl["NT1"] = (x - 10.6, 22.6, 90)
+    pl["NT1"] = (x - 10.6, 19.6, 90)          # its CHASSIS pad reaches the B.Cu chassis strip (y < 21)
     pl[P.one("HOST_GPIO6", "R", "10k")] = (x + 8.6, 36.0, 90)
     pl[P.one("+12V_PROT", "TP")] = (x + 9.6, 26.6, 0)
     pl[P.one("HOST_GPIO6", "TP")] = (x + 9.6, 40.0, 0)
@@ -415,7 +415,8 @@ def placement(P):
         pl[cdd] = (ux - 4.6, uy + 4.0, 90)
         pl[crst] = (ux - 4.6, uy + 0.4, 90)
         rst = P.one(f"{u}_RST", "R"); pl[rst] = (ux - 6.0, uy + 0.4, 90)
-        irq = P.one(f"HOST_GPIO{24 if u == 'U4' else 25}", "R", "1k"); pl[irq] = (ux + 4.6, uy + 0.4, 90)
+        # the IRQ resistor below the package: beside it, it walled in the right-hand pin column's escapes (#34)
+        irq = P.one(f"HOST_GPIO{24 if u == 'U4' else 25}", "R", "1k"); pl[irq] = (ux, uy + 6.0, 0)
     pl["J2"] = ("pins", {"1": (166.0, 300.0), "3": (168.54, 300.0)})   # 2 x 20 box header, ribbon to the CM4IO J8
     host_r = P.on("+3V3", "R")
     for i, r in enumerate(x for x in host_r if x not in pl):
@@ -580,6 +581,7 @@ def courtyard_overlaps(fps, t=0.03):
 
 
 FIXED_PREFIX = ("J", "U", "H", "Q", "F")
+PAD_EXTRA = ("BUCK_EN",)       # 0.5 mm pitch beside VIN: keep the VIN neck a full Power clearance away
 
 
 def legalize(fps, pl, margin=0.1, passes=400):
@@ -637,7 +639,8 @@ def fill_copper(fps):
                 continue
             poly = pad_poly(p, P_.F_Cu if 0 in layers else P_.B_Cu)
             hole = (to_xy(p.GetPosition()), P_.ToMM(max(p.GetDrillSize().x, p.GetDrillSize().y)) / 2) if pth else None
-            it = cu.pad(layers, poly, net, extra=0.25 if is_rf(net) else 0.0, smd=not pth, hole=hole)
+            it = cu.pad(layers, poly, net, extra=0.25 if is_rf(net) else (0.05 if net in PAD_EXTRA else 0.0), smd=not pth,
+                        hole=hole)
             it.conn = False
             pads.setdefault((ref, p.GetNumber()), []).append(it)
     # spacer / screw keep-outs round every mounting hole (spacer faces up to 3.3 mm radius, M2.5 2.9)
@@ -927,20 +930,32 @@ def gnd_hand(b, cu, fps, gnd_vias):
     # and every TPS2595's FLT (pin 6) likewise: it sits between OUT (pin 5, a 0.5 mm power track routed first) and
     # the ILM hop from pin 7, so the generic router found it boxed in
     tps = [r for r, fp in fps.items() if str(fp.GetFPID().GetLibItemName()).startswith("Texas_DSG0008A")]
-    for ref in tps:
+    flt = []
+    for ref in [t for t in tps if t in ("U10", "U11") or t[1] in "23" and len(t) == 3]:
         for num, dx, dy in ((("2", -0.95, 0.0),) if ref in ("U10", "U11") else ()) + (("6", 0.95, -0.15),):
             pad = [p_ for p_ in fps[ref].Pads() if p_.GetNumber() == num][0]
             net, a = pad.GetNetname(), pc(fps, ref, num)
             v = (a[0] + dx, a[1] + dy)
-            # HOST_GPIO6 joins 21 eFuses: its escapes stay "not connected" own-net copper the router passes through,
-            # or they would be 21 islands the tree never joins; U10/U11's nets have one island each
-            single = ref in ("U10", "U11")
+            # HOST_GPIO6 joins 20 eFuses: the 16 slot ones hang off an In2 trunk drawn below (one tree); U1 / U12
+            # stay "not connected" own-net copper the router passes through; U10/U11's nets have one island each
+            single = ref in ("U10", "U11") or ref[1] in "23" and len(ref) == 3
             pk.add_track(b, NETS[net], P_.F_Cu, a, v, 0.2)
             cu.seg(0, a, v, 0.2, net, conn=single)
             pk.add_via(b, NETS[net], v)
-            cu.via_at(v, net, conn=single)
+            cu.via_at(v, net, d=VIA_D + 0.05, conn=single)     # a little fat for the grid: off-grid hand via
             if single:
                 HAND.add((ref, num))
+            if num == "6" and ref[1] in "23" and len(ref) == 3:
+                flt.append(v)
+    # the slot eFuses' FLT wire-OR (HOST_GPIO6): an In2 trunk in front of the eFuse row, one stub per via
+    if flt:
+        ty = FLT_TRUNK_Y
+        for v in flt:
+            pk.add_track(b, NETS["HOST_GPIO6"], P_.In2_Cu, v, (v[0], ty), 0.2)
+            cu.seg(1, v, (v[0], ty), 0.2, "HOST_GPIO6")
+        xs = sorted(v[0] for v in flt)
+        pk.add_track(b, NETS["HOST_GPIO6"], P_.In2_Cu, (xs[0], ty), (xs[-1], ty), 0.2)
+        cu.seg(1, (xs[0], ty), (xs[-1], ty), 0.2, "HOST_GPIO6")
 
 
 def gnd_fanout(b, cu, pads, gnd_vias, log):
@@ -1037,10 +1052,12 @@ def zone_fanout(b, cu, pads, net, rect, log, placed):
     return n
 
 
+FLT_TRUNK_Y = 180.4           # In2 trunk of the slot eFuses' FLT wire-OR (between the eFuses and the test pads)
 # the bias eFuses' EN / FLT sit inside the B.Cu +12V_BUS rear strip, the GND fan-out fences them in front and L1 is RF
 # from y 31: they route first, on F.Cu + In2 only, before the strip joins the router's copper (their vias become holes
 # in the strip pour; nothing runs on B.Cu there) (#34)
-EARLY_NETS = ("U10_ILM", "U11_ILM", "U10_DVDT", "U11_DVDT", "HOST_GPIO22", "HOST_GPIO23", "HOST_GPIO26", "HOST_GPIO27")
+EARLY_NETS = ("U10_ILM", "U11_ILM", "U10_DVDT", "U11_DVDT", "HOST_GPIO22", "HOST_GPIO23", "HOST_GPIO26", "HOST_GPIO27",
+              "HOST_GPIO6")       # the eFuse fault wire-OR: before the power nets crowd U1 / U12's pin 6
 
 
 def route_all(b, cu, nets, log, only=None):
@@ -1097,9 +1114,11 @@ def stitch_grid(b, cu, gnd_vias):
     while y < BD - 1.0:
         pts += [(1.2, y), (BW - 1.2, y)]
         y += 3.0
+    ports = [(PITCH * k + PORT[a][0], PORT[a][1]) for a in "AB" for k in range(N_SLOTS)]
     for gx in range(6, int(BW) - 2, 6):
         for gy in range(6, int(BD) - 2, 6):
-            pts.append((float(gx), float(gy)))
+            if all(math.dist((gx, gy), q) > 2.5 for q in ports):      # the u.FL footprints' keepout areas
+                pts.append((float(gx), float(gy)))
     return place_gnd_vias(b, cu, pts, gnd_vias, spacing=1.2, tol=0.6)
 
 
@@ -1168,7 +1187,7 @@ def write_project(nets):
             "via_dimensions": [{"diameter": 0.0, "drill": 0.0}, {"diameter": VIA_D, "drill": VIA_DRILL}],
         }},
         "net_settings": {
-            "classes": [cls("Default", 0.127, 0.2, 2147483647), cls("Power", 0.15, WIDE_W, 1), cls("Big", 0.2, BIG_W, 0),
+            "classes": [cls("Default", 0.127, 0.2, 2147483647), cls("Power", 0.15, WIDE_W, 1), cls("Big", 0.15, BIG_W, 0),
                         cls("Audio_I", 0.15, WIDE_W, 2), cls("RF", 0.15, W50, 3)],
             "meta": {"version": 4},
             "netclass_patterns": pats,

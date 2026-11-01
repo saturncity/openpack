@@ -8,7 +8,7 @@
 
 # No unconditional copper-clearance rule (#116 review M1): it would override every netclass clearance. The netclasses
 # set them (rack.kicad_pro): Default 0.127, Power / Audio_I 0.15 (IPC-2221 B4 external coated 31-100 V asks 0.13 for
-# the P48 nets), Big 0.2, RF 0.15; board min_clearance 0.1 is the floor, above JLC's 0.09.
+# the P48 nets), Big 0.15 (12 V entry: IPC-2221 B4 asks 0.05 below 15 V), RF 0.15; board min_clearance 0.1 is the floor, above JLC's 0.09.
 
 (rule "JLC via"
   (condition "A.Type == 'Via'")
