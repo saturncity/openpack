@@ -1,1 +1,10 @@
 #include "nrf5340dk_nrf5340_cpunet.overlay"
+
+/* #107: bsim has no nRF21540 (and no GPIO devices for it): the FEM node is silicon-only. */
+&nrf_radio_fem {
+	status = "disabled";
+};
+
+&radio {
+	/delete-property/ fem;
+};
