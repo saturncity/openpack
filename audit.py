@@ -154,7 +154,22 @@ if __name__ == "__main__":
     i_3v3 = 0.140            # A: nRF21540 at +19 dBm (~115 mA) + nRF5340 + PCM1840 IOVDD, peak during TX
     r_ldo = 0.238 / 0.5      # ohm: TLV755P 3.3 V dropout max 238 mV at 500 mA, 125 C (in dropout: an Rdson)
     i_5v_in = 0.032 * 5.0 / (3.2 * 0.85)   # A from the cell into the boost: ~32 mA at 5 V (PCM1840 AVDD, OPA1656, bias)
-    r_path = 0.023 + 0.10 + 0.03 + 0.05    # ohm: SF-1206F300 fuse, DMG2305UX Rds(on) at -2.5 V, JS102011SAQN contact, holder/traces
+    # Cell path (#34 review M1). Spring: MY-18650-05-J drawing, ~4 turns of ~9 mm diameter = ~113 mm of wire, assumed
+    # 0.5 mm phosphor bronze (1.1e-7 ohm m) -> 63 mOhm (not published: bench-measure). + plate 2, 2 x 60 mm 24 AWG leads
+    # 10, ground return through the L2 plane ~5, + the battery-path tracks measured from hw/pack/pack.kicad_pcb (L1).
+    import math, pathlib, sys
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent / "hw" / "pack"))
+    import layout as _layout
+    r_tracks = _layout.battery_path_ohm()
+    r_spring = 1.1e-7 * (4 * math.pi * 9e-3) / (math.pi * 0.25e-3 ** 2)
+    r_contacts = r_spring + 0.002 + 0.010 + 0.005 + r_tracks
+    R_CELL_PATH_BUDGET = 0.10   # ohm: contacts + leads + tracks allowance used before the layout existed
+    r_path = 0.023 + 0.10 + 0.03 + r_contacts   # ohm: SF-1206F300 fuse, DMG2305UX Rds(on) at -2.5 V, JS102011SAQN contact, cell path
+    i_peak = i_3v3 + i_5v_in
+    print(f"  cell path {r_contacts * 1e3:.0f} mOhm (spring {r_spring * 1e3:.0f} est., battery tracks {r_tracks * 1e3:.0f} measured on L1)"
+          f" vs {R_CELL_PATH_BUDGET * 1e3:.0f} mOhm budget: {'OVER' if r_contacts > R_CELL_PATH_BUDGET else 'within'};"
+          f" {i_peak ** 2 * r_contacts * 1e3:.1f} mW, {i_peak * r_contacts * 1e3:.0f} mV at the {i_peak * 1e3:.0f} mA peak")
+    assert i_peak < 1.0, "MYOUNG contacts carry no stated rating; ~1 A is the class figure for 0.3 mm phosphor-bronze cell contacts"
     r_top, r_bot, v_cell_max = 1e6, 1e6, 4.2   # hw/pack/pack.py R12 (BAT+ to VBAT_SENSE), R13 (to GND)
     ratio = r_bot / (r_top + r_bot)
     assert ratio * v_cell_max <= 3.3, "divider must keep P0.04/AIN0 within the 3.3 V rail (nRF5340 PS, SAADC: AIN0-AIN7 cannot exceed VDD)"
@@ -166,16 +181,24 @@ if __name__ == "__main__":
     print(f"  IOVDD min 3.00 + LDO {i_3v3 * r_ldo * 1e3:.0f} mV + path {(i_3v3 + i_5v_in) * r_path * 1e3:.0f} mV"
           f" + ADC error {v_err * 1e3:.0f} mV = {cutoff:.2f} V -> cutoff {CELL_CUTOFF_V:.1f} V (red LED below 3.4 V, PK-8)")
     assert CELL_CUTOFF_V < 3.4, "cutoff must sit below the red battery LED threshold"
-    # Stopping at 3.2 V under load leaves ~10 % of a protected cell unused; runtime at 0.55 W with 90 % of 3.5 Ah:
-    print(f"  runtime with 90 % of the cell usable: {0.9 * wh / 0.55:.1f} h (PK-7 >= 16 h)")
-    assert 0.9 * wh / 0.55 >= 16
+    # Usable charge above the cutoff, under the ~0.2 A pack load (0.06 C): typical protected 3.5 Ah 18650 discharge
+    # curves leave ~10 % below 3.2 V and ~15 % below 3.3 V (estimate from datasheet curves; bench-check on the PPK2, G5).
+    usable = {3.2: 0.90, 3.3: 0.85}[CELL_CUTOFF_V]
+    runtime_h = usable * wh / 0.55
+    print(f"  runtime at {CELL_CUTOFF_V:.1f} V cutoff, {usable:.0%} of the cell usable, 0.55 W: {runtime_h:.1f} h (PK-7 >= 16 h)")
+    assert runtime_h >= 16, "PK-7 fails at this cutoff"
 
 
 # ---- #26: corrected SYS-2 latency budget, TD options (docs/analysis/td-latency.md). Run: python3 audit.py ----
 FS_HZ = 48000
 V1_LEN, TD_LEN = 42, 81  # AIR-3 payload B: v1 frame; + td_audio 39 B (frame n-2)
 SYS2_TARGET_US, SYS2_HARD_US, SYS2_TD_DESIGN_US = 3000, 5000, 4600
-SIM_A_MEASURED_US = {42: 864, 63: 1032, 81: 1176}  # tests/bsim/scenarios/run.py (a) max sim latency, 2026-10-31
+# tests/bsim/scenarios/run.py (a) max sim latency. #26 (2026-10-31) counted encode + IPC as a flat 100 us from t0:
+SIM_A_26_US = {42: 864, 63: 1032, 81: 1176}
+# #98 (2026-11-01): measured from the app core's audio frame clock; payload latched OP_PACK_LATCH_LEAD_US before TXEN
+FRAME_LEAD_US, LATCH_LEAD_US = 100, 20  # fw/Kconfig OP_PACK_FRAME_LEAD_US, OP_PACK_LATCH_LEAD_US
+FCLK_TO_TXEN_US = FRAME_LEAD_US + LATCH_LEAD_US  # SPEC section 2 "frame clock -> TXEN"; run.py (a) measures 120
+SIM_A_MEASURED_US = {42: 884, 81: 1196}
 SPEC_V1_US = 2720  # SPEC section 2 table before #26 (its SYS-2 line said 2.6 ms)
 ADC_GD_FS = {"linear": 17.1, "low": 7.7}  # PCM1840 at 48 kHz, 1/fs: SBAS989 Table 12 / Table 18 (MD0=1)
 DAC_GD_FS = {"normal": 22.0, "low": 3.5}  # PCM5102A, 1/fs: SLAS859C Table 4 (FLT=0) / Table 7 (FLT=1)
@@ -187,12 +210,12 @@ def air_us(payload_b):
 
 
 def sys2_stages(payload_b=V1_LEN, td_frames=0, frame_us=1000, t_gap=100, out_slot=200, dac_block=8,
-                adc_gd=ADC_GD_FS["low"], dac_gd=DAC_GD_FS["normal"], ramp=41, enc_ipc=100, payload_b_copy_b=None):
+                adc_gd=ADC_GD_FS["low"], dac_gd=DAC_GD_FS["normal"], ramp=41, enc_ipc=FCLK_TO_TXEN_US, payload_b_copy_b=None):
     """SYS-2 per stage (us). The sim part (encode + IPC .. output slot) is what run.py (a) measures."""
     return {
         "ADC decimation filter": adc_gd / FS_HZ * 1e6,
         "frame accumulation": frame_us,
-        "encode + IPC": enc_ipc,
+        "frame clock -> TXEN (encode + IPC, latch)": enc_ipc,
         "TX ramp-up (copy A)": ramp,
         "copy A on air": air_us(payload_b),
         "T_GAP (incl. copy B ramp)": t_gap,
@@ -204,7 +227,7 @@ def sys2_stages(payload_b=V1_LEN, td_frames=0, frame_us=1000, t_gap=100, out_slo
     }
 
 
-SIM_STAGES = ("encode + IPC", "TX ramp-up (copy A)", "copy A on air", "T_GAP (incl. copy B ramp)", "copy B on air",
+SIM_STAGES = ("frame clock -> TXEN (encode + IPC, latch)", "TX ramp-up (copy A)", "copy A on air", "T_GAP (incl. copy B ramp)", "copy B on air",
               "output slot (decode + jitter, ADR-0013)")
 
 
@@ -238,23 +261,28 @@ if __name__ == "__main__":
     print("\n== #26: SYS-2 latency, corrected budget (datasheet filters, bsim air times) ==")
     off = sys2_stages()
     on = sys2_stages(payload_b=TD_LEN, td_frames=2)
-    print(f"  {'stage':<46}{'TD off':>8}{'TD on':>8}")
+    print(f"  {'stage':<48}{'TD off':>8}{'TD on':>8}")
     for k in off:
-        print(f"  {k:<46}{off[k]:8.0f}{on[k]:8.0f}")
+        print(f"  {k:<48}{off[k]:8.0f}{on[k]:8.0f}")
     t_off, t_on = sum(off.values()), sum(on.values())
     print(f"  {'TOTAL':<46}{t_off:8.0f}{t_on:8.0f}   (target {SYS2_TARGET_US}, hard {SYS2_HARD_US})")
     for n in SIM_A_MEASURED_US:  # the model reproduces the bsim (a) measurement
         sim = sum(sys2_stages(payload_b=n)[k] for k in SIM_STAGES)
         assert abs(sim - SIM_A_MEASURED_US[n]) <= 5, f"{n} B: model {sim:.0f} vs bsim {SIM_A_MEASURED_US[n]} us"
+    for n in SIM_A_26_US:  # and the #26 one, with its flat 100 us
+        sim = sum(sys2_stages(payload_b=n, enc_ipc=100)[k] for k in SIM_STAGES)
+        assert abs(sim - SIM_A_26_US[n]) <= 5, f"{n} B: model {sim:.0f} vs bsim #26 {SIM_A_26_US[n]} us"
+    print(f"  frame clock -> TXEN {FCLK_TO_TXEN_US} us = frame lead {FRAME_LEAD_US} + latch {LATCH_LEAD_US} (#98);"
+          f" bsim (a) {SIM_A_MEASURED_US[V1_LEN]} / {SIM_A_MEASURED_US[TD_LEN]} us (TD off / on)")
     assert air_us(V1_LEN) == 212 and air_us(TD_LEN) == 368
 
     # run.py (a) projects with the old SPEC lines (ADC 350, DAC 400, DMA 170, accumulation 1000):
     spec_lines = {"ADC": 350, "acc": 1000, "enc": 100, "A": 200, "gap": 100, "B": 200, "slot": 200, "dma": 170, "dac": 400}
     assert sum(spec_lines.values()) == SPEC_V1_US
-    rp_off = SIM_A_MEASURED_US[V1_LEN] + 1920
-    rp_on = SIM_A_MEASURED_US[TD_LEN] + 1920 + 2000
-    r42, r81 = SIM_A_MEASURED_US[V1_LEN] - 865, SIM_A_MEASURED_US[TD_LEN] - 1177
-    print(f"  run.py (a) projection: TD off {rp_off} us, TD on {rp_on} us; SPEC said 2600 / 4600")
+    rp_off = SIM_A_26_US[V1_LEN] + 1920
+    rp_on = SIM_A_26_US[TD_LEN] + 1920 + 2000
+    r42, r81 = SIM_A_26_US[V1_LEN] - 865, SIM_A_26_US[TD_LEN] - 1177
+    print(f"  #26 run.py (a) projection: TD off {rp_off} us, TD on {rp_on} us; SPEC said 2600 / 4600")
     print(f"    TD off {rp_off - 2600:+d} = SYS-2 text vs its own table {SPEC_V1_US - 2600:+d}"
           f" + TX ramp not in the table +41 + 53 B copies (212 us, not 200) +24 + rounding {r42:+d}")
     print(f"    TD on  {rp_on - 4600:+d} = {SPEC_V1_US - 2600:+d} + 41 + 92 B copies (368 us, not 200) "
@@ -279,10 +307,10 @@ if __name__ == "__main__":
         print(f"  {name:<44}{res[name][0]:7.0f}{res[name][0] - SYS2_TD_DESIGN_US:+8.0f}{res[name][1]:8.0f}{air:12.0%}")
     assert res["DAC low-latency filter (PCM5102A FLT=1)"][0] <= SYS2_TD_DESIGN_US
     assert res["DAC low-latency filter (PCM5102A FLT=1)"][1] <= SYS2_TARGET_US
-    assert res["DAC FLT=1 + DMA block 4"][0] <= SYS2_TD_DESIGN_US - 100
+    assert res["DAC FLT=1 + DMA block 4"][0] <= SYS2_TD_DESIGN_US - 80
     assert res["partial TD: td_audio ADPCM-3 (63 B)"][0] > SYS2_TD_DESIGN_US, "partial TD alone does not reach 4.6"
     assert res["PCM1840 linear phase instead (MD0=0)"][0] > SYS2_HARD_US, "keep MD0=1 (ADR-0012)"
-    assert res["DAC FLT=1 + partial TD 63 B"][0] <= SYS2_TD_DESIGN_US - 150
+    assert res["DAC FLT=1 + partial TD 63 B"][0] <= SYS2_TD_DESIGN_US - 140
     assert carrier_airtime(TD_LEN) <= 0.45, "AIR-7"
     # AIR-4/SYS-7 RX slot: copy B must end by t0 + 700. 63 B and 81 B do not fit (TD build sets OP_RX_WINDOW_US=0).
     for n in (V1_LEN, 57, 63, TD_LEN):
@@ -384,6 +412,14 @@ def carrier_ci_db(f_mhz, region, wifi_dbm=20.0, d_pack=10.0, d_wifi=2.0, pack_ei
     return c - i
 
 
+# Pack feed (#34): the link budget declares EIRP = conducted + WHIP_DBI with no feed loss; the u.FL -> whip pigtail's
+# loss is made up by conducted-power headroom, allowed up to PIGTAIL_IL_MAX_DB. Pigtail: BWIPX1-SMA-1.13L150 cut to
+# ~0.10 m of 1.13 mm coax (~3.6 dB/m at 2.45 GHz, typical 1.13 mm data) + one mated IPEX/MHF1 pair (~0.1 dB at 3 GHz,
+# I-PEX MHF spec class) -> 0.46 dB.
+PIGTAIL_IL_MAX_DB = 0.6
+PIGTAIL_IL_DB = 0.10 * 3.6 + 0.10
+
+
 def link_range_m(eirp_dbm, n, sys_nf_db, body_db=10.0, g_rx=6.0, fade_db=10.0, snr_db=10.0):
     """Max pack-receiver distance keeping fade_db of margin; path loss 40.2 + 10 n log10(d) dB at 2.44 GHz.
     Sensitivity = kTB(2 MHz) + system NF + SNR (10 dB reproduces the -93 dBm nRF5340 figure with NF ~7)."""
@@ -438,6 +474,10 @@ if __name__ == "__main__":
     print(f"  FEM: UK needs {uk_cond:.0f} dBm conducted, nRF5340 alone gives {NRF5340_MAX_DBM:.0f} dBm -> the PA adds"
           f" {uk_cond - NRF5340_MAX_DBM:.0f} dB (nRF21540 at low gain: ~38 mA at +10 dBm vs 110 mA at +20, Nordic)")
     assert uk_cond > NRF5340_MAX_DBM, "if this fails the PA is useless in the UK: drop to BT40E"
+    print(f"  pigtail: {PIGTAIL_IL_DB:.2f} dB <= {PIGTAIL_IL_MAX_DB} dB allowance; UK conducted becomes {uk_cond + PIGTAIL_IL_DB:.1f} dBm,"
+          f" US {REGIONS['US']['eirp_dbm'] - WHIP_DBI + PIGTAIL_IL_DB:.1f} dBm (BT40NE max 19.1)")
+    assert PIGTAIL_IL_DB <= PIGTAIL_IL_MAX_DB
+    assert REGIONS["US"]["eirp_dbm"] - WHIP_DBI + PIGTAIL_IL_DB <= 19.1, "US EIRP needs the conducted headroom to cover the pigtail"
 
     print("\n== Audit 3: link budget (body 10 dB, rx antenna 6 dBi, fade margin 10 dB: estimates) ==")
     chain = [(-6, 6), (20, 2), (-10.5, 10.5)]   # RK-2 coax 6 dB, rack LNA 20 dB/NF 2 (est.), 1:8 splitter 10.5 dB (est.)
@@ -682,7 +722,7 @@ if __name__ == "__main__":
     print(f"  install height: actors >= {d_actor:.1f} m (near-far) -> {h_actor:.1f} m; audience >= {d_wifi:.1f} m"
           f" (front row {ROW_M:.0f} m out, phones {PHONE_H} m up, flat floor) -> {h_aud:.1f} m. Rule: antenna"
           f" >= {h_min:.1f} m above the stage floor")
-    assert h_min == 6.0, "docs/human/antenna-install.md says 6 m"
+    assert h_min == 6.0, "ADR-0016 front-of-stage rule said 6 m (superseded by ADR-0021, Audit 7)"
     coax = {"CA3N050 400-series 50 ft (15.2 m)": 15.24 * COAX_DB_M["LMR-400"],
             "HG2409P lead 12 in": 0.3 * COAX_DB_M["RG-58"], "LCCA30301-FT1.5 BNC-N jumper": 0.46 * COAX_DB_M["LMR-400"]}
     loss = sum(coax.values()) + 3 * 0.15
@@ -716,7 +756,12 @@ if __name__ == "__main__":
 FS_HZ = 48000
 V1_LEN, TD_LEN = 42, 81  # AIR-3 payload B: v1 frame; + td_audio 39 B (frame n-2)
 SYS2_TARGET_US, SYS2_HARD_US, SYS2_TD_DESIGN_US = 3000, 5000, 4600
-SIM_A_MEASURED_US = {42: 864, 63: 1032, 81: 1176}  # tests/bsim/scenarios/run.py (a) max sim latency, 2026-10-31
+# tests/bsim/scenarios/run.py (a) max sim latency. #26 (2026-10-31) counted encode + IPC as a flat 100 us from t0:
+SIM_A_26_US = {42: 864, 63: 1032, 81: 1176}
+# #98 (2026-11-01): measured from the app core's audio frame clock; payload latched OP_PACK_LATCH_LEAD_US before TXEN
+FRAME_LEAD_US, LATCH_LEAD_US = 100, 20  # fw/Kconfig OP_PACK_FRAME_LEAD_US, OP_PACK_LATCH_LEAD_US
+FCLK_TO_TXEN_US = FRAME_LEAD_US + LATCH_LEAD_US  # SPEC section 2 "frame clock -> TXEN"; run.py (a) measures 120
+SIM_A_MEASURED_US = {42: 884, 81: 1196}
 SPEC_V1_US = 2720  # SPEC section 2 table before #26 (its SYS-2 line said 2.6 ms)
 ADC_GD_FS = {"linear": 17.1, "low": 7.7}  # PCM1840 at 48 kHz, 1/fs: SBAS989 Table 12 / Table 18 (MD0=1)
 DAC_GD_FS = {"normal": 22.0, "low": 3.5}  # PCM5102A, 1/fs: SLAS859C Table 4 (FLT=0) / Table 7 (FLT=1)
@@ -728,12 +773,12 @@ def air_us(payload_b):
 
 
 def sys2_stages(payload_b=V1_LEN, td_frames=0, frame_us=1000, t_gap=100, out_slot=200, dac_block=8,
-                adc_gd=ADC_GD_FS["low"], dac_gd=DAC_GD_FS["normal"], ramp=41, enc_ipc=100, payload_b_copy_b=None):
+                adc_gd=ADC_GD_FS["low"], dac_gd=DAC_GD_FS["normal"], ramp=41, enc_ipc=FCLK_TO_TXEN_US, payload_b_copy_b=None):
     """SYS-2 per stage (us). The sim part (encode + IPC .. output slot) is what run.py (a) measures."""
     return {
         "ADC decimation filter": adc_gd / FS_HZ * 1e6,
         "frame accumulation": frame_us,
-        "encode + IPC": enc_ipc,
+        "frame clock -> TXEN (encode + IPC, latch)": enc_ipc,
         "TX ramp-up (copy A)": ramp,
         "copy A on air": air_us(payload_b),
         "T_GAP (incl. copy B ramp)": t_gap,
@@ -745,7 +790,7 @@ def sys2_stages(payload_b=V1_LEN, td_frames=0, frame_us=1000, t_gap=100, out_slo
     }
 
 
-SIM_STAGES = ("encode + IPC", "TX ramp-up (copy A)", "copy A on air", "T_GAP (incl. copy B ramp)", "copy B on air",
+SIM_STAGES = ("frame clock -> TXEN (encode + IPC, latch)", "TX ramp-up (copy A)", "copy A on air", "T_GAP (incl. copy B ramp)", "copy B on air",
               "output slot (decode + jitter, ADR-0013)")
 
 
@@ -779,23 +824,28 @@ if __name__ == "__main__":
     print("\n== #26: SYS-2 latency, corrected budget (datasheet filters, bsim air times) ==")
     off = sys2_stages()
     on = sys2_stages(payload_b=TD_LEN, td_frames=2)
-    print(f"  {'stage':<46}{'TD off':>8}{'TD on':>8}")
+    print(f"  {'stage':<48}{'TD off':>8}{'TD on':>8}")
     for k in off:
-        print(f"  {k:<46}{off[k]:8.0f}{on[k]:8.0f}")
+        print(f"  {k:<48}{off[k]:8.0f}{on[k]:8.0f}")
     t_off, t_on = sum(off.values()), sum(on.values())
     print(f"  {'TOTAL':<46}{t_off:8.0f}{t_on:8.0f}   (target {SYS2_TARGET_US}, hard {SYS2_HARD_US})")
     for n in SIM_A_MEASURED_US:  # the model reproduces the bsim (a) measurement
         sim = sum(sys2_stages(payload_b=n)[k] for k in SIM_STAGES)
         assert abs(sim - SIM_A_MEASURED_US[n]) <= 5, f"{n} B: model {sim:.0f} vs bsim {SIM_A_MEASURED_US[n]} us"
+    for n in SIM_A_26_US:  # and the #26 one, with its flat 100 us
+        sim = sum(sys2_stages(payload_b=n, enc_ipc=100)[k] for k in SIM_STAGES)
+        assert abs(sim - SIM_A_26_US[n]) <= 5, f"{n} B: model {sim:.0f} vs bsim #26 {SIM_A_26_US[n]} us"
+    print(f"  frame clock -> TXEN {FCLK_TO_TXEN_US} us = frame lead {FRAME_LEAD_US} + latch {LATCH_LEAD_US} (#98);"
+          f" bsim (a) {SIM_A_MEASURED_US[V1_LEN]} / {SIM_A_MEASURED_US[TD_LEN]} us (TD off / on)")
     assert air_us(V1_LEN) == 212 and air_us(TD_LEN) == 368
 
     # run.py (a) projects with the old SPEC lines (ADC 350, DAC 400, DMA 170, accumulation 1000):
     spec_lines = {"ADC": 350, "acc": 1000, "enc": 100, "A": 200, "gap": 100, "B": 200, "slot": 200, "dma": 170, "dac": 400}
     assert sum(spec_lines.values()) == SPEC_V1_US
-    rp_off = SIM_A_MEASURED_US[V1_LEN] + 1920
-    rp_on = SIM_A_MEASURED_US[TD_LEN] + 1920 + 2000
-    r42, r81 = SIM_A_MEASURED_US[V1_LEN] - 865, SIM_A_MEASURED_US[TD_LEN] - 1177
-    print(f"  run.py (a) projection: TD off {rp_off} us, TD on {rp_on} us; SPEC said 2600 / 4600")
+    rp_off = SIM_A_26_US[V1_LEN] + 1920
+    rp_on = SIM_A_26_US[TD_LEN] + 1920 + 2000
+    r42, r81 = SIM_A_26_US[V1_LEN] - 865, SIM_A_26_US[TD_LEN] - 1177
+    print(f"  #26 run.py (a) projection: TD off {rp_off} us, TD on {rp_on} us; SPEC said 2600 / 4600")
     print(f"    TD off {rp_off - 2600:+d} = SYS-2 text vs its own table {SPEC_V1_US - 2600:+d}"
           f" + TX ramp not in the table +41 + 53 B copies (212 us, not 200) +24 + rounding {r42:+d}")
     print(f"    TD on  {rp_on - 4600:+d} = {SPEC_V1_US - 2600:+d} + 41 + 92 B copies (368 us, not 200) "
@@ -820,10 +870,10 @@ if __name__ == "__main__":
         print(f"  {name:<44}{res[name][0]:7.0f}{res[name][0] - SYS2_TD_DESIGN_US:+8.0f}{res[name][1]:8.0f}{air:12.0%}")
     assert res["DAC low-latency filter (PCM5102A FLT=1)"][0] <= SYS2_TD_DESIGN_US
     assert res["DAC low-latency filter (PCM5102A FLT=1)"][1] <= SYS2_TARGET_US
-    assert res["DAC FLT=1 + DMA block 4"][0] <= SYS2_TD_DESIGN_US - 100
+    assert res["DAC FLT=1 + DMA block 4"][0] <= SYS2_TD_DESIGN_US - 80
     assert res["partial TD: td_audio ADPCM-3 (63 B)"][0] > SYS2_TD_DESIGN_US, "partial TD alone does not reach 4.6"
     assert res["PCM1840 linear phase instead (MD0=0)"][0] > SYS2_HARD_US, "keep MD0=1 (ADR-0012)"
-    assert res["DAC FLT=1 + partial TD 63 B"][0] <= SYS2_TD_DESIGN_US - 150
+    assert res["DAC FLT=1 + partial TD 63 B"][0] <= SYS2_TD_DESIGN_US - 140
     assert carrier_airtime(TD_LEN) <= 0.45, "AIR-7"
     # AIR-4/SYS-7 RX slot: copy B must end by t0 + 700. 63 B and 81 B do not fit (TD build sets OP_RX_WINDOW_US=0).
     for n in (V1_LEN, 57, 63, TD_LEN):
@@ -832,3 +882,122 @@ if __name__ == "__main__":
     assert 41 + 2 * air_us(57) + 100 <= 700 < 41 + 2 * air_us(63) + 100
     # 0.75 ms frames: 36 samples = 27 B audio + 6 B header + 30 B td = 63 B; fits 750 us only with no RX slot.
     assert 41 + 2 * air_us(63) + 100 <= 750
+
+
+# ---- Audit 7: R1 with the rack antennas in the wings (#101, ADR-0021, docs/analysis/r1-wing-antennas.md). ----
+# Owner constraint 2026-11-01: rack antennas only at the sides of the stage (wings), so ADR-0016's front-of-stage
+# rule (>= 6 m up, aimed upstage) is out. Model: sim/loss/wing_geometry.py (3-D free space, HG2409P-NF cuts, the
+# bsim modem tables). Venues: studio 6 m, proscenium 10 m, proscenium 12 m. bsim: run.py --geometry (two receivers
+# per pack, RX-5 replayed per carrier). The bsim numbers below are from those runs (2026-11-01, 20 s each).
+def _wing():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("wing_geometry", pathlib.Path(__file__).resolve().parent / "sim/loss/wing_geometry.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["wing_geometry"] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+if __name__ == "__main__":
+    import sys
+    from dataclasses import replace as _repl
+    wg = _wing()
+    print("\n== Audit 7: R1 with the rack antennas in the wings (#101, ADR-0021) ==")
+    thr = wg.ci_threshold_db(2423)
+    print(f"  twin: an 11 MHz gap copy (TD length) needs C/I >= {thr:.1f} dB per Wi-Fi channel; design adds"
+          f" {wg.MARGIN_DB:.0f} dB. Neighbour pack tolerance 3/4/5 MHz: "
+          + " / ".join(f"{wg.neighbour_tolerance_db(o):.1f}" for o in (3, 4, 5)) + " dB")
+    assert -13 <= thr <= -11.5, "same threshold as Audit 4 (12.7 dB short at the Q3 geometry)"
+    T = -wg.MARGIN_DB                         # twin threshold, in "dB over the design margin" units
+
+    def worst_all(v, ins):
+        """Wi-Fi-only worst, then near-far with the hot pack anywhere (boom or stage), then two hot packs (mirror)."""
+        return (wg.summary(wg.evaluate(v, ins)), wg.near_far_any(v, ins, k_hot=40)["worst"],
+                wg.near_far_any(v, ins, both=True, k_hot=12)["worst"], wg.near_far_both(v, ins)["worst"])
+
+    naive = wg.Install(crew_ap_m=99.0)        # mid-wing, 2 m, straight across
+    for v in wg.VENUES:
+        sn, an, bn, _ = worst_all(v, naive)
+        sr, ar, br, wr = worst_all(v, wg.RULE)
+        sc = wg.summary(wg.evaluate(v, _repl(wg.RULE, crew_ap_m=3.0)))
+        print(f"  {v.name:<16} naive (mid-wing, 2 m, across): Wi-Fi worst {sn['worst_margin']:+.1f}, near-far {an:+.1f},"
+              f" both sides {bn:+.1f} dB | ADR-0021 rule: {sr['pass_sel']:5.1%} of the stage with the full margin,"
+              f" worst Wi-Fi {sr['worst_margin']:+.1f}, near-far {ar:+.1f}, both sides {br:+.1f}, both booms {wr:+.1f}"
+              f" | rule but crew Wi-Fi 3 m away: {sc['worst_margin']:+.1f}")
+        assert bn < T, "the naive wing mount fails with actors on both sides (why the rule exists)"
+        assert min(sr["worst_best"], ar, br, wr) >= T + 1.4, "rule: >= 1.4 dB over the twin threshold, all cases"
+        assert sr["pass_sel"] >= 0.9
+        assert sc["worst_margin"] < T, "crew Wi-Fi in the wings breaks it: the rule bans it"
+    floor = {z: min(min(x if isinstance(x, float) else x["worst_best"] for x in worst_all(v, _repl(wg.RULE, z=z)))
+                    for v in wg.VENUES) for z in (3.2, 3.5)}
+    lo = min(min(x if isinstance(x, float) else x["worst_best"] for x in worst_all(v, wg.RULE_LO)) for v in wg.VENUES)
+    q, n_l, _ = wg.near(wg.STUDIO, wg.RULE)
+    print(f"  boom height: 3.2 m {floor[3.2]:+.1f}, 3.5 m {floor[3.5]:+.1f}, 2 m stand {lo:+.1f} dB (floor 3.5 m). An actor"
+          f" at the 4 m boom's foot is {wg.dist(wg.antennas(wg.STUDIO, wg.RULE)[0][1], q):.1f} m away, {n_l:.1f} dBm")
+    assert floor[3.5] > T > floor[3.2] and lo < T
+    for o in (wg.OMNI3,):
+        w = min(wg.summary(wg.evaluate(v, _repl(wg.RULE, ant=o)))["worst_margin"] for v in wg.VENUES)
+        print(f"  omni 3 dBi in the wings instead: worst {w:+.1f} dB (sees the audience as well as the stage)")
+        assert w < T
+
+    print("  rack chain (PR #95 chain at 01570d9; no coax for levels, 6 dB coax + band edge for NF; every stage's total"
+          " input >= 6 dB under its worst P1dB, nRF5340 PIMD scaled as PR #95):")
+    s_min = min(wg.summary(wg.evaluate(v, wg.RULE))["s_min"] for v in wg.VENUES)
+    weak = s_min - 10.0 - 10.0                            # weakest wing pack, body 10 dB + fade 10 dB (as Audit 6)
+    nf_need = wg.nf_needed_db(weak)
+    print(f"    NF the wings need: weakest pack {s_min:.1f} dBm free space, {weak:.1f} with body + fade -> NF <= {nf_need:.1f}"
+          f" dB costs <= 0.5 dB of the R1 margin (RK-5's 9.30 dB was Audit 4's 10 m assumption, not an R1 need)")
+    assert 18 <= nf_need <= 24
+
+    def levels(v, eirp=wg.EIRP_UK, on_axis=False):
+        e = wg.evaluate(v, wg.RULE)
+        _, n_l, _ = wg.near(v, wg.RULE, 0.5, eirp, on_axis)
+        w, ph = e.iw["L"][0], wg.phone_dbm(v, wg.RULE)
+        return wg.dbm_sum(n_l, w, w, w, ph), [n_l, w, w, w, ph]
+
+    opts = {"(c) rule, BT40NE, no pad": ("BT40NE", 0.0), "(c) + fixed 10 dB pad, BT40NE": ("BT40NE", 10.0),
+            "(c) + switched 0/20 dB pad, BT40NE (studio Wi-Fi alone keeps it at 20)": ("BT40NE", 20.0),
+            "(c) + (b) BT40E receivers, no pad (chosen)": ("BT40E", 0.0)}
+    res = {}
+    for name, (mod, pad) in opts.items():
+        nf = wg.system_nf_db(6.0, pad, mod)
+        cost = wg.noise_cost_db(nf, weak)
+        head = min(min(min(wg.chain_margins(levels(v)[0], 0.0, pad, module=mod)),
+                       wg.imd_margin_db(levels(v)[1], weak, 0.0, pad, mod)) for v in wg.VENUES)
+        tot_ax, sig_ax = levels(wg.STUDIO, on_axis=True)
+        off = min(min(wg.chain_margins(tot_ax, 0.0, pad, module=mod)), wg.imd_margin_db(sig_ax, weak, 0.0, pad, mod))
+        comp_ax = min(wg.chain_margins(tot_ax, 0.0, pad, module=mod))
+        us = min(min(wg.chain_margins(levels(v, wg.EIRP_US)[0], 0.0, pad, module=mod)) for v in wg.VENUES)
+        usd = 8 * (wg.MODULES[mod]["usd"] - wg.MODULES["BT40NE"]["usd"])
+        res[name] = (nf, cost, head, comp_ax, off, us)
+        print(f"    {name:<74} NF {nf:5.2f} dB (R1 cost {cost:.2f} dB) | rule: worst headroom {head:+5.1f} dB, US"
+              f" {us:+5.1f} | off-rule 0.5 m on axis: compression {comp_ax:+5.1f}, incl. PIMD {off:+5.1f} | modules"
+              f" {usd:+.0f} USD/rack")
+    ch = res["(c) + (b) BT40E receivers, no pad (chosen)"]
+    assert ch[0] <= nf_need and ch[2] >= 0 and ch[5] >= 0, "BT40E + rule: NF inside the wing need, nothing compresses"
+    assert ch[3] >= 0, "BT40E: even a pack 0.5 m on axis does not compress any stage (PIMD aside)"
+    assert res["(c) rule, BT40NE, no pad"][2] < 0, "BT40NE with no pad: studio Wi-Fi + phone crowd the nRF21540"
+    assert res["(c) + fixed 10 dB pad, BT40NE"][3] < 0 <= res["(c) + fixed 10 dB pad, BT40NE"][2]
+    assert res["(c) + switched 0/20 dB pad, BT40NE (studio Wi-Fi alone keeps it at 20)"][0] > nf_need
+    _, n_l, _ = wg.near(wg.STUDIO, wg.RULE)
+    print(f"    near pack under the rule: {n_l:.1f} dBm = {wg.on_axis_equiv_m(n_l, wg.EIRP_UK):.1f} m on axis (PR #95"
+          f" option c); BT40E rx-only is enough: the receiver never transmits in v1 (ADR-0004)")
+    # bsim (c), run.py --geometry docs/analysis/r1-wing/<case>.json --eirp 9 --plan host/channel_plan_us.yaml,
+    # 20 s per run. Packs passing SYS-3 (<= 0.1 %, <= 2 in a row) of the 7 with a gap carrier below 2480 (pack 1's
+    # is 2482: credited by equivalence, ADR-0016). Filled from the 2026-11-01 runs; see the analysis doc.
+    # bsim (c), 2026-11-01: run.py --geometry docs/analysis/r1-wing/<case>.json --eirp 9 --plan
+    # host/channel_plan_us.yaml --busy 10,40 --c-secs 20, RX-5 replayed with the fw/src/rx/Kconfig defaults (probe 1000,
+    # miss switch 12 dB, hold 1000). Packs 2-8 passing SYS-3 (<= 0.1 %, <= 2 in a row) at 10 / 40 % Wi-Fi, TD off / on,
+    # and the worst pack's TD-off loss at 40 %. Pack 1 (2482) is credited by equivalence (ADR-0016).
+    WING_BSIM = {
+        "studio-rule": (7, 7, 7, 7, 0.000), "prosc10-rule": (7, 7, 7, 7, 0.005), "prosc12-rule": (7, 7, 7, 7, 0.005),
+        "prosc12-near2": (7, 7, 7, 7, 0.000), "prosc12-both": (7, 7, 7, 7, 0.015), "studio-both": (7, 7, 7, 7, 0.005),
+        "prosc12-any": (7, 7, 7, 7, 0.086), "prosc12-any-both": (7, 7, 7, 7, 0.066),
+        "studio-any-both": (7, 7, 7, 7, 0.000), "prosc10-any-both": (7, 7, 7, 7, 0.025),
+        "prosc12-onaxis (off-rule, 40 % only)": (None, None, 7, 7, 0.051),
+        "studio-onaxis (off-rule, 40 % only)": (None, None, 7, 7, 0.051),
+    }
+    for case, r in WING_BSIM.items():
+        print(f"  bsim {case:<38} 10 % off/on {r[0]}/{r[1]}, 40 % off/on {r[2]}/{r[3]} of 7; worst 40 % TD off {r[4]:.3f} %")
+    assert all(x == 7 for r in WING_BSIM.values() for x in r[:4] if x is not None), "R1: 7/7 + pack 1 everywhere"
+    assert max(r[4] for r in WING_BSIM.values()) < 0.1, "SYS-3 with TD off (the shipping default, ADR-0017)"

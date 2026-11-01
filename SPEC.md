@@ -7,7 +7,7 @@
 | ID | Requirement | Verify |
 |---|---|---|
 | SYS-1 | 8 bodypacks → 1 receiver rack, 1U, 8 balanced analog outputs (R9) | Inspection |
-| SYS-2 | Mic-in to XLR-out latency: ≤ 3.0 ms target, ≤ 5.0 ms hard (R3). Design (§2, bsim (a) + datasheets): **time diversity off by default (ADR-0017): 2.65 ms** (2.27 ms with the PCM5102A FLT=1 strap on hw/rx). TD is a per-pack setting for hostile venues: 4.58 ms with FLT=1 (4.96 with FLT=0; d = 2, 81 B packets). Options: `docs/analysis/td-latency.md` (#26) | bsim timestamps + logic analyzer |
+| SYS-2 | Mic-in to XLR-out latency: ≤ 3.0 ms target, ≤ 5.0 ms hard (R3). Design (§2, bsim (a) + datasheets): **time diversity off by default (ADR-0017): 2.67 ms** (2.28 ms with the PCM5102A FLT=1 strap on hw/rx). TD is a per-pack setting for hostile venues: 4.60 ms with FLT=1 (4.98 with FLT=0; d = 2, 81 B packets). Options: `docs/analysis/td-latency.md` (#26) | bsim timestamps + logic analyzer |
 | SYS-3 | Under the Q3 interference setup for 1 h: residual frame loss ≤ 0.1 %, ≤ 2 consecutive lost frames, ≤ 1 audible dropout event (R1) | bsim scenario (c), then Phase 5/6 |
 | SYS-4 | Audio: 48 kHz, 20 Hz–20 kHz ±0.5 dB, ViSQOL ≥ 4.0 vs 24-bit input on the Phase 1 corpus (R5) | ViSQOL |
 | SYS-5 | 2.4 GHz ISM only. Region from `host/channel_plan.yaml` `region` (ADR-0015). **UK (default):** Ofcom IR2030/7/1, ETSI EN 300 328 V2.2.2 non-adaptive non-FHSS, declared max **9 dBm EIRP** (below 10 dBm, so the Tx-gap/MU/adaptivity clauses 4.3.2.4–4.3.2.6 do not apply), PSD ≤ 10 dBm/MHz, 99 % OBW inside 2400–2483.5 MHz (4.3.2.7), OOB ≤ −10/−20 dBm/MHz (4.3.2.8 Figure 3). The highest carrier is 2482: its OBW top edge is ≤ 2483.28 MHz and its OOB margin ≥ 6 dB (ADR-0016). **US:** FCC 15.247 DTS, ≤ 20 dBm EIRP, highest carrier 2480 (15.205 restricted band above 2483.5) | `audit.py` Audit 3/5 + ADR-0015/0016; 2482 OBW and OOB measured on a pack in Phase 5 |
@@ -16,13 +16,13 @@
 
 ## 2. Latency budget (per stage; sum = SYS-2)
 
-Corrected by #26 (`python3 audit.py`, `docs/analysis/td-latency.md`). The radio part (encode + IPC through output slot) is *measured* in bsim (a): 864 µs, 1176 µs at TD length. Filters are datasheet values at 48 kHz, *measured* in Phase 5.
+Corrected by #26 and #98 (`python3 audit.py`, `docs/analysis/td-latency.md`). The radio part (pack audio frame clock through output slot) is *measured* in bsim (a), from the app core's frame clock: 884 µs, 1196 µs at TD length (#98). Filters are datasheet values at 48 kHz, *measured* in Phase 5.
 
 | Stage | µs (TD off) | µs (TD on) | Note |
 |---|---|---|---|
 | ADC decimation filter | 160 | 160 | PCM1840 low-latency filter, 7.7/fs (SBAS989 Table 18), MD0=1 (ADR-0012). Linear phase would be 356 |
 | Frame accumulation | 1000 | 1000 | 48 samples |
-| Encode + IPC app→net core | 100 | 100 | Twister timing test |
+| Frame clock → TXEN (encode + IPC, latch) | 120 | 120 | frame lead `OP_PACK_FRAME_LEAD_US` 100 (the encode + IPC deadline, ADR-0020) + payload latch `OP_PACK_LATCH_LEAD_US` 20 before TXEN (#98), *measured* bsim (a) |
 | TX ramp-up, copy A | 41 | 41 | RADIO fast ramp-up (40 on silicon, 41 in bsim) |
 | Copy A on air | 212 | 368 | 53 B / 92 B on air (AIR-2 + 42 B / 81 B payload) at 2 Mbps |
 | Retune gap | 100 | 100 | parameter `T_GAP`, includes copy B ramp-up, *measured* |
@@ -31,7 +31,7 @@ Corrected by #26 (`python3 audit.py`, `docs/analysis/td-latency.md`). The radio 
 | DAC DMA block (8 samples) | 167 | 167 | parameter `DAC_BLOCK` |
 | DAC interpolation filter | 458 | 458 | PCM5102A normal FIR, 22/fs (SLAS859C Table 4). FLT=1 low-latency IIR: 73 (3.5/fs, Table 7) |
 | Time diversity | 0 | 2000 | frame n is played after packet n+2 (AIR-3, RX-4) |
-| **Total** | **2650** | **4962** | was 2720 / 4720 in this table and 2.6 / 4.6 ms in SYS-2 |
+| **Total** | **2670** | **4982** | FLT=1: 2285 / 4597. #26: 2650 / 4962 counted 100 µs here but the latch waited 435 µs more for TXEN (#98); before #26: 2720 / 4720 |
 
 ## 3. Air interface
 
@@ -71,7 +71,7 @@ Corrected by #26 (`python3 audit.py`, `docs/analysis/td-latency.md`). The radio 
 | RX-2 | Acquisition: open RX on channel A until a CRC-valid packet with the configured address; lock ≤ 2 s from pack power-on | bsim (a), (e) |
 | RX-3 | Tracking: RX windows on A then B per AIR-4, window ±50 µs, re-acquire after 100 consecutive misses | bsim (b) |
 | RX-4 | Merge: first CRC-valid copy wins; output at fixed deadline; with time diversity, frame n is recovered from packet n+2 if both copies of n failed | bsim (b), (c) |
-| RX-5 | Antenna selection: per-channel RSSI history, switch when the other antenna's last-valid RSSI exceeds current by 6 dB | bsim with two path losses |
+| RX-5 | Antenna selection: per-channel RSSI history, switch when the other antenna's last-valid RSSI exceeds current by 6 dB; and (ADR-0021) at once on a missed window when the other antenna's last window on that channel was valid and ≤ 12 dB weaker, then hold it 1000 windows against the RSSI rule; probe every 1000 frames | bsim with two path losses |
 | RX-6 | PLC: repeat last frame with 1 ms linear fade; mute after 10 ms of loss | ViSQOL on loss traces |
 | RX-7 | Clock recovery: HFCLKAUDIO tuned by a PI loop on jitter-buffer fill; after lock, output rate error ≤ 1 sample/h, no buffer slips over 1 h at ±40 ppm | bsim (d) |
 | RX-8 | Output: PCM5102 DAC → balanced driver → XLR male; max +18 dBu, nominal −20 dBFS = −2 dBu, Zout ≤ 100 Ω; digital trim −40…0 dB from host | ngspice, inspection |
@@ -83,7 +83,7 @@ Corrected by #26 (`python3 audit.py`, `docs/analysis/td-latency.md`). The radio 
 | ID | Requirement |
 |---|---|
 | RK-1 | 1U, external 12 V DC brick, rear: 8 XLR male, 2 BNC (antenna A/B) with switchable 12 V bias-T for active antennas, RJ45, USB-C (host service) (R9, R10) |
-| RK-2 | RF: per antenna input, LNA (NF ≤ 2 dB, input P1dB ≥ −10 dBm, IIP3 ≥ 0 dBm) → 1:8 splitter → 8 modules; coax loss budget 6 dB. Antennas (ADR-0016): 2× L-com HG2409P-NF 8 dBi patch, each on 15.2 m of 400-series coax + BNC jumper (4.2 dB). Install rule `docs/human/antenna-install.md`: front of stage, aimed upstage, ≥ 6 m above the stage floor; Wi-Fi ≥ 4.5 m behind/beside, ≥ 12 m in front (R1 rests on it). **R10 verification note:** the 2 BNC stay; the link-on-a-body check (Phase 5/6) uses these antennas mounted per the rule, and Phase 5 also measures their real rear lobes (datasheet plot: −9 dB) |
+| RK-2 | RF: per antenna input, LNA (NF ≤ 2 dB, input P1dB ≥ −10 dBm, IIP3 ≥ 0 dBm) → 1:8 splitter → 8 modules; coax loss budget 6 dB. Antennas (ADR-0016): 2× L-com HG2409P-NF 8 dBi patch, each on 15.2 m of 400-series coax + BNC jumper (4.2 dB). Install rule (ADR-0021, supersedes ADR-0016's front-of-stage rule) `docs/human/antenna-install.md`: one antenna per wing, 1 m offstage of the acting area, ¼ of the stage depth back from the front edge, 4.0 m up (3.7–4.5, never below 3.5), aimed at the far upstage corner, tilted 10° down; no Wi-Fi transmitter in either wing or on stage, backstage Wi-Fi ≥ 6 m from both antennas, crew phones in the wings in airplane mode (R1 rests on it). RX-5 per-carrier diversity across the two wings is part of the R1 budget (bsim `run.py --geometry`). Under this rule the receiver modules are BT40E (no nRF21540), with no pad (ADR-0021). System NF ≤ 21.1 dB is enough at stage ranges, and every stage stays ≥ 6 dB under P1dB (Audit 7) **R10 verification note:** the 2 BNC stay; the link-on-a-body check (Phase 5/6) uses these antennas mounted per the rule, and Phase 5 also measures their real rear lobes (datasheet plot: −9 dB) |
 | RK-3 | Host: Raspberry Pi CM4 on a carrier with Ethernet; 8 module UARTs via the carrier or a USB-UART hub; boots to service ≤ 60 s |
 | RK-4 | Front: per channel, lock LED and audio peak LED; no display |
 
@@ -107,6 +107,7 @@ Corrected by #26 (`python3 audit.py`, `docs/analysis/td-latency.md`). The radio 
 | FW-4 | Codec in `fw/codec/`, pure C, no Zephyr dependency, bit-exact to `sim/codec/` reference (Twister test compares against golden vectors) |
 | FW-5 | All timing constants (`T_GAP`, `DAC_BLOCK`, RX window) are Kconfig; no magic numbers |
 | FW-6 | MCUboot on both roles; serial DFU on the pack, UART DFU on modules |
+| FW-7 | Pack frame lead (ADR-0020, ADR-0022): the audio frame clock (I2S RXPTRUPD) stays `OP_PACK_FRAME_LEAD_US` before the net core's payload latch. A PI loop on HFCLKAUDIO holds it, fed by the net core's latch margin every 100 frames. 0 skipped or repeated frames over 1 h at frame clock offsets of +0.371 ppm (HFCLKAUDIO FREQ 39846) and ±40 ppm; lead within ±3 µs after 60 s (`tests/bsim/sched/lead.sh`, `fw/tests/pack_lead`) |
 
 ## 9. Test gates (from `PLAN.md`, restated as pass/fail)
 

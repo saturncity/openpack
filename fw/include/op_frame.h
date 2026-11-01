@@ -25,9 +25,13 @@ extern int op_pack_id, op_ch_a_mhz, op_ch_b_mhz;
 #endif
 
 /* FW-2: one frame per IPC message, app core -> net core. Pack only, net -> app, once at start: the
- * latch sync (OP_SYNC_LEN bytes, u16 LE us to the net core's next payload latch, #87).
+ * latch sync (OP_SYNC_LEN bytes, u16 LE us to the net core's next payload latch, #87). Then every
+ * CONFIG_OP_PACK_LEAD_REPORT_FRAMES frames the lead report (OP_LEAD_LEN bytes: i16 LE latch margin
+ * of the earliest frame in the window, i16 LE of the latest; latch - arrival, us; #97). The length
+ * tells them apart.
  */
 #define OP_SYNC_LEN 2
+#define OP_LEAD_LEN 4
 int op_ipc_init(void (*rx)(const uint8_t *frame, size_t len));
 int op_ipc_send(const uint8_t *frame, size_t len);
 

@@ -55,14 +55,17 @@ def build():
     with Group("power"):  # one schematic sheet
         # ---- PK-6 power: 18650 -> 3 A chip fuse -> P-FET reverse-polarity -> slide switch -> VSYS ----
         # Fuse guards against an unprotected cell; 23 mOhm cold (5 mV at 0.2 A), unlike a ~1 Ohm PTC (ADR-0012).
-        bt = part("Battery_18650", "BT1", "18650 holder", "openpack:BH-18650-B1BA002", "BH-18650-B1BA002")
+        # cell in a printed cradle (mech/pack.py), MYOUNG MY-18650-04-J (+ plate) / -05-J (- spring) wired to 2 pads
+        bt = part("Battery_18650", "BT1", "18650 cradle contacts", "openpack:Cell_Wire_Pads", "MY-18650-04-J/05-J")
         bt["+"] += vbat; bt["-"] += gnd
         q1 = part("PMOS", "Q1", "DMG2305UX", "Package_TO_SOT_SMD:SOT-23", "DMG2305UX-7")
         f1 = part("Fuse", "F1", "3A fast", "Fuse:Fuse_1206_3216Metric", "SF-1206F300-2"); f1[1] += vbat; f1[2] += vbatf
         q1["D"] += vbatf; q1["S"] += vrp          # body diode conducts only with the cell the right way round
         qg = Net("Q1_G"); q1["G"] += qg; R("R1", "100k", qg, gnd)
         sw = part("SW_SPDT", "SW1", "recessed slide", "Button_Switch_SMD:SW_SPDT_CK_JS102011SAQN", "JS102011SAQN")
-        sw["COM"] += vrp; sw["A"] += vsys; sw["B"] += NC
+        # VSYS on throw B (pin 3): battery arrives from the left and VSYS leaves to the right, so the 1 mm L1 tracks
+        # never cross at the switch (#34 review M1). Slide towards pin 3 = on.
+        sw["COM"] += vrp; sw["B"] += vsys; sw["A"] += NC
         C("C1", "10u", vsys, gnd)
 
         # 5 V boost (preamp + mic bias + analog LDO): TPS61023, Vout = 0.595 V * (1 + 732k/100k) = 4.95 V
@@ -179,6 +182,11 @@ def build():
         u1["16"] += swdio; u1["15"] += swclk; u1["14"] += nrst
         for ref, pad, name in (("TP1", "B1", "UART_TX"), ("TP2", "C1", "UART_RX")):
             n = Net(name); pins[pad] = n
+            tp = part("TestPoint", ref, name, "TestPoint:TestPoint_Pad_D1.0mm", "TP-pad"); tp[1] += n
+        # bring-up / Phase 5 bench test pads: rails, ground and the I2S bus (logic analyser)
+        for ref, name, n in (("TP3", "VSYS", vsys), ("TP4", "+5V", v5), ("TP5", "+3V3", v3), ("TP6", "+3V3A", v3a),
+                             ("TP7", "+5V_BIAS", v5b), ("TP8", "GND", gnd), ("TP9", "I2S_BCLK", i2s_sck),
+                             ("TP10", "I2S_FSYNC", i2s_lrck), ("TP11", "I2S_SDOUT", i2s_sdin)):
             tp = part("TestPoint", ref, name, "TestPoint:TestPoint_Pad_D1.0mm", "TP-pad"); tp[1] += n
         for pad, net in pins.items():
             u1[pad] += net
