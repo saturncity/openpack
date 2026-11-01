@@ -491,3 +491,174 @@ if __name__ == "__main__":
     print(f"  x8 sub-boards ${8 * usd:.0f} (GBP {8 * gbp:.0f}) before main board, splitters, CM4, panel;"
           f" no per-receiver cap in SPEC/AUDIT, so none asserted (QUESTIONS.md Q14 guessed ~$150-250 for the rack)")
     assert all(r["uk_distributor"] for r in rx), "every rx BOM line needs a UK-reachable distributor"
+
+
+# ---- Audit 6: rack RF chain and backplane BOM (#33, ADR-0018). hw/rack/backplane.py, hw/rack/wilkinson.py ----
+# Antenna connector -> coax -> BNC/ESD/bias-T/DC block -> QPL9057 LNA -> QPQ1907 BAW filter -> 1:8 Wilkinson ->
+# u.FL cable -> sub-board (DC block, PE4259, u.FL jumper) -> module (nRF21540 LNA or bypass) -> nRF5340.
+# QPL9057 (Qorvo datasheet Rev. F, 2020-09-20): EVB typical at 1800 / 2600 MHz, VDD 5 V, 50 mA: gain 21.0 / 22.7 dB,
+#   NF 0.50 / 0.47 dB (input trace de-embedded), OP1dB 17.1 / 17.1 dBm, OIP3 33.8 / 37.8 dBm; spec table (3.5 GHz)
+#   min/max: gain >= 21.5, NF <= 0.90, OP1dB >= 14.5, OIP3 >= 29. Abs max RF input +27 dBm CW. ESD HBM class 1B.
+#   The worst-case (min/max) figures are used for every assert below; the typicals are printed.
+# QPQ1907 (Qorvo BAW, DigiKey UK page): passband 2402.5-2481.5 MHz, IL 1.3 dB typ / 2.2 dB max. Its stop-band
+#   rejection at 2390 / 2500 MHz was not read (datasheet unreachable): no rejection is credited here.
+# Levels: Audit 4 geometry (Wi-Fi 20 dBm at 2 m in front of the patch, worst) and the ADR-0016 install rule
+#   (packs >= 4 m from an antenna); the near pack is counted at the US 20 dBm EIRP (same hardware, worst region).
+LNA = {"part": "Qorvo QPL9057", "f_mhz": (1800, 2600), "gain": (21.0, 22.7), "nf": (0.50, 0.47),
+       "op1db": (17.1, 17.1), "oip3": (33.8, 37.8), "nf_max": 0.90, "op1db_min": 14.5, "oip3_min": 29.0,
+       "pin_abs_max_dbm": 27.0}
+F_RX_MHZ = 2441.75
+FRONT_END_DB = 0.4       # est.: BNC 0.1, ESD103 (0.09 pF) + ESD101 (0.1 pF) 0.05, bias-T choke shunt 0.05, DC block
+                         #   0.05, 10 mm of 50 ohm FR-4 microstrip 0.15 (hw/rack/wilkinson.py line loss)
+FILTER_DB = 2.2          # QPQ1907 max insertion loss (DigiKey UK page)
+WILK_LAYOUT_DB = 0.5     # est.: T-junctions, bends, resistor pads (not in the hw/rack/wilkinson.py model; #34)
+UFL_CABLE_DB = 1.0       # est.: 200 mm 1.13 mm coax ~3.5 dB/m + two mated u.FL pairs at 0.07 dB
+SUBBOARD_DB = 0.9        # ADR-0014: PE4259 0.5 dB, u.FL jumper ~0.3 dB, three 10 pF blocks ~0.1 dB
+MODULE_LNA = (13.0, 2.7) # nRF21540 RX gain / NF (Nordic PS), as Audit 3
+MODULE_BYPASS_DB = 1.0   # est.: nRF21540 in bypass
+NRF5340_NF = 7.0         # est., as Audit 3 (reproduces the -93 dBm sensitivity with SNR 10 dB)
+NRF5340_PMAX_DBM = 0.0   # nRF5340 PS: maximum received signal strength at < 0.1 % PER
+COAX_ADR16_DB, COAX_BUDGET_DB = 4.2, 6.0   # ADR-0016 (PR #93): CA3N050 15.2 m + BNC jumper; RK-2 budget
+AUDIT4_SYS_NF_DB = cascade_nf_db([(-6, 6), (20, 2), (-10.5, 10.5), (0, 7)])   # what Audit 4's link and R1 used
+LTE_UE_DBM = 23.0        # 3GPP power class 3 UE (LTE Band 40, 2300-2400 MHz, used in the UK)
+
+
+def lna_at(f_mhz=F_RX_MHZ):
+    """QPL9057 EVB typicals interpolated to f, plus the input-referred worst-case IP1dB / IIP3 used for asserts."""
+    f0, f1 = LNA["f_mhz"]
+    lin = lambda k: LNA[k][0] + (LNA[k][1] - LNA[k][0]) * (f_mhz - f0) / (f1 - f0)
+    g = lin("gain")
+    return {"gain": g, "nf": lin("nf"), "iip3": lin("oip3") - g, "ip1db": lin("op1db") - g + 1,
+            "iip3_min": LNA["oip3_min"] - g, "ip1db_min": LNA["op1db_min"] - g + 1, "nf_max": LNA["nf_max"]}
+
+
+def wilkinson_db():
+    """Modelled 1:8 worst-case insertion loss over the band (hw/rack/wilkinson.py) + the layout allowance."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("wk", pathlib.Path(__file__).resolve().parent / "hw/rack/wilkinson.py")
+    wk = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(wk)
+    return wk.summary(5)["il_db"] + WILK_LAYOUT_DB
+
+
+def rack_chain(coax_db, module_lna=False, worst=True, splitter_db=None):
+    """[(gain dB, NF dB), ...] from the antenna connector inwards. Passive stages: NF = loss."""
+    splitter_db = wilkinson_db() if splitter_db is None else splitter_db
+    lna = lna_at()
+    lossy = lambda d: (-d, d)
+    ch = [lossy(coax_db), lossy(FRONT_END_DB), (lna["gain"], lna["nf_max"] if worst else lna["nf"]),
+          lossy(FILTER_DB), lossy(splitter_db), lossy(UFL_CABLE_DB), lossy(SUBBOARD_DB)]
+    ch += [MODULE_LNA] if module_lna else [lossy(MODULE_BYPASS_DB)]
+    return ch + [(0.0, NRF5340_NF)]
+
+
+def fspl_db(d_m, f_mhz=F_RX_MHZ):
+    return 20 * math.log10(d_m) + 20 * math.log10(f_mhz) - 27.55
+
+
+def dbm_sum(*p):
+    return 10 * math.log10(sum(10 ** (x / 10) for x in p))
+
+
+def r1_noise_cost_db(nf_sys):
+    """ADR-0016 holds R1 with MARGIN_DB of C/I margin. Receiver noise adds to the interference: dB of that margin
+    used up at the Q3 geometry (UK pack 10 m, body 10 dB, fade 10 dB, patch antenna)."""
+    c = REGIONS["UK"]["eirp_dbm"] - 10.0 - 10.0 + PATCH_DBI - (40.2 + 20)
+    i_lim = c - CI_REQ_DB - MARGIN_DB
+    n = -174 + 10 * math.log10(2e6) + nf_sys
+    return 10 * math.log10(1 + 10 ** ((n - i_lim) / 10)), c, n
+
+
+def bom_rack():
+    """Rack main-board BOM (GBP, one rack) from hw/rack/out/bom.csv, written by hw/rack/backplane.py."""
+    import csv
+    with open(pathlib.Path(__file__).resolve().parent / "hw/rack/out/bom.csv") as f:
+        return list(csv.DictReader(f))
+
+
+if __name__ == "__main__":
+    print("\n== Audit 6: rack RF chain (#33, ADR-0018): antenna -> coax -> LNA -> filter -> 1:8 Wilkinson -> sub-board ==")
+    lna = lna_at()
+    print(f"  {LNA['part']} at {F_RX_MHZ:.0f} MHz: gain {lna['gain']:.1f} dB, NF {lna['nf']:.2f} dB typ"
+          f" ({lna['nf_max']:.2f} max), IIP3 {lna['iip3']:+.1f} dBm typ ({lna['iip3_min']:+.1f} worst),"
+          f" input P1dB {lna['ip1db']:+.1f} dBm typ ({lna['ip1db_min']:+.1f} worst)")
+    assert lna["nf_max"] <= 2.0, "RK-2: LNA NF <= 2 dB"
+    assert lna["ip1db_min"] >= -10 and lna["iip3_min"] >= 0, "RK-2: input P1dB >= -10 dBm, IIP3 >= 0 dBm"
+    wil = wilkinson_db()
+    print(f"  1:8 Wilkinson (hw/rack/wilkinson.py, JLC04161H-7628 er 4.4 tan(d) 0.02) {wil - WILK_LAYOUT_DB:.2f} dB"
+          f" + {WILK_LAYOUT_DB} dB layout allowance; Audit 3/4 assumed 10.5 dB")
+    for name, coax in (("ADR-0016 coax 4.2 dB", COAX_ADR16_DB), ("RK-2 budget 6.0 dB", COAX_BUDGET_DB)):
+        nfs = [cascade_nf_db(rack_chain(coax, m, w, wil)) for m in (False, True) for w in (True, False)]
+        print(f"  system NF at the antenna connector, {name}: {nfs[0]:.2f} dB worst / {nfs[1]:.2f} typ (module LNA"
+              f" bypassed), {nfs[2]:.2f} / {nfs[3]:.2f} (module LNA on)")
+    # 16 dB of loss after the rack LNA (filter, splitter, cable, sub-board) is more than its 22 dB gain can bury:
+    # with the module's nRF21540 LNA bypassed the 6 dB-coax case misses Audit 4's NF. So the module LNA stays ON
+    # (BT40NE kept, ADR-0018) and firmware bypasses it only for a near pack (RSSI-driven, below).
+    nf_byp = cascade_nf_db(rack_chain(COAX_BUDGET_DB, False, True, wil))
+    nf_sys = cascade_nf_db(rack_chain(COAX_BUDGET_DB, True, True, wil))
+    assert nf_byp > AUDIT4_SYS_NF_DB >= nf_sys, "module LNA needed at the 6 dB coax budget, and sufficient"
+    assert cascade_nf_db(rack_chain(COAX_ADR16_DB, False, True, wil)) <= AUDIT4_SYS_NF_DB, "ADR-0016 coax: bypass ok"
+    sens = -174 + 10 * math.log10(2e6) + nf_sys + 10
+    rng = link_range_m(REGIONS["UK"]["eirp_dbm"], 3.0, nf_sys, g_rx=PATCH_DBI)
+    print(f"  worst case (6 dB coax, max NF, module LNA on): NF {nf_sys:.2f} dB vs {AUDIT4_SYS_NF_DB:.2f} assumed"
+          f" by Audit 4 (bypassed: {nf_byp:.2f}) -> sensitivity {sens:.1f} dBm at the antenna, indoor n=3 range"
+          f" {rng:.0f} m (UK 9 dBm)")
+    cost, c, n = r1_noise_cost_db(nf_sys)
+    print(f"  R1 margin: pack {c:.1f} dBm (10 m, body 10 dB, fade 10 dB), noise {n:.1f} dBm/2 MHz -> receiver noise"
+          f" costs {cost:.2f} dB of the {MARGIN_DB:.0f} dB R1 C/I margin")
+    assert cost <= 0.5, "receiver noise must not eat the ADR-0016 R1 margin"
+
+    # ---- compression and intermodulation: levels at the LNA input, no coax (short cable = worst) ----
+    near_rule = REGIONS["US"]["eirp_dbm"] - fspl_db(4.0) + PATCH_DBI - CONN_DB
+    near_off = REGIONS["US"]["eirp_dbm"] - fspl_db(1.0) + PATCH_DBI - CONN_DB
+    wifi_in = 20.0 - fspl_db(2.0) + PATCH_DBI - CONN_DB           # Audit 4 worst: Wi-Fi in front at 2 m
+    # install rule (ADR-0016): Wi-Fi >= 4.4 m behind/beside (rear lobe -9 dB) and >= 12.2 m in front
+    wifi_rule = max(20.0 - fspl_db(4.4) + PATCH_DBI - 9.0, 20.0 - fspl_db(12.2) + PATCH_DBI) - CONN_DB
+    lte_in = LTE_UE_DBM - fspl_db(2.0, 2390) + PATCH_DBI - CONN_DB   # B40 phone in front at 2 m, no patch roll-off
+    lte_rule = LTE_UE_DBM - fspl_db(4.4, 2390) + PATCH_DBI - 9.0 - CONN_DB
+    tot_rule = dbm_sum(near_rule, wifi_rule, wifi_rule, wifi_rule, lte_rule)   # all on air at once
+    tot_off = dbm_sum(near_off, wifi_in, wifi_in, wifi_in, lte_in)
+    print(f"  LNA input, install rule: near pack {near_rule:.1f} dBm (4 m), Wi-Fi {wifi_rule:.1f} x3, B40 UE"
+          f" {lte_rule:.1f} -> total {tot_rule:.1f} dBm, {lna['ip1db_min'] - tot_rule:.1f} dB below the worst input"
+          f" P1dB {lna['ip1db_min']:.1f}")
+    print(f"  LNA input, everything off-rule (pack 1 m, Wi-Fi 1/6/11 and a B40 phone 2 m in front): near pack"
+          f" {near_off:.1f}, Wi-Fi {wifi_in:.1f} x3, B40 {lte_in:.1f} -> total {tot_off:.1f} dBm,"
+          f" {lna['ip1db_min'] - tot_off:.1f} dB below the worst P1dB ({lna['ip1db'] - tot_off:.1f} dB below typical)")
+    assert lna["ip1db_min"] - tot_rule >= 10, "install rule: >= 10 dB below the worst-case input P1dB"
+    assert tot_off < lna["ip1db_min"], "off-rule pile-up: still below the worst-case input P1dB"
+    assert tot_off < LNA["pin_abs_max_dbm"] - 30
+    im3 = 3 * wifi_in - 2 * lna["iip3_min"] - 10 * math.log10(60 / 2)   # Audit 4 form, real IIP3
+    im3_np = 2 * near_rule + wifi_in - 2 * lna["iip3_min"] - 10 * math.log10(20 / 2)   # near pack x Wi-Fi
+    wanted = REGIONS["UK"]["eirp_dbm"] - (40.2 + 20) + PATCH_DBI
+    print(f"  IM3 at worst IIP3 {lna['iip3_min']:+.1f} dBm: Wi-Fi x Wi-Fi {im3:.0f} dBm/2 MHz, near pack x Wi-Fi"
+          f" {im3_np:.0f} dBm/2 MHz, vs pack at 10 m {wanted:.0f} dBm (Audit 4 asked for 20 dB below)")
+    assert max(im3, im3_np) < wanted - 20
+    g_mod = sum(g for g, _ in rack_chain(0.0, False, True, wil)[1:-1]) + FRONT_END_DB   # LNA input -> nRF5340
+    g_on = g_mod + MODULE_BYPASS_DB + MODULE_LNA[0]
+    print(f"  LNA input -> nRF5340: {g_on:+.1f} dB module LNA on / {g_mod:+.1f} bypassed. Near pack at the radio"
+          f" (US 20 dBm, short coax): install rule {near_rule + g_on:.1f} dBm with the module LNA on; off-rule (1 m)"
+          f" {near_off + g_mod:.1f} dBm bypassed, vs {NRF5340_PMAX_DBM:.0f} dBm max. Firmware: bypass the nRF21540"
+          f" LNA when the radio sees > {NRF5340_PMAX_DBM - 6:.0f} dBm (RSSI), back on below {NRF5340_PMAX_DBM - 12:.0f}")
+    assert near_rule + g_on <= NRF5340_PMAX_DBM, "install rule: the module LNA can stay on"
+    assert near_off + g_mod <= NRF5340_PMAX_DBM - 6, "off-rule: bypassed, the radio keeps 6 dB below its maximum"
+    print(f"  LTE B40 UE (2390 MHz) at the radio with no filter credit, module LNA on: {lte_rule + g_on:.1f} dBm"
+          f" (install rule, 4.4 m behind) / {lte_in + g_on:.1f} dBm (2 m in front). The QPQ1907 rejection at"
+          f" 2390 MHz and the nRF5340 blocking figure decide it: not read, ADR-0018 open item")
+
+    print("\n== Audit 6: rack BOM (one rack, GBP ex VAT; hw/rack/out/bom.csv + 8 sub-boards + ADR-0016 antennas) ==")
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("rack_prices", pathlib.Path(__file__).resolve().parent / "hw/rack/prices.py")
+    rp = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rp)
+    rk = bom_rack()
+    for r in rk:
+        label = r["value"] if r["mpn"] in ("-", "PCB_TRACE") or r["mpn"].startswith(("R_", "C_")) else r["mpn"]
+        print(f"  {label[:46]:<46} x{r['qty']:<3} GBP {float(r['ext_gbp']):7.2f}  {r['uk_distributor']}")
+    main_gbp = sum(float(r["ext_gbp"]) for r in rk)
+    rx_gbp = sum(float(r["ext_gbp"]) for r in bom_rx())
+    est = sum(float(r["ext_gbp"]) for r in rk if r["source"].startswith("est."))
+    tot = main_gbp + 8 * rx_gbp + rp.ANTENNA_KIT_GBP
+    print(f"  main board + host + cables GBP {main_gbp:.2f} (est. lines GBP {est:.2f}); 8 sub-boards GBP {8 * rx_gbp:.2f}"
+          f" (converted, hw/rx/out/bom.csv); antennas + coax GBP {rp.ANTENNA_KIT_GBP:.2f} (ADR-0016)"
+          f" -> rack GBP {tot:.2f} ex VAT. No cap in SPEC/AUDIT, so none asserted")
+    assert all(r["uk_distributor"] and r["source"] for r in rk), "every rack BOM line needs a UK distributor and source"

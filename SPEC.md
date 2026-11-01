@@ -80,8 +80,9 @@
 |---|---|
 | RK-1 | 1U, external 12 V DC brick, rear: 8 XLR male, 2 BNC (antenna A/B) with switchable 12 V bias-T for active antennas, RJ45, USB-C (host service) (R9, R10) |
 | RK-2 | RF: per antenna input, LNA (NF ≤ 2 dB) → 1:8 splitter → 8 modules; coax loss budget 6 dB; antenna placement guidance in `docs/human/antennas.md` (stage wings, directional) |
-| RK-3 | Host: Raspberry Pi CM4 on a carrier with Ethernet; 8 module UARTs via the carrier or a USB-UART hub; boots to service ≤ 60 s |
+| RK-3 | Host: Raspberry Pi CM4 **without wireless** on the official CM4 IO Board (ADR-0018), ribbon to the main board; 8 module UARTs = CM4 UART0/3/4/5 + 2× SC16IS752 on SPI1, whose GPIOs drive every slot's nRESET/BOOT; Ethernet via a rear etherCON feedthrough; USB-C service = the CM4IO rpiboot port; boots to service ≤ 60 s |
 | RK-4 | Front: per channel, lock LED and audio peak LED; no display |
+| RK-5 | Main board (ADR-0018, `hw/rack/backplane.py`, Audit 6): per antenna, RF ESD + host-switched bias-T eFuse (off by default, 0.49 A) → DC block → QPL9057 LNA → QPQ1907 BAW → 3-stage microstrip Wilkinson (≤ 11 dB IL, ≥ 20 dB output isolation, ≥ 15 dB RL across 2400–2483.5 MHz on JLC04161H-7628). System NF at the antenna connector ≤ the 9.3 dB Audit 4 assumed, at the 6 dB coax budget, with the module nRF21540 LNA on (firmware bypasses it above −6 dBm at the radio). Per-slot eFuses on +12 V and +5 V; XLR pins 2/3 TVS ≥ 58 V standoff |
 
 ## 7. Host API (`host/`)
 
