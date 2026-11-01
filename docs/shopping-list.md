@@ -6,49 +6,56 @@ One purchase, bought once, after all design is done (ADR-0019). **Everything exc
 
 | Basket | Ex VAT (GBP) | VAT 20 % | Inc VAT |
 |---|---:|---:|---:|
-| Digi-Key UK | 449.90 | 89.98 | 539.88 |
+| Digi-Key UK | 600.40 | 120.08 | 720.48 |
 | Mouser UK | 6.55 | 1.31 | 7.86 |
-| Farnell UK | 89.78 | 17.96 | 107.74 |
-| RS UK | 96.00 | 19.20 | 115.20 |
+| Farnell UK | 31.78 | 6.36 | 38.14 |
+| RS UK | 89.37 | 17.87 | 107.24 |
 | LCSC | 41.22 | 8.24 | 49.46 |
 | JLCPCB | 96.00 | 19.20 | 115.20 |
 | ITM Components | 348.92 | 69.78 | 418.70 |
 | Simply Sound & Lighting | 311.66 | 62.33 | 373.99 |
-| The Pi Hut | 34.50 | 6.90 | 41.40 |
+| The Pi Hut | 16.00 | 3.20 | 19.20 |
 | Thomann | 26.50 | 5.30 | 31.80 |
-| tinySA reseller (UK) | 122.00 | 24.40 | 146.40 |
-| **Grand total (required, no rack)** | **1,623.03** | **324.61** | **1,947.64** |
+| Lab401 (EU) | 155.00 | 31.00 | 186.00 |
+| The Debug Store | 51.00 | 10.20 | 61.20 |
+| Knives and Tools UK | 24.92 | 4.98 | 29.90 |
+| 123-3D UK | 15.67 | 3.13 | 18.80 |
+| **Grand total (required, no rack)** | **1,814.99** | **363.00** | **2,177.99** |
 | Optional items (not in total) | 385.00 | 77.00 | 462.00 |
 | RACK (pending #34) | TBD | TBD | TBD |
 
-Of the required total, GBP 795.24 ex VAT is **quoted** and the rest, GBP 827.79, is **estimated** (including shipping). Estimated prices are marked `estimated` in every table; none can be called a quote.
+Of the required total, GBP 1,439.70 ex VAT is **quoted** and the rest, GBP 375.29, is **estimated** (including shipping). Estimated prices are marked `estimated` in every table; none can be called a quote.
 
 ## How prices were read
 
 - All prices GBP **ex VAT**; VAT 20 % shown separately and added in the inc-VAT column. Digi-Key UK, Mouser UK, Farnell UK, RS UK show ex- and inc-VAT side by side; ITM Components and the owner-given Simply Sound prices are ex VAT.
 - **quoted** = a price read from a source page, with its URL and read date. For pack lines these are the readings in `hw/bom/pack_uk.csv` (2026-10-31 for Digi-Key UK, 2026-11-01 for LCSC) and `hw/rx/out/bom.csv`; for the antennas, coax, mounts and stands they are the figures given by the owner or ADR-0016 on 2026-11-01. Prices are at the quantity of 4 packs (or the 100-tier when the order quantity reaches 100), not re-read today.
-- **estimated** = no page read (or the repo marks it ESTIMATE). On 2026-11-01 the web fetches of Farnell, Mouser and The Pi Hut timed out or returned nothing, so every bench kit price, all fab, mechanical and shipping lines are estimates. Re-check each basket before paying.
+- **estimated** = no page read (or the repo marks it ESTIMATE). Bench kit lines were re-read on 2026-11-01 from Digi-Key UK, The Debug Store, Lab401, Knives and Tools UK and 123-3D UK (some from search snippets, marked in the notes). Farnell, Mouser and RS pages timed out or were refused. Still estimated: JLCPCB fab, stencil and shipping (quote page is dynamic), protected cells, fasteners, wire, most delivery lines. Re-check each basket before paying.
 - **LCSC and JLCPCB** orders to the UK: 20 % import VAT is collected at checkout, no duty under GBP 135 per consignment, courier shipping is a separate line. Split orders so each stays under GBP 135 ex VAT (the PCB order and parts order already do).
 - Quantities: pack lines are 4 packs; receiver lines are **4 receivers** (one per pack; the rack has 8 slots, 4 stay empty). Spares: passives max(10, 25 %), ICs under GBP 1 get 1 spare, dearer parts none. Lines used by both pack and receiver are merged into one line.
 - Parts the repo consigns elsewhere: BT40NE (pack) at Digi-Key UK GBP 16.34 at qty 4, BT40E (receiver) at Digi-Key UK GBP 9.78 (10 week lead on both; order first). F1 fuse SF-1206F300-2 at Digi-Key UK. No FEM is bought (U8 is not fitted).
 
 ## Gaps and decisions
 
-- **Not UK-sourceable / unconfirmed:** the tinySA Ultra (no UK stockist confirmed; Amazon UK is the usual route), the NanoVNA (optional). Everything else is on a UK distributor's list but unverified in stock.
+- **Not UK-sourceable / unconfirmed:** the tinySA Ultra+ comes from Lab401 (France), no UK stockist was found; protected 18650 cells (no UK seller page could be read), the NanoVNA (optional). Everything else is on a UK distributor's list but unverified in stock.
 - **Missing from the BOMs, added here:** Tag-Connect TC2030-IDC-NL (programming), protected 18650 cells, an external 18650 charger, solder paste, the u.FL pigtails and attenuators for conducted-power measurement.
 - **Open:** CA3N030 (9.14 m) is ordered for both wings by the owner; the design-log rack placeholder suggests the far wing may need CA3N075 (22.86 m). If so, swap one line when #34 lands. A reflow hot plate/oven and a multimeter are assumed owned.
 - **Not listed (assumed owned):** Bambu A1 mini (ADR-0008 says the owner has it), PC, soldering iron.
 
 ## Basket: Digi-Key UK
 
-**Basket total: GBP 449.90 ex VAT, VAT 89.98, GBP 539.88 inc VAT.**
+**Basket total: GBP 600.40 ex VAT, VAT 120.08, GBP 720.48 inc VAT.**
 
 | Item | Part number | Qty | Unit (GBP ex VAT) | Line total | Price | Link | Reason / what it unblocks |
 |---|---|---:|---:|---:|---|---|---|
-| TI PCM1840 evaluation module | PCM1840EVM | 1 | 55.0000 | 55.00 | estimated | [link](https://www.digikey.co.uk/en/products/result?keywords=PCM1840EVM) | #38 ADC delay and noise measured before the pack is populated (ADR-0019 mitigation). Estimate; TI also sells direct but ships from US. If DK UK has no stock use Mouser UK 595-PCM1840EVM. |
-| Tag-Connect TC2030-IDC-NL cable (2x5 1.27 mm to TC2030 no-legs) | TC2030-IDC-NL | 1 | 32.0000 | 32.00 | estimated | [link](https://www.digikey.co.uk/en/products/result?keywords=TC2030-IDC-NL) | Programs and debugs the pack and receiver boards (both carry TC2030 pads only, no header). Not in either BOM, so a missing item. Estimate; plugs into the DK's debug-out header. Alternative: TC2030-CTX-NL (no ribbon). |
-| Nordic Power Profiler Kit II | nRF-PPK2 | 1 | 75.0000 | 75.00 | estimated | [link](https://www.digikey.co.uk/en/products/result?keywords=nRF-PPK2) | #38 FEM and pack current; sources/measures 0.8-5 V for the battery-life check. Estimate; page not readable 2026-11-01. Also Mouser UK / Farnell UK. |
-| nRF5340-DK | nRF5340-DK | 2 | 40.0000 | 80.00 | estimated | [link](https://www.digikey.co.uk/en/products/result?keywords=nRF5340-DK) | Phase 5 DK bring-up (#38): ADC/DAC delay, T_GAP, lock, end-to-end latency. Second DK is the peer. Estimate from memory of ~GBP 40-48 ex VAT; page not readable 2026-11-01 (fetch timed out). Also stocked by Mouser UK and Farnell UK. |
+| PCM5102A I2S DAC breakout board (Adafruit 6250) | Adafruit 6250 | 1 | 3.7000 | 3.70 | quoted 2026-11-01 | [link](https://www.digikey.co.uk/en/products/result?keywords=1528-6250-ND) | #38 I2S backend and the DAC output chain on the bench; FLT/XSMT strap tests (ADR-0017). Digi-Key UK 2026-11-01: GBP 3.70 ex VAT (4.44 inc), 494 in stock. The Pi Hut search found no PCM5102 board. |
+| u.FL to SMA female pigtail 150 mm (GCT) | CABLE 348 RF-150-A-1 | 2 | 2.1900 | 4.38 | quoted 2026-11-01 | [link](https://www.digikey.co.uk/en/products/result?keywords=U.FL%20to%20SMA%20cable%20assembly) | Connects the pack/receiver u.FL (and the DK RF connector) to the SMA attenuator and analyser. Digi-Key UK 2026-11-01: GBP 2.19 ex VAT, 1,228 in stock; U.FL (MHF1) to SMA, 5.9 in. Check the SMA end is a jack (listing does not say) before ordering. |
+| TI PCM1840 evaluation module | PCM1840EVM | 1 | 148.8400 | 148.84 | quoted 2026-11-01 | [link](https://www.digikey.co.uk/en/products/result?keywords=PCM1840EVM) | #38 ADC delay and noise measured before the pack is populated (ADR-0019 mitigation). Digi-Key UK 2026-11-01: GBP 148.84 ex VAT (178.61 inc), 2 in stock, 12 week factory lead time, purchase limit applies. Was estimated at 55: nearly 3x higher. Order early; Mouser UK page timed out. |
+| 8-channel 24 MHz USB logic analyser (Cypress FX2, sigrok fx2lafw), SparkFun | SparkFun 18627 | 1 | 20.4400 | 20.44 | quoted 2026-11-01 | [link](https://www.digikey.co.uk/en/products/result?keywords=logic%20analyzer%20USB%208%20channel) | #38 end-to-end latency via GPIO toggles; I2S and frame-clock phasing (ADR-0020/0022). 24 MHz sampling is 40 ns against ms-scale latency. Digi-Key UK 2026-11-01: GBP 20.44 ex VAT, 968 in stock; the SparkFun unit is documented for sigrok PulseView. The Pi Hut lists the same unit at GBP 26.30 inc VAT (21.92 ex) but SOLD OUT 2026-11-01. |
+| SMA attenuator 10 dB 2 W DC-6 GHz (Mini-Circuits) | VAT-10W2+ | 1 | 28.1800 | 28.18 | quoted 2026-11-01 | [link](https://www.digikey.co.uk/en/products/result?keywords=attenuator%20SMA%2010dB) | Stacks to 30 dB for the nRF21540 +20 dBm case if the FEM is fitted. Digi-Key UK 2026-11-01: GBP 28.18 ex VAT, 455 in stock. Cheaper DC-4 GHz Cinch part exists (GBP 17.95) but would not cover harmonics. |
+| SMA attenuator 20 dB 2 W DC-6 GHz (Mini-Circuits) | VAT-20W2+ | 1 | 33.6300 | 33.63 | quoted 2026-11-01 | [link](https://www.digikey.co.uk/en/products/result?keywords=attenuator%20SMA%2020dB%202W) | Protects the tinySA input while measuring conducted TX power at the pack u.FL (limit +7 dBm, ADR-0016/design-log). Digi-Key UK 2026-11-01: GBP 33.63 ex VAT, 137 in stock. |
+| Nordic Power Profiler Kit II | nRF-PPK2 | 1 | 80.1700 | 80.17 | quoted 2026-11-01 | [link](https://www.digikey.co.uk/en/products/result?keywords=nRF-PPK2) | #38 FEM and pack current; sources/measures 0.8-5 V for the battery-life check. Digi-Key UK 2026-11-01: GBP 80.17 ex VAT (96.20 inc), 1,798 in stock. |
+| nRF5340-DK | nRF5340-DK | 2 | 36.5800 | 73.16 | quoted 2026-11-01 | [link](https://www.digikey.co.uk/en/products/result?keywords=nRF5340-DK) | Phase 5 DK bring-up (#38): ADC/DAC delay, T_GAP, lock, end-to-end latency. Second DK is the peer. Digi-Key UK result page 2026-11-01: GBP 36.58 qty 1 (DK UK shows ex VAT; the page does not label it). Stock level not shown on the result page. Also stocked by Mouser UK and Farnell UK (their pages timed out). |
 | Packs x4 part | BAV199,215 | 5 | 0.1600 | 0.80 | estimated | [link](https://www.digikey.co.uk/en/products/detail/nexperia-usa-inc/BAV199-215/763223) | Needed 4 (pack x1; refs D6), +1 spare q4 from DK UK listing (VAT basis not stated); qty100 ESTIMATE |
 | Packs x4 part | BT40NE | 4 | 16.3400 | 65.36 | quoted 2026-10-31 | [link](https://www.digikey.co.uk/en/products/detail/fanstel-corp/BT40NE/22107427) | Needed 4 (pack x1) DK UK ex-VAT breaks; Fanstel direct (fanstel.com) also sells; no Farnell/RS/Mouser UK listing found |
 | Packs x4 part | C_100n_0402 | 42 | 0.0120 | 0.50 | estimated | [link](https://www.digikey.co.uk/en/products/result?keywords=C_100n_0402) | Needed 32 (pack x8; refs C13 C20 C22 C25 C27 C29 C30 C32), +10 spare ESTIMATE; e.g. CL05B104KO5NNNC |
@@ -91,15 +98,11 @@ Of the required total, GBP 795.24 ex VAT is **quoted** and the rest, GBP 827.79,
 
 ## Basket: Farnell UK
 
-**Basket total: GBP 89.78 ex VAT, VAT 17.96, GBP 107.74 inc VAT.**
+**Basket total: GBP 31.78 ex VAT, VAT 6.36, GBP 38.14 inc VAT.**
 
 | Item | Part number | Qty | Unit (GBP ex VAT) | Line total | Price | Link | Reason / what it unblocks |
 |---|---|---:|---:|---:|---|---|---|
-| SMA attenuator 10 dB 2 W DC-6 GHz | SMA-ATT-10DB | 1 | 10.0000 | 10.00 | estimated | [link](https://uk.farnell.com/w/search?st=SMA+attenuator+10dB) | Stacks to 30 dB for the nRF21540 +20 dBm case if the FEM is fitted. Estimate. |
-| SMA attenuator 20 dB 2 W DC-6 GHz | SMA-ATT-20DB | 1 | 12.0000 | 12.00 | estimated | [link](https://uk.farnell.com/w/search?st=SMA+attenuator+20dB) | Protects the tinySA input (max +6 dBm) while measuring conducted TX power at the pack u.FL (limit +7 dBm, ADR-0016/design-log). Estimate; class part, choose any 50 ohm 2 W SMA 20 dB with DC-6 GHz rating. |
 | SMA male-male adapter | SMA-MM | 2 | 3.0000 | 6.00 | estimated | [link](https://uk.farnell.com/w/search?st=SMA+male+male+adapter) | Joins attenuators to the tinySA. Estimate. |
-| u.FL to SMA female pigtail 150 mm | U.FL-SMA-F-150 | 2 | 4.0000 | 8.00 | estimated | [link](https://uk.farnell.com/w/search?st=u.FL+SMA+pigtail) | Connects the pack/receiver u.FL (and the DK RF connector) to the SMA attenuator and analyser. Estimate. |
-| Lead-free low-temperature solder paste, 10 g syringe | Chip Quik SMDLTLFP10T5 | 2 | 14.0000 | 28.00 | estimated | [link](https://uk.farnell.com/w/search?st=SMDLTLFP10T5) | Bare PCBs plus stencil, assembly waits for bench results (ADR-0019); hot-plate reflow. 8 boards of about 70-95 parts each. Estimate. Reflow hot plate/oven is not listed: nothing in the repo says whether the owner has one. If not, add a hot plate (about GBP 40) before assembly. |
 | Receivers x4 part | ALU_BP_47u_63V | 18 | 0.1900 | 3.42 | estimated | [link](https://uk.farnell.com/w/search?st=ALU_BP_47u_63V) | Needed 8 (rx x2; refs C47 C48), +10 spare rx price from hw/rx/out/bom.csv (est. (47 uF 63 V bipolar aluminium, 10 mm, e.g. Nichicon UEP series)) |
 | Receivers x4 part | TQ2SA-12V | 4 | 3.1600 | 12.64 | estimated | [link](https://uk.farnell.com/w/search?st=TQ2SA-12V) | Needed 4 (rx x1) rx price from hw/rx/out/bom.csv (est. (Panasonic TQ2 DPDT 12 V signal relay, q100; Farnell UK 1124056)); x1.3 on the qty-100 figure for a 4-board order |
 | Receivers x4 part | U.FL-R-SMT-1(10) | 13 | 0.4400 | 5.72 | estimated | [link](https://uk.farnell.com/w/search?st=U.FL-R-SMT-1(10)) | Needed 12 (rx x1; rx x1; rx x1; refs J3), +1 spare rx price from hw/rx/out/bom.csv (est. (Hirose U.FL receptacle, q100)); x1.3 on the qty-100 figure for a 4-board order |
@@ -107,17 +110,16 @@ Of the required total, GBP 795.24 ex VAT is **quoted** and the rest, GBP 827.79,
 
 ## Basket: RS UK
 
-**Basket total: GBP 96.00 ex VAT, VAT 19.20, GBP 115.20 inc VAT.**
+**Basket total: GBP 89.37 ex VAT, VAT 17.87, GBP 107.24 inc VAT.**
 
 | Item | Part number | Qty | Unit (GBP ex VAT) | Line total | Price | Link | Reason / what it unblocks |
 |---|---|---:|---:|---:|---|---|---|
 | Rigol DS1054Z 50 MHz 4-channel oscilloscope | DS1054Z | 1 | 310.0000 | 310.00 | estimated, OPTIONAL | [link](https://uk.rs-online.com/web/c/?searchTerm=DS1054Z) | Optional: preamp step into 10 nF, start-up transient, boost ripple, P48/hot-plug transients. The PPK2 and logic analyser do not see analogue waveforms. Optional. Estimate; skip if the owner already has a scope. |
-| External 18650 charger, 2-bay, with display | 18650 charger 2-bay | 1 | 18.0000 | 18.00 | estimated | [link](https://uk.rs-online.com/web/c/?searchTerm=18650+charger) | The pack has no charging circuit (PK-6), so cells charge externally. Estimate. |
-| Protected 18650 Li-ion cell, button top, ~3000 mAh | 18650 protected | 6 | 7.0000 | 42.00 | estimated | [link](https://uk.rs-online.com/web/c/?searchTerm=protected+18650) | PK-6: one removable protected 18650 per pack, no on-board charging. 4 + 2 spares for bench and failure. Estimate. Must be PROTECTED (the pack has no cell protection) and button-top to suit the printed cradle contacts. Li-ion cells are restricted for post; if RS UK will not ship, buy from Farnell UK. |
+| Protected 18650 Li-ion cell, button top, ~3000 mAh | 18650 protected | 6 | 7.0000 | 42.00 | estimated | [link](https://uk.rs-online.com/web/c/?searchTerm=protected+18650) | PK-6: one removable protected 18650 per pack, no on-board charging. 4 + 2 spares for bench and failure. Estimate, NOT sourced. Must be PROTECTED and button-top. RS UK shipping of cells unconfirmed. Tried 2026-11-01: Nkon (403), 18650.UK (TLS error), Fogstar (only a sold-out unprotected 2500 mAh cell, GBP 6.49, on page 1 of 3), Digi-Key UK (no cells in the search). Next: Fogstar or 18650.UK by hand, Nkon by courier. |
 | Silicone hookup wire 24 AWG, 5 m red/black | 24AWG silicone | 1 | 5.0000 | 5.00 | estimated | [link](https://uk.rs-online.com/web/c/?searchTerm=24AWG+silicone+wire) | Cell leads (2 x 60 mm per pack) and the 31 mm whip wire. Estimate. |
 | M2 brass heat-set inserts, pack of 50 | M2 heat-set insert | 1 | 7.0000 | 7.00 | estimated | [link](https://uk.rs-online.com/web/c/?searchTerm=M2+heat+set+insert) | Clip screws into 7 mm bosses (ADR-0008), two per pack plus spares. Estimate. |
 | M2 x 6 pan-head thread-forming screws, pack of 100 | M2x6 PT pan | 1 | 6.0000 | 6.00 | estimated | [link](https://uk.rs-online.com/web/c/?searchTerm=M2x6+thread+forming) | 2 per pack board retention into printed bosses (ADR-0008, pack_uk.csv). Estimate; replaces the US Fastener Superstore source in pack_uk.csv. |
-| PETG filament 1.75 mm, 1 kg spool (enclosures + belt clips) | PETG 1 kg | 1 | 18.0000 | 18.00 | estimated | [link](https://uk.rs-online.com/web/c/?searchTerm=PETG+1.75mm) | ADR-0008: printed PETG body, clip and cradle on the Bambu A1 mini (assumed owned, not listed). About 30 g per pack; 1 kg covers reprints. Estimate. Any PETG that prints on textured PEI; Bambu A1 mini is not on the list because nothing in the repo says the owner lacks it. |
+| Lead-free low-temperature solder paste, 35 g syringe (Chip Quik SMD LTLF) | RS 146-6200 | 1 | 29.3700 | 29.37 | quoted 2026-11-01 | [link](https://uk.rs-online.com/web/p/solder-pastes/1466200) | Bare PCBs plus stencil, assembly waits for bench results (ADR-0019); hot-plate reflow. 8 boards of about 70-95 parts each; 35 g replaces 2 x 10 g. SEARCH-RESULT SNIPPET 2026-11-01: GBP 29.37 ex VAT (35.24 inc); product page returned 403. Stock not seen. Farnell UK SMDLTLFP10T5 (10 g) found no price. Reflow hot plate/oven is not listed: if the owner has none, add a hot plate (about GBP 40). |
 | Delivery | - | 1 | 0.0000 | 0.00 | estimated | [link](https://uk.rs-online.com) | Free over GBP 50 ex VAT (pack-parts-uk-draft.md); basket is above it. Estimate. |
 
 ## Basket: LCSC
@@ -159,7 +161,7 @@ Of the required total, GBP 795.24 ex VAT is **quoted** and the rest, GBP 827.79,
 | Item | Part number | Qty | Unit (GBP ex VAT) | Line total | Price | Link | Reason / what it unblocks |
 |---|---|---:|---:|---:|---|---|---|
 | Pack stencil, top side only, frameless | pack stencil | 1 | 8.0000 | 8.00 | estimated | [link](https://cart.jlcpcb.com/quote) | All 70 pack parts are on Top (cpl_jlc.csv), one stencil. Estimate. |
-| Pack PCB, 4-layer, 73.5 x 35.1 mm, 1.6 mm, ENIG, 10 pcs | pack.kicad_pcb | 1 | 28.0000 | 28.00 | estimated | [link](https://cart.jlcpcb.com/quote) | 4 packs plus 6 spares so a re-spin or a bad solder job costs boards, not a new order (ADR-0019). Size/layers from hw/pack/out/fab/pack-job.gbrjob. Estimate: JLCPCB 4-layer, 10 pcs, small area, plus ENIG surcharge. Gerbers: hw/pack/out/fab/gerber. |
+| Pack PCB, 4-layer, 73.5 x 35.1 mm, 1.6 mm, ENIG, 10 pcs | pack.kicad_pcb | 1 | 28.0000 | 28.00 | estimated | [link](https://cart.jlcpcb.com/quote) | 4 packs plus 6 spares so a re-spin or a bad solder job costs boards, not a new order (ADR-0019). Size/layers from hw/pack/out/fab/pack-job.gbrjob. Estimate; JLCPCB quote page is dynamic and was not readable 2026-11-01. Only published datum: 4-layer board charge USD 70.6/m2 (Mar 2024 news), which makes the board area itself under GBP 1; the rest is engineering fee, ENIG and shipping. Gerbers: hw/pack/out/fab/gerber. No JLC assembly is assumed (ADR-0019: hand/hot-plate reflow). |
 | Receiver stencil, top side only, frameless | rx stencil | 1 | 8.0000 | 8.00 | estimated | [link](https://cart.jlcpcb.com/quote) | All 95 receiver parts are on Top, one stencil. Estimate. |
 | Receiver sub-board PCB, 4-layer, 48.1 x 90.1 mm, 1.6 mm, ENIG, 10 pcs | rx.kicad_pcb | 1 | 36.0000 | 36.00 | estimated | [link](https://cart.jlcpcb.com/quote) | 4 receivers plus 6 spares (50 ohm RF traces, 4-layer). Size/layers from hw/rx/out/fab/rx-job.gbrjob. Estimate; 5 pcs would do for 4 boards but 10 costs little more. Gerbers: hw/rx/out/fab/gerber. |
 | Shipping to the UK (DHL) + import VAT at checkout | - | 1 | 16.0000 | 16.00 | estimated | [link](https://cart.jlcpcb.com/quote) | JLCPCB collects UK VAT (20 %) at checkout; no duty under GBP 135. Estimate. |
@@ -187,13 +189,11 @@ Of the required total, GBP 795.24 ex VAT is **quoted** and the rest, GBP 827.79,
 
 ## Basket: The Pi Hut
 
-**Basket total: GBP 34.50 ex VAT, VAT 6.90, GBP 41.40 inc VAT.**
+**Basket total: GBP 16.00 ex VAT, VAT 3.20, GBP 19.20 inc VAT.**
 
 | Item | Part number | Qty | Unit (GBP ex VAT) | Line total | Price | Link | Reason / what it unblocks |
 |---|---|---:|---:|---:|---|---|---|
 | Dupont jumper wires F-F 20 cm (40-pack) | Dupont F-F 40 | 2 | 2.5000 | 5.00 | estimated | [link](https://thepihut.com) | Logic analyser probes to DK pins and board test pads (TP1-TP13 on the receiver). Estimate. |
-| 8-channel 24 MHz USB logic analyser (Cypress FX2 clone, sigrok fx2lafw) | FX2-LA-8CH | 1 | 9.5000 | 9.50 | estimated | [link](https://thepihut.com) | #38 end-to-end latency via GPIO toggles; I2S and frame-clock phasing (ADR-0020/0022). Cheapest adequate: 24 MHz sampling is 40 ns against ms-scale latency. Estimate; Pi Hut search fetch 2026-11-01 found no analyser. Same part is sold by Rapid Electronics and Pimoroni; the choice is a commodity clone. |
-| PCM5102A I2S DAC breakout board | PCM5102A module | 1 | 9.0000 | 9.00 | estimated | [link](https://thepihut.com) | #38 I2S backend and the DAC output chain on the bench; FLT/XSMT strap tests (ADR-0017). Estimate; stock not verified (Pi Hut search fetch 2026-11-01 returned nothing useful). Any PCM5102A (not PCM5100) breakout works; fall back to a HiFiBerry DAC Zero (same chip). |
 | Micro-USB cable 1 m (DK, PPK2, programming) | USB-A to micro-B 1 m | 3 | 2.5000 | 7.50 | estimated | [link](https://thepihut.com) | Powers/connects 2 DKs and the PPK2. Estimate. |
 | Delivery | - | 1 | 3.5000 | 3.50 | estimated | [link](https://thepihut.com) | Standard. Estimate. |
 
@@ -207,15 +207,49 @@ Of the required total, GBP 795.24 ex VAT is **quoted** and the rest, GBP 827.79,
 | Cable 3.5 mm TRS to 3.5 mm TRS 1.5 m | TRS-TRS 1.5 m | 1 | 3.5000 | 3.50 | estimated | [link](https://www.thomann.de/gb/) | DAC output to the PC sound card / headphone amp during #38. Estimate. |
 | Delivery to the UK | - | 1 | 8.0000 | 8.00 | estimated | [link](https://www.thomann.de/gb/) | Thomann ships from Germany; UK prices include VAT at checkout. Estimate. |
 
-## Basket: tinySA reseller (UK)
+## Basket: Lab401 (EU)
 
-**Basket total: GBP 122.00 ex VAT, VAT 24.40, GBP 146.40 inc VAT.**
+**Basket total: GBP 155.00 ex VAT, VAT 31.00, GBP 186.00 inc VAT.**
 
 | Item | Part number | Qty | Unit (GBP ex VAT) | Line total | Price | Link | Reason / what it unblocks |
 |---|---|---:|---:|---:|---|---|---|
-| NanoVNA-H4 vector network analyser | NanoVNA-H4 | 1 | 75.0000 | 75.00 | estimated, OPTIONAL | [link](https://nanovna.com) | Optional: RF-11 (QPQ1907 loss at band edges), antenna/coax S11, receiver RF chain S2P checks. Optional. Estimate. UK stockist not confirmed. |
-| tinySA Ultra spectrum analyser 100 kHz-5.3 GHz | tinySA Ultra | 1 | 118.0000 | 118.00 | estimated | [link](https://tinysa.org/wiki/pmwiki.php?n=Main.Buy) | #92 / design-log AN-risk 2: conducted TX power and the 99 % OBW and 2483.5-2487.6 MHz emissions on a pack at 2482 MHz (limit 2.51 MHz OBW). Cheapest adequate; indicative, not a lab EN 300 328 report. Estimate (~GBP 140 inc VAT). NO UK stockist confirmed: tinysa.org lists resellers, Amazon UK is the usual route. If it cannot be bought in the UK, use a Siglent SSA1015X-class unit from RS UK instead (about GBP 700 ex VAT). |
-| Delivery | - | 1 | 4.0000 | 4.00 | estimated | [link](https://tinysa.org) | Estimate. Estimate. |
+| tinySA Ultra+ spectrum analyser 100 kHz-5.4 GHz (CE version) | tinySA Ultra+ | 1 | 140.0000 | 140.00 | quoted 2026-11-01 | [link](https://lab401.com/products/tinysa-ultra) | #92 / design-log AN-risk 2: conducted TX power and the 99 % OBW and 2483.5-2487.6 MHz emissions on a pack at 2482 MHz (limit 2.51 MHz OBW). Cheapest adequate; indicative, not a lab EN 300 328 report. DECISION: no UK stockist found (tinysa.org buy page 404, Technofix not found, eBay 403, Amazon UK not found). Lab401 (France, EU) sells the Ultra+ (the current CE-compliant model; the original Ultra is retired at eleshop.eu), EUR 163.00 on 2026-11-01, in stock for EU, UK is in its country list but UK shipping was not confirmed. GBP 140 = EUR 163 x 0.86 (assumed rate; VAT basis of the EUR price not stated). Delivery line is an estimate. Input max is +10 dBm so the 20 dB attenuator is belt and braces. Fallback: Siglent SSA1015X-class from RS UK (about GBP 700). |
+| Delivery to the UK (courier) + import VAT at the door | - | 1 | 15.0000 | 15.00 | estimated | [link](https://lab401.com) | EU seller; post-Brexit UK import VAT (20 %) is collected by the courier, unit is under GBP 135. Estimate; shipping is calculated at checkout. |
+
+## Basket: The Debug Store
+
+**Basket total: GBP 51.00 ex VAT, VAT 10.20, GBP 61.20 inc VAT.**
+
+| Item | Part number | Qty | Unit (GBP ex VAT) | Line total | Price | Link | Reason / what it unblocks |
+|---|---|---:|---:|---:|---|---|---|
+| Tag-Connect TC2030-IDC-NL cable (2x5 1.27 mm to TC2030 no-legs) | TC2030-IDC-NL | 1 | 46.0000 | 46.00 | quoted 2026-11-01 | [link](https://thedebugstore.com/products/tag-connect-tc2030-idc-nl-cable-uk) | Programs and debugs the pack and receiver boards (both carry TC2030 pads only, no header). Not in either BOM, so a missing item. UK Tag-Connect stockist. GBP 46.00 ex VAT from the search-result snippet (55.20 inc); the product page read 2026-11-01 showed 42.00 ex VAT and is internally inconsistent, so the higher figure is used. SOLD OUT on the page, dispatch within 10 working days if ordered. Digi-Key UK does not list the -NL cable (only TC2030-IDC with legs, GBP 33.31, 339 in stock, which needs mounting holes the boards lack). |
+| Delivery | - | 1 | 5.0000 | 5.00 | estimated | [link](https://thedebugstore.com) | UK seller. Estimate. |
+
+## Basket: Knives and Tools UK
+
+**Basket total: GBP 24.92 ex VAT, VAT 4.98, GBP 29.90 inc VAT.**
+
+| Item | Part number | Qty | Unit (GBP ex VAT) | Line total | Price | Link | Reason / what it unblocks |
+|---|---|---:|---:|---:|---|---|---|
+| External 18650 charger, 2-bay, USB (Nitecore UI2) | Nitecore UI2 | 1 | 16.6300 | 16.63 | quoted 2026-11-01 | [link](https://knivesandtools.co.uk/en/pt/-nitecore-ui2-battery-charger.htm) | The pack has no charging circuit (PK-6), so cells charge externally. GBP 19.95 inc VAT on the page 2026-11-01 (16.63 ex; a search snippet showed 15.45), in stock, ships from the Netherlands. LED, no display. |
+| Delivery (fixed rate, from the Netherlands) | - | 1 | 8.2900 | 8.29 | quoted 2026-11-01 | [link](https://knivesandtools.co.uk/en/pt/-nitecore-ui2-battery-charger.htm) | Fixed GBP 9.95 inc VAT for all orders. Page read 2026-11-01. |
+
+## Basket: 123-3D UK
+
+**Basket total: GBP 15.67 ex VAT, VAT 3.13, GBP 18.80 inc VAT.**
+
+| Item | Part number | Qty | Unit (GBP ex VAT) | Line total | Price | Link | Reason / what it unblocks |
+|---|---|---:|---:|---:|---|---|---|
+| PETG filament 1.75 mm, 1 kg spool (eSun solid grey; enclosures + belt clips) | eSun PETG 1 kg | 1 | 11.6700 | 11.67 | quoted 2026-11-01 | [link](https://www.123-3d.co.uk/eSun-PETG-filament-1-75mm-Solid-Grey-1-kg-i9656.html) | ADR-0008: printed PETG body, clip and cradle on the Bambu A1 mini (assumed owned, not listed). About 30 g per pack; 1 kg covers reprints. SEARCH-RESULT SNIPPET, 2026-11-01: GBP 14.00 inc, 11.67 ex VAT. The product page returned HTTP 429, stock not confirmed; other 123-3D snippets disagreed (13.33 to 19.96 ex). |
+| Delivery | - | 1 | 4.0000 | 4.00 | estimated | [link](https://www.123-3d.co.uk) | Standard. Estimate. |
+
+## Basket: tinySA reseller (UK)
+
+**Basket total: GBP 0.00 ex VAT, VAT 0.00, GBP 0.00 inc VAT.**
+
+| Item | Part number | Qty | Unit (GBP ex VAT) | Line total | Price | Link | Reason / what it unblocks |
+|---|---|---:|---:|---:|---|---|---|
+| NanoVNA-H4 vector network analyser | NanoVNA-H4 | 1 | 75.0000 | 75.00 | estimated, OPTIONAL | [link](https://nanovna.com) | Optional: RF-11 (QPQ1907 loss at band edges), antenna/coax S11, receiver RF chain S2P checks. Optional. Estimate. UK stockist not confirmed; not searched. |
 
 ## RACK (pending #34): placeholder
 
@@ -231,14 +265,14 @@ Do not buy these yet. Pull in the numbers from the rack layout PR (#34) when it 
 
 | Category | Ex VAT | VAT 20 % | Inc VAT |
 |---|---:|---:|---:|
-| Bench kit | 445.50 | 89.10 | 534.60 |
+| Bench kit | 615.50 | 123.10 | 738.60 |
 | Packs x4 | 137.11 | 27.42 | 164.53 |
 | Packs x4 + Receivers x4 | 17.84 | 3.57 | 21.41 |
 | Receivers x4 | 104.50 | 20.90 | 125.40 |
-| Shipping | 93.50 | 18.70 | 112.20 |
-| Mechanical and cells | 124.00 | 24.80 | 148.80 |
+| Shipping | 121.79 | 24.36 | 146.15 |
+| Mechanical and cells | 117.67 | 23.53 | 141.20 |
 | PCB fabrication | 80.00 | 16.00 | 96.00 |
 | Antennas, coax, stands | 620.58 | 124.12 | 744.70 |
-| **Total** | **1,623.03** | **324.61** | **1,947.64** |
+| **Total** | **1,814.99** | **363.00** | **2,177.99** |
 
 Shipping is its own category. Optional items are excluded. The RACK section is excluded (placeholder).
