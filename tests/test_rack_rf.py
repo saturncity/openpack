@@ -119,7 +119,9 @@ def test_nf_at_every_carrier():
     need = audit.nf_need_wings_db()
     assert 20.0 <= need <= 22.0                                   # ADR-0021: 21.1 dB
     nfs = {f: audit.cascade_nf_db(audit.rack_chain(audit.COAX_BUDGET_DB, f, "BT40E", wil)) for f in audit.CARRIERS}
-    assert max(nfs.values()) <= need and 11.0 <= max(nfs.values()) <= 12.0   # ADR-0021: 11.5 dB
+    # ADR-0021 planned 11.5 dB; #34's Wilkinson as routed (hw/rack/out/rf_routed.json, ~13.7 dB worst port with the
+    # distribution lines) puts it near 12.9
+    assert max(nfs.values()) <= need and 11.0 <= max(nfs.values()) <= 13.5
 
 
 def test_gain_plan_bt40e():

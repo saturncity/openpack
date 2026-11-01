@@ -351,7 +351,7 @@ def placement(P):
     en = P.on("U1_EN", "R")
     pl[en[0]] = (x + 5.4, 36.0, 90); pl[en[1]] = (x + 6.8, 36.0, 90)
     pl["C5"] = (x + 3.0, 42.6, 0); pl["C6"] = (x - 4.0, 44.0, 0)    # +12V_BUS bulk at the eFuse output, by the spine
-    pl["NT1"] = (x - 10.6, 19.6, 90)          # its CHASSIS pad reaches the B.Cu chassis strip (y < 21)
+    pl["NT1"] = (x - 10.6, 19.6, 270)          # its CHASSIS pad reaches the B.Cu chassis strip (y < 21)
     pl[P.one("HOST_GPIO6", "R", "10k")] = (x + 8.6, 36.0, 90)
     pl[P.one("+12V_PROT", "TP")] = (x + 9.6, 26.6, 0)
     pl[P.one("HOST_GPIO6", "TP")] = (x + 9.6, 40.0, 0)
@@ -969,10 +969,10 @@ def hand_signals(b, cu, fps):
       leave that column in a fan, and the last one routed found its pin walled in)."""
     import pcbnew as P_
 
-    def track(net, pts, w=0.2):
+    def track(net, pts, w=0.2, conn=True):
         for a, c in zip(pts, pts[1:]):
             pk.add_track(b, NETS[net], P_.F_Cu, a, c, w)
-            cu.seg(0, a, c, w, net)
+            cu.seg(0, a, c, w, net, conn=conn)
     for ref, fp in fps.items():
         if not str(fp.GetFPID().GetLibItemName()).startswith("Texas_DSG0008A"):
             continue
@@ -984,7 +984,7 @@ def hand_signals(b, cu, fps):
         track(net, [a, (t[0], a[1]), t])
         HAND.update({(ref, "7"), (rr, num)})
     a, t = pc(fps, "U2", "3"), pc(fps, "C11", "1")
-    track("+12V_BUS", [a, (a[0] - 0.66, a[1]), t], 0.3)
+    track("+12V_BUS", [a, (a[0] - 0.66, a[1]), t], 0.3, conn=False)      # not an island: C11.1 routes to the tree
     VIN_HIDDEN.add(("U2", "3"))
     for ref in ("U4", "U5"):
         for p_ in fps[ref].Pads():
@@ -1253,6 +1253,34 @@ def segments(path=BOARD):
     return pk.segments(path)
 
 
+def prune_dangling(rep):
+    """delete the vias and tracks DRC reports as dangling (hand escape vias the router bypassed, a stray stub), then
+    let the caller refill and re-run DRC"""
+    import pcbnew as P_
+    key = lambda q: (round(P_.ToMM(q.x), 3), round(P_.ToMM(q.y), 3))
+    vias = {(round(i["pos"]["x"], 3), round(i["pos"]["y"], 3)) for v in rep.get("violations", [])
+            if v["type"] == "via_dangling" for i in v["items"] if i["description"].startswith("Via")}
+    stubs = {(round(i["pos"]["x"], 3), round(i["pos"]["y"], 3)) for v in rep.get("violations", [])
+             if v["type"] == "track_dangling" for i in v["items"] if i["description"].startswith("Track")}
+    if not vias and not stubs:
+        return 0
+    b = P_.LoadBoard(str(BOARD))
+    n = 0
+    for t in list(b.GetTracks()):
+        if t.Type() == P_.PCB_VIA_T:
+            hit = key(t.GetPosition()) in vias
+        else:   # only short stray stubs; a hand escape stub stays (it joins its pad)
+            hit = P_.ToMM(t.GetLength()) < 1.0 and key(t.GetPosition()) in stubs and \
+                not any(t.GetNetCode() == p_.GetNetCode() and (p_.HitTest(t.GetStart()) or p_.HitTest(t.GetEnd()))
+                        for fp in b.GetFootprints() for p_ in fp.Pads())
+        if hit:
+            b.Delete(t)
+            n += 1
+    P_.ZONE_FILLER(b).Fill(b.Zones())
+    P_.SaveBoard(str(BOARD), b)
+    return n
+
+
 def drc(out=None):
     out = out or (OUT / "drc.json")
     out.parent.mkdir(exist_ok=True)
@@ -1343,6 +1371,10 @@ def main(argv):
                                                        "tracks": RF_LOG}, indent=0) + "\n")
     (OUT / "mech.json").write_text(json.dumps(mech_record(fps), indent=1) + "\n")
     rep, errs, warns, unconn = drc()
+    pruned = prune_dangling(rep)
+    if pruned:
+        print(f"pruned {pruned} dangling vias / tracks")
+        rep, errs, warns, unconn = drc()
     print(pk.summarize(errs, warns, unconn))
     if "--no-out" not in argv:
         outputs = _load("hw_rack_outputs", HERE / "outputs_rack.py")
