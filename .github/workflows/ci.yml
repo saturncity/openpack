@@ -27,9 +27,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "bsim skipped until phase 2"
-  # enabled in phase 4
-  kibot:
-    if: ${{ false }}
+  # pack PCB (#34): DRC 0 errors against hw/pack/pack.kicad_dru, fab outputs regenerate identically, fit
+  pcb:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "kibot skipped until phase 4"
+      - uses: actions/checkout@v4
+      - run: |
+          sudo add-apt-repository -y ppa:kicad/kicad-10.0-releases
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends kicad python3-pytest
+      - run: kicad-cli version
+      - run: python3 -m pytest -q -rP tests/test_pack_layout.py

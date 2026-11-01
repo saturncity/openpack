@@ -2,12 +2,12 @@
   (version "D")
   (design
     (source "pack.py")
-    (date "10/31/2026 11:02 PM")
+    (date "11/01/2026 03:19 AM")
     (tool "SKiDL (3.0.0)")
     (sheet
       (number 1)
-      (name "/power1/")
-      (tstamps "/1c71258b-4a63-53c3-96a6-ba5ec56f90dd/")
+      (name "/mcu_usb1/")
+      (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/")
       (title_block
         (title)
         (company)
@@ -117,8 +117,8 @@
           (value ""))))
     (sheet
       (number 4)
-      (name "/mcu_usb1/")
-      (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/")
+      (name "/power1/")
+      (tstamps "/1c71258b-4a63-53c3-96a6-ba5ec56f90dd/")
       (title_block
         (title)
         (company)
@@ -192,16 +192,16 @@
   (components
     (comp
       (ref "BT1")
-      (value "18650 holder")
+      (value "18650 cradle contacts")
       (description "18650 cell holder, single cell")
-      (footprint "openpack:BH-18650-B1BA002")
+      (footprint "openpack:Cell_Wire_Pads")
       (fields
         (field
-          (name "MPN") "BH-18650-B1BA002")
+          (name "MPN") "MY-18650-04-J/05-J")
         (field
           (name "Description") "18650 cell holder, single cell")
         (field
-          (name "Footprint") "openpack:BH-18650-B1BA002")
+          (name "Footprint") "openpack:Cell_Wire_Pads")
         (field
           (name "Datasheet"))
         (field
@@ -1933,6 +1933,58 @@
       (component_classes)
       (tstamps "1f3756b6-8f5b-517c-83dd-542a88fb2033"))
     (comp
+      (ref "TP10")
+      (value "I2S_FSYNC")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP10")
+        (field
+          (name "SKiDL Line") "pack.py:31"))
+      (libsource
+        (lib "openpack")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/mcu_usb1/")
+        (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/"))
+      (component_classes)
+      (tstamps "3d3c876b-e0d9-50eb-b90b-c81ad2bb295b"))
+    (comp
+      (ref "TP11")
+      (value "I2S_SDOUT")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP11")
+        (field
+          (name "SKiDL Line") "pack.py:31"))
+      (libsource
+        (lib "openpack")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/mcu_usb1/")
+        (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/"))
+      (component_classes)
+      (tstamps "23e27a2b-d51b-5111-ad4a-082ad523fe5f"))
+    (comp
       (ref "TP2")
       (value "UART_RX")
       (description "Test point")
@@ -1958,6 +2010,188 @@
         (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/"))
       (component_classes)
       (tstamps "57dfea3f-c985-503d-9261-2e1557eec914"))
+    (comp
+      (ref "TP3")
+      (value "VSYS")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP3")
+        (field
+          (name "SKiDL Line") "pack.py:31"))
+      (libsource
+        (lib "openpack")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/mcu_usb1/")
+        (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/"))
+      (component_classes)
+      (tstamps "ae37ca67-1ab5-5c4a-ab58-8068b51686bb"))
+    (comp
+      (ref "TP4")
+      (value "+5V")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP4")
+        (field
+          (name "SKiDL Line") "pack.py:31"))
+      (libsource
+        (lib "openpack")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/mcu_usb1/")
+        (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/"))
+      (component_classes)
+      (tstamps "ecd103e3-26d4-585b-8140-395b81e7f2f6"))
+    (comp
+      (ref "TP5")
+      (value "+3V3")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP5")
+        (field
+          (name "SKiDL Line") "pack.py:31"))
+      (libsource
+        (lib "openpack")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/mcu_usb1/")
+        (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/"))
+      (component_classes)
+      (tstamps "2ad7ead5-2a5d-5eab-8c30-a8d7eee02421"))
+    (comp
+      (ref "TP6")
+      (value "+3V3A")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP6")
+        (field
+          (name "SKiDL Line") "pack.py:31"))
+      (libsource
+        (lib "openpack")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/mcu_usb1/")
+        (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/"))
+      (component_classes)
+      (tstamps "5cc0fef4-5b81-5793-b3e0-d767a3851026"))
+    (comp
+      (ref "TP7")
+      (value "+5V_BIAS")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP7")
+        (field
+          (name "SKiDL Line") "pack.py:31"))
+      (libsource
+        (lib "openpack")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/mcu_usb1/")
+        (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/"))
+      (component_classes)
+      (tstamps "4f9b812e-937e-5c94-9a0b-b98203f1061c"))
+    (comp
+      (ref "TP8")
+      (value "GND")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP8")
+        (field
+          (name "SKiDL Line") "pack.py:31"))
+      (libsource
+        (lib "openpack")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/mcu_usb1/")
+        (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/"))
+      (component_classes)
+      (tstamps "a7655e82-3f30-50ad-ac57-bde052dd529f"))
+    (comp
+      (ref "TP9")
+      (value "I2S_BCLK")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP9")
+        (field
+          (name "SKiDL Line") "pack.py:31"))
+      (libsource
+        (lib "openpack")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/mcu_usb1/")
+        (tstamps "/e37a8441-a1fe-5873-9813-2e05dc04425c/"))
+      (component_classes)
+      (tstamps "bd56dd72-e216-522f-9510-0c3df173e343"))
     (comp
       (ref "U1")
       (value "BT40NE")
@@ -2174,6 +2408,10 @@
         (pin "1")
         (pintype "PASSIVE"))
       (node
+        (ref "TP5")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
         (ref "U1")
         (pin "9")
         (pintype "POWER-IN"))
@@ -2219,6 +2457,10 @@
         (pintype "PASSIVE"))
       (node
         (ref "C7")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "TP6")
         (pin "1")
         (pintype "PASSIVE"))
       (node
@@ -2270,6 +2512,10 @@
         (pin "1")
         (pintype "PASSIVE"))
       (node
+        (ref "TP4")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
         (ref "U3")
         (pin "8")
         (pintype "POWER-IN"))
@@ -2299,6 +2545,10 @@
         (pintype "PASSIVE"))
       (node
         (ref "R5")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "TP7")
         (pin "1")
         (pintype "PASSIVE")))
     (net
@@ -2666,6 +2916,10 @@
         (pin "2")
         (pintype "PASSIVE"))
       (node
+        (ref "TP8")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
         (ref "U1")
         (pin "10")
         (pintype "POWER-IN"))
@@ -2738,6 +2992,10 @@
       (name "I2S_BCLK")
       (class "Default")
       (node
+        (ref "TP9")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
         (ref "U1")
         (pin "C3")
         (pintype "BIDIRECTIONAL"))
@@ -2750,6 +3008,10 @@
       (name "I2S_FSYNC")
       (class "Default")
       (node
+        (ref "TP10")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
         (ref "U1")
         (pin "C4")
         (pintype "BIDIRECTIONAL"))
@@ -2761,6 +3023,10 @@
       (code 20)
       (name "I2S_SDOUT")
       (class "Default")
+      (node
+        (ref "TP11")
+        (pin "1")
+        (pintype "PASSIVE"))
       (node
         (ref "U1")
         (pin "C5")
@@ -3211,6 +3477,10 @@
         (pintype "PASSIVE"))
       (node
         (ref "SW1")
+        (pin "3")
+        (pintype "PASSIVE"))
+      (node
+        (ref "TP3")
         (pin "1")
         (pintype "PASSIVE"))
       (node

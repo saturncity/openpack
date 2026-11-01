@@ -22,4 +22,9 @@ int op_audio_read_frame(int16_t *frame);
 /* Write one DAC block of OP_AUDIO_BLOCK_SAMPLES samples. 0 or negative errno. */
 int op_audio_write_block(const int16_t *block);
 
+/* I2S backend, pack (#97): start capture; cb runs in the I2S interrupt once per completed frame
+ * (RXPTRUPD), the audio frame clock. Steer its rate in whole HFCLKAUDIO steps (3311 ppb each). */
+int op_audio_i2s_rx_start(void (*cb)(void));
+void op_audio_i2s_aclk_steps(int32_t steps);
+
 #endif /* OP_AUDIO_H */

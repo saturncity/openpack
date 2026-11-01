@@ -1,0 +1,143 @@
+{
+ "outline_matches_mech": {
+  "ok": true,
+  "detail": "layout (-28.0, 45.4, -6.5, 28.5) mech (-28.0, 45.4, -6.5, 28.5)"
+ },
+ "board_clear": {
+  "ok": true,
+  "detail": "[[], []]"
+ },
+ "antenna_overhang_clear": {
+  "ok": true,
+  "detail": "[]"
+ },
+ "antenna_overhang_ge_9.8mm": {
+  "ok": true,
+  "detail": "10.9 mm past the board edge (Fanstel p.20: 9.8)"
+ },
+ "parts_clear": {
+  "ok": true,
+  "detail": "{}"
+ },
+ "lid_clearance": {
+  "ok": true,
+  "detail": "tallest J1 top z 16.2, lid underside 21.2"
+ },
+ "jack_in_opening": {
+  "ok": true,
+  "detail": "jack y 0.00 vs JACK_Y 0.0; axis z 11.80 vs JACK_Z 11.80; body front x 46.4 on the wall face; bushing 3.6 through a 1.6 wall (nut needs ~1.5)"
+ },
+ "usb_in_opening": {
+  "ok": true,
+  "detail": "usb y 18.00 vs USB_Y 18.0; mouth z 8.20 vs USB_Z 8.20"
+ },
+ "leds_under_lid_holes": {
+  "ok": true,
+  "detail": "{'D1': (7.199999999999999, 20.0), 'D2': (8.8, 20.0), 'D3': (15.2, 20.0), 'D4': (16.799999999999997, 20.0)}"
+ },
+ "switch_fork_on_actuator": {
+  "ok": true,
+  "detail": "SW1 at (-3.5, 19.0, 0), SW_ACT {'x0': -5.5, 'x1': -4.0, 'y0': 15.2, 'y1': 17.2, 'travel': 1.5}"
+ },
+ "switch_stalk_in_slot": {
+  "ok": true,
+  "detail": "stalk x -5.75..-2.25 in slot -6.30..-1.70"
+ },
+ "switch_fork_clear": {
+  "ok": true,
+  "detail": "[]"
+ },
+ "light_pipes_clear": {
+  "ok": true,
+  "detail": "[]"
+ },
+ "light_pipe_bore_mm": 15.4,
+ "screws_match_layout": {
+  "ok": true,
+  "detail": "mech [(-25.0, -3.5), (36.0, 26.0)] layout {'H1': (-25.0, -3.5), 'H2': (36.0, 26.0)}"
+ },
+ "tht_legs_clear_standoffs": {
+  "ok": true,
+  "detail": "[]"
+ },
+ "pigtail_route": {
+  "ok": true,
+  "detail": "length 81 mm (audit.py IL uses 100), bends (deg, tangent need, half-segment) [(13, 0.7, 5.2), (57, 3.3, 7.8), (51, 2.9, 2.9)], hits []"
+ },
+ "pigtail_route_mm": 80.8,
+ "clip_inserts_clear": {
+  "ok": true,
+  "detail": "[(-24.0, 3.0), (-24.0, 17.0)], boss top 4.7 < board 5.0; legs []"
+ },
+ "board_mm": [
+  73.4,
+  35.0
+ ],
+ "cradle_cell_lengths": {
+  "ok": true,
+  "detail": "spring length at cell 65/68/70 mm: {65.0: 9.2, 68.0: 6.2, 70.0: 4.2} (free 11.6 +- 0.8)"
+ },
+ "fail": [],
+ "_tht": [
+  [
+   "J1",
+   38.4,
+   5.0
+  ],
+  [
+   "J1",
+   43.4,
+   5.0
+  ],
+  [
+   "J1",
+   43.4,
+   -5.0
+  ],
+  [
+   "J1",
+   38.4,
+   -5.0
+  ],
+  [
+   "J1",
+   43.4,
+   0.0
+  ],
+  [
+   "J1",
+   38.4,
+   2.5
+  ],
+  [
+   "J2",
+   39.895,
+   13.68
+  ],
+  [
+   "J2",
+   44.075,
+   13.68
+  ],
+  [
+   "J2",
+   39.895,
+   22.32
+  ],
+  [
+   "J2",
+   44.075,
+   22.32
+  ],
+  [
+   "BT1",
+   -20.75,
+   -4.2
+  ],
+  [
+   "BT1",
+   -17.25,
+   -4.2
+  ]
+ ]
+}
