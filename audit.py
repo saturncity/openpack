@@ -338,8 +338,8 @@ if __name__ == "__main__":
             ci = [carrier_ci_db(f, r, w, wifi13=w13) for f in gaps]
             print(f"  {r + (' +ch13' if w13 else ''):<8} Wi-Fi {w} dBm: " + " ".join(f"{f}:{c:+.0f}" for f, c in zip(gaps, ci))
                   + f"  -> {sum(c >= CI_REQ_DB for c in ci)}/{len(gaps)} hold")
-    assert len(gaps) == 7 and all(carrier_ci_db(f, "US", 20) >= CI_REQ_DB for f in gaps)
-    assert sum(carrier_ci_db(f, "UK", 20) >= CI_REQ_DB for f in gaps) <= 1, "UK worst case: gap carriers fail"
+    assert len(gaps) == 8 and all(carrier_ci_db(f, "US", 20) >= CI_REQ_DB for f in gaps)  # UK plan: + 2482 (ADR-0016)
+    assert sum(carrier_ci_db(f, "UK", 20) >= CI_REQ_DB for f in gaps) <= 2, "UK worst case: gap carriers fail"  # 2479, 2482 hold
     m = carrier_ci_db(2423, "UK", 20) - CI_REQ_DB
     print(f"  UK worst case margin {m:+.1f} dB: holds with Wi-Fi >= {2 * 10 ** (-m / 20):.1f} m from the rx antenna"
           f" (Q3: 2 m), or pack <= {10 * 10 ** (m / 20):.1f} m (Q3: 10 m); at 15 dBm phones"
@@ -352,7 +352,7 @@ if __name__ == "__main__":
         bad = tr.metrics(tr.frame_lost(la, lb, True))
         print(f"  TD on, Wi-Fi busy {busy:.0%}: gap holds {ok[0]:.3f} %/{ok[1]}/{ok[2]:.0f} ev/h;"
               f" gap fails {bad[0]:.3f} %/{bad[1]}/{bad[2]:.0f} ev/h  (ADR-0003: <= 0.1 %/2/1)")
-    under13 = [f for f in gaps if abs(f - UK_WIFI_13) <= 9]
+    under13 = [f for f in gaps if abs(f - UK_WIFI_13) <= 10]  # 2482 is 10 MHz off, like 2402 vs Wi-Fi 1 (host/channel_plan.py)
     print(f"  plan gap carriers under UK Wi-Fi 13 (2463-2481 occupied): {under13} -> packs"
           f" {[k for k, ab in plan.items() if ab['fB'] in under13 or ab['fA'] in under13]} lose their gap copy if 13 is used")
 
@@ -470,6 +470,103 @@ if __name__ == "__main__":
           f" so a gap copy holds while its neighbour is <= {hot:.1f} dB hotter: for packs at 10 m, no pack closer"
           f" than {d_near:.1f} m to an antenna")
     assert 3 <= d_near <= 4.5
+
+
+# ---- Audit 5: ADR-0016 (#26, #89). 2482 MHz legality, the real rack antenna, the theatre install rule. ----
+# EN 300 328 V2.2.2 (2019-07): 4.3.2.7 OCB = 99 % power bandwidth, "within the band given in table 1" (2400-2483.5),
+#   5.4.7: normal conditions only, lowest and highest channel. 4.3.2.8 Figure 3: OOB domain 2483.5 .. +BW at
+#   -10 dBm/MHz EIRP (A), +BW .. +2BW at -20 (B), BW = OCB or 1 MHz; 5.4.8: 1 MHz RMS during the burst, normal
+#   conditions, declared antenna gain added. 4.3.2.9 Table 12: spurious above 1 GHz -30 dBm / 1 MHz.
+# nRF5340 PS v1.3.1 radio transmitter spec: PRF1,2 1st adjacent channel power 2 MHz (2 Mbps) -25 dBc; PRF2,2 4 MHz
+#   -50 dBc. nRF21540 (ADR-0015 keeps it): POUTB 10 dB gain, max output +22 dBm; at +7 dBm conducted it is 15 dB
+#   backed off, and GFSK is constant-envelope, so it passes the nRF5340 spectrum through in dBc.
+# Measured (ISL-18LR094E328, EN 300 328 V2.1.1, Fanstel BT840, nRF52840, BLE, rate not stated): OCB 1.84 MHz at
+#   2480, highest frequency 2480.978 MHz, uncertainty +-0.12 MHz; OOB 2483.5..+BW -44.6 dBm/MHz at 4.84 dBm EIRP.
+BAND_TOP = 2483.5
+OOB_A, OOB_B, SPUR_DBM = -10.0, -20.0, -30.0
+ACP1_2M_DBC, ACP2_2M_DBC = -25.0, -50.0   # nRF5340 PRF1,2 (1-3 MHz off), PRF2,2 (3-5 MHz off)
+XTAL_PPM = 50.0          # BLE core spec carrier tolerance (+-50 ppm); the pack's 32 MHz HFXO is tighter
+OCB_UNC_MHZ = 0.12       # lab 99 % OBW uncertainty (ISL report)
+ISL_2480_TOP = 2480.978  # measured 99 % upper edge at 2480 MHz (nRF52840)
+FEM_MAX_DBM, FEM_OUT_DBM = 22.0, 7.0
+# Rack antenna (Phase 5 purchase): L-com HyperLink HG2409P-NF, 8 dBi flat patch, HPBW 75 H / 65 V, 2400-2500 MHz,
+# N-female on a 12 in lead; ds_HG2409P-NF.pdf. The datasheet gives no F/B number, only polar plots; read off them:
+# 180 deg -18 dB (V plane) / ~-30 dB (H plane), but rear lobes reach -9 dB (V, ~120 deg) and -10 dB (H, ~135 deg).
+# A rear-hemisphere audience sees the lobes, so the real rejection behind and beside is 9 dB, not the 15 dB est.
+ANT = {"name": "L-com HG2409P-NF", "dbi": 8.0, "hpbw": (75, 65), "fb_180": 18.0, "rear_lobe": 9.0, "gbp": 72.12}
+# Theatre geometry for the install rule (est.): pack worn at <= 1.5 m above the stage floor (belt on a rostrum);
+# audience phone <= 1.5 m above its floor (standing); stage floor >= 0 m above the audience floor (studio, worst);
+# nearest audience 1 m horizontally from the antenna's foot.
+PACK_H, PHONE_H, STAGE_H, ROW_M = 1.5, 1.5, 0.0, 1.0
+
+if __name__ == "__main__":
+    print("\n== Audit 5: ADR-0016, 2482 MHz under EN 300 328 V2.2.2, real rack antenna, install rule ==")
+    fr, p = gfsk_spectrum()
+    _, obw = psd_stats()
+    f0, df = 2482.0, 2482.0 * XTAL_PPM * 1e-6
+    top_model = f0 + obw / 2 + df + OCB_UNC_MHZ
+    top_meas = ISL_2480_TOP + 2.0 + df + OCB_UNC_MHZ
+    print(f"  4.3.2.7 OCB: ideal BLE-2M GFSK 99 % OBW {obw:.2f} MHz; at 2482 + {XTAL_PPM:.0f} ppm ({df * 1e3:.0f} kHz) +"
+          f" lab uncertainty: upper edge {top_model:.2f} MHz (model), {top_meas:.2f} (nRF52840 measured at 2480,"
+          f" moved up 2 MHz) vs {BAND_TOP}. Fails only if the OCB exceeds {2 * (BAND_TOP - f0 - df - OCB_UNC_MHZ):.2f} MHz")
+    assert max(top_model, top_meas) <= BAND_TOP - 0.2, "2482: 99 % OBW must sit inside 2400-2483.5 with margin"
+    eirp = REGIONS["UK"]["eirp_dbm"]
+
+    def seg_model(lo, hi):  # ideal GFSK power in [lo, hi) MHz absolute, carrier at f0 + df (worst: drifted up)
+        sel = (fr >= (lo - f0 - df) * 1e6) & (fr < (hi - f0 - df) * 1e6)
+        return eirp + 10 * math.log10(max(float(p[sel].sum()), 1e-30))
+
+    def seg_bound(lo, hi):  # datasheet bound: PRF1,2 covers 1-3 MHz off the carrier, PRF2,2 3-5 MHz and beyond
+        off_lo, off_hi = lo - f0 - df, hi - f0 - df
+        parts = [ACP1_2M_DBC] if off_lo < 3 else []
+        parts += [ACP2_2M_DBC] if off_hi > 3 else []
+        assert off_lo >= 1, "segment reaches inside the 1st adjacent window"
+        return eirp + 10 * math.log10(sum(10 ** (x / 10) for x in parts))
+    bw = max(obw, 1.0)
+    segs = {"A": [(BAND_TOP, BAND_TOP + 1), (BAND_TOP + bw - 1, BAND_TOP + bw)],
+            "B": [(BAND_TOP + bw, BAND_TOP + bw + 1), (BAND_TOP + 2 * bw - 1, BAND_TOP + 2 * bw)],
+            "spur": [(BAND_TOP + 2 * bw, BAND_TOP + 2 * bw + 1)]}
+    lim = {"A": OOB_A, "B": OOB_B, "spur": SPUR_DBM}
+    for k, ss in segs.items():
+        b = max(seg_bound(*s) for s in ss)
+        m = max(seg_model(*s) for s in ss)
+        print(f"  4.3.2.{'8' if k != 'spur' else '9'} {k:<4} {ss[0][0]:.1f}-{ss[-1][1]:.1f} MHz: datasheet bound {b:6.1f},"
+              f" ideal GFSK {m:6.1f} dBm/MHz at {eirp:.0f} dBm EIRP vs {lim[k]:.0f} -> margin {lim[k] - b:.1f} dB")
+        assert b <= lim[k] - 5, f"2482 {k}: need >= 5 dB under the EN 300 328 mask on the datasheet bound"
+    print(f"  nRF21540 POUTB at +{FEM_OUT_DBM:.0f} dBm: {FEM_MAX_DBM - FEM_OUT_DBM:.0f} dB under its +{FEM_MAX_DBM:.0f} dBm max,"
+          f" constant-envelope GFSK -> no spectral regrowth term. Verdict: 2482 is EN 300 328 compliant (UK/EU);"
+          f" US stays at 2480 (15.205). Phase 5 bench check: 99 % OBW and 2483.5-2487.6 MHz at 2482 on a real pack")
+    assert FEM_MAX_DBM - FEM_OUT_DBM >= 10
+
+    rej = rejection_db("behind", ANT["rear_lobe"])
+    hold = sorted(f for f in gapc.values() if rej >= need[f] - 1e-9)
+    print(f"  rack antenna {ANT['name']} ({ANT['dbi']:.0f} dBi, {ANT['hpbw'][0]}/{ANT['hpbw'][1]} deg, GBP"
+          f" {ANT['gbp']:.2f}): F/B {ANT['fb_180']:.0f} dB at 180 deg, rear lobes -{ANT['rear_lobe']:.0f} dB ->"
+          f" rejection {rej:.1f} dB (study est. {rejection_db('behind'):.1f})")
+    print(f"    Q3 geometry (Wi-Fi 2 m behind): {len(hold)}/8 gap carriers hold ({', '.join(map(str, hold))});"
+          f" the 11 MHz carriers need {worst:.1f}")
+    assert len(hold) == 3 and rej < worst, "real F/B is worse than the 15 dB estimate: R1 rests on distance"
+    d_wifi = 2.0 * 10 ** ((worst + MARGIN_DB - rej) / 20)
+    print(f"    with {MARGIN_DB:.0f} dB margin, Wi-Fi must be >= {d_wifi:.1f} m behind or beside an antenna"
+          f" (study: {wifi_min_dist_m(worst, 'behind'):.1f} / {wifi_min_dist_m(worst, 'beside'):.1f} m),"
+          f" >= {wifi_min_dist_m(worst, 'front'):.1f} m in front. That is --wifi-gain"
+          f" {ANT['dbi'] - rej - 20 * math.log10(d_wifi / 2):.1f}; bsim (c) 40 %, 20 s, --rx-gain 8 --wifi-gain -7.6"
+          f" --near-att 43.2 (2026-11-01): packs 2-8 0.000 % TD on and off")
+    assert 4.0 <= d_wifi <= 5.0 and ANT["dbi"] - rej - 20 * math.log10(d_wifi / 2) <= -7.6
+    d_actor = math.ceil(d_near * 2) / 2
+    h_actor = d_actor + PACK_H
+    h_aud = math.sqrt(d_wifi ** 2 - ROW_M ** 2) + PHONE_H - STAGE_H
+    h_min = math.ceil(max(h_actor, h_aud) * 2) / 2
+    print(f"  install height: actors >= {d_actor:.1f} m (near-far) -> {h_actor:.1f} m; audience >= {d_wifi:.1f} m"
+          f" (front row {ROW_M:.0f} m out, phones {PHONE_H} m up, flat floor) -> {h_aud:.1f} m. Rule: antenna"
+          f" >= {h_min:.1f} m above the stage floor")
+    assert h_min == 6.0, "docs/human/antenna-install.md says 6 m"
+    coax = {"CA3N050 400-series 50 ft (15.2 m)": 15.24 * COAX_DB_M["LMR-400"],
+            "HG2409P lead 12 in": 0.3 * COAX_DB_M["RG-58"], "LCCA30301-FT1.5 BNC-N jumper": 0.46 * COAX_DB_M["LMR-400"]}
+    loss = sum(coax.values()) + 3 * 0.15
+    print(f"  per antenna: {' + '.join(coax)} + 3 connectors = {loss:.1f} dB (RK-2 budget 6);"
+          f" GBP {ANT['gbp']:.2f} + 61.07 + 37.09 = {ANT['gbp'] + 61.07 + 37.09:.2f}, x2 per rack ex VAT")
+    assert loss <= 6.0 and 2 * (ANT["gbp"] + 61.07 + 37.09) <= 400
 
 
 # ---- Receiver sub-board BOM (#32, ADR-0014). Written by hw/rx/rx.py from the SKiDL netlist + hw/rx/prices.py ----

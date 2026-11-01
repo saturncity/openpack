@@ -99,6 +99,25 @@ ZTEST(proto, test_rx_scan_and_errors)
 	zassert_equal(op_proto_exec(op_rx_cmds, op_rx_ncmds, &rx, blank, out, sizeof(out)), 0);
 }
 
+ZTEST(proto, test_fb_cap_by_region) /* AIR-5, ADR-0016: 2482 is uk/eu only, same as host/channel_plan.py */
+{
+	zassert_str_equal(pk_do("region"), "ok region=uk\n"); /* default UK (ADR-0015) */
+	zassert_str_equal(pk_do("chan 2414 2482"), "ok\n");
+	zassert_true(strncmp(pk_do("chan 2414 2483"), "err", 3) == 0);
+	zassert_true(strncmp(pk_do("region us"), "err", 3) == 0); /* fB 2482 would be illegal in the US */
+	zassert_str_equal(pk_do("region eu"), "ok\n");
+	zassert_str_equal(pk_do("chan 2414 2456"), "ok\n");
+	zassert_str_equal(pk_do("region us"), "ok\n");
+	zassert_true(strncmp(pk_do("chan 2414 2482"), "err", 3) == 0);
+	zassert_str_equal(pk_do("chan 2414 2480"), "ok\n");
+	zassert_true(strncmp(pk_do("region jp"), "ok", 2) == 0);
+	zassert_equal(op_fb_max("uk"), 2482);
+	zassert_equal(op_fb_max("jp"), 2480);
+	/* the receiver accepts 2482 in any region: receiving is not regulated, the host checks the plan */
+	zassert_str_equal(rx_do("pair 1 2414 2482"), "ok\n");
+	zassert_str_equal(rx_do("pair 1 2414 2483"), "err bad pairing\n");
+}
+
 ZTEST(proto, test_pack_config)
 {
 	zassert_str_equal(pk_do("id"), "ok id=2\n");

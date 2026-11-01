@@ -3,14 +3,18 @@ from pathlib import Path
 
 import yaml
 
-PATH = Path(__file__).with_name("channel_plan.yaml")
+PATH = Path(__file__).with_name("channel_plan.yaml")        # UK, the default region (ADR-0015)
+PATH_US = Path(__file__).with_name("channel_plan_us.yaml")  # US: no 2482, pack 1 in-band (ADR-0016)
 REGIONS = ("UK", "US")  # SYS-5 / AIR-6 power limit; ADR-0015
-GAPS = [(2423, 2426), (2448, 2451), (2473, 2480)]  # carriers clear of Wi-Fi 1/6/11 (sim/loss/RESULTS.md s2)
+GAPS = [(2423, 2426), (2448, 2451), (2473, 2482)]  # carriers clear of Wi-Fi 1/6/11 (sim/loss/RESULTS.md s2)
+# Highest carrier by region (ADR-0016): under EN 300 328 a 2482 MHz BLE-2M carrier keeps its 99 % OBW inside
+# 2400-2483.5 and its OOB under the 4.3.2.8 mask (audit.py Audit 5); US stops at 2480 (15.205 restricted band).
+FB_MAX = {"UK": 2482, "US": 2480}
 WIFI = (2412, 2437, 2462)                            # Wi-Fi 1/6/11 centres
 WIFI_13 = 2472                                       # UK only: Wi-Fi 13, occupied ~2463-2481
 MIN_SPACING = 3   # MHz between any two carriers: 2 MHz neighbours collide at 2 Mbit GFSK (bsim, #76)
 NEAR_SPACING = 5  # MHz from a pack next to an antenna (20 dB stronger) for a carrier to survive (bsim, #76)
-GAP_PACKS = 7     # 7 gap carriers fit at 3 MHz spacing (2+2+3); one pack has none
+GAP_PACKS = {"UK": 8, "US": 7}  # gap carriers at 3 MHz: 2+2+4 up to 2482 (UK); 2+2+3 up to 2480 (US, one pack has none)
 
 
 def _gap(f):
@@ -27,13 +31,14 @@ def validate(plan):
         raise ValueError("plan must define packs 1..8")
     if plan.get("region") not in REGIONS:
         raise ValueError(f"region must be one of {REGIONS}")
+    reg = plan["region"]
     pairs = {int(k): (v["fA"], v["fB"]) for k, v in packs.items()}
     freqs, load, gapped = [], {}, 0
     for pid, (a, b) in pairs.items():
         if not (2402 <= a <= 2440):
             raise ValueError(f"pack {pid}: fA {a} outside 2402-2440")
-        if b < a + 40 or b > 2480:
-            raise ValueError(f"pack {pid}: fB {b} must be in [fA+40, 2480]")
+        if b < a + 40 or b > FB_MAX[reg]:
+            raise ValueError(f"pack {pid}: fB {b} must be in [fA+40, {FB_MAX[reg]}] ({reg})")
         n = _gap(a) + _gap(b)
         if n > 1:
             raise ValueError(f"pack {pid}: two gap carriers")
@@ -43,8 +48,8 @@ def validate(plan):
             if not _gap(f):
                 ch = min(WIFI, key=lambda c: abs(f - c))
                 load[ch] = load.get(ch, 0) + 1
-    if gapped < GAP_PACKS:
-        raise ValueError(f"only {gapped} packs have a gap carrier, need {GAP_PACKS}")
+    if gapped < GAP_PACKS[reg]:
+        raise ValueError(f"only {gapped} packs have a gap carrier, need {GAP_PACKS[reg]} ({reg})")
     if max(load.values()) > 4:
         raise ValueError(f"more than 4 in-band carriers under one Wi-Fi channel: {load}")
     freqs.sort()
@@ -62,8 +67,9 @@ def validate(plan):
 
 
 def gap_lost_to_wifi13(pairs):
-    """UK: packs whose gap carrier sits under Wi-Fi 13 (centre 2472, +-9 MHz) if a venue uses it."""
-    return sorted(k for k, ab in pairs.items() if any(_gap(f) and abs(f - WIFI_13) <= 9 for f in ab))
+    """UK: packs whose gap carrier sits under Wi-Fi 13 if a venue uses it: within 10 MHz of 2472. 2482 is 10 MHz
+    from it, as 2402 is from Wi-Fi 1, and would need 18.4 dB of isolation (audit.py Audit 4), so it counts as lost."""
+    return sorted(k for k, ab in pairs.items() if any(_gap(f) and abs(f - WIFI_13) <= 10 for f in ab))
 
 
 def region(path=PATH):
