@@ -2,6 +2,10 @@
 
 Master agent kickoff: `docs/agents/MASTER-PROMPT.md`. Read in order: `docs/agents/hands-off.md` (how to work without the owner), `REQUIREMENTS.md` (owner's ranked requirements, the yardstick), `SPEC.md` (numbered requirements + verification), `PLAN.md` (phases, tools, gates), `QUESTIONS.md` (hands-off defaults → ADRs), `AUDIT.md` / `AUDIT-2.md` (feasibility). Numbers: `python3 audit.py`. Work is tracked as GitHub issues: spec is #1, phases #2–#8, tasks under them. Keep `STATUS.md` current.
 
+## Design log
+
+`docs/design-log.md` records every design difficulty and consideration for the owner's final audit. Every design PR (hw, fw, sim, RF, mech, sourcing, compliance, ADRs) adds or updates its design-log entries in the same PR, and moves resolved items out of "Open risks for audit".
+
 ## Agent skills
 
 ### Issue tracker

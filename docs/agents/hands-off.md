@@ -83,3 +83,4 @@ The human reads `STATUS.md`, nothing else.
 - Ponytail applies: smallest working thing, one runnable check per non-trivial piece, nothing built for a later phase.
 - Numbers live in `audit.py` or a test, not in prose.
 - Nothing is bought, built or laid out before `PLAN.md` says it is unblocked.
+- Every design PR adds or updates its entries in `docs/design-log.md` in the same PR: the difficulty, the options, the choice and why, links, residual risk, and whether Phase 5 must verify it. Keep its "Open risks for audit" table current.
