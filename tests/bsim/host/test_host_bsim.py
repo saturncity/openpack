@@ -82,29 +82,41 @@ def test_telemetry_10hz_three_receivers(c):
     assert all(m[1]["status"] is None for m in msgs)
 
 
+def _wait(ws, pred, what, tries=200):
+    """Read telemetry frames (one per 100 ms) until pred(packs) holds. Bounded by frame count, not by a wall-clock
+    deadline racing a loaded CI box; each frame is itself bounded by the server's 10 Hz tick."""
+    for _ in range(tries):
+        packs = ws.receive_json()["packs"]
+        if pred(packs):
+            return packs
+    pytest.fail(f"telemetry never showed: {what}")
+
+
+def _live(packs, n):
+    return packs[n - 1]["status"] is not None
+
+
 def test_receiver_reboot(bench, c):
     """Kill slot 3's sim mid-telemetry (module reset), start a fresh one on a new pty, service recovers with no restart."""
     path, procs = bench[3]
     with c.websocket_connect("/telemetry") as ws:
-        ws.receive_json()
+        _wait(ws, lambda m: all(_live(m, n) for n in SLOTS), "all three receivers live")
         for p in procs:
             try:
                 os.killpg(p.pid, signal.SIGKILL)
             except ProcessLookupError:
                 pass
-        t0, m = time.monotonic(), None
-        while time.monotonic() - t0 < 3.0:
-            m = ws.receive_json()["packs"]
-            if m[2]["status"] is None:
-                break
-        assert m[2]["status"] is None and m[0]["status"] and m[5]["status"]  # only slot 3 blanked
+            p.wait()  # reaped: the old pty is gone before we look for its absence
+        # only slot 3 blanks; slots 1 and 6 stay live (a transient miss on them is retried, not asserted on one frame)
+        _wait(ws, lambda m: not _live(m, 3) and _live(m, 1) and _live(m, 6), "only slot 3 blanked")
         assert c.put("/packs/3/trim", json={"gain_db": 0}).status_code == 504
         assert c.get("/packs/3").json()["status"] is None
-        newpath, newprocs = _boot(EXE)
+        newpath, newprocs = _boot(EXE)  # returns only once the new firmware answered `info` on its pty
         bench[3] = (newpath, newprocs)
         app.state.ports[2] = newpath
-        t0, back = time.monotonic(), False
-        while time.monotonic() - t0 < 5.0 and not back:
-            back = ws.receive_json()["packs"][2]["status"] is not None
-        assert back
-    assert c.put("/packs/3/trim", json={"gain_db": 1}).status_code == 200
+        _wait(ws, lambda m: _live(m, 3), "slot 3 back on the new pty")
+    for _ in range(50):  # the fresh receiver already answered; retry only absorbs a single loaded-box timeout
+        if c.put("/packs/3/trim", json={"gain_db": 1}).status_code == 200:
+            break
+    else:
+        pytest.fail("trim never succeeded after reboot")

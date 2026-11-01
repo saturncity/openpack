@@ -32,3 +32,33 @@
 		};
 	};
 };
+
+/* #107: Fanstel BT40NE nRF21540 front-end (FEM), GPIO mode.
+ * TODO(#107): PLACEHOLDER on the nRF5340 DK. The pack and receiver board targets do not exist yet; when they do
+ * (boards/openpack_pack, boards/openpack_rx), move this node into their net-core devicetree unchanged. The pins
+ * below are the BT40NE module-internal wiring, so they are right on the final boards and arbitrary on a DK.
+ *
+ * Source: Fanstel, "BLE 5.3, 802.15.4 Modules, BT40/F/E/N/NE Product Specifications", Ver 1.09, July 2024
+ * (https://fanstel.squarespace.com/s/BT40F_BT40N-Product-Specifications.pdf), pin table p.21 (BT40N/NE
+ * internally wired nRF5340 pins) and "GPIO mode" devicetree sample p.22:
+ *   TX_EN  = P0.21 (pad C2)    RX_EN = P0.27 (pad D2)    PDN = P0.26 (pad D1)
+ *   MODE   = P1.04 (pad E0)    ANT_SEL = P1.05 (pad E1)  CSN = P1.06, MISO = P0.25 (SPI mode only, unused here)
+ * The p.22 sample says mode = P0.24 (pad C3), which the p.21 table does not mark as an nRF21540 pin; the table (and
+ * hw/pack/symbols.py _FEM) put MODE on pad E0 = P1.04, so the table wins. Confirm MODE with Fanstel before Phase 5.
+ * Fanstel p.22 shows ant-sel-gpios as GPIO_ACTIVE_HIGH but does not say which level selects the u.FL.
+ * Firmware therefore takes the level from CONFIG_OP_FEM_ANT_SEL_UFL (fw/Kconfig), a bench gate before Phase 5.
+ */
+/ {
+	nrf_radio_fem: nrf21540_fem {
+		compatible = "nordic,nrf21540-fem";
+		tx-en-gpios = <&gpio0 21 GPIO_ACTIVE_HIGH>;
+		rx-en-gpios = <&gpio0 27 GPIO_ACTIVE_HIGH>;
+		pdn-gpios = <&gpio0 26 GPIO_ACTIVE_HIGH>;
+		mode-gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;
+		ant-sel-gpios = <&gpio1 5 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&radio {
+	fem = <&nrf_radio_fem>;
+};

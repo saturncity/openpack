@@ -31,6 +31,7 @@
 #include <hal/nrf_timer.h>
 #include <hal/nrf_dppi.h>
 #include "op_frame.h"
+#include "op_fem.h"
 #if defined(CONFIG_OP_TEST_SCHED_REPORT)
 #include "nsi_hw_scheduler.h" /* bsim: device time, for run.py (a) frame clock -> TXEN */
 #endif
@@ -190,7 +191,7 @@ static void radio_init(void)
 	nrf_radio_crc_configure(NRF_RADIO, 3, NRF_RADIO_CRC_ADDR_SKIP, 0x00065B);
 	nrf_radio_crcinit_set(NRF_RADIO, 0x555555);
 	nrf_radio_datawhiteiv_set(NRF_RADIO, 0x40);
-	nrf_radio_txpower_set(NRF_RADIO, NRF_RADIO_TXPOWER_0DBM); /* FEM gain later (AIR-6) */
+	nrf_radio_txpower_set(NRF_RADIO, OP_TXPOWER_REG); /* FEM gain is fixed by op_fem.c (#107) */
 	nrf_radio_packetptr_set(NRF_RADIO, pkt);
 	nrf_radio_frequency_set(NRF_RADIO, OP_CH_A_MHZ);
 	nrf_radio_shorts_set(NRF_RADIO, NRF_RADIO_SHORT_READY_START_MASK | NRF_RADIO_SHORT_END_DISABLE_MASK);

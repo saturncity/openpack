@@ -116,6 +116,46 @@ config OP_TEST_PROTO_POLL_MS
 	help
 	  Brings back the 50 ms console poll that exposed #87. The shipped build waits forever.
 
+# #107 / ADR-0015: nRF21540 front-end on the BT40NE (pack and receiver).
+config OP_FEM_NRF21540
+	bool "nRF21540 FEM present (devicetree node nrf_radio_fem)"
+	default y if DT_HAS_NORDIC_NRF21540_FEM_ENABLED
+
+config OP_FEM_ANT_SEL_UFL
+	int "ANT_SEL (P1.05) logical level that selects the u.FL port"
+	default 1
+	range 0 1
+	depends on OP_FEM_NRF21540
+	help
+	  UNVERIFIED. The Fanstel BT40/BT40N/NE spec v1.09 (p.21-22) wires P1.05 to the nRF21540 ANT_SEL but does not
+	  say which port is the u.FL. Nordic: ANT_SEL low = ANT1, high = ANT2. Default 1 assumes the u.FL is on ANT2.
+	  Confirm with Fanstel or on the bench (conducted power at the u.FL, P1.05 low vs high) before Phase 5.
+
+config OP_FEM_GAIN_DB
+	int "nRF21540 PA gain with MODE high (POUTB), dB"
+	default 10
+	depends on OP_FEM_NRF21540
+	help
+	  nRF21540 MODE high selects POUTB, about 10 dB gain (low selects POUTA, about 20 dB). The firmware always
+	  drives MODE to POUTB: +7 dBm conducted needs only the low-gain path (ADR-0015, ~38 mA at +10 dBm).
+
+config OP_TX_SOC_DBM
+	int "nRF5340 radio TXPOWER (dBm, 1 dB steps -4..3)"
+	default -3 if OP_FEM_NRF21540
+	default 0
+	range -4 3
+	help
+	  Without a FEM (native_sim, BabbleSim) this is the conducted power. With the FEM the conducted power is
+	  this plus OP_FEM_GAIN_DB.
+
+config OP_TX_MAX_CONDUCTED_DBM
+	int "Conducted TX power ceiling (dBm)"
+	default 7
+	help
+	  Region UK, ADR-0015: 9 dBm EIRP declared = +7 dBm conducted into the 2 dBi whip, 1 dB under the 10 dBm
+	  EN 300 328 non-adaptive line. A build whose OP_TX_SOC_DBM (+ OP_FEM_GAIN_DB with a FEM) exceeds this does
+	  not compile (fw/src/net/op_fem.h). Raise it only for a US-region build (ADR-0015, FCC 15.247).
+
 # FW-2: the nRF5340 builds split work across cores over ipc0.
 config OP_NRF5340
 	bool
