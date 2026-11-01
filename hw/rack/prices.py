@@ -9,12 +9,16 @@ Stock was read where the page showed it; "0 stock" lines are open items in ADR-0
 DK = "DigiKey UK 2026-11-01, read"
 
 PRICES = {  # mpn: (gbp_each, qty_break, source, uk_distributor)
+    # #34 layout picks (coordinator decisions 2026-11-01). USD -> GBP at 0.76.
+    "2.54-2*13PFemale": (0.17, 1, "est. (BOOMELE 2x13 2.54 mm female 8.5 mm, LCSC C64320, USD 0.2225, JLC parts record 2026-11-01 (stock unconfirmed)); contact 14 pulled and "
+                         "the cavity plugged at assembly: the footprint has no hole at 14 (ADR-0014 key)", "LCSC"),
+    "LTST-S270KGKT": (0.03, 1, "est. (Lite-On side-looking green, LCSC C125113, USD 0.042, JLC parts record 2026-11-01 (stock unconfirmed))", "LCSC"),
+    "LTST-S270KRKT": (0.03, 1, "est. (Lite-On side-looking red, LCSC C125114, USD 0.032, JLC parts record 2026-11-01 (stock unconfirmed))", "LCSC"),
+    "5415025-1": (6.95, 1, "est. (TE right-angle PCB BNC 50 ohm 4 GHz, 1/2-28 bulkhead; LCSC C5164649 USD 9.15, JLC parts record 2026-11-01 (stock unconfirmed); "
+                  "replaces Amphenol 112487, whose drawing could not be read)", "LCSC / DigiKey UK / Mouser UK"),
     "QPL9057TR7": (4.60, 1, DK + " (61,763 in stock); 25+ GBP 3.77, 100+ GBP 3.17", "DigiKey UK"),
     "0451004.MRL": (0.90, 1, "est. (Littelfuse Nano2 451 4 A fast, 125 V)", "DigiKey UK / Farnell UK"),
     "R_2512_1R_1W": (0.10, 1, "est. (1 ohm 1 % 2512 1 W thick film)", "LCSC / Farnell UK"),
-    "M20-7831346": (2.19, 1, DK + " (Harwin 2x13 2.54 mm socket, 4,728 in stock)", "DigiKey UK"),
-    "LTST-C191KGKT": (0.11, 1, "DigiKey UK, read for hw/bom/pack_uk.csv (Lite-On 0603 green)", "DigiKey UK"),
-    "LTST-C191KRKT": (0.11, 1, "DigiKey UK, read for hw/bom/pack_uk.csv (Lite-On 0603 red)", "DigiKey UK"),
     "QPQ1907SR": (2.82, 1, DK + " (7,548 in stock; 33-week lead); IL 1.3 typ / 2.2 max dB", "DigiKey UK"),
     "ESD103-B1-02EL": (0.30, 1, "est. (Infineon 15 V 0.09 pF RF ESD, TSLP-2-20; Farnell UK 2725731, LCSC C535146)",
                        "Farnell UK / LCSC"),
@@ -29,7 +33,6 @@ PRICES = {  # mpn: (gbp_each, qty_break, source, uk_distributor)
     "SC16IS752IPW,128": (5.92, 1, DK + " (11,036 in stock); the ,112 tube variant is obsolete", "DigiKey UK"),
     "CX3225GB14745P0HPQCC": (0.58, 1, DK + " (3,000 in stock): 14.7456 MHz 3225 18 pF", "DigiKey UK"),
     "NC3MAH": (2.08, 1, DK + " (Neutrik NC3MAH; qty-10 break not shown)", "DigiKey UK"),
-    "112487": (7.18, 1, DK + " (Amphenol RF 112487 R/A bulkhead BNC, 4 GHz; 12-week lead)", "DigiKey UK"),
     "SMAJ58CA": (0.36, 1, DK + " (Littelfuse)", "DigiKey UK"),
     "SMBJ12A": (0.37, 1, DK + " (Littelfuse)", "DigiKey UK"),
     "SMF12A": (0.08, 1, "est. (SMF 200 W TVS SOD-123F)", "LCSC / Farnell UK"),
@@ -55,32 +58,57 @@ PRICES = {  # mpn: (gbp_each, qty_break, source, uk_distributor)
     "R_0402_1%": (0.01, 10, "est.", "LCSC"),
     "R_0402_100R_TF": (0.08, 10, "est. (100 ohm 0402 thin film, Wilkinson isolation)", "LCSC / Farnell UK"),
     "R_0402_0R": (0.01, 1, "est.", "LCSC"),
+    "TP-pad": (0.0, 1, "est. (footprint only: bare test pad)", "-"),
     "PCB_TRACE": (0.0, 1, "copper on the main board (hw/rack/wilkinson.py): no part", "-"),
 }
 
 # Items with no schematic symbol: the host computer, cables, panel parts. (item, qty, gbp_each, source, distributor)
+# #34 cost-downs (coordinator, 2026-11-01): real quotes for the case, USB lead and RF jumpers; GBP ex VAT (UK VAT 20 %
+# on top). Stock marked "unconfirmed" was not re-read at order time.
 EXTRAS = [
     ("Raspberry Pi CM4 2 GB RAM / 8 GB eMMC, no wireless (SC0680 = CM4002008)", 1, 79.20,
      "The Pi Hut UK, qty 1, 2026-11-01 (coordinator decision on #95; DigiKey UK SC0680 was 0 stock at GBP 61.64)."
      " SC0681 (16 GB eMMC) same price is the drop-in alternative", "The Pi Hut UK"),
-    ("Harwin M20-003 polarising key, fitted in socket position 14 (ADR-0014 key)", 8, 0.22, DK + " (Harwin M20-003)",
-     "DigiKey UK / Farnell UK 512023"),
     ("Raspberry Pi CM4 IO Board (SC0326)", 1, 26.15, DK, "DigiKey UK"),
     ("40-way IDC ribbon 152 mm, socket-socket (Assmann H3AAH-4006G): main board J to CM4IO J8", 1, 1.30, DK, "DigiKey UK"),
     ("CM4IO 12 V pigtail: JST VH 2-pin housing to 2.1 mm DC plug, 200 mm", 1, 3.00, "est.", "LCSC / RS UK"),
-    ("U.FL-U.FL 1.13 mm cable 200 mm (Sevskiy CA-MHF1-MC1.13-200-MHF1), splitter port to sub-board J3/J4", 16, 4.48,
-     DK + " (109,584 in stock)", "DigiKey UK"),
+    ("U.FL-U.FL 1.13 mm jumper 100 mm (Taoglas CAB.6012), main-board port to receiver J3/J4 (#34: ports sit right "
+     "behind each receiver, 3.1 dB/m -> 0.3 dB + 2 mated pairs)", 16, 1.02,
+     "RS UK 069-0832, read by the coordinator 2026-11-01 (stock unconfirmed); alternative LCSC C7541876 (Kinghelm)",
+     "RS UK"),
     ("Neutrik NE8FDP etherCON RJ45 feedthrough (rear panel)", 1, 12.78, DK, "DigiKey UK"),
     ("Cat6 patch 0.3 m, NE8FDP to CM4IO RJ45", 1, 2.00, "est.", "RS UK / Farnell UK"),
-    ("Panel-mount USB-C socket to micro-USB plug, 0.3 m (CM4IO rpiboot service port, RK-1)", 1, 8.00,
-     "est. (not found on DigiKey UK: open item)", "RS UK / Farnell UK"),
+    ("Panel-mount USB-C socket to micro-B plug, 30 cm, M3 ears 20 mm apart (Adafruit 4056; CM4IO rpiboot port, RK-1;"
+     " no CC resistors: service with a USB-A-to-C lead)", 1, 3.83,
+     "The Pi Hut UK SKU 103462, GBP 4.60 inc VAT, read 2026-11-01 (sold out that day; Adafruit direct USD 4.95)",
+     "The Pi Hut UK"),
     ("Mean Well GST60A12-P1J 12 V 5 A desktop brick, 2.1 mm plug, C14 inlet", 1, 14.50, DK + " (6,852 in stock)",
      "DigiKey UK"),
     ("UK mains cord BS1363 to C13, 1.83 m (AC-12206-UK)", 1, 8.35, DK + " (7,931 in stock)", "DigiKey UK"),
-    ("Main board PCB 4-layer ~400 x 150 mm, JLC04161H-7628, ENIG", 1, 25.00, "est. (JLCPCB qty-5 price share)",
-     "JLCPCB (ships to UK)"),
-    ("1U 19 in steel case, ~250 mm deep, with blank rear panel to punch", 1, 60.00, "est.", "RS UK / Farnell UK"),
+    ("Main board PCB 4-layer 412 x 323 mm, JLC04161H-7628, ENIG (hw/rack/layout.py)", 1, 40.00,
+     "est. (JLCPCB qty-5 price share for a 0.133 m^2 4-layer board; quote before ordering)", "JLCPCB (ships to UK)"),
+    ("Hammond RM1U1913SBK 1U 19 in aluminium case, 330 mm deep (mech/rack.py; panels drilled per mech/out)", 1, 140.76,
+     "Rapid Online 31-1555, read by the coordinator 2026-11-01, in stock; DigiKey UK HM996-ND GBP 142.98 (90 in stock)",
+     "Rapid Online / DigiKey UK"),
+    ("M3 x 11 mm F-F hex spacer + 2 x M3 x 6 screws: receiver mounts (2 per slot, mech.json H1/H2)", 16, 0.30,
+     "est. (brass hex spacer class price)", "RS UK / Farnell UK"),
+    ("M2.5 x 10 mm F-F spacer + screws: CM4IO above the main board", 4, 0.30, "est.", "RS UK / Farnell UK"),
+    ("M3 x 5 mm F-F spacer + screws: main board to the case floor (8 holes)", 8, 0.25, "est.", "RS UK / Farnell UK"),
 ]
 
-# Not on the backplane BOM, priced elsewhere and added by audit.py for the rack total:
-ANTENNA_KIT_GBP = 340.56   # ADR-0016 (PR #93): 2 x (HG2409P-NF + CA3N050 + BNC jumper), ex VAT, ITM Components UK
+# Not on the backplane BOM, priced elsewhere and added by audit.py for the rack total. Antenna kit per rack, ex VAT
+# (#34 cost-down, coordinator quotes 2026-11-01; audit.py Audit 5 sizes the coax from the wing geometry):
+ANTENNA_KIT = [  # (item, qty, gbp_each, source)
+    ("L-com HG2409P-NF 8 dBi 2.4 GHz flat patch", 2, 72.12, "ITM Components UK (ADR-0016)"),
+    ("L-com CA3N030 CA-400 N-male/N-male 30 ft (9.14 m): rack -> near-wing boom", 1, 45.80,
+     "ITM Components UK, ex VAT, read 2026-11-01"),
+    ("L-com CA3N075 CA-400 N-male/N-male 75 ft (22.86 m): rack -> far-wing boom (12 m stage)", 1, 88.02,
+     "ITM Components UK, ex VAT, read 2026-11-01"),
+    ("Amphenol RF NF-BM-NT3G-50 N socket to BNC plug adapter at the rack BNC (replaces the GBP 37.09 LCCA30301-FT1.5)",
+     2, 8.40, "RS UK 285-6398, ex VAT, search snippet 2026-11-01"),
+    ("Thor LS003 4.0 m winch lighting stand, 35 mm top (antenna boom)", 2, 140.83,
+     "Simply Sound and Lighting LS003, GBP 169 inc VAT, in stock, 2026-11-01"),
+    ("L-com HGX-PMT07 stationary mast mount kit (U-bolts for 31.7-50.8 mm mast; fits the 35 mm stand top)", 2, 14.45,
+     "ITM Components UK, ex VAT, in stock, 2026-11-01"),
+]
+ANTENNA_KIT_GBP = round(sum(q * g for _, q, g, _ in ANTENNA_KIT), 2)

@@ -57,6 +57,10 @@ R_POWER_W = {"Resistor_SMD:R_0402_1005Metric": 0.0625, "Resistor_SMD:R_0603_1608
              "Resistor_SMD:R_1206_3216Metric": 0.25, "Resistor_SMD:R_2512_6332Metric": 1.0}
 
 
+# Front-panel status LEDs: side-looking SMD, Lite-On LTST-S270 (LCSC C125113 green / C125114 red, #34)
+LED_MPN = {"green": "LTST-S270KGKT", "red": "LTST-S270KRKT"}
+
+
 def i_lim(r):
     return 2000 / r + 0.04
 
@@ -70,7 +74,9 @@ def build():
     symbols_rack.write_lib(LIB)
     if str(HERE) not in lib_search_paths[KICAD9]:
         lib_search_paths[KICAD9].append(str(HERE))
-    count = {}
+    # D1/D2 (power entry) and L1 (buck) are named explicitly; automatic numbering starts after them, so SKiDL never
+    # has to rename a clash (it made D1_1 / D2_1 / L1_1 before #34)
+    count = {"D": 2, "L": 1}
 
     def ref(prefix):
         count[prefix] = count.get(prefix, 0) + 1
@@ -104,6 +110,11 @@ def build():
     def power(name):
         n = Net(name); n.drive = POWER; return n
 
+    def tp(n):
+        """bring-up test pad (#104 review M2: every rail and bus gets one)"""
+        t = part("TestPoint", ref("TP"), n.name, "TestPoint:TestPoint_Pad_D1.0mm", "TP-pad"); t[1] += n
+        return t
+
     gnd, chassis = power("GND"), Net("CHASSIS")
     v12raw, v12p, v12, v5, v3 = power("+12V_RAW"), power("+12V_PROT"), power("+12V_BUS"), power("+5V"), power("+3V3")
     hnet = {}
@@ -115,7 +126,7 @@ def build():
 
     def efuse(rf, mpn, vin, vout, r_ilm, en, flt, c_dvdt="22n"):
         """TPS2595: IN/OUT, ILM to GND, dVdt cap, EN as given (net), FLT open drain to the given net."""
-        u = part("TPS2595", rf, mpn, "Package_SON:WSON-8-1EP_2x2mm_P0.5mm_EP0.9x1.6mm", mpn)
+        u = part("TPS2595", rf, mpn, "Package_SON:Texas_DSG0008A_WSON-8-1EP_2x2mm_P0.5mm_EP0.9x1.6mm", mpn)
         u["IN"] += vin; u["OUT"] += vout; u["GND"] += gnd; u["PAD"] += gnd
         ilm, dvdt = Net(f"{rf}_ILM"), Net(f"{rf}_DVDT")
         u["ILM"] += ilm; u["dVdt"] += dvdt; u["EN/UVLO"] += en
@@ -139,7 +150,7 @@ def build():
         j1 = part("DC_Jack", "J1", "12V IN", "Connector_BarrelJack:BarrelJack_CUI_PJ-063AH_Horizontal", "PJ-063AH")
         v12in = power("+12V_IN")
         j1["+"] += v12in; j1["SLEEVE"] += gnd; j1["SW"] += NC
-        f1 = part("Fuse", "F1", "4A fast", "Fuse:Fuse_Littelfuse_NANO2_451_453", "0451004.MRL")
+        f1 = part("Fuse", "F1", "4A fast", "Fuse:Fuse_Littelfuse-NANO2-451_453", "0451004.MRL")
         f1[1] += v12in; f1[2] += v12raw
         # AO4407A: drain at the fuse, source to the load, gate to GND via 10k; the body diode conducts first, then
         # Vgs = -12 V turns it on. Reversed brick: body diode blocks, Vgs = 0. BZT52C12 clamps Vgs (AO4407A +-25 V).
@@ -184,6 +195,8 @@ def build():
         efuse("U12", "TPS259541DSGR", v12, v12h, R_ILM["cm4"], uvlo12("U12"), pwr_flt)
         j5 = part("Conn_01x02", "J5", "CM4IO 12V", "Connector_JST:JST_VH_B2P-VH_1x02_P3.96mm_Vertical", "B2P-VH")
         j5[1] += v12h; j5[2] += gnd
+        for n in (v12p, v12, v5, v3, v12h, pwr_flt, gnd, gnd):
+            tp(n)
 
     with Group("host"):
         # ---- ribbon header to the CM4IO J8 (pin n to pin n). The CM4IO's own 3V3/5V pins stay unconnected here ----
@@ -209,6 +222,9 @@ def build():
             y[1] += x1; y[2] += x2; C("22p", x1, gnd); C("22p", x2, gnd)
             u["~{CTSA}"] += gnd; u["~{CTSB}"] += gnd; u["~{RTSA}"] += NC; u["~{RTSB}"] += NC
             C("100n", v3, gnd)
+        for k in ("SPI1_SCLK", "SPI1_MOSI", "SPI1_MISO", "SPI1_CE0", "SPI1_CE1", "IRQ_U4", "IRQ_U5"):
+            tp(host(HOST[k]))
+        tp(gnd)
 
     def ufl(rf, value, sig):
         j = part("UFL", rf, value, "Connector_Coaxial:U.FL_Hirose_U.FL-R-SMT-1_Vertical", "U.FL-R-SMT-1(10)")
@@ -222,7 +238,9 @@ def build():
         with Group(f"rf_{ant.lower()}"):
             # ---- antenna input: BNC -> ESD103 (+-15 V, 0.09 pF: survives the 12 V bias) -> bias-T -> DC block ----
             ant_n, bias_rf, bias_dc = Net(f"ANT_{ant}"), Net(f"BIAS_{ant}_RF"), Net(f"BIAS_{ant}_DC")
-            j = part("BNC", bnc, f"ANT {ant}", "openpack:BNC_Amphenol_112487_RA_Bulkhead", "112487")
+            # TE 5415025-1: right-angle PCB BNC, 50 ohm 4 GHz, 1/2-28 bulkhead thread (#34: replaces Amphenol 112487,
+            # whose drawing could not be read; TE drawing C-5415025 rev A2, panel up to 4.6 mm, so the 3.18 mm panel fits)
+            j = part("BNC", bnc, f"ANT {ant}", "openpack:BNC_TE_5415025-1_RA", "5415025-1")
             j["IN"] += ant_n; j["SHIELD"] += gnd
             e1 = part("ESD_Bidir", ref("D"), "ESD103-B1-02EL", "Diode_SMD:D_0402_1005Metric", "ESD103-B1-02EL")
             e1[1] += ant_n; e1[2] += gnd
@@ -238,6 +256,7 @@ def build():
             en = host(HOST[f"BIAS_{ant}_EN"]); R("100k", en, gnd)
             fl = host(HOST[f"BIAS_{ant}_FLT"]); R("10k", v3, fl)
             efuse(efb, "TPS259541DSGR", v12, bias_dc, R_ILM["bias"], en, fl)
+            tp(bias_dc)
             # ---- LNA: QPL9057 per its EVB (datasheet Rev. F): 100 pF blocks, 18 nH choke on RF out, R4 5.1k bias ----
             lna_in, rf_in, rf_o, lna_out = Net(f"LNA_{ant}_IN"), Net(f"LNA_{ant}_RFIN"), Net(f"LNA_{ant}_RFOUT"), Net(f"LNA_{ant}_OUT")
             C("100p", ant_n, lna_in)                          # DC block (EVB C1): the LNA input never sees the bias
@@ -248,6 +267,7 @@ def build():
             fbd = part("L", ref("FB"), "600R@100M", "Inductor_SMD:L_0603_1608Metric", "FB_0603_600R")
             fbd[1] += v5; fbd[2] += v5l
             C("10u", v5l, gnd); C("1u", v5l, gnd); C("100p", v5l, gnd)
+            tp(v5l)
             u = part("QPL9057", lna, "QPL9057", "Package_DFN_QFN:DFN-8-1EP_2x2mm_P0.5mm_EP0.9x1.6mm", "QPL9057TR7")
             u["RF_IN"] += rf_in; u["RF_OUT"] += rf_o; u["GND"] += gnd
             u["SD"] += gnd                                    # always on (datasheet note 5, FDD)
@@ -282,10 +302,11 @@ def build():
 
     with Group("slots"):
         for k in range(N_SLOTS):
-            # ---- ADR-0014 socket (Harwin M20-7831346). Position 14 takes a Harwin M20-003 polarising key (BOM EXTRAS),
-            # so the sub-board, whose pin 14 is pulled, only goes in one way ----
-            js = part("Conn_Slot", f"J{10 + k}", f"SLOT {k}", "Connector_PinSocket_2.54mm:PinSocket_2x13_P2.54mm_Vertical",
-                      "M20-7831346")
+            # ---- ADR-0014 socket: BOOMELE 2x13 2.54 mm female, 8.5 mm (LCSC C64320, coordinator pick on #34; the
+            # factory-keyed Samtec SSW-113-01-G-D-14 is the drop-in alternative). The footprint has NO hole at 14, so the
+            # socket cannot be soldered until its contact 14 is pulled, and the empty cavity is then plugged (a cut header
+            # pin, glued) so a receiver turned 180 deg cannot go in (#116 review S1, hw/REVIEW.md assembly step) ----
+            js = part("Conn_Slot", f"J{10 + k}", f"SLOT {k}", "openpack:PinSocket_2x13_P2.54mm_Key14", "2.54-2*13PFemale")
             v12s, v5s = power(f"+12V_S{k}"), power(f"+5V_S{k}")
             s = {name: Net(f"S{k}_{name}") for name in set(symbols_rack.BACKPLANE.values())
                  if name not in ("GND", "+12V", "+5V", "KEY") and not name.startswith(("BP_I2S", "BP_SLOT"))}
@@ -299,6 +320,8 @@ def build():
             # ---- per-slot current limit: a shorted sub-board trips its own eFuses, the other seven keep running ----
             efuse(f"U{20 + k}", "TPS259541DSGR", v12, v12s, R_ILM["slot"], uvlo12(f"U{20 + k}"), pwr_flt)
             efuse(f"U{30 + k}", "TPS259531DSGR", v5, v5s, R_ILM["slot"], v5, pwr_flt)   # EN to IN: < 6 V allowed
+            for n in (v12s, v5s, s["BP_UART_TX"], s["BP_UART_RX"], s["BP_nRESET"]):
+                tp(n)
             # ---- UART + control to the host ----
             tx, rx = SLOT_UART[k]
             if tx.startswith("GPIO"):
@@ -309,11 +332,13 @@ def build():
                 u[f"TX{rx}"] += s["BP_UART_RX"]; u[f"RX{rx}"] += s["BP_UART_TX"]
             uc, g_rst, g_boot = SLOT_CTRL[k]
             uart[uc][f"GPIO{g_rst}"] += s["BP_nRESET"]; uart[uc][f"GPIO{g_boot}"] += s["BP_BOOT"]
-            # ---- front LEDs (RK-4): module GPIO (100 R on the sub-board) -> 560 R -> LED -> GND, ~2 mA ----
+            # ---- front LEDs (RK-4): module GPIO (100 R on the sub-board) -> 560 R -> LED -> GND, ~2 mA. Side-view
+            # (right-angle) LEDs at the main board's front edge shine straight through the front-panel holes (#34) ----
             for sig, col in (("BP_LED_LOCK", "GREEN"), ("BP_LED_PEAK", "RED")):
                 a = Net(f"S{k}_{sig}_A")
                 R("560", s[sig], a)
-                d = part("LED", ref("D"), col.lower(), "LED_SMD:LED_0603_1608Metric", {"GREEN": "LTST-C191KGKT", "RED": "LTST-C191KRKT"}[col])
+                d = part("LED", ref("D"), col.lower(), "openpack:LED_LiteOn_LTST-S270",
+                         {"GREEN": LED_MPN["green"], "RED": LED_MPN["red"]}[col])
                 d["A"] += a; d["K"] += gnd
             # ---- XLR male (RX-8): pin 2 hot, 3 cold, 1 + shell to chassis; SMAJ58CA (VRWM 58 V >= P48 52 V max) ----
             jx = part("XLR3_Male", f"J{20 + k}", f"OUT {k + 1}", "openpack:Neutrik_NC3MAH", "NC3MAH")

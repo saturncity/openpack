@@ -52,7 +52,7 @@ def test_erc_and_bom(built):
     assert [{k: str(v) for k, v in r.items()} for r in rows] == committed, "run python hw/rack/backplane.py --no-sch"
     for r in rows:                      # UK owner: every line has a UK distributor, a GBP price and a labelled source
         assert r["uk_distributor"] and float(r["unit_gbp"]) >= 0
-        assert r["source"].startswith(("est.", "DigiKey UK", "copper", "The Pi Hut")), r
+        assert r["source"].startswith(("est.", "DigiKey UK", "copper", "The Pi Hut", "RS UK", "Rapid Online")), r
 
 
 def test_no_skidl_calls_in_comments():
@@ -71,7 +71,7 @@ def test_slot_sockets_follow_adr0014(built):
         assert re.search(rf"\|\s*{n}\s*\|\s*`{re.escape(name)}`\s*\|", adr), (n, name)
     for k in range(bp.N_SLOTS):
         j = f"J{10 + k}"
-        assert parts[j].fields["MPN"] == "M20-7831346"
+        assert parts[j].fields["MPN"] == "2.54-2*13PFemale"
         got = {n: net[j, str(n)] for n in table}
         assert got[14] == "__NOCONNECT"                        # key: position 14 plugged
         for n, name in table.items():
@@ -200,7 +200,7 @@ def test_host_interface(built):
 def test_rear_panel_and_esd(built):
     bp, _, _, net, parts = built
     xlr = [p for p in parts.values() if p.fields.get("MPN") == "NC3MAH"]
-    bnc = [p for p in parts.values() if p.fields.get("MPN") == "112487"]
+    bnc = [p for p in parts.values() if p.fields.get("MPN") == "5415025-1"]
     dc = [p for p in parts.values() if p.fields.get("MPN") == "PJ-063AH"]
     assert (len(xlr), len(bnc), len(dc)) == (8, 2, 1)                 # RK-1 rear panel (+ etherCON, USB in EXTRAS)
     extras = " ".join(e[0] for e in bp.prices.EXTRAS)
@@ -254,7 +254,9 @@ def test_bias_t_resistor_dissipation(built):
 
 
 def test_slot_key_plugs():
-    """#95 S3: position 14 is physically blocked by a polarising key in every slot socket."""
+    """#95 S3 / #116 S1: position 14 is physically blocked in every slot socket: the footprint has no hole at 14 (the
+    socket cannot be soldered with its contact 14 in place) and the price line carries the pull-and-plug step."""
     pr = _load("hw_rack_prices_t", RACK / "prices.py")
-    key = [e for e in pr.EXTRAS if "M20-003" in e[0]]
-    assert len(key) == 1 and key[0][1] == 8
+    assert "cavity plugged" in pr.PRICES["2.54-2*13PFemale"][2]
+    src = (RACK / "backplane.py").read_text()
+    assert '"openpack:PinSocket_2x13_P2.54mm_Key14", "2.54-2*13PFemale"' in src

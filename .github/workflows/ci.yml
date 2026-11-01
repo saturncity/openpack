@@ -30,8 +30,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "bsim skipped until phase 2"
-  # pack + receiver PCBs (#34): DRC 0 errors against hw/{pack,rx}/*.kicad_dru (rules proven loaded), fab outputs
-  # regenerate identically, pack fit, rx current-path widths / RF line / analog keep-out / JLC BOM
+  # pack + receiver + rack PCBs (#34): DRC 0 errors against hw/{pack,rx,rack}/*.kicad_dru (rules proven loaded), fab
+  # outputs regenerate identically, pack fit, rx/rack current-path widths / RF lines / JLC BOM, rack keyed slots and fit
   pcb:
     runs-on: ubuntu-latest
     steps:
@@ -41,4 +41,4 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends kicad python3-pytest
       - run: kicad-cli version
-      - run: python3 -m pytest -q -rP tests/test_pack_layout.py tests/test_rx_layout.py
+      - run: python3 -m pytest -q -rP tests/test_pack_layout.py tests/test_rx_layout.py tests/test_rack_layout.py
