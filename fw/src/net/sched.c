@@ -13,7 +13,7 @@
  * Payload: the newest IPC frame (op_sched_put) is latched in the DISABLED interrupt after copy B
  * (LATCH_US) for the next t0. At start the net core tells the app core where that latch is
  * (op_sched_sync), and the app core places its audio frame clock OP_PACK_FRAME_LEAD_US before it, so
- * every frame lands in its own slot (#87, ADR-0019).
+ * every frame lands in its own slot (#87, ADR-0020).
  *
  * All peripheral access is via the nrfx HAL (the bsim models only see HAL writes, ADR-0009).
  */
