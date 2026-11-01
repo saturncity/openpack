@@ -57,9 +57,32 @@ def client():
 def test_plan_file_valid():
     assert len(channel_plan.load()) == 8
     assert channel_plan.region() == "UK"
-    assert channel_plan.gap_lost_to_wifi13(channel_plan.load()) == [6, 7, 8]  # ADR-0015: UK Wi-Fi 13 caveat
+    assert channel_plan.gap_lost_to_wifi13(channel_plan.load()) == [1, 6, 7, 8]  # UK Wi-Fi 13 caveat (ADR-0016)
+    assert channel_plan.load()[1] == (2414, 2482)  # ADR-0016: every UK pack has a gap carrier
 
 
+def test_us_plan_file_valid():
+    us = channel_plan.load(channel_plan.PATH_US)
+    assert channel_plan.region(channel_plan.PATH_US) == "US"
+    assert max(b for _, b in us.values()) <= 2480 and us[1] == (2414, 2456)
+    # identical to the UK plan except pack 1, so bsim (US plan, run.py default) covers packs 2-8 of both
+    assert {k: v for k, v in us.items() if k != 1} == {k: v for k, v in channel_plan.load().items() if k != 1}
+
+
+@pytest.mark.parametrize("path, region, fb", [
+    ("PATH", "UK", 2483),     # 99 % OBW would cross 2483.5 (audit.py Audit 5)
+    ("PATH_US", "US", 2482),  # 15.205 restricted band above 2483.5
+    ("PATH", "US", 2482),     # the UK plan relabelled US: 2482 is UK/EU only
+])
+def test_fb_cap_by_region(path, region, fb):
+    plan = yaml.safe_load(getattr(channel_plan, path).read_text())
+    plan["region"] = region
+    plan["packs"][1]["fB"] = fb
+    with pytest.raises(ValueError):
+        channel_plan.validate(plan)
+
+
+@pytest.mark.parametrize("path", ["PATH", "PATH_US"])
 @pytest.mark.parametrize("edit", [
     lambda p: p.pop(8),                                  # missing pack
     lambda p: p[1].update(fA=2445),                      # fA > 2440
@@ -73,8 +96,8 @@ def test_plan_file_valid():
     lambda p: p[3].update(fB=2466),                      # pack 2 near: pack 3 loses 2426 and 2466 (near-far)
     lambda p: [p[i].update(fA=a) for i, a in ((6, 2417), (7, 2420))],   # 5 in-band carriers under Wi-Fi 1
 ])
-def test_bad_plans_rejected(edit):
-    plan = yaml.safe_load(channel_plan.PATH.read_text())
+def test_bad_plans_rejected(edit, path):
+    plan = yaml.safe_load(getattr(channel_plan, path).read_text())
     edit(plan["packs"])
     with pytest.raises(ValueError):
         channel_plan.validate(plan)

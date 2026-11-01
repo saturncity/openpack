@@ -1,5 +1,5 @@
-# Study plan for #89 (docs/analysis/r1-uk-isolation.md), not the production plan: host/channel_plan.yaml is
-# unchanged until an ADR adopts this. MHz. The same as host/channel_plan.yaml except pack 1, which moves from
+# ADOPTED by ADR-0016 (2026-11-01): host/channel_plan.yaml is now this plan; kept here as the study record.
+# Study plan for #89 (docs/analysis/r1-uk-isolation.md). MHz. The same as host/channel_plan_us.yaml (the ADR-0015 plan) except pack 1, which moves from
 # 2414/2456 (both in-band) to 2414/2482. 2482 is an 8th gap carrier, 20 MHz from Wi-Fi 11. With it, all
 # 8 packs have one carrier clear of Wi-Fi 1/6/11.
 # 2482 is UK only: its skirt above 2483.5 is -25 dBm/MHz at 9 dBm (ideal GFSK; EN 300 328 4.3.2.8 allows -10).

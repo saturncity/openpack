@@ -5,7 +5,9 @@ usage: run.py [--long] [--only abcde] [--build DIR] [--no-build] [--out DIR] [--
 needs BSIM_OUT_PATH, BSIM_COMPONENTS_PATH and a west workspace (ZEPHYR_BASE, Zephyr SDK) for the builds.
 
 Builds 5 images (pack, receiver, pack that goes silent after 3 s, and both at the time-diversity packet
-length) once; every pack id and carrier pair comes from host/channel_plan.yaml through the bsim-only
+length) once; every pack id and carrier pair comes from host/channel_plan_us.yaml (default --plan; the
+BabbleSim phy rejects centres above 2480 MHz, so the UK plan's 2482 carrier for pack 1 cannot run here,
+ADR-0016; packs 2-8 are identical in both plans) through the bsim-only
 -op_pack_id/-op_ch_a/-op_ch_b options (CONFIG_OP_TEST_BSIM_ARGS). Each scenario launches the 2G4 phy
 (multiatt channel, BLE_simple modem) + N packs + N receivers + optional 3 WLAN_actmod interferers on
 Wi-Fi 1/6/11, every process under `timeout` with -sim_length, all killed on exit (hands-off.md).
@@ -530,7 +532,8 @@ def main():
                     help="rack antenna gain toward Wi-Fi, dB vs isotropic (patch behind: rx-gain - front-to-back)")
     ap.add_argument("--busy", default="", help="(c) Wi-Fi busy sets, e.g. 10,40 (default 40, --long 10,25,40)")
     ap.add_argument("--c-secs", type=float, default=0, help="(c) Wi-Fi run length in s (default 5, --long 60)")
-    ap.add_argument("--plan", default=str(REPO / "host/channel_plan.yaml"), help="channel plan for (b) and (c)")
+    ap.add_argument("--plan", default=str(REPO / "host/channel_plan_us.yaml"),
+                    help="channel plan for (b) and (c); bsim cannot run carriers above 2480 (UK pack 1, ADR-0016)")
     ap.add_argument("--td-len", type=int, default=81,
                     help="TD-length packet payload B (81 = full td_audio, AIR-3; e.g. 63 = ADPCM-3 td_audio, #26)")
     a = ap.parse_args()

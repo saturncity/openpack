@@ -1,0 +1,15 @@
+# US region channel plan (FCC 15.247, 20 dBm EIRP): fB stops at 2480, since 2483.5-2500 is a 15.205 restricted band.
+# This is the ADR-0015 plan. 7 gap carriers clear of Wi-Fi 1/6/11 (2423 2426 | 2448 2451 | 2473 2476 2479), one for
+# each of packs 2-8. Pack 1 has none: both copies are in-band, and every other carrier is >= 5 MHz away.
+# Use it by copying it over host/channel_plan.yaml (the region default is UK, ADR-0015/ADR-0016).
+# BabbleSim's phy stops at 2480 MHz, so tests/bsim/scenarios/run.py runs this plan by default (its default --eirp is 20).
+region: US
+packs:
+  1: {fA: 2414, fB: 2456}
+  2: {fA: 2423, fB: 2463}
+  3: {fA: 2426, fB: 2468}
+  4: {fA: 2403, fB: 2448}
+  5: {fA: 2408, fB: 2451}
+  6: {fA: 2429, fB: 2473}
+  7: {fA: 2434, fB: 2476}
+  8: {fA: 2439, fB: 2479}
