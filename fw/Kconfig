@@ -238,6 +238,17 @@ config OP_PERSIST
 	  defaults at boot. The net core still takes its id and carriers from its own Kconfig until the app core
 	  forwards them (#38).
 
+config OP_DFU
+	bool "`dfu` command: reboot into MCUboot serial recovery (PK-9, FW-6)"
+	default y if BOOTLOADER_MCUBOOT && OP_NRF5340 && !SOC_COMPATIBLE_NRF5340_CPUNET
+	select REBOOT
+	select RETAINED_MEM
+	select RETENTION
+	select RETENTION_BOOT_MODE
+	help
+	  Needs the DT chosen zephyr,boot-mode (DK, openpack boards) and an MCUboot with BOOT_SERIAL_BOOT_MODE
+	  (fw/sysbuild/mcuboot.conf). Updates the app core only: the net core image is not under MCUboot (fw/PROTOCOL.md).
+
 config OP_CONSOLE_USB_CDC
 	bool "Protocol on USB CDC ACM (PK-9) instead of the console UART"
 	default y if $(dt_chosen_enabled,openpack-proto)

@@ -110,6 +110,13 @@ def test_rx_stats_real_counters(rx):
     assert all(v == "0" for v in s.values())
 
 
+def test_dfu_refused_without_mcuboot(rx):
+    """#25 `dfu`: bsim has no MCUboot, so both forms are refused with an early err (the host never streams a payload)."""
+    for cmd in ("dfu", "dfu 1024"):
+        with pytest.raises(modules.ModuleError, match="^err dfu"):
+            modules.request(rx, cmd)
+
+
 def test_rx_commands(rx):
     assert modules.request(rx, "pair 3 2424 2473") == ""
     assert modules.request(rx, "trim -3.5") == ""

@@ -132,7 +132,7 @@ int op_pack_cfg_valid(const struct op_pack_cfg *c)
 const struct op_cmd op_pack_cmds[] = {
 	{"info", c_info},   {"id", c_id},         {"chan", c_chan},
 	{"power", c_power}, {"region", c_region}, {"td", c_td},
-	{"save", c_save},
+	{"save", c_save},   {"dfu", op_c_dfu},
 };
 const size_t op_pack_ncmds = sizeof(op_pack_cmds) / sizeof(op_pack_cmds[0]);
 

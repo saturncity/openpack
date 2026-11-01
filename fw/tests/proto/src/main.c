@@ -246,3 +246,28 @@ ZTEST(proto, test_cfg_valid)
 	strcpy(c.region, "zz");
 	zassert_false(op_pack_cfg_valid(&c));
 }
+
+static int dfu_calls, dfu_fail;
+static int fake_dfu(void)
+{
+	dfu_calls++;
+	return dfu_fail ? -1 : 0;
+}
+
+ZTEST(proto, test_dfu) /* both roles: bare `dfu` enters recovery via the hook; the raw-payload form stays refused */
+{
+	op_dfu_hook = NULL;
+	zassert_str_equal(rx_do("dfu"), "err dfu not available in this build\n");
+	zassert_str_equal(pk_do("dfu"), "err dfu not available in this build\n");
+	op_dfu_hook = fake_dfu;
+	dfu_calls = 0;
+	zassert_str_equal(rx_do("dfu"), "ok\n");
+	zassert_str_equal(pk_do("dfu"), "ok\n");
+	zassert_equal(dfu_calls, 2);
+	zassert_true(strncmp(rx_do("dfu 1024"), "err ", 4) == 0);
+	zassert_equal(dfu_calls, 2); /* a sized request never resets: the host would stream the payload into the parser */
+	dfu_fail = 1;
+	zassert_str_equal(rx_do("dfu"), "err dfu failed\n");
+	dfu_fail = 0;
+	op_dfu_hook = NULL;
+}

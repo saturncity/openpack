@@ -19,6 +19,22 @@ void op_status_unpack(uint16_t w, struct op_telem *t)
 	t->flags = (w >> 13) & 7;
 }
 
+int (*op_dfu_hook)(void);
+
+/* `dfu`: reboot into MCUboot serial recovery (mcumgr SMP over the serial port). Bare `dfu` only: the raw-payload form
+ * `dfu <bytes>` of host/PROTOCOL.md stays refused (an early err keeps the host from streaming bytes into the
+ * command parser). fw/PROTOCOL.md "dfu". */
+const char *op_c_dfu(void *c, int argc, char **argv, char *out, size_t n)
+{
+	if (argc != 0) {
+		return "dfu takes no size: send `dfu`, then mcumgr over the serial port";
+	}
+	if (!op_dfu_hook) {
+		return "dfu not available in this build";
+	}
+	return op_dfu_hook() ? "dfu failed" : NULL;
+}
+
 int op_parse_int(const char *s, long lo, long hi, long *v)
 {
 	char *e;

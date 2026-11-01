@@ -41,6 +41,11 @@ struct op_cmd {
  */
 size_t op_proto_exec(const struct op_cmd *tbl, size_t n, void *ctx, char *line, char *out, size_t outsz);
 
+/* `dfu` (both roles). op_dfu_hook is set by the platform glue (proto_uart.c) when MCUboot serial recovery is built in;
+ * it schedules the reset (the reply must go out first) and returns 0. */
+extern int (*op_dfu_hook)(void);
+const char *op_c_dfu(void *c, int argc, char **argv, char *out, size_t outsz);
+
 /* Integer args: whole string must parse and lie in [lo, hi]. */
 int op_parse_int(const char *s, long lo, long hi, long *v);
 /* Decimal dB like "-3.5" -> tenths (-35), within +-limit_tenths. */

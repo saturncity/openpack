@@ -102,14 +102,9 @@ static const char *c_scan(void *c, int argc, char **argv, char *out, size_t n)
 	return NULL;
 }
 
-static const char *c_dfu(void *c, int argc, char **argv, char *out, size_t n)
-{
-	return "dfu not implemented"; /* MCUboot serial DFU, not this task */
-}
-
 const struct op_cmd op_rx_cmds[] = {
 	{"info", c_info}, {"status", c_status}, {"pair", c_pair},
-	{"trim", c_trim}, {"scan", c_scan},     {"dfu", c_dfu},
+	{"trim", c_trim}, {"scan", c_scan},     {"dfu", op_c_dfu},
 	{"td", c_td},       {"stats", c_stats},
 };
 const size_t op_rx_ncmds = sizeof(op_rx_cmds) / sizeof(op_rx_cmds[0]);

@@ -635,10 +635,42 @@ The rack main board (`hw/rack/layout.py` → `hw/rack/rack.kicad_pcb`) and its 1
 - **Bench:** **yes**, conducted power at the u.FL (#38).
 
 ### FW-11. Unfinished host protocol items
-- **Difficulty:** #25 is open: no USB CDC console on the DK (uses the VCOM UART), settings saved in RAM only (no NVS), no `dfu` command in firmware at the time, receiver telemetry partly stubbed.
+- **Difficulty:** #25 was open after PR #72: no USB CDC console on the DK (VCOM UART), settings saved in RAM only, no `dfu`, receiver telemetry stubbed. Closed by FW-12 to FW-15 below, with the leftovers listed there.
 - **Links:** #25, PR #72, `fw/PROTOCOL.md`.
-- **Residual risk:** pack settings (id, channel pair, TD) are lost at power-off until NVS lands.
-- **Bench:** yes.
+- **Bench:** see FW-12 to FW-15.
+
+### FW-12. Receiver telemetry: counters from #24, one new command, no change to the host contract
+- **Difficulty:** `status` returned stub values. The app core already counts frames, valid, lost, PLC, per-copy successes, skips, jitter-slot fill and slips and the clock-recovery correction (for the 1 s RXAPP log line), but the log line is a cleared-every-second window and the console needs cumulative values plus a loss figure that does not jump.
+- **Options:** (a) add the new fields to `status`; (b) keep `status` exactly as `host/PROTOCOL.md` and add a separate `stats` command; (c) derive loss in the host from two polls.
+- **Chosen:** (b). The host parser rejects or ignores unknown keys depending on version and 10 Hz polling must stay cheap. `status` now reads the cumulative snapshot (`op_rx_app_snapshot`): `locked` = a frame arrived in the last 100 ms, `rssi` = last valid frame, `batt/peak/clip/temp` = the pack's AIR-3 status word from the last valid frame, `loss` = lost/frames over the last full 1000-frame window (the running one until the first completes, `op_loss_win`, unit tested). `stats` carries the counters (`frames valid lost plc a_ok b_ok skips td_rec under over fill_milli ppb`). Pure-C mapping and window in `proto_rx.c`, tested in `fw/tests/proto`; a bsim pty test checks the fields with no pack on air.
+- **Links:** #25, #24, `fw/PROTOCOL.md`, `fw/src/rx_app/rx_app.c`.
+- **Residual risk:** the pack still sends status word 0 until the battery and peak sensors land, so `batt=0` on a real link. RSSI per channel and `lowbat` are not in `status` (listed in the gap list). Real-air values are not checked in CI (no pack in the pty test).
+- **Bench:** no, but `status` against a live pack is part of #38.
+
+### FW-13. `save` goes to flash through NVS, two sectors, validated on load
+- **Difficulty:** `save` copied the config to RAM. Pack settings (id, carriers, power, region, TD) must survive power-off. The bsim `storage_partition` is the whole 1 MB of simulated flash, the DK one is 32 kB.
+- **Options:** Zephyr settings subsystem; NVS; a raw sector write.
+- **Chosen:** NVS (`zephyr/kvss/nvs.h`; `fs/nvs.h` is deprecated in Zephyr 4.5), one fixed-width versioned record, the first two sectors of `storage_partition` only (NVS needs one live and one spare for garbage collection). Settings is heavier than one record needs. On load a record that fails `op_pack_cfg_valid` (the same limits the commands enforce, including the region cap on fB) is ignored and the Kconfig defaults stay. `save` returns `err save failed` if the write fails. Tested on native_sim's flash simulator (`fw/tests/store`: round trip across a re-mount, 500 overwrites through garbage collection, an invalid record, and the console `save` end to end). bsim runs the same code, so the pty test's `save` writes simulated flash.
+- **Links:** #25, `fw/src/proto/op_store.c`.
+- **Residual risk:** the net core still takes its id and carriers from its own Kconfig: the console values, saved or not, are reported and kept but do not retune the radio until the app core forwards them (not in #25; belongs with the bench bring-up, #38). No wear levelling beyond NVS's own (a few writes per day is fine).
+- **Bench:** yes, a power cycle on real flash.
+
+### FW-14. The protocol moves to USB CDC ACM on the DK and the pack board; the receiver stays on UART
+- **Difficulty:** PK-9 asks for a USB CDC console. The line protocol reads `zephyr,console`, which is uart0 everywhere, and printk shares it. bsim has no USB.
+- **Options:** make CDC the console; add a second chosen node for the protocol only; USB everywhere.
+- **Chosen:** a new chosen node `openpack-proto` (`fw/boards/op_usb_cdc.dtsi`) set only on the DK and the pack board (the receiver's host link is the backplane UART, ADR-0014, and it has no USB device). `OP_CONSOLE_USB_CDC` defaults on when that node exists and uses Zephyr's own boot-time USB bring-up (`CDC_ACM_SERIAL_INITIALIZE_AT_BOOT`, new USB device stack) instead of the sample init code. uart0 keeps boot and log lines, so on USB the host no longer sees them. The bsim overlay no longer includes the DK overlay (`ipc_icmsg_cpuapp.dtsi` holds the shared IPC part) and keeps the pty protocol. A DK or pack-board build proves only that it compiles and links: Twister `fw.build.dk.*` and `fw.build.board.pack`.
+- **Links:** #25, `fw/Kconfig`, `fw/src/proto/proto_uart.c`.
+- **Residual risk:** USB VID/PID are placeholders (pid.codes test pair 0x1209:0x0001). A real VID/PID is needed before units are sold, and until then the host cannot tell a pack from any other test device. Enumeration, DTR handling and `uart_poll_out` behaviour with no host open are untested on silicon.
+- **Bench:** **yes**: plug the DK/pack into a host, open the port, run `info`.
+
+### FW-15. `dfu` is MCUboot serial recovery entered from the app, not a raw upload; two limits found
+- **Difficulty:** `host/PROTOCOL.md` says `dfu <bytes>` followed by raw bytes. Two things make that a poor fit with the signed bootloader: the image must be written to slot 1 and validated by MCUboot (the app cannot sign-check it), and the net core image is not under MCUboot at all.
+- **Options:** (a) receive raw bytes in the app and write slot 1 (`flash_img`), then request an upgrade; (b) mcumgr SMP in the app (shares the line protocol's port); (c) the app sets a retained boot mode and resets into MCUboot serial recovery, which speaks SMP on its own port.
+- **Chosen:** (c). `dfu` replies `ok`, 200 ms later sets `BOOT_MODE_TYPE_BOOTLOADER` in the retained byte (the DK already has it; added to the openpack boards, `gpregret1`) and resets. MCUboot (`fw/sysbuild/mcuboot.conf`: `BOOT_SERIAL_BOOT_MODE`, inactivity timeout 60 s so a stray `dfu` does not strand a pack) stays in the bootloader. The receiver also has the BP_BOOT strap (ADR-0014). Recovery runs on the UART on the DK and receiver and on USB CDC on the pack board (the only host link of the pack). `dfu <bytes>` is refused with an early `err`, so the host never streams a payload into the command parser.
+- **Difficulties on the way:** (1) the pack board has no BOOT strap, and MCUboot's GPIO entrance does not compile without one: switched off for that board in `fw/sysbuild.cmake`. (2) An overlay in `fw/sysbuild/mcuboot.overlay` replaces MCUboot's own `app.overlay`; the first build linked MCUboot at the slot 0 address until the `zephyr,code-partition` line was repeated. (3) MCUboot with USB CDC is 67.7 kB, over the 64 kB boot partition; Twister reports that as SKIPPED (FLASH overflow), not as a failure. Turning MCUboot logging off gets it to 64.4 kB of 65.5 kB: 1.1 kB of headroom.
+- **Links:** #25, ADR-0014, FW-9, `fw/src/proto/op_dfu.c`.
+- **Residual risk:** (1) `host/app.py` still sends raw bytes after `dfu <n>`; it needs a follow-up to send `dfu`, then talk SMP (mcumgr/smpmgr) to the recovery port. Until then the firmware refuses (safe). (2) Only the app core updates. The net core (radio) image is flashed separately: upstream Zephyr 4.5 has no net-core update through MCUboot (it is an nRF Connect SDK feature), so a radio-side fix needs SWD. (3) Not run on hardware: build-verified only (no USB or MCUboot in bsim). (4) The 1.1 kB size margin on the pack board; any MCUboot feature added later will overflow. (5) The pack's recovery port is USB, so a pack with broken USB firmware in the app cannot be put into recovery without the app (no strap): a power cycle with the app intact is the only way in.
+- **Bench:** **yes** (#38): `dfu`, an SMP upload, a swap, and revert on an unconfirmed image.
 
 ## Audio and latency
 

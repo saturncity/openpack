@@ -32,3 +32,16 @@ if(NOT "${SB_CONFIG_NET_CORE_BOARD}" STREQUAL "" AND NOT TARGET fw_net)
     native_simulator_set_final_executable(${DEFAULT_IMAGE})
   endif()
 endif()
+
+# The pack board has no BOOT strap (the receiver has one: BP_BOOT, ADR-0014): MCUboot serial recovery is entered by the
+# app's `dfu` command only (#25). Without a strap pin MCUboot's GPIO entrance does not compile.
+if(BOARD STREQUAL "openpack_pack" AND SB_CONFIG_BOOTLOADER_MCUBOOT)
+  set_config_bool(mcuboot CONFIG_BOOT_SERIAL_ENTRANCE_GPIO n)
+  set(cdc_overlay ${CMAKE_CURRENT_LIST_DIR}/sysbuild/mcuboot_cdc.overlay)
+  if(NOT cdc_overlay IN_LIST mcuboot_EXTRA_DTC_OVERLAY_FILE)
+    set(mcuboot_EXTRA_DTC_OVERLAY_FILE ${mcuboot_EXTRA_DTC_OVERLAY_FILE} ${cdc_overlay}
+        CACHE INTERNAL "pack: MCUboot serial recovery on USB CDC ACM" FORCE)
+  endif()
+  set_config_bool(mcuboot CONFIG_BOOT_SERIAL_UART n)
+  set_config_bool(mcuboot CONFIG_BOOT_SERIAL_CDC_ACM y)
+endif()
