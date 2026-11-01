@@ -16,7 +16,7 @@ D1,1,SMF15A,SMF15A,0.10,0.10,0.08,0.08,LCSC / Farnell UK,"est. (SMF 200 W TVS SO
 D2,1,SMF5.0A,SMF5.0A,0.10,0.10,0.08,0.08,LCSC / Farnell UK,"est. (SMF 200 W TVS SOD-123F, q100)"
 D3 D4 D5 D6 D7,5,S1J,S1J,0.04,0.20,0.03,0.15,LCSC / Farnell UK,"est. (S1J 1 A 600 V SMA, IFSM 30 A, q100)"
 D8 D9 D10,3,BAT54,"BAT54,215",0.03,0.09,0.02,0.07,LCSC / Farnell UK,"est. (Nexperia BAT54 SOT-23, q100)"
-J1,1,backplane 2x13,HDR_2x13_2.54_SMD_KEY14,0.40,0.40,0.30,0.30,LCSC,"est. (2x13 2.54 mm gold pin header, pin 14 pulled as the key, q100)"
+J1,1,backplane 2x13,HDR_2x13_2.54_KEY14,0.40,0.40,0.30,0.30,LCSC,"est. (2x13 2.54 mm gold THT pin header, pin 14 pulled as the key, q100)"
 J2,1,SWD,TC2030-pads,0.00,0.00,0.00,0.00,-,footprint only
 J3,1,ANT_A,U.FL-R-SMT-1(10),0.45,0.45,0.34,0.34,Farnell UK / RS UK,"est. (Hirose U.FL receptacle, q100)"
 J4,1,ANT_B,U.FL-R-SMT-1(10),0.45,0.45,0.34,0.34,Farnell UK / RS UK,"est. (Hirose U.FL receptacle, q100)"
@@ -37,6 +37,18 @@ R45 R46,2,22k,R_0402_1%,0.02,0.04,0.02,0.03,LCSC,est.
 R47 R48 R50 R51,4,22,R_0603_1%,0.02,0.08,0.02,0.06,LCSC,est.
 R60,1,249k,R_0402_1%,0.02,0.02,0.02,0.02,LCSC,est.
 R61,1,9.76k,R_0402_1%,0.02,0.02,0.02,0.02,LCSC,est.
+TP1,1,+12V,TP-pad,0.00,0.00,0.00,0.00,-,footprint only
+TP2,1,+12VA,TP-pad,0.00,0.00,0.00,0.00,-,footprint only
+TP3,1,+5V,TP-pad,0.00,0.00,0.00,0.00,-,footprint only
+TP4,1,+3V3,TP-pad,0.00,0.00,0.00,0.00,-,footprint only
+TP5,1,+3V3A,TP-pad,0.00,0.00,0.00,0.00,-,footprint only
+TP6 TP7,2,GND,TP-pad,0.00,0.00,0.00,0.00,-,footprint only
+TP8,1,I2S_BCK,TP-pad,0.00,0.00,0.00,0.00,-,footprint only
+TP9,1,I2S_LRCK,TP-pad,0.00,0.00,0.00,0.00,-,footprint only
+TP10,1,I2S_SDOUT,TP-pad,0.00,0.00,0.00,0.00,-,footprint only
+TP11,1,VCM,TP-pad,0.00,0.00,0.00,0.00,-,footprint only
+TP12,1,ANT_SEL,TP-pad,0.00,0.00,0.00,0.00,-,footprint only
+TP13,1,RLY_G,TP-pad,0.00,0.00,0.00,0.00,-,footprint only
 U1,1,BT40E,BT40E,12.86,12.86,9.77,9.77,DigiKey UK,"Digi-Key UK qty-100 cut tape GBP 9.7765, part 13174285, 803 in stock, 10 wk lead (read 2026-11-01)"
 U2,1,PE4259,PE4259-63,0.41,0.41,0.31,0.31,LCSC C470892,"LCSC C470892 qty-100, via findchips.com/LCSC snapshot read 2026-10-31 (range $0.32-0.49)"
 U3,1,PCM5102A,PCM5102APWR,2.80,2.80,2.13,2.13,Mouser UK / Farnell UK,"Digi-Key qty-100, via findchips.com snapshot read 2026-10-31 (Mouser q100 $2.78)"

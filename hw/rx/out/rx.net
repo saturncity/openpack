@@ -2,47 +2,10 @@
   (version "D")
   (design
     (source "rx.py")
-    (date "11/01/2026 03:36 AM")
+    (date "11/01/2026 04:06 AM")
     (tool "SKiDL (3.0.0)")
     (sheet
       (number 1)
-      (name "/driver1/")
-      (tstamps "/7733c520-0688-552a-bd17-c5a827a49212/")
-      (title_block
-        (title)
-        (company)
-        (rev)
-        (date)
-        (source "out/rx.py")
-        (comment
-          (number "1")
-          (value ""))
-        (comment
-          (number "2")
-          (value ""))
-        (comment
-          (number "3")
-          (value ""))
-        (comment
-          (number "4")
-          (value ""))
-        (comment
-          (number "5")
-          (value ""))
-        (comment
-          (number "6")
-          (value ""))
-        (comment
-          (number "7")
-          (value ""))
-        (comment
-          (number "8")
-          (value ""))
-        (comment
-          (number "9")
-          (value ""))))
-    (sheet
-      (number 2)
       (name "/")
       (tstamps "/")
       (title_block
@@ -79,118 +42,44 @@
           (number "9")
           (value ""))))
     (sheet
+      (number 2)
+      (name "/driver1/")
+      (tstamps "/7733c520-0688-552a-bd17-c5a827a49212/")
+      (title_block
+        (title)
+        (company)
+        (rev)
+        (date)
+        (source "out/rx.py")
+        (comment
+          (number "1")
+          (value ""))
+        (comment
+          (number "2")
+          (value ""))
+        (comment
+          (number "3")
+          (value ""))
+        (comment
+          (number "4")
+          (value ""))
+        (comment
+          (number "5")
+          (value ""))
+        (comment
+          (number "6")
+          (value ""))
+        (comment
+          (number "7")
+          (value ""))
+        (comment
+          (number "8")
+          (value ""))
+        (comment
+          (number "9")
+          (value ""))))
+    (sheet
       (number 3)
-      (name "/dac1/")
-      (tstamps "/82e6aa05-01ab-5aef-b2f4-90b019b1eeb2/")
-      (title_block
-        (title)
-        (company)
-        (rev)
-        (date)
-        (source "out/rx.py")
-        (comment
-          (number "1")
-          (value ""))
-        (comment
-          (number "2")
-          (value ""))
-        (comment
-          (number "3")
-          (value ""))
-        (comment
-          (number "4")
-          (value ""))
-        (comment
-          (number "5")
-          (value ""))
-        (comment
-          (number "6")
-          (value ""))
-        (comment
-          (number "7")
-          (value ""))
-        (comment
-          (number "8")
-          (value ""))
-        (comment
-          (number "9")
-          (value ""))))
-    (sheet
-      (number 4)
-      (name "/rf1/")
-      (tstamps "/c7465acf-bbdb-571f-91c7-fa52e0ca8e96/")
-      (title_block
-        (title)
-        (company)
-        (rev)
-        (date)
-        (source "out/rx.py")
-        (comment
-          (number "1")
-          (value ""))
-        (comment
-          (number "2")
-          (value ""))
-        (comment
-          (number "3")
-          (value ""))
-        (comment
-          (number "4")
-          (value ""))
-        (comment
-          (number "5")
-          (value ""))
-        (comment
-          (number "6")
-          (value ""))
-        (comment
-          (number "7")
-          (value ""))
-        (comment
-          (number "8")
-          (value ""))
-        (comment
-          (number "9")
-          (value ""))))
-    (sheet
-      (number 5)
-      (name "/power1/")
-      (tstamps "/1c71258b-4a63-53c3-96a6-ba5ec56f90dd/")
-      (title_block
-        (title)
-        (company)
-        (rev)
-        (date)
-        (source "out/rx.py")
-        (comment
-          (number "1")
-          (value ""))
-        (comment
-          (number "2")
-          (value ""))
-        (comment
-          (number "3")
-          (value ""))
-        (comment
-          (number "4")
-          (value ""))
-        (comment
-          (number "5")
-          (value ""))
-        (comment
-          (number "6")
-          (value ""))
-        (comment
-          (number "7")
-          (value ""))
-        (comment
-          (number "8")
-          (value ""))
-        (comment
-          (number "9")
-          (value ""))))
-    (sheet
-      (number 6)
       (name "/mute1/")
       (tstamps "/5ea1cf4f-6e07-50a4-8168-1a8faa970016/")
       (title_block
@@ -227,9 +116,157 @@
           (number "9")
           (value ""))))
     (sheet
-      (number 7)
+      (number 4)
+      (name "/dac1/")
+      (tstamps "/82e6aa05-01ab-5aef-b2f4-90b019b1eeb2/")
+      (title_block
+        (title)
+        (company)
+        (rev)
+        (date)
+        (source "out/rx.py")
+        (comment
+          (number "1")
+          (value ""))
+        (comment
+          (number "2")
+          (value ""))
+        (comment
+          (number "3")
+          (value ""))
+        (comment
+          (number "4")
+          (value ""))
+        (comment
+          (number "5")
+          (value ""))
+        (comment
+          (number "6")
+          (value ""))
+        (comment
+          (number "7")
+          (value ""))
+        (comment
+          (number "8")
+          (value ""))
+        (comment
+          (number "9")
+          (value ""))))
+    (sheet
+      (number 5)
       (name "/mcu1/")
       (tstamps "/f0f0c750-503c-5678-9e62-e0dad76cd8d9/")
+      (title_block
+        (title)
+        (company)
+        (rev)
+        (date)
+        (source "out/rx.py")
+        (comment
+          (number "1")
+          (value ""))
+        (comment
+          (number "2")
+          (value ""))
+        (comment
+          (number "3")
+          (value ""))
+        (comment
+          (number "4")
+          (value ""))
+        (comment
+          (number "5")
+          (value ""))
+        (comment
+          (number "6")
+          (value ""))
+        (comment
+          (number "7")
+          (value ""))
+        (comment
+          (number "8")
+          (value ""))
+        (comment
+          (number "9")
+          (value ""))))
+    (sheet
+      (number 6)
+      (name "/test1/")
+      (tstamps "/b0c68bbe-965c-59f9-b78b-9e0f005f248a/")
+      (title_block
+        (title)
+        (company)
+        (rev)
+        (date)
+        (source "out/rx.py")
+        (comment
+          (number "1")
+          (value ""))
+        (comment
+          (number "2")
+          (value ""))
+        (comment
+          (number "3")
+          (value ""))
+        (comment
+          (number "4")
+          (value ""))
+        (comment
+          (number "5")
+          (value ""))
+        (comment
+          (number "6")
+          (value ""))
+        (comment
+          (number "7")
+          (value ""))
+        (comment
+          (number "8")
+          (value ""))
+        (comment
+          (number "9")
+          (value ""))))
+    (sheet
+      (number 7)
+      (name "/power1/")
+      (tstamps "/1c71258b-4a63-53c3-96a6-ba5ec56f90dd/")
+      (title_block
+        (title)
+        (company)
+        (rev)
+        (date)
+        (source "out/rx.py")
+        (comment
+          (number "1")
+          (value ""))
+        (comment
+          (number "2")
+          (value ""))
+        (comment
+          (number "3")
+          (value ""))
+        (comment
+          (number "4")
+          (value ""))
+        (comment
+          (number "5")
+          (value ""))
+        (comment
+          (number "6")
+          (value ""))
+        (comment
+          (number "7")
+          (value ""))
+        (comment
+          (number "8")
+          (value ""))
+        (comment
+          (number "9")
+          (value ""))))
+    (sheet
+      (number 8)
+      (name "/rf1/")
+      (tstamps "/c7465acf-bbdb-571f-91c7-fa52e0ca8e96/")
       (title_block
         (title)
         (company)
@@ -1516,14 +1553,14 @@
       (ref "J1")
       (value "backplane 2x13")
       (description "Receiver backplane connector, 2x13 2.54 mm (ADR-0014)")
-      (footprint "Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical_SMD")
+      (footprint "Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical")
       (fields
         (field
-          (name "MPN") "HDR_2x13_2.54_SMD_KEY14")
+          (name "MPN") "HDR_2x13_2.54_KEY14")
         (field
           (name "Description") "Receiver backplane connector, 2x13 2.54 mm (ADR-0014)")
         (field
-          (name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical_SMD")
+          (name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical")
         (field
           (name "Datasheet"))
         (field
@@ -2741,6 +2778,344 @@
       (component_classes)
       (tstamps "6751bfdd-84c7-5d2f-96fc-26ce45c93266"))
     (comp
+      (ref "TP1")
+      (value "+12V")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP1")
+        (field
+          (name "SKiDL Line") "rx.py:62"))
+      (libsource
+        (lib "openpack_rx")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/test1/")
+        (tstamps "/b0c68bbe-965c-59f9-b78b-9e0f005f248a/"))
+      (component_classes)
+      (tstamps "8808ef01-2546-5b9e-94de-1cd13d3de4d6"))
+    (comp
+      (ref "TP10")
+      (value "I2S_SDOUT")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP10")
+        (field
+          (name "SKiDL Line") "rx.py:62"))
+      (libsource
+        (lib "openpack_rx")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/test1/")
+        (tstamps "/b0c68bbe-965c-59f9-b78b-9e0f005f248a/"))
+      (component_classes)
+      (tstamps "4af1a014-6612-5bc1-a887-a49e94a776cc"))
+    (comp
+      (ref "TP11")
+      (value "VCM")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP11")
+        (field
+          (name "SKiDL Line") "rx.py:62"))
+      (libsource
+        (lib "openpack_rx")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/test1/")
+        (tstamps "/b0c68bbe-965c-59f9-b78b-9e0f005f248a/"))
+      (component_classes)
+      (tstamps "27d7f32c-b741-5856-ae49-b49ce49d6499"))
+    (comp
+      (ref "TP12")
+      (value "ANT_SEL")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP12")
+        (field
+          (name "SKiDL Line") "rx.py:62"))
+      (libsource
+        (lib "openpack_rx")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/test1/")
+        (tstamps "/b0c68bbe-965c-59f9-b78b-9e0f005f248a/"))
+      (component_classes)
+      (tstamps "518967a2-250f-5401-a4b8-3a6a5169532e"))
+    (comp
+      (ref "TP13")
+      (value "RLY_G")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP13")
+        (field
+          (name "SKiDL Line") "rx.py:62"))
+      (libsource
+        (lib "openpack_rx")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/test1/")
+        (tstamps "/b0c68bbe-965c-59f9-b78b-9e0f005f248a/"))
+      (component_classes)
+      (tstamps "8243ff4a-1328-5e54-a93c-f35b5e214bff"))
+    (comp
+      (ref "TP2")
+      (value "+12VA")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP2")
+        (field
+          (name "SKiDL Line") "rx.py:62"))
+      (libsource
+        (lib "openpack_rx")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/test1/")
+        (tstamps "/b0c68bbe-965c-59f9-b78b-9e0f005f248a/"))
+      (component_classes)
+      (tstamps "1753808c-9414-5186-9383-05c47e396eaa"))
+    (comp
+      (ref "TP3")
+      (value "+5V")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP3")
+        (field
+          (name "SKiDL Line") "rx.py:62"))
+      (libsource
+        (lib "openpack_rx")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/test1/")
+        (tstamps "/b0c68bbe-965c-59f9-b78b-9e0f005f248a/"))
+      (component_classes)
+      (tstamps "87511bf9-ef6f-5835-85c7-8906c9488402"))
+    (comp
+      (ref "TP4")
+      (value "+3V3")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP4")
+        (field
+          (name "SKiDL Line") "rx.py:62"))
+      (libsource
+        (lib "openpack_rx")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/test1/")
+        (tstamps "/b0c68bbe-965c-59f9-b78b-9e0f005f248a/"))
+      (component_classes)
+      (tstamps "8d7505fb-6d55-5bf0-905f-acda65fa638a"))
+    (comp
+      (ref "TP5")
+      (value "+3V3A")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP5")
+        (field
+          (name "SKiDL Line") "rx.py:62"))
+      (libsource
+        (lib "openpack_rx")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/test1/")
+        (tstamps "/b0c68bbe-965c-59f9-b78b-9e0f005f248a/"))
+      (component_classes)
+      (tstamps "2c6c2283-2711-54dd-988a-0dce41400929"))
+    (comp
+      (ref "TP6")
+      (value "GND")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP6")
+        (field
+          (name "SKiDL Line") "rx.py:62"))
+      (libsource
+        (lib "openpack_rx")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/test1/")
+        (tstamps "/b0c68bbe-965c-59f9-b78b-9e0f005f248a/"))
+      (component_classes)
+      (tstamps "aa19d76c-6e4d-5ed4-8fba-5f3d84a1319a"))
+    (comp
+      (ref "TP7")
+      (value "GND")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP7")
+        (field
+          (name "SKiDL Line") "rx.py:62"))
+      (libsource
+        (lib "openpack_rx")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/test1/")
+        (tstamps "/b0c68bbe-965c-59f9-b78b-9e0f005f248a/"))
+      (component_classes)
+      (tstamps "d168cfb1-4542-52e7-8153-9d1bac368bf9"))
+    (comp
+      (ref "TP8")
+      (value "I2S_BCK")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP8")
+        (field
+          (name "SKiDL Line") "rx.py:62"))
+      (libsource
+        (lib "openpack_rx")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/test1/")
+        (tstamps "/b0c68bbe-965c-59f9-b78b-9e0f005f248a/"))
+      (component_classes)
+      (tstamps "17225c62-2e91-51ce-8fd5-cdc684120a0a"))
+    (comp
+      (ref "TP9")
+      (value "I2S_LRCK")
+      (description "Test point")
+      (footprint "TestPoint:TestPoint_Pad_D1.0mm")
+      (fields
+        (field
+          (name "MPN") "TP-pad")
+        (field
+          (name "Description") "Test point")
+        (field
+          (name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+        (field
+          (name "Datasheet"))
+        (field
+          (name "SKiDL Tag") "TP9")
+        (field
+          (name "SKiDL Line") "rx.py:62"))
+      (libsource
+        (lib "openpack_rx")
+        (part "TestPoint"))
+      (sheetpath
+        (names "/test1/")
+        (tstamps "/b0c68bbe-965c-59f9-b78b-9e0f005f248a/"))
+      (component_classes)
+      (tstamps "12864a7f-faf7-595f-bada-383da16c3b05"))
+    (comp
       (ref "U1")
       (value "BT40E")
       (description "Fanstel BT40E nRF5340 module, u.FL, no FEM (14x16 mm)")
@@ -2954,6 +3329,10 @@
       (node
         (ref "R60")
         (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "TP1")
+        (pin "1")
         (pintype "PASSIVE")))
     (net
       (code 2)
@@ -2993,6 +3372,10 @@
         (pintype "PASSIVE"))
       (node
         (ref "R45")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "TP2")
         (pin "1")
         (pintype "PASSIVE"))
       (node
@@ -3068,6 +3451,10 @@
         (pin "1")
         (pintype "PASSIVE"))
       (node
+        (ref "TP4")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
         (ref "U1")
         (pin "9")
         (pintype "POWER-IN"))
@@ -3124,6 +3511,10 @@
         (pin "1")
         (pintype "PASSIVE"))
       (node
+        (ref "TP5")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
         (ref "U3")
         (pin "1")
         (pintype "POWER-IN"))
@@ -3176,6 +3567,10 @@
         (pin "9")
         (pintype "PASSIVE"))
       (node
+        (ref "TP3")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
         (ref "U4")
         (pin "5")
         (pintype "INPUT"))
@@ -3197,6 +3592,10 @@
       (class "Default")
       (node
         (ref "R36")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "TP12")
         (pin "1")
         (pintype "PASSIVE"))
       (node
@@ -3908,6 +4307,14 @@
         (pin "2")
         (pintype "PASSIVE"))
       (node
+        (ref "TP6")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "TP7")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
         (ref "U1")
         (pin "10")
         (pintype "POWER-IN"))
@@ -4012,6 +4419,10 @@
         (pin "1")
         (pintype "PASSIVE"))
       (node
+        (ref "TP8")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
         (ref "U1")
         (pin "C3")
         (pintype "BIDIRECTIONAL"))
@@ -4028,6 +4439,10 @@
         (pin "1")
         (pintype "PASSIVE"))
       (node
+        (ref "TP9")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
         (ref "U1")
         (pin "C4")
         (pintype "BIDIRECTIONAL"))
@@ -4041,6 +4456,10 @@
       (class "Default")
       (node
         (ref "R35")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "TP10")
         (pin "1")
         (pintype "PASSIVE"))
       (node
@@ -4157,6 +4576,10 @@
         (pintype "PASSIVE"))
       (node
         (ref "R63")
+        (pin "1")
+        (pintype "PASSIVE"))
+      (node
+        (ref "TP13")
         (pin "1")
         (pintype "PASSIVE"))
       (node
@@ -4334,6 +4757,10 @@
       (node
         (ref "R53")
         (pin "2")
+        (pintype "PASSIVE"))
+      (node
+        (ref "TP11")
+        (pin "1")
         (pintype "PASSIVE"))
       (node
         (ref "U6")

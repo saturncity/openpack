@@ -86,8 +86,10 @@ def build():
 
     with Group("power"):
         # ---- backplane connector (ADR-0014) + rail protection ----
-        j1 = part("Conn_Backplane", "J1", "backplane 2x13", "Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical_SMD",
-                  "HDR_2x13_2.54_SMD_KEY14")
+        # THT header fitted on the underside (pins down into the main-board socket, #34 layout): a mezzanine wants
+        # the through-hole pins for retention, and an underside SMD header would need a second reflow side.
+        j1 = part("Conn_Backplane", "J1", "backplane 2x13", "Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical",
+                  "HDR_2x13_2.54_KEY14")
         rails = {"GND": gnd, "+12V": v12, "+5V": v5}
         for num, name in symbols_rx.BACKPLANE.items():
             j1[str(num)] += NC if name == "KEY" else (rails.get(name) or bp[name])
@@ -151,6 +153,19 @@ def build():
         for p in u1.pins:
             if not p.net:
                 p += NC      # spare GPIO (incl. P1.05, the BT40NE's ANT_SEL pad E1), NC, USB, VBUS
+
+    with Group("test"):
+        # bring-up / Phase 5 bench pads (#104 review M2 lesson): every rail, two grounds (analog side, digital side),
+        # the I2S bus for a logic analyser, VCM, and the two control lines the bench needs to see (ANT_SEL, RLY_G).
+        tps = (("TP1", "+12V", v12), ("TP2", "+12VA", v12a), ("TP3", "+5V", v5), ("TP4", "+3V3", v3), ("TP5", "+3V3A", v3a),
+               ("TP6", "GND", gnd), ("TP7", "GND", gnd), ("TP8", "I2S_BCK", sig["I2S_BCK"]),
+               ("TP9", "I2S_LRCK", sig["I2S_LRCK"]), ("TP10", "I2S_SDOUT", sig["I2S_SDOUT"]), ("TP11", "VCM", None),
+               ("TP12", "ANT_SEL", sig["ANT_SEL"]), ("TP13", "RLY_G", None))
+        tp = {}
+        for ref, name, n in tps:
+            tp[ref] = part("TestPoint", ref, name, "TestPoint:TestPoint_Pad_D1.0mm", "TP-pad")
+            if n is not None:
+                tp[ref][1] += n
 
     with Group("rf"):
         # ---- RX-1 antenna A/B: two u.FL from the rack splitters -> PE4259 -> u.FL -> jumper -> BT40E u.FL ----
@@ -216,6 +231,7 @@ def build():
         CP("C49", "22u 25V", vcm, gnd, "ALU_22u_25V", "Capacitor_SMD:CP_Elec_5x5.4"); C("C44", "100n", vcm, gnd)
         d8 = part("BAT54", "D8", "BAT54", "Package_TO_SOT_SMD:SOT-23", "BAT54,215"); d8["A"] += vcm; d8["K"] += v12a
         u6["+INA"] += vcm; u6["+INB"] += vcm
+        tp["TP11"][1] += vcm
         u6["V+"] += v12a; u6["V-"] += gnd
         C("C45", "100n", v12a, gnd); C("C46", "10u", v12a, gnd, C1206, "C_10u_1206_25V_X7R")
         # leg A: DAC_OUTF -> 47 uF (+ at the op-amp side, which sits at VCM) -> 2.0k -> -INA; Rf 3.65k || 100 pF
@@ -259,6 +275,7 @@ def build():
         C("C61", "100n", v3, gnd)
         R("R60", "249k", v12, sense); R("R61", "9.76k", sense, gnd); C("C60", "1n", sense, gnd, mpn="C_1n_0402")
         R("R62", "10k", sig["OUT_EN"], rly_g); R("R63", "100k", rly_g, gnd)
+        tp["TP13"][1] += rly_g
         q1 = part("NMOS", "Q1", "BSS138", "Package_TO_SOT_SMD:SOT-23", "BSS138")
         q1["G"] += rly_g; q1["S"] += gnd; q1["D"] += coil
         k1["COIL+"] += v12; k1["COIL-"] += coil
