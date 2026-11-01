@@ -1,42 +1,9 @@
-/* FW-2: ipc0 as icmsg (no OpenAMP), from zephyr samples/subsys/ipc/ipc_service/icmsg. */
-/delete-node/ &sram0_shared;
-
-/ {
-	chosen {
-		/delete-property/ zephyr,ipc_shm;
-	};
-
-	reserved-memory {
-		#address-cells = <1>;
-		#size-cells = <1>;
-
-		sram_rx: memory@20070000 {
-			reg = <0x20070000 0x0800>;
-		};
-
-		sram_tx: memory@20078000 {
-			reg = <0x20078000 0x0800>;
-		};
-	};
-
-	ipc {
-		/delete-node/ ipc0;
-
-		ipc0: ipc0 {
-			compatible = "zephyr,ipc-icmsg";
-			tx-region = <&sram_tx>;
-			rx-region = <&sram_rx>;
-			mboxes = <&mbox 0>, <&mbox 1>;
-			mbox-names = "rx", "tx";
-			status = "okay";
-		};
-	};
-};
+#include "ipc_icmsg_cpunet.dtsi"
 
 /* #107: Fanstel BT40NE nRF21540 front-end (FEM), GPIO mode.
- * TODO(#107): PLACEHOLDER on the nRF5340 DK. The pack board target does not exist yet; when it does
- * (boards/openpack_pack), move this node into its net-core devicetree unchanged. The pins below are the BT40NE
- * module-internal wiring, so they are right on the pack and arbitrary on a DK.
+ * PLACEHOLDER on the nRF5340 DK. The pack board target (boards/openpack/openpack_pack, #118) generates the same node
+ * from the netlist (gen_pins.py, which also checks the nRF21540 pads are NC on the board). The pins below are the
+ * BT40NE module-internal wiring, so they are right on the pack and arbitrary on a DK.
  * PACK ONLY: the receiver sub-board is a BT40E with no nRF21540 (ADR-0021). Receiver builds (SB_CONFIG_OP_ROLE_RX)
  * disable this node through boards/role_rx_cpunet.overlay, and fw/src/rx/rx.c refuses to build with it enabled.
  *
@@ -46,7 +13,8 @@
  *   TX_EN  = P0.21 (pad C2)    RX_EN = P0.27 (pad D2)    PDN = P0.26 (pad D1)
  *   MODE   = P1.04 (pad E0)    ANT_SEL = P1.05 (pad E1)  CSN = P1.06, MISO = P0.25 (SPI mode only, unused here)
  * The p.22 sample says mode = P0.24 (pad C3), which the p.21 table does not mark as an nRF21540 pin; the table (and
- * hw/pack/symbols.py _FEM) put MODE on pad E0 = P1.04, so the table wins. Confirm MODE with Fanstel before Phase 5.
+ * hw/pack/symbols.py _FEM) put MODE on pad E0 = P1.04, so the table wins. Confirm MODE with Fanstel before Phase 5:
+ * on the pack, C3 = P0.24 is the I2S BCLK, so if the sample were right the two would collide.
  * Fanstel p.22 shows ant-sel-gpios as GPIO_ACTIVE_HIGH but does not say which level selects the u.FL.
  * Firmware therefore takes the level from CONFIG_OP_FEM_ANT_SEL_UFL (fw/Kconfig), a bench gate before Phase 5.
  */

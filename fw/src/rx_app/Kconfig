@@ -20,3 +20,11 @@ config OP_RX_CLK_KI_PPB
 config OP_RX_CLK_LIM_PPB
 	int "RX-7 correction limit (ppb), also the integrator clamp"
 	default 100000
+
+config OP_RX_OUT_EN_DELAY_MS
+	int "Receiver: close the output relay (OUT_EN) this long after boot (ms, ADR-0014)"
+	default 5000
+	range 5000 60000
+	help
+	  The driver's VCM needs about 5 s to settle; closing K1 earlier thumps into the desk. RK-3 allows 60 s
+	  from power-up to audio. XSMT (DAC soft mute) is released first, as soon as the I2S clocks run.

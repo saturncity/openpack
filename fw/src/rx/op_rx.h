@@ -24,6 +24,8 @@ struct op_rx_msg {
 
 int op_rx_start(void);     /* net core */
 int op_rx_app_start(void); /* app core */
+/* App core: XSMT_EN high now if audio_ok, relay OUT_EN CONFIG_OP_RX_OUT_EN_DELAY_MS after boot (ADR-0014, #118). */
+int op_rx_out_start(bool audio_ok);
 int op_rx_app_td(void);    /* app core: 1 if the last frame came from a time-diversity pack */
 
 /* RX-1 SPDT antenna switch. Weak no-op until the hw/rx board fixes the GPIO; bsim has one antenna. */

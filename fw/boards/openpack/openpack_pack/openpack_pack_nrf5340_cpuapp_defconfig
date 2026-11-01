@@ -1,0 +1,8 @@
+CONFIG_ARM_MPU=y
+CONFIG_ARM_TRUSTZONE_M=y
+CONFIG_GPIO=y
+CONFIG_SERIAL=y
+CONFIG_CONSOLE=y
+CONFIG_UART_CONSOLE=y
+# Release the net core at boot and hand it the gpio_fwd pins (FEM / ANT_SEL).
+CONFIG_SOC_NRF53_CPUNET_ENABLE=y

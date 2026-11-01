@@ -1,0 +1,7 @@
+# OpenPack receiver sub-board (Fanstel BT40E) (#118)
+if BOARD_OPENPACK_RX
+
+config HW_STACK_PROTECTION
+	default ARCH_HAS_STACK_PROTECTION
+
+endif

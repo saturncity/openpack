@@ -2,6 +2,7 @@
 #include <zephyr/kernel.h>
 #include "op_frame.h"
 #include "op_rx.h"
+#include "op_batt.h"
 
 #define ROLE (IS_ENABLED(CONFIG_OP_ROLE_PACK) ? "pack" : "rx")
 #define NET  IS_ENABLED(CONFIG_SOC_COMPATIBLE_NRF5340_CPUNET)
@@ -24,6 +25,9 @@ int main(void)
 		}
 	} else {
 		err = op_pack_start();
+		if (err == 0 && IS_ENABLED(CONFIG_OP_BATT)) {
+			err = op_batt_start(); /* PK-8 LEDs, 3.3 V cutoff (ADR-0012) */
+		}
 	}
 	printk("OpenPack %s pipeline %s (%d)\n", CORE, err ? "FAILED" : "up", err);
 #elif defined(CONFIG_OP_NRF5340) && defined(CONFIG_OP_ROLE_RX)

@@ -1,0 +1,5 @@
+tests:
+  # Receiver I2S DAC FIFO (fw/src/audio/op_i2s_ring.c, #118): priming, underrun, overrun, wrap, pure C.
+  fw.audio.i2s_ring:
+    platform_allow: native_sim
+    tags: openpack
