@@ -351,6 +351,19 @@ def bom_rows(circuit):
     return rows
 
 
+def normalise_netlist(text):
+    """SKiDL stamps the build date and lists the hierarchy sheets in an order that varies between Python builds
+    (CI 3.12 vs local 3.13). Blank the date and sort the sheet entries by name, renumbering them."""
+    text = re.sub(r'\(date "[^"]*"\)', '(date "")', text)
+    head, rest = text.split("\n    (sheet\n", 1)
+    sheets_txt, tail = rest.split("\n  (components", 1)
+    sheets = sheets_txt.split("\n    (sheet\n")
+    sheets[-1] = sheets[-1][:-1]                     # the last sheet carries the ")" closing (design ...)
+    sheets.sort(key=lambda s: re.search(r'\(name "([^"]*)"\)', s).group(1))
+    sheets = [re.sub(r"\(number \d+\)", f"(number {i + 1})", s, count=1) for i, s in enumerate(sheets)]
+    return head + "\n    (sheet\n" + "\n    (sheet\n".join(sheets) + ")" + "\n  (components" + tail
+
+
 def erc():
     """Run SKiDL ERC on the built circuit; return (errors, warnings) counted by ERC alone (as hw/rx/rx.py)."""
     import skidl
@@ -374,8 +387,8 @@ def main(argv):
     (OUT / "erc.txt").write_text(f"SKiDL ERC: {errs} errors, {warns} warnings\n")
     print(f"ERC: {errs} errors, {warns} warnings")
     skidl.generate_netlist(file_=str(OUT / "backplane.net"))
-    net = OUT / "backplane.net"   # drop the build timestamp so CI's stale-output diff is meaningful
-    net.write_text(re.sub(r'\(date "[^"]*"\)', '(date "")', net.read_text()))
+    net = OUT / "backplane.net"   # make it reproducible so CI's stale-output diff is meaningful:
+    net.write_text(normalise_netlist(net.read_text()))
     rows = bom_rows(builtins.default_circuit)
     with open(OUT / "bom.csv", "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
