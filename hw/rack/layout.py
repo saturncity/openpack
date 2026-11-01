@@ -922,6 +922,25 @@ def gnd_hand(b, cu, fps, gnd_vias):
     v = (a[0], a[1] - 0.95)
     stub(a, v, 0.3); via(v)
     HAND.add(("U2", "4"))
+    # bias eFuses: EN (pin 2) and FLT (pin 6) each escape to their own via beside the package; the pins sit inside
+    # the B.Cu +12V_BUS strip with no other way out, and the early pass then only joins via to header on In2
+    # and every TPS2595's FLT (pin 6) likewise: it sits between OUT (pin 5, a 0.5 mm power track routed first) and
+    # the ILM hop from pin 7, so the generic router found it boxed in
+    tps = [r for r, fp in fps.items() if str(fp.GetFPID().GetLibItemName()).startswith("Texas_DSG0008A")]
+    for ref in tps:
+        for num, dx, dy in ((("2", -0.95, 0.0),) if ref in ("U10", "U11") else ()) + (("6", 0.95, -0.15),):
+            pad = [p_ for p_ in fps[ref].Pads() if p_.GetNumber() == num][0]
+            net, a = pad.GetNetname(), pc(fps, ref, num)
+            v = (a[0] + dx, a[1] + dy)
+            # HOST_GPIO6 joins 21 eFuses: its escapes stay "not connected" own-net copper the router passes through,
+            # or they would be 21 islands the tree never joins; U10/U11's nets have one island each
+            single = ref in ("U10", "U11")
+            pk.add_track(b, NETS[net], P_.F_Cu, a, v, 0.2)
+            cu.seg(0, a, v, 0.2, net, conn=single)
+            pk.add_via(b, NETS[net], v)
+            cu.via_at(v, net, conn=single)
+            if single:
+                HAND.add((ref, num))
 
 
 def gnd_fanout(b, cu, pads, gnd_vias, log):
@@ -1021,7 +1040,7 @@ def zone_fanout(b, cu, pads, net, rect, log, placed):
 # the bias eFuses' EN / FLT sit inside the B.Cu +12V_BUS rear strip, the GND fan-out fences them in front and L1 is RF
 # from y 31: they route first, on F.Cu + In2 only, before the strip joins the router's copper (their vias become holes
 # in the strip pour; nothing runs on B.Cu there) (#34)
-EARLY_NETS = ("HOST_GPIO22", "HOST_GPIO23", "HOST_GPIO26", "HOST_GPIO27")
+EARLY_NETS = ("U10_ILM", "U11_ILM", "U10_DVDT", "U11_DVDT", "HOST_GPIO22", "HOST_GPIO23", "HOST_GPIO26", "HOST_GPIO27")
 
 
 def route_all(b, cu, nets, log, only=None):
@@ -1229,6 +1248,9 @@ def main(argv):
     gnd_vias = []
     cu.zone(0, BUCK_SW_ZONE, "BUCK_SW")
     gnd_hand(b, cu, fps, gnd_vias)
+    for key in HAND:
+        for it in pads.get(key, []):
+            it.conn = True
     print("placed, RF drawn", flush=True)
     nf = gnd_fanout(b, cu, pads, gnd_vias, log)
     print(f"GND fan-out {nf}", flush=True)
