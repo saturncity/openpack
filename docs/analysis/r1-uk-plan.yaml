@@ -1,0 +1,20 @@
+# Study plan for #89 (docs/analysis/r1-uk-isolation.md), not the production plan: host/channel_plan.yaml is
+# unchanged until an ADR adopts this. MHz. The same as host/channel_plan.yaml except pack 1, which moves from
+# 2414/2456 (both in-band) to 2414/2482. 2482 is an 8th gap carrier, 20 MHz from Wi-Fi 11. With it, all
+# 8 packs have one carrier clear of Wi-Fi 1/6/11.
+# 2482 is UK only: its skirt above 2483.5 is -25 dBm/MHz at 9 dBm (ideal GFSK; EN 300 328 4.3.2.8 allows -10).
+# Under FCC it falls in the 2483.5-2500 restricted band (15.205), so the US keeps host/channel_plan.yaml.
+# Like 2473/2476/2479, it is lost if the venue runs Wi-Fi 13.
+# Adopting it needs fw/src/proto/proto_{pack,rx}.c to accept fB up to 2482 (now 2402-2480) and host/channel_plan.py
+# GAPS/fB limits. BabbleSim cannot run it: its phy rejects centres above 2480 (bs_pc_2G4_utils.c "out of ISM band"),
+# so run.py with this file shows pack 1 as NO LOCK. The twin evidence for 2482 is by equivalence (see the doc).
+region: UK
+packs:
+  1: {fA: 2414, fB: 2482}
+  2: {fA: 2423, fB: 2463}
+  3: {fA: 2426, fB: 2468}
+  4: {fA: 2403, fB: 2448}
+  5: {fA: 2408, fB: 2451}
+  6: {fA: 2429, fB: 2473}
+  7: {fA: 2434, fB: 2476}
+  8: {fA: 2439, fB: 2479}
