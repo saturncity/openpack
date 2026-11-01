@@ -1,14 +1,17 @@
-# Single source of pack id -> carrier pair (API-3, SYS-6, AIR-5). MHz.
-# Each pack: one gap carrier (clear of Wi-Fi 1/6/11) + one carrier under Wi-Fi.
-# Packs 1-2 use gap carriers as A (only 2423/2425 can be A: fA <= 2440);
-# packs 3-8 use the other six gap carriers as B.
-# In-band carriers spread 2/2/4 over Wi-Fi 11/1/6, >= 3 MHz apart.
+# Single source of pack id -> carrier pair (API-3, SYS-6, AIR-5). MHz. ADR-0015 (#80, #76).
+# region sets the pack power limit (SYS-5, AIR-6): UK = EN 300 328 non-adaptive, < 10 dBm EIRP; US = FCC 15.247.
+# Rules (host/channel_plan.py): every carrier >= 3 MHz from every other (2 Mbit GFSK, bsim #76); fB >= fA + 40;
+# 7 gap carriers clear of Wi-Fi 1/6/11 (2423 2426 | 2448 2451 | 2473 2476 2479), one per pack for packs 2-8;
+# pack 1 has none: both copies in-band, every other carrier >= 5 MHz away (it may stand next to an antenna).
+# Near-far: whichever pack is near an antenna, every other pack keeps one carrier >= 5 MHz from both of its carriers.
+# UK venues may also run Wi-Fi 13 (2462-2482): then 2473/2476/2479 are in-band and packs 6-8 lose their gap copy.
+region: UK
 packs:
-  1: {fA: 2423, fB: 2463}
-  2: {fA: 2425, fB: 2466}
-  3: {fA: 2406, fB: 2448}
-  4: {fA: 2410, fB: 2450}
-  5: {fA: 2428, fB: 2473}
-  6: {fA: 2431, fB: 2475}
-  7: {fA: 2434, fB: 2477}
-  8: {fA: 2437, fB: 2479}
+  1: {fA: 2414, fB: 2456}
+  2: {fA: 2423, fB: 2463}
+  3: {fA: 2426, fB: 2468}
+  4: {fA: 2403, fB: 2448}
+  5: {fA: 2408, fB: 2451}
+  6: {fA: 2429, fB: 2473}
+  7: {fA: 2434, fB: 2476}
+  8: {fA: 2439, fB: 2479}

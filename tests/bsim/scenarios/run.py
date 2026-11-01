@@ -33,7 +33,12 @@ Asserted (exit code != 0 on failure), per ADR-0003 / ADR-0010:
 Known failures are XFAIL with the issue that explains them (#76: channel plan); they do not fail the run
 but keep "G2 gate MET" false.
 Region knobs (UK EN 300 328 vs US, see --help): --eirp (pack EIRP, sets the pack -> rack path loss),
---wifi (interferer channels, e.g. 1,5,9,13), --plan (carrier pairs), --inband. (a)/(d)/(e) use the
+--wifi (interferer channels, e.g. 1,5,9,13), --plan (carrier pairs), --inband.
+Receive-antenna knobs (#89, docs/analysis/r1-uk-isolation.md): --rx-gain is the rack antenna gain toward the
+packs (dB vs the isotropic baseline), and --wifi-gain is its gain toward the Wi-Fi interferers (--rx-gain minus
+the front-to-back or off-axis rejection). Both shift the multiatt attenuations. Coax, LNA and splitter scale the
+wanted signal and the interferer alike, so they are not modelled. --near-att sets how hot the near pack is.
+--busy and --c-secs pick the (c) Wi-Fi sets and run length. (a)/(d)/(e) use the
 Kconfig OP_CH_A_MHZ/OP_CH_B_MHZ defaults read from fw/Kconfig.
 """
 import argparse
@@ -317,14 +322,14 @@ class G2:
             out.append((lab, pid, pdev, rdev, fa, fb))
         for lab, _, pdev, _, _, _ in out:
             for _, _, _, rdev, _, _ in out:
-                sim.att.append((pdev, rdev, ATT_NEAR if str(near) == lab else ATT_PACK))
+                sim.att.append((pdev, rdev, (self.a.near_att if str(near) == lab else ATT_PACK) - self.a.rx_gain))
         return out
 
     def wifi(self, sim, busy, links):
         for j in range(len(WIFI_CH)):
             w = sim.wlan(busy, j)
             for *_, rdev, _, _ in links:
-                sim.att.append((w, rdev, ATT_WLAN))
+                sim.att.append((w, rdev, ATT_WLAN - self.a.wifi_gain))
 
     def measure(self, sim, links, warm=0.3):
         """Per pack: dump statistics + firmware RXAPP cross-check."""
@@ -447,7 +452,8 @@ class G2:
     def sc_c(self):
         near = self.a.near
         self.loss_runs("c", list(range(1, 9)), (0,), self.secs(3, 10), near=near)
-        self.loss_runs("c", list(range(1, 9)), self.secs((40,), (10, 25, 40)), self.secs(5, 60), near=near, assert_at=40)
+        busy = tuple(int(x) for x in self.a.busy.split(",")) if self.a.busy else self.secs((40,), (10, 25, 40))
+        self.loss_runs("c", list(range(1, 9)), busy, self.a.c_secs or self.secs(5, 60), near=near, assert_at=40)
 
     # (d) +-40 ppm radio tracking here; RX-7 clock recovery via tests/bsim/rx/run.sh d / dn (#24).
     def sc_d(self):
@@ -509,13 +515,21 @@ def main():
     ap.add_argument("--no-build", action="store_true", help="reuse the images in --build")
     ap.add_argument("--out", default="g2-out", help="logs, g2.json, g2.md")
     ap.add_argument("--jobs", type=int, default=max(1, min(4, (os.cpu_count() or 2) // 2)))
-    ap.add_argument("--near", type=int, default=1, help="(c) pack id at -20 dBm at the rack")
+    ap.add_argument("--near", type=int, default=1, help="(c) pack id at -20 dBm at the rack (0: none)")
+    ap.add_argument("--near-att", type=float, default=ATT_NEAR,
+                    help="(c) near pack radio -> rack attenuation, dB (default 20 = -20 dBm; EIRP 9 at 4 m: 43.2)")
     ap.add_argument("--eirp", type=float, default=20.0,
                     help="pack EIRP dBm (AIR-6: US max ~+20; UK/EU EN 300 328 +10); 10 m path loss 60.2 dB")
     ap.add_argument("--wifi", default="1,6,11", help="Wi-Fi interferer channels (one actmod each), e.g. 1,5,9,13")
     ap.add_argument("--inband", default="2437,2462", help="(b) carrier pair with both copies under Wi-Fi")
     ap.add_argument("--d-secs", type=int, default=0, help="(d) RX-7 sim seconds (default 300, --long 3600)")
     ap.add_argument("--keep", action="store_true", help="keep the phy dumps")
+    ap.add_argument("--rx-gain", type=float, default=0.0,
+                    help="rack antenna gain toward the packs, dB vs isotropic (e.g. 8 for an 8 dBi patch aimed at the stage)")
+    ap.add_argument("--wifi-gain", type=float, default=0.0,
+                    help="rack antenna gain toward Wi-Fi, dB vs isotropic (patch behind: rx-gain - front-to-back)")
+    ap.add_argument("--busy", default="", help="(c) Wi-Fi busy sets, e.g. 10,40 (default 40, --long 10,25,40)")
+    ap.add_argument("--c-secs", type=float, default=0, help="(c) Wi-Fi run length in s (default 5, --long 60)")
     ap.add_argument("--plan", default=str(REPO / "host/channel_plan.yaml"), help="channel plan for (b) and (c)")
     ap.add_argument("--td-len", type=int, default=81,
                     help="TD-length packet payload B (81 = full td_audio, AIR-3; e.g. 63 = ADPCM-3 td_audio, #26)")
@@ -541,7 +555,8 @@ def main():
             f"{' ' + c['xfail'] if c['xfail'] else ''} | {c['value']} |"
             for sc, r in g.results.items() for c in r.get("checks", [])]
     (g.out / "g2.md").write_text("### G2 bsim scenarios\n\n| sc | check | result | value |\n|---|---|---|---|\n" +
-                                 "\n".join(rows) + f"\n\nPack EIRP {a.eirp:g} dBm, Wi-Fi channels {a.wifi}. G2 gate met: {g.gate}\n")
+                                 "\n".join(rows) + f"\n\nPack EIRP {a.eirp:g} dBm, Wi-Fi channels {a.wifi}, rx antenna gain {a.rx_gain:g} dB"
+                                 f" to packs / {a.wifi_gain:g} dB to Wi-Fi. G2 gate met: {g.gate}\n")
     g.results["gate_met"] = g.gate
     (g.out / "g2.json").write_text(json.dumps(g.results, indent=1, default=str))
     print(f"G2 gate {'MET' if g.gate else 'NOT MET (see XFAIL)'}; run {'PASS' if g.ok else 'FAIL'} "
