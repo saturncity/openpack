@@ -13,9 +13,13 @@ The owner asked for a record of every design difficulty and consideration, kept 
 
 Backfilled 2026-11-01 from AUDIT.md, AUDIT-2.md, ADR-0001 to ADR-0022, hw/REVIEW.md, docs/analysis/, and merged PRs #43 to #121 with their review comments.
 
+## Project closed (2026-11-01)
+
+The owner closed the project at the end of Phase 4 without a build. Their verdict: "solid prototype", "cost on receiver too high", "needs new innovation at the highest level" (report `docs/report/REPORT.md` D6). The risks below stay open for good: each was waiting on a bench measurement, and there will be no bench. Entries marked "Bench: yes" were never measured.
+
 ## Open risks for audit
 
-Unresolved items, worst first. Each links to its entry.
+Unresolved items, worst first. Each links to its entry. Frozen at project close.
 
 | # | Risk | Why it matters | Closes when | Entry |
 |---|---|---|---|---|

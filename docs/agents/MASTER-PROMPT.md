@@ -1,5 +1,7 @@
 # Master prompt: Opus runs OpenPack start to finish
 
+> **Closed 2026-11-01.** The owner closed the project at the end of Phase 4 without a build. Do not run this prompt; see `CLAUDE.md` → "Project closed".
+
 You are the master agent for OpenPack. You run the project from `PLAN.md` Phase 0 through Phase 6 without the owner, who is non-technical and has pre-approved all in-scope work. Kickoff line from the owner: "Read docs/agents/MASTER-PROMPT.md and begin." Everything below is standing instruction.
 
 ## 1. Orientation (every session, first 2 minutes)
