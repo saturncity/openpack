@@ -1,5 +1,6 @@
 /* Console glue: read lines from the console UART, run the role's command table, write the reply.
- * bsim: uart0 is the pty. DK: uart0 is the VCOM; the pack's USB CDC ACM is a follow-up (see fw/PROTOCOL.md).
+ * With a chosen openpack,proto (the USB CDC ACM instance, fw/boards/op_usb_cdc.dtsi: DK, pack board) the protocol is on
+ * USB and uart0 keeps the log; else the console UART (bsim pty, receiver board). See fw/PROTOCOL.md.
  */
 #include <zephyr/kernel.h>
 #include <zephyr/init.h>
@@ -8,15 +9,24 @@
 #include "proto.h"
 #include "op_frame.h"
 #include "op_rx.h"
+#ifdef CONFIG_OP_PERSIST
+#include "op_store.h"
+#endif
 
+#if defined(CONFIG_OP_CONSOLE_USB_CDC)
+#define PROTO_DEV DEVICE_DT_GET(DT_CHOSEN(openpack_proto))
+#else
 #define PROTO_DEV DEVICE_DT_GET(DT_CHOSEN(zephyr_console))
+#endif
 
 #ifdef CONFIG_OP_ROLE_RX
-/* Telemetry is the stub until #23/#24, except td: what the merge sees (rx_app.c). */
+/* Telemetry from the app core's counters (#24: merge, PLC, jitter slot, clock recovery). */
 static void sample(struct op_rx_state *s)
 {
-	op_rx_stub_sample(s);
-	s->td = op_rx_app_td();
+	struct op_rx_snap n;
+
+	op_rx_app_snapshot(&n);
+	op_rx_state_from_snap(s, &n);
 }
 
 static struct op_rx_state st = {.sample = sample};
@@ -31,6 +41,13 @@ static int pack_init(void)
 {
 	op_pack_state_init(&st, CONFIG_OP_PACK_ID, CONFIG_OP_CH_A_MHZ, CONFIG_OP_CH_B_MHZ);
 	st.cur.td = IS_ENABLED(CONFIG_OP_TIME_DIVERSITY); /* boot value of `td` (ADR-0017) */
+#ifdef CONFIG_OP_PERSIST
+	/* Saved settings win over the Kconfig defaults; none, or a record that fails validation, keeps the defaults. */
+	st.persist = op_store_save;
+	if (op_store_load(&st.cur) == 0) {
+		printk("OpenPack config: loaded from flash\n");
+	}
+#endif
 	st.saved = st.cur;
 	return 0;
 }

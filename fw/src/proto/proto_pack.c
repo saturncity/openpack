@@ -109,9 +109,24 @@ static const char *c_save(void *c, int argc, char **argv, char *out, size_t n)
 {
 	struct op_pack_state *s = c;
 
-	s->saved = s->cur; /* RAM only; NVS is a follow-up */
+	if (s->persist && s->persist(&s->cur)) {
+		return "save failed";
+	}
+	s->saved = s->cur;
 	s->saves++;
 	return NULL;
+}
+
+int op_pack_cfg_valid(const struct op_pack_cfg *c)
+{
+	if (c->id < 0 || c->id > 7 || c->power_dbm < -40 || c->power_dbm > 3 || (c->td != 0 && c->td != 1)) {
+		return 0;
+	}
+	if (strcmp(c->region, "uk") && strcmp(c->region, "us") && strcmp(c->region, "eu") &&
+	    strcmp(c->region, "jp")) {
+		return 0;
+	}
+	return c->ch_a >= 2402 && c->ch_a <= 2440 && c->ch_b >= c->ch_a + 40 && c->ch_b <= op_fb_max(c->region);
 }
 
 const struct op_cmd op_pack_cmds[] = {

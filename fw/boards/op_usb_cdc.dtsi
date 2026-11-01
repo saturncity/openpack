@@ -1,0 +1,14 @@
+/* PK-9 / RX-9: the line protocol (fw/PROTOCOL.md) over USB CDC ACM. Needs a &zephyr_udc0 (the nRF USB device).
+ * Not on bsim, which has no USB: there the protocol stays on uart0 (the pty).
+ */
+/ {
+	chosen {
+		openpack,proto = &cdc_acm_uart0;
+	};
+};
+
+&zephyr_udc0 {
+	cdc_acm_uart0: cdc_acm_uart0 {
+		compatible = "zephyr,cdc-acm-uart";
+	};
+};

@@ -46,21 +46,47 @@ int op_parse_int(const char *s, long lo, long hi, long *v);
 /* Decimal dB like "-3.5" -> tenths (-35), within +-limit_tenths. */
 int op_parse_tenths(const char *s, int limit_tenths, int *tenths);
 
+/* ---- receiver telemetry (#24 counters, RX-9) ---- */
+/* Loss over fixed windows of OP_LOSS_WIN frames (1 s): the last full window, or the running one before the first
+ * completes. Pure C. */
+#define OP_LOSS_WIN 1000
+struct op_loss_win {
+	uint32_t n, lost; /* current window */
+	int last;         /* permille of the last full window, -1 until one completes */
+};
+void op_loss_win_init(struct op_loss_win *w);
+void op_loss_win_frame(struct op_loss_win *w, int lost);
+int op_loss_win_permille(const struct op_loss_win *w);
+
+/* What the app core's merge/PLC/jitter slot know (fw/src/rx_app/rx_app.c). Counts are cumulative since boot. */
+struct op_rx_snap {
+	int locked;           /* frames arriving now */
+	int rssi_dbm;         /* last valid frame, 0 before one */
+	uint16_t status_word; /* AIR-3 status of the last valid frame (PK-10) */
+	int loss_permille;    /* op_loss_win */
+	int td;               /* last frame came from a time-diversity pack */
+	uint32_t frames, valid, lost, plc, a_ok, b_ok, skips, td_rec;
+	uint32_t under, over; /* jitter slot slips */
+	int fill_milli;       /* jitter slot fill at the last arrival, milli-samples */
+	int ppb;              /* DAC clock correction applied (clock recovery offset) */
+};
+
 /* ---- receiver (host/PROTOCOL.md) ---- */
 struct op_rx_state {
 	int pack, fa, fb; /* pairing, 0 = unpaired */
 	int trim_tenths;
-	/* telemetry source, filled by the platform (stub until #23/#24) */
+	/* telemetry source, filled by the platform (rx_app.c via op_rx_state_from_snap; the unit test sets fields) */
 	void (*sample)(struct op_rx_state *s);
 	int locked, rssi_dbm;
 	int loss_permille;
 	int td;      /* the pack sends time-diversity packets (81 B payload, ADR-0017), from the merge */
 	int td_plan; /* what the booth says this pack should send (`td on|off`), 0 until set */
 	struct op_telem telem;
+	struct op_rx_snap snap; /* counters behind `stats` */
 };
 extern const struct op_cmd op_rx_cmds[];
 extern const size_t op_rx_ncmds;
-void op_rx_stub_sample(struct op_rx_state *s);
+void op_rx_state_from_snap(struct op_rx_state *s, const struct op_rx_snap *n);
 
 /* ---- pack config (PK-9) ---- */
 struct op_pack_cfg {
@@ -71,9 +97,13 @@ struct op_pack_cfg {
 	int td;         /* time diversity (AIR-3 td_audio, ADR-0017): 0 (default) | 1 */
 };
 struct op_pack_state {
-	struct op_pack_cfg cur, saved; /* saved is RAM only: NVS persistence not wired (see fw/PROTOCOL.md) */
+	struct op_pack_cfg cur, saved; /* saved: the last `save` (RAM copy; flash via persist) */
 	int saves;
+	/* `save` writes cur through this (NVS, op_store.c); NULL = RAM only. Nonzero return = `err save failed`. */
+	int (*persist)(const struct op_pack_cfg *cfg);
 };
+/* Every field inside the limits the commands enforce (a record read back from flash is checked with this). */
+int op_pack_cfg_valid(const struct op_pack_cfg *c);
 extern const struct op_cmd op_pack_cmds[];
 extern const size_t op_pack_ncmds;
 void op_pack_state_init(struct op_pack_state *s, int id, int ch_a, int ch_b);

@@ -1,0 +1,5 @@
+tests:
+  # PK-9 `save` round trip through NVS on the native_sim flash simulator (#25).
+  fw.store.nvs:
+    platform_allow: native_sim
+    tags: openpack

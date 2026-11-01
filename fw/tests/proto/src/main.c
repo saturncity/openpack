@@ -159,3 +159,90 @@ ZTEST(proto, test_pack_config)
 	zassert_str_equal(pk_do("info"),
 			  "ok fw=" OP_FW_VERSION " role=pack id=5 chan=2410,2460 power=-8 region=eu td=off\n");
 }
+
+ZTEST(proto, test_loss_window) /* RX-9 loss: last full 1000-frame window, running estimate before the first */
+{
+	struct op_loss_win w;
+
+	op_loss_win_init(&w);
+	zassert_equal(op_loss_win_permille(&w), 0);
+	for (int i = 0; i < 100; i++) {
+		op_loss_win_frame(&w, i < 5); /* 5 of the first 100 */
+	}
+	zassert_equal(op_loss_win_permille(&w), 50);
+	for (int i = 100; i < OP_LOSS_WIN; i++) {
+		op_loss_win_frame(&w, i < 115); /* 5 + 15 = 20 of 1000 in the window */
+	}
+	zassert_equal(op_loss_win_permille(&w), 20);
+	op_loss_win_frame(&w, 1); /* a new window does not move the last full one until it completes */
+	zassert_equal(op_loss_win_permille(&w), 20);
+}
+
+ZTEST(proto, test_rx_status_from_snapshot) /* the app core's counters reach `status` and `stats` */
+{
+	struct op_rx_snap n = {
+		.locked = 1, .rssi_dbm = -63, .loss_permille = 7, .td = 0,
+		.status_word = 87 | (51 << 7) | ((OP_ST_CLIP | OP_ST_TEMP) << 13), /* bat 87, peak -12 */
+		.frames = 5000, .valid = 4965, .lost = 35, .plc = 35, .a_ok = 4900, .b_ok = 4800, .skips = 2,
+		.td_rec = 3, .under = 1, .over = 0, .fill_milli = 6012, .ppb = -1800,
+	};
+
+	op_rx_state_from_snap(&rx, &n);
+	zassert_str_equal(rx_do("status"),
+			  "ok locked=1 rssi=-63 loss=0.007 batt=87 peak=-12 clip=1 temp=1 td=0\n");
+	zassert_str_equal(rx_do("stats"),
+			  "ok frames=5000 valid=4965 lost=35 plc=35 a_ok=4900 b_ok=4800 skips=2 td_rec=3 under=1 "
+			  "over=0 fill_milli=6012 ppb=-1800\n");
+}
+
+static int persisted;
+static struct op_pack_cfg flash_cfg;
+static int persist_fail;
+static int fake_persist(const struct op_pack_cfg *c)
+{
+	if (persist_fail) {
+		return -5;
+	}
+	flash_cfg = *c;
+	persisted++;
+	return 0;
+}
+
+ZTEST(proto, test_save_persists) /* `save` goes through the persist hook; a failure is an err and saves nothing */
+{
+	pk.persist = fake_persist;
+	persisted = 0;
+	zassert_str_equal(pk_do("id 6"), "ok\n");
+	zassert_str_equal(pk_do("save"), "ok\n");
+	zassert_equal(persisted, 1);
+	zassert_equal(flash_cfg.id, 6);
+	zassert_equal(pk.saved.id, 6);
+	persist_fail = 1;
+	zassert_str_equal(pk_do("id 7"), "ok\n");
+	zassert_str_equal(pk_do("save"), "err save failed\n");
+	zassert_equal(pk.saved.id, 6);
+	persist_fail = 0;
+}
+
+ZTEST(proto, test_cfg_valid)
+{
+	struct op_pack_cfg c = pk.cur;
+
+	zassert_true(op_pack_cfg_valid(&c));
+	c.ch_b = 2482;
+	zassert_true(op_pack_cfg_valid(&c));
+	strcpy(c.region, "us");
+	zassert_false(op_pack_cfg_valid(&c)); /* 2482 is uk/eu only (ADR-0016) */
+	c = pk.cur;
+	c.id = 8;
+	zassert_false(op_pack_cfg_valid(&c));
+	c = pk.cur;
+	c.ch_b = c.ch_a + 39;
+	zassert_false(op_pack_cfg_valid(&c));
+	c = pk.cur;
+	c.power_dbm = 4;
+	zassert_false(op_pack_cfg_valid(&c));
+	c = pk.cur;
+	strcpy(c.region, "zz");
+	zassert_false(op_pack_cfg_valid(&c));
+}
