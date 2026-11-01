@@ -39,14 +39,17 @@ KICAD_FP = pk.KICAD_FP
 # Outline. No rack mechanics exist yet (#33), so this defines them: a 48 x 90 mm mezzanine, J1 (2x13 THT header on
 # the underside) along the bottom edge, two M3 standoff holes at the far end. Eight slots at >= 52 mm pitch = 416 mm,
 # inside a 19" 1U case (~425 mm inside). Stack: main-board socket 8.5 + header body 2.5 -> sub-board underside 11.0
-# mm above the main board; tallest top part C47/C48 (10 x 12.5 radial) -> 25.1 mm above the main board top.
+# mm above the main board; tallest top part C47/C48, Nichicon UEP1J470MPD bi-polar 10 x 16 mm (CAT.8100L; L + 1.5 max
+# = 17.5 mm seated) -> 11.0 + 1.6 + 17.5 = 30.1 mm above the main board top (1U: ~42 mm inside less the main board's
+# own standoff and thickness). Next tallest: K1 TQ2SA 5.6 mm, C7 5.4 mm.
 # ---------------------------------------------------------------------------------------------------------------
 BW, BH = 48.0, 90.0
 OUTLINE = [(0.0, 0.0), (BW, 0.0), (BW, BH), (0.0, BH)]
 J1_PIN1 = (8.76, 5.54)           # pin 1; odd pins on y = 5.54, even on 3.0 (underside header: mirrored), pairs every 2.54 mm in +x
 MOUNT = {"H1": (3.4, 86.6), "H2": (44.6, 40.0)}
 MECH = dict(board=(BW, BH), thickness=1.6, j1_pin1=J1_PIN1, j1_pitch=2.54, mount_m3=MOUNT, slot_pitch_min=52.0,
-            header_stack=11.0, top_max_height=12.5)
+            header_stack=11.0, top_max_height=17.5, top_tallest="C47/C48 Nichicon UEP1J470MPD 10x16 (+1.5)",
+            above_main_board=30.1)
 
 STACKUP = pk.STACKUP
 H_L1L2, ER = 0.2104, 4.4

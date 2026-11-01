@@ -30,34 +30,36 @@ LAYERS = {"L1_F.Cu": "F.Cu", "L2_In1.Cu": "In1.Cu", "L3_In2.Cu": "In2.Cu", "L4_B
 # ---- JLCPCB assembly ------------------------------------------------------------------------------------------
 # LCSC part numbers. "DNP" = not placed by the assembler (pads only, not fitted, or hand-soldered THT); "CONSIGN" = not
 # stocked at LCSC (supply it, or JLC global sourcing). Keyed by MPN, or (MPN, value) for the generic resistor lines.
-# LCSC_SRC says where each code came from:
-#   "pack" = the same part as hw/pack/outputs.py LCSC, checked there against LCSC's product record on 2026-11-01;
-#   "prices" = hw/rx/prices.py (findchips/LCSC snapshot 2026-10-31);
-#   "unverified" = JLC basic/extended library code from the agent's knowledge, NOT read from LCSC in this session
-#     (no network use allowed for #34). Each must be confirmed in JLC's BOM tool, which shows the MPN behind the
-#     code, before ordering (hw/REVIEW.md receiver open item 3).
-#   "MATCH" (in place of a code) = a commodity part whose LCSC code could not be confirmed offline; JLC's BOM tool matches
-#     it by MPN/value at order time. Listed as an open item, not guessed.
+# Every code was read on 2026-11-01 from LCSC's product record (lcsc.com/product-detail/<code>.html: productModel and
+# description) or JLCPCB's parts search (manufacturer part, package, stock); the second field names the part found.
+V = "LCSC/JLC record read 2026-11-01: "
 LCSC = {
-    ("R_0402_1%", "100k"): ("C25741", "pack"), ("R_0402_1%", "1k"): ("C11702", "pack"), ("R_0402_1%", "100"): ("C25076", "pack"),
-    ("R_0402_1%", "10k"): ("C25744", "unverified"), ("R_0402_1%", "22k"): ("C25768", "unverified"),
-    ("R_0402_1%", "470"): ("C25117", "unverified"), ("R_0402_1%", "2.0k"): ("C4109", "unverified"),
-    ("R_0402_1%", "3.65k"): ("MATCH", "match by MPN/value in JLC's BOM tool"), ("R_0402_1%", "4.99k"): ("MATCH", "match by MPN/value in JLC's BOM tool"),
-    ("R_0402_1%", "249k"): ("MATCH", "match by MPN/value in JLC's BOM tool"), ("R_0402_1%", "9.76k"): ("MATCH", "match by MPN/value in JLC's BOM tool"),
-    ("R_0603_1%", "10"): ("C22859", "unverified"), ("R_0603_1%", "22"): ("C23345", "unverified"),
-    "C_100n_0402": ("C1525", "pack"), "C_1u_0402": ("C52923", "pack"), "C_10u_0603_X5R": ("C19702", "pack"),
-    "OPA1656IDR": ("C1849431", "pack"), "PE4259-63": ("C470892", "prices"),
-    "C_10p_0402_C0G": ("C32949", "unverified"), "C_100p_0402_C0G": ("C1546", "unverified"),
-    "C_2n2_0402_C0G": ("MATCH", "match by MPN/value in JLC's BOM tool"), "C_1n_0402": ("C1523", "unverified"),
-    "C_2u2_0603_X7R": ("MATCH", "match by MPN/value in JLC's BOM tool"), "C_10u_1206_25V_X7R": ("MATCH", "match by MPN/value in JLC's BOM tool"),
-    "ALU_100u_25V": ("MATCH", "match by MPN/value in JLC's BOM tool"), "ALU_47u_25V": ("MATCH", "match by MPN/value in JLC's BOM tool"), "ALU_22u_25V": ("MATCH", "match by MPN/value in JLC's BOM tool"),
-    "PCM5102APWR": ("C107671", "unverified"), "TLV76733DGNR": ("MATCH", "match by MPN/value in JLC's BOM tool"),
-    "TPS3808G01DBVR": ("MATCH", "match by MPN/value in JLC's BOM tool"), "BSS138": ("MATCH", "match by MPN/value in JLC's BOM tool"), "BAT54,215": ("MATCH", "match by MPN/value in JLC's BOM tool"),
-    "S1J": ("MATCH", "match by MPN/value in JLC's BOM tool"), "SMF15A": ("MATCH", "match by MPN/value in JLC's BOM tool"), "SMF5.0A": ("MATCH", "match by MPN/value in JLC's BOM tool"),
-    "U.FL-R-SMT-1(10)": ("C88374", "unverified"),
-    "BT40E": ("CONSIGN", "Fanstel / Digi-Key UK only (prices.py)"),
-    "TQ2SA-12V": ("CONSIGN", "Panasonic relay, Farnell UK / RS UK (prices.py)"),
-    "ALU_BP_47u_63V": ("DNP", "THT radial: hand-solder (or JLC THT assembly), Farnell UK / RS UK"),
+    ("R_0402_1%", "100k"): ("C25741", V + "UNI-ROYAL 0402WGF1003TCE"), ("R_0402_1%", "1k"): ("C11702", V + "UNI-ROYAL 0402WGF1001TCE"),
+    ("R_0402_1%", "100"): ("C25076", V + "UNI-ROYAL 0402WGF1000TCE"), ("R_0402_1%", "10k"): ("C25744", V + "UNI-ROYAL 0402WGF1002TCE"),
+    ("R_0402_1%", "22k"): ("C25768", V + "UNI-ROYAL 0402WGF2202TCE"), ("R_0402_1%", "470"): ("C25117", V + "UNI-ROYAL 0402WGF4700TCE"),
+    ("R_0402_1%", "2.0k"): ("C4109", V + "UNI-ROYAL 0402WGF2001TCE"), ("R_0402_1%", "3.65k"): ("C67235", V + "UNI-ROYAL 0402WGF3651TCE"),
+    ("R_0402_1%", "4.99k"): ("C25903", V + "UNI-ROYAL 0402WGF4991TCE"), ("R_0402_1%", "249k"): ("C11425", V + "UNI-ROYAL 0402WGF2493TCE"),
+    ("R_0402_1%", "9.76k"): ("C270420", V + "UNI-ROYAL 0402WGF9761TCE"),
+    ("R_0603_1%", "10"): ("C22859", V + "UNI-ROYAL 0603WAF100JT5E (10 ohm 1 %)"),
+    ("R_0603_1%", "22"): ("C23345", V + "UNI-ROYAL 0603WAF220JT5E (22 ohm 1 %)"),
+    "C_100n_0402": ("C1525", V + "Samsung CL05B104KO5NNNC 16 V X7R"), "C_1u_0402": ("C52923", V + "Samsung CL05A105KA5NQNC 25 V X5R"),
+    "C_10u_0603_X5R": ("C19702", V + "Samsung CL10A106KP8NNNC 10 V X5R"),
+    "C_10p_0402_C0G": ("C32949", V + "Samsung CL05C100JB5NNNC 50 V C0G"), "C_100p_0402_C0G": ("C1546", V + "FH 0402CG101J500NT 50 V C0G"),
+    "C_2n2_0402_C0G": ("C385029", V + "Murata GRM1555C1H222JA01D 50 V C0G"), "C_1n_0402": ("C1523", V + "FH 0402B102K500NT 50 V X7R"),
+    "C_2u2_0603_X7R": ("C100082", V + "Samsung CL10B225KP8NNNC 10 V X7R (CAPP/CAPM/VNEG are < 3.3 V)"),
+    "C_10u_1206_25V_X7R": ("C14860", V + "Samsung CL31B106KAHNNNE 25 V X7R"),
+    "ALU_100u_25V": ("C7469933", V + "FOSAN FVM025ADA101M0654, 6.3 x 5.4"),
+    "ALU_47u_25V": ("C696191", V + "Honor RVT1E470M0505, 5 x 5.4"), "ALU_22u_25V": ("C15848", V + "Honor RVT1E220M0505, 5 x 5.4"),
+    "OPA1656IDR": ("C1849431", V + "TI OPA1656IDR"), "PE4259-63": ("C470892", V + "pSemi PE4259-63"),
+    "PCM5102APWR": ("C107671", V + "TI PCM5102APWR"), "TLV76733DGNR": ("C2873382", V + "TI TLV76733DGNR, HVSSOP-8"),
+    "TPS3808G01DBVR": ("C19653", V + "TI TPS3808G01DBVR, SOT-23-6"), "BSS138": ("C52895", V + "onsemi BSS138"),
+    "BAT54,215": ("C85084", V + "Nexperia BAT54,215"), "S1J": ("C184326", V + "onsemi S1J, SMA, IFSM 30 A"),
+    "SMF15A": ("C123802", V + "MDD SMF15A, SOD-123FL"), "SMF5.0A": ("C193402", V + "MDD SMF5.0A, SOD-123FL"),
+    "U.FL-R-SMT-1(10)": ("C88374", V + "Hirose U.FL-R-SMT-1(80): same part, 80-piece-reel suffix"),
+    "TQ2SA-12V": ("C2684447", V + "Panasonic TQ2SA-12V-Z (taped TQ2SA-12V), 2245 at JLC"),
+    "BT40E": ("CONSIGN", "Fanstel BT40E, not at LCSC: Digi-Key UK 13174285 (prices.py)"),
+    "ALU_BP_47u_63V": ("DNP", "THT radial, hand-solder: Nichicon UEP1J470MPD bi-polar 10 x 16 mm (CAT.8100L), not at LCSC; "
+                              "UK: Farnell / RS"),
     "HDR_2x13_2.54_KEY14": ("DNP", "THT underside header, pin 14 pulled: hand-solder after reflow"),
     "TC2030-pads": ("DNP", "pads only"), "TP-pad": ("DNP", "pads only"), "DNP": ("DNP", "not fitted (R33-R35, ADR-0014)"),
 }

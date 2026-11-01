@@ -11,10 +11,10 @@ same drawing). Datasheet coordinates: u = mm from the module's left edge (14.0 w
   u.FL receptacle top right, centre (12.05, 14.6) (scaled from the top view; side view: 1.4 from the top edge).
   No PCB antenna: the u.FL is the only RF port, so there is no antenna keepout, only u.FL mating room.
 
-TQ2SA: Panasonic TQ relay, SA-type surface-mount terminals, 14.0 x 9.0 mm body, 2.54 mm pitch, pins 1-5 down one
-long side and 6-10 back up the other (10 opposite 1; coil 1/10). The land pattern row spacing (11.0 mm centres,
-2.0 x 1.0 mm pads) is PROVISIONAL: the Panasonic "recommended PC board pattern" drawing was not available offline.
-Check it against the TQ-SMD datasheet before ordering (hw/REVIEW.md receiver open items).
+TQ2SA: Panasonic "TQ relays" datasheet (c Panasonic 2019, LCSC C2684447 PDF) p.11, "2. Surface-mount terminal", SA type:
+body 14 x 9 mm, 5.6 mm tall (seated), terminals 11.5 +-0.5 tip to tip; "Suggested mounting pad (Top view)": 1.0 x 2.94 mm
+pads at 2.54 mm pitch, 9.56 mm between the two rows' pad centres (+-0.1). Schematic (top view): 10 9 8 7 6 on one side,
+1..5 on the other, 10 opposite 1; coil 1 (+) / 10 (-).
 """
 import importlib.util
 import pathlib
@@ -27,7 +27,7 @@ pk = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(pk)
 
 BT40E = dict(W=14.0, L=16.0, UFL=(12.05, 14.6))
-TQ2SA = dict(BODY=(9.0, 14.0), ROW=11.0, PAD=(2.0, 1.0), PITCH=2.54, H=5.2)
+TQ2SA = dict(BODY=(9.0, 14.0), ROW=9.56, PAD=(2.94, 1.0), PITCH=2.54, H=5.6)
 
 
 def bt40e_pads():
@@ -79,15 +79,17 @@ def tq2sa():
     b = pk._text("Reference", "REF**", 0, -bl / 2 - 1.0, "F.SilkS", size=0.8)
     b += pk._text("Value", "TQ2SA-12V", 0, 0, "F.Fab")
     b += pk._rect(-bw / 2, -bl / 2, bw / 2, bl / 2, "F.Fab")
-    b += pk._rect(-r - sx / 2 - 0.25, -bl / 2 - 0.25, r + sx / 2 + 0.25, bl / 2 + 0.25, "F.CrtYd", 0.05)
-    b += pk._rect(-bw / 2 + 0.6, -bl / 2 - 0.12, bw / 2 - 0.6, bl / 2 + 0.12, "F.SilkS", 0.12)
+    b += pk._rect(-max(r + sx / 2, 5.75) - 0.25, -bl / 2 - 0.25, max(r + sx / 2, 5.75) + 0.25, bl / 2 + 0.25, "F.CrtYd", 0.05)
+    # silk: the body's short ends only (the pads reach under the body sides)
+    b += pk._line(-bw / 2, -bl / 2 - 0.12, bw / 2, -bl / 2 - 0.12, "F.SilkS", 0.12)
+    b += pk._line(-bw / 2, bl / 2 + 0.12, bw / 2, bl / 2 + 0.12, "F.SilkS", 0.12)
     b += pk._fp_text("coil", 0, -bl / 2 + 1.5, "F.Fab", 0.7)
     for k in range(5):
         y = -2 * p + k * p
         b += pk._smd(str(1 + k), -r, y, "rect", sx, sy)          # 1..5 down the left
         b += pk._smd(str(10 - k), r, y, "rect", sx, sy)          # 10..6 down the right (10 opposite 1)
     b += f'  (fp_circle (center {-r:.3f} {-2 * p - 1.1:.3f}) (end {-r + 0.2:.3f} {-2 * p - 1.1:.3f}) (stroke (width 0.12) (type solid)) (fill yes) (layer "F.SilkS"))\n'
-    return pk._wrap("Panasonic_TQ2SA", "Panasonic TQ2SA DPDT relay, SA surface-mount terminals; land pattern provisional", b)
+    return pk._wrap("Panasonic_TQ2SA", "Panasonic TQ2SA DPDT relay, SA surface-mount terminals; TQ datasheet p.11 suggested mounting pad", b)
 
 
 FOOTPRINTS = {"Fanstel_BT40E": bt40e, "Panasonic_TQ2SA": tq2sa}

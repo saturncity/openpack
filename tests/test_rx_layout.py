@@ -196,9 +196,12 @@ def test_jlc_bom_has_lcsc_or_dnp(outp):
     refs = {r for b in bom for r in b["refs"].split() if r != "-"}
     listed = {d for r in rows for d in r["Designator"].split(",")}
     assert listed == refs, listed ^ refs
-    bad = [r for r in rows if not (re.fullmatch(r"C\d+", r["LCSC Part #"]) or r["LCSC Part #"] in ("DNP", "CONSIGN", "MATCH"))]
+    bad = [r for r in rows if not (re.fullmatch(r"C\d+", r["LCSC Part #"]) or r["LCSC Part #"] in ("DNP", "CONSIGN"))]
     assert not bad, bad
     assert all(r["LCSC source"] for r in rows)
+    # every LCSC code was read from its LCSC/JLC record; only the module is consigned
+    assert all(r["LCSC source"].startswith("LCSC/JLC record") for r in rows if re.fullmatch(r"C\d+", r["LCSC Part #"]))
+    assert {d for r in rows if r["LCSC Part #"] == "CONSIGN" for d in r["Designator"].split(",")} == {"U1"}
     cpl = {r["Designator"] for r in csv.DictReader(open(FAB / "cpl_jlc.csv"))}
     dnp = {d for r in rows if r["LCSC Part #"] == "DNP" for d in r["Designator"].split(",")}
     assert not dnp & cpl
@@ -221,5 +224,10 @@ def test_mech_record(lay):
     m = json.loads((FAB / "mech.json").read_text())
     assert tuple(m["board"]) == (lay.BW, lay.BH) and tuple(m["j1_pin1"]) == lay.J1_PIN1
     assert 8 * m["slot_pitch_min"] <= 425 and m["slot_pitch_min"] >= lay.BW + 4
+    # tallest part from its datasheet (C47/C48 UEP1J470MPD, 16 + 1.5 mm) stacked on the 11 mm header + 1.6 mm board;
+    # 1U leaves about 35 mm above the main board (44.45 - 2 x 1.2 sheet - 5 standoff - 1.6 board)
+    assert m["top_max_height"] >= 17.5
+    assert m["above_main_board"] == pytest.approx(m["header_stack"] + m["thickness"] + m["top_max_height"])
+    assert m["above_main_board"] <= 35.0
     txt = (RX / "rx.kicad_pcb").read_text()
     assert '(layer "B.Cu")' in txt.split('"Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical"')[1][:400]

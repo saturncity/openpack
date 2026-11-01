@@ -164,7 +164,7 @@ Process (docs/agents/hands-off.md, "PCB layout review"): `kicad-cli` renders eve
 | **Decoupling** (pin → cap pad) | **PCM5102A:** DVDD 1.9 mm, LDOO 1.9, AVDD 2.1, CPVDD 2.4, CAPP/CAPM 2.6 (L-stubs drawn before the GND fan-out), VNEG 3.7.<br>**OPA1656 V+:** 100 nF 1.9 mm, 10 µF 4.4 mm.<br>**LDOs:** U4 in 2.0 / out 2.6; U5 in 3.2 / out 3.4.<br>**Others:** TPS3808 1.5, PE4259 2.3.<br>**BT40E VDD (pad 9):** 3.2 / 4.5 mm. VDDH (F4, under the module) is 7.3 mm away through its fan-out via. Fanstel needs no external parts on an LDO-fed rail (p.26). | ✓ |
 | **Backplane connector** | J1 follows ADR-0014. Pin 1 is at (8.76, 5.54) from the bottom-left corner: odd pins on the upper row (y 5.54), even pins on y 3.0, pairs every 2.54 mm in +x. The header is on the underside, so as seen from the top this mirrors the order the footprint gives on top. `place_j1` asserts the order, and `mech.json` records it for #33.<br>TVS D1/D2 sit right over the +12 V/+5 V pins. GND pins 5/6 guard audio from power. The digital series resistors are in two rows over pins 13–26. | ✓ |
 | **Test points** | Following the #104 M2 lesson: **TP1–TP13**, Ø1 mm pads: +12V, +12VA, +5V, +3V3, +3V3A, GND on both the analog and the digital side, I2S BCK/LRCK/SDOUT (logic analyser), VCM, ANT_SEL, RLY_G. SWD is on the TC2030. | ✓ |
-| **JLC assembly files** | `bom_jlc.csv` lists every part with an LCSC # or DNP/CONSIGN/MATCH, and an `LCSC source` column. The CPL uses the pack's rotation table (SOT-23* +180, SOIC +270, QFN +270, checked by test). DNP parts are not in the CPL. See open item 3 for the unverified codes. | partial |
+| **JLC assembly files** | `bom_jlc.csv` gives every placed part an LCSC # **read from its LCSC/JLC record on 2026-11-01**. The `LCSC source` column names the manufacturer part that was found. That includes K1 (C2684447, TQ2SA-12V-Z, the taped TQ2SA-12V).<br>Only the BT40E is CONSIGN (not at LCSC; Digi-Key UK 13174285). DNP: J1 and C47/C48 (THT, hand-solder), R33–R35 (not fitted), TPs, TC2030.<br>The CPL uses the pack's rotation table (SOT-23* +180, SOIC +270, checked by test), and DNP parts are not in it. | ✓ |
 | **Silkscreen** | Refdes sit inside the IC and relay bodies. Passives keep theirs on F.Fab. J3/J4 are labelled "ANT A"/"ANT B", and there is a "J1 underside, pin 1" marker. DRC shows 0 silk warnings. | ✓ |
 
 ### Fixes made during review (found in the renders, crops or DRC, then fixed in `layout_rx.py`)
@@ -191,23 +191,29 @@ There is no rack mechanics yet, so this layout defines it (`layout_rx.MECH` → 
 - **Standoffs:** two M3 at (3.4, 86.6) and (44.6, 40.0).
 - **Stack height:**
   - main-board 2×13 socket (8.5 mm) + header body 2.5 mm = sub-board underside 11.0 mm above the main board;
-  - tallest top part: C47/C48 radial, 12.5 mm assumed, so ≈ 25 mm above the main-board top, inside 1U's ~40 mm.
+  - tallest top part: C47/C48, Nichicon **UEP1J470MPD**, a 47 µF 63 V bi-polar radial, 10 × 16 mm, L + 1.5 mm max (Nichicon CAT.8100L), so **17.5 mm** seated;
+  - so the sub-board top is **30.1 mm above the main-board top** (11.0 + 1.6 + 17.5);
+  - 1U leaves about 35 mm there (44.45 − 2 × 1.2 mm sheet − 5 mm standoff − 1.6 mm main board), which is 4.9 mm spare;
+  - next tallest: K1 at 5.6 mm (TQ datasheet) and C7 at 5.4 mm;
+  - `test_mech_record` checks the sum.
 - **Rack fit:** 8 slots at ≥ 52 mm pitch = 416 mm, inside a 19″ 1U case (~425 mm inside).
 - **Socket:** #33's socket must be a 2×13 female with position 14 plugged (ADR-0014). The U.FL inputs J3/J4 are at x 8.8 mm, 4.5 mm and 11 mm below the top edge, for the splitter coax.
 
 ### Open items (must close before ordering)
 
-1. **TQ2SA land pattern is provisional.** The 11.0 mm row pitch and 2.0 × 1.0 mm pads are not from the Panasonic drawing, which was not available offline. Check it against the TQ-SMD "recommended PC board pattern" before ordering.
+1. ~~TQ2SA land pattern provisional~~ **(closed).** The footprint now follows the Panasonic TQ datasheet (© 2019, the LCSC C2684447 PDF), p.11, "Surface-mount terminal, SA type", "Suggested mounting pad (Top view)": 1.0 × 2.94 mm pads, 2.54 mm pitch, **9.56 mm between the row centres** (±0.1); body 14 × 9 × 5.6 mm. The relay sits as before; DRC is still 0/0/0.
 2. **The BT40E u.FL position (12.05, 14.6) is scaled from the p.11 drawing.** It is F.Fab only, so it does not affect copper. The pad grid is dimensioned on the drawing.
-3. **LCSC codes:**
-   - 7 lines are checked codes (the same parts as the pack table, read 2026-11-01), plus PE4259 from `prices.py`;
-   - **13 lines are unverified codes** from memory; this task allowed no network use;
-   - **17 lines are `MATCH`** (commodity values whose code could not be confirmed offline; JLC's BOM tool matches them by MPN/value);
-   - CONSIGN: BT40E (Fanstel/Digi-Key UK) and TQ2SA-12V (Farnell/RS);
-   - DNP: J1 and C47/C48 (THT, hand-solder or JLC THT), R33–R35 (not fitted), TPs, TC2030.
-
-   Confirm every code in JLC's BOM tool, which shows the MPN behind each code.
-4. **C47/C48 height.** A 47 µF 63 V bipolar radial, 10 mm diameter, is 12.5–16 mm tall depending on series. Pin the part, then the #33 standoff height (ADR-0014 item 6).
+3. ~~LCSC codes~~ **(closed).** All 39 placed BOM lines carry a code read from its LCSC product record or JLC parts search on 2026-11-01. The manufacturer part found is recorded in each line.
+   - **All 13 earlier codes checked out.** C88374 is Hirose's 80-piece-reel suffix of the same U.FL.
+   - **The 17 `MATCH` lines are now real parts:**
+     - resistors: UNI-ROYAL 3.65k C67235, 4.99k C25903, 249k C11425, 9.76k C270420;
+     - ceramic capacitors: Murata 2.2 nF C0G C385029, Samsung 2.2 µF X7R C100082, 10 µF 25 V 1206 C14860;
+     - electrolytics: Honor 47 µF/22 µF 25 V 5 × 5.4 C696191/C15848, FOSAN 100 µF 25 V 6.3 × 5.4 C7469933;
+     - ICs: TI TLV76733DGNR C2873382, TPS3808G01DBVR C19653;
+     - discretes: onsemi BSS138 C52895, Nexperia BAT54,215 C85084, onsemi S1J C184326, MDD SMF15A C123802 and SMF5.0A C193402.
+   - **The relay is no longer consigned:** C2684447.
+   - **Stock at JLC is low on two parts:** TLV76733DGNR (583) and the relay (2245). Re-check both at order time.
+4. ~~C47/C48 height~~ **(closed).** The part is Nichicon UEP1J470MPD, 10 × 16 mm (17.5 mm max). It fits the stack with 4.9 mm spare (see the mechanical record). If #33 needs more room, a 12.5 mm-tall 33 µF (UEP1J330MPD, 10 × 12.5) would change the 20 Hz corner; that needs a new SPICE run first.
 5. **CPL:** SOT-363 (PE4259), HVSSOP-8 (TLV76733), the TSSOP-20 and the relay have no rotation-table entry. Check them in JLC's CPL preview.
 6. **Board size:** the right half below the module (x 30–48, y 14–56) is sparse. Moving the +12 V/supervisor block there would free about 10 mm of height (48 × 80) if rack depth gets tight.
 7. **No 3D models are installed** (as on the pack), so the STEP is the bare board.
