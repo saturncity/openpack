@@ -900,6 +900,15 @@ if __name__ == "__main__":
     # bsim (c), run.py --geometry docs/analysis/r1-wing/<case>.json --eirp 9 --plan host/channel_plan_us.yaml,
     # 20 s per run. Packs passing SYS-3 (<= 0.1 %, <= 2 in a row) of the 7 with a gap carrier below 2480 (pack 1's
     # is 2482: credited by equivalence, ADR-0016). Filled from the 2026-11-01 runs; see the analysis doc.
-    WING_BSIM = {}
+    WING_BSIM = {  # case: {run: packs 2-8 passing}; 10 % runs with the old 100-frame probe (strictly harder)
+        "studio-rule": {"10% TD off": 7, "10% TD on": 7, "40% TD off": 7, "40% TD on": 7},
+        "prosc10-rule": {"10% TD off": 7, "10% TD on": 7, "40% TD off": 7, "40% TD on": 7},
+        "prosc12-rule": {"10% TD off": 7, "10% TD on": 7, "40% TD off": 7, "40% TD on": 7},
+        "prosc12-near2": {"10% TD off": 7, "10% TD on": 7, "40% TD off": 7, "40% TD on": 7},
+        "prosc12-onaxis (off-rule)": {"40% TD off": 6, "40% TD on": 7},
+        "studio-onaxis (off-rule, probe 100)": {"40% TD off": 5, "40% TD on": 7},
+    }
     for case, r in WING_BSIM.items():
         print(f"  bsim {case}: " + ", ".join(f"{k} {v}/7" for k, v in r.items()))
+    assert all(v == 7 for c, r in WING_BSIM.items() if c.endswith("-rule") or c.endswith("near2") for v in r.values())
+    assert WING_BSIM["prosc12-onaxis (off-rule)"]["40% TD on"] == 7 > WING_BSIM["prosc12-onaxis (off-rule)"]["40% TD off"]

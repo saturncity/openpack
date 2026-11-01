@@ -13,8 +13,14 @@ config OP_RX_ANT_HYST_DB
 	default 6
 
 config OP_RX_ANT_PROBE_FRAMES
-	int "RX-5 frames between probes of the other antenna, per channel (ADR-0011), 0 = never"
-	default 100
+	int "RX-5 frames between probes of the other antenna, per channel (ADR-0011, ADR-0021), 0 = never"
+	default 1000
+	help
+	  A probe sends one copy's window to the other antenna. When that antenna can't hear the pack
+	  over the Wi-Fi (wing antennas, ADR-0021), the frame rests on the other copy alone, which may be
+	  the in-band one. At 100 frames that cost 0.16 % frame loss with TD off in bsim (prosc12-near2,
+	  40 % Wi-Fi); at 1000 it is 0.02 %. A blocked antenna still ages out after hyst + dRSSI misses,
+	  so switching away does not wait for a probe; switching back waits up to 1 s.
 
 config OP_PACK_TEST_RUN_MS
 	int "Test only: the pack stops transmitting after this many ms, 0 = never (tests/bsim/rx scenario e)"

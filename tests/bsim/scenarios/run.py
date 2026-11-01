@@ -103,14 +103,21 @@ SYS2_SIM_MAX, LOCK_MAX = 1600, 2.0
 SYS3_LOSS, SYS3_RUN = 0.001, 2
 XF_PLAN = "#76"  # channel plan: 2 MHz-spaced carriers collide; near pack blocks 3 MHz neighbours
 XF_2482 = "ADR-0016"  # pack 1 has no gap carrier below 2480 (its UK 2482 carrier cannot run in bsim)
-ANT_PROBE, ANT_HYST = 100, 6  # fw/src/rx/Kconfig OP_RX_ANT_PROBE_FRAMES / OP_RX_ANT_HYST_DB defaults (ADR-0011)
+RX5 = {}  # RX-5 replay settings: fw/src/rx/Kconfig defaults, --rx5-probe overrides (set in main)
 
 
-def rx5_replay(ok, rssi, ch, probe=ANT_PROBE, hyst=ANT_HYST):
+def rx_kconfig(sym):
+    m = re.search(rf"^config {sym}\n(?:\t.*\n)*?\tdefault (\d+)", (REPO / "fw/src/rx/Kconfig").read_text(), re.M)
+    return int(m[1])
+
+
+def rx5_replay(ok, rssi, ch, probe=None, hyst=None):
     """RX-5 (fw/src/rx/ant.c) on per-antenna outcomes of channel ch (0 = copy A, 1 = copy B). ok[ant][i]: the copy
     of frame i arrived on antenna ant; rssi[ant]: its RSSI there (dBm, static geometry). The state starts converged
     (on the stronger antenna, both RSSIs known), as after the first probes of a show; the lock transient is not
     counted. Returns (got[i], antenna used[i], switches)."""
+    probe = RX5["probe"] if probe is None else probe
+    hyst = RX5["hyst"] if hyst is None else hyst
     cur = 0 if rssi[0] >= rssi[1] else 1
     last, seen, sw = [round(r) for r in rssi], [True, True], 0
     got, used = [], []
@@ -636,9 +643,12 @@ def main():
     ap.add_argument("--geometry", default="",
                     help="wing-antenna geometry JSON (sim/loss/wing_geometry.py --write): per-antenna attenuations,"
                          " two receivers per pack, RX-5 replayed (#101)")
+    ap.add_argument("--rx5-probe", type=int, default=0,
+                    help="--geometry: RX-5 probe period in frames for the replay (default: Kconfig OP_RX_ANT_PROBE_FRAMES)")
     ap.add_argument("--td-len", type=int, default=81,
                     help="TD-length packet payload B (81 = full td_audio, AIR-3; e.g. 63 = ADPCM-3 td_audio, #26)")
     a = ap.parse_args()
+    RX5.update(probe=a.rx5_probe or rx_kconfig("OP_RX_ANT_PROBE_FRAMES"), hyst=rx_kconfig("OP_RX_ANT_HYST_DB"))
     TD[:] = [f"-Dfw_net_CONFIG_OP_TEST_FRAME_LEN={a.td_len}"]
     IMAGES["pack_td"][0], IMAGES["rx_td"][1] = TD[0], TD[0]
     global ATT_PACK
