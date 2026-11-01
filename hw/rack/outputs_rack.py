@@ -73,18 +73,19 @@ LCSC = {
     "QPQ1907SR": ("CONSIGN", "Qorvo QPQ1907SR not at LCSC (C22413100 is the TR13 10k reel, 0 stock): DigiKey UK, consign"),
     "FB_0603_600R": ("C85833", V + "Murata BLM18KG601SN1D 1.3 A"),
     "0451004.MRL": ("C27515", V + "Littelfuse 0451004.MRL NANO2 2410 = KiCad Fuse_Littelfuse-NANO2-451_453 pads"),
-    "LQW18AN39NG80D": ("C2042966", V + "Murata LQW18AN39NG80D (the ADR part, SRF 3.28 GHz; C142171 CS0603-39NJ has SRF "
-                                       "2.2 GHz, below the band, so it is not used)"),
-    "0402CS-18NXG": ("C361616", V + "Sunlord SDWL1005C18NGSTF 18 nH 2 %, Q 25 at 250 MHz, SRF 4.5 GHz (equivalent)"),
-    "CX3225GB14745P0HPQCC": ("C6523919", V + "AKER C3E-14.7456-18-3030-R, 18 pF like the CX3225; ESR 100 ohm, -20..70 C"),
-    "IND_6u8_4A": ("C1329837", V + "Bourns SRP5030T-6R8M 4 A (footprint L_Bourns_SRP5030T); C177249 is only 3.5 A"),
+    "CS0603-39NJ-S": ("C142171", V + "Chilisin CS0603-39NJ-S 39 nH 0603, SRF 2.2 GHz: above SRF it is a ~0.13 pF "
+                                       "self-capacitance, |Z| > 1 kohm across 2400-2483.5 MHz, so the shunt choke still costs < 0.02 dB"),
+    "SDWL1005C18NGSTF": ("C361616", V + "Sunlord SDWL1005C18NGSTF 18 nH 2 %, Q 25 at 250 MHz, SRF 4.5 GHz (equivalent)"),
+    "C3E-14.7456-18-3030-R": ("C6523919", V + "AKER C3E-14.7456-18-3030-R, 18 pF like the CX3225; ESR 100 ohm, -20..70 C"),
+    "SRP5030T-6R8M": ("CONSIGN", "Bourns SRP5030T-6R8M (Irms 4.0 A, Isat 4.3 A): buy UK (DigiKey / Mouser / Farnell), "
+                                 "not LCSC (C177249 is only 3.5 A)"),
     "U.FL-R-SMT-1(10)": ("C88373", V + "Hirose U.FL-R-SMT-1(10)"),
     "LTST-S270KGKT": ("C125113", V + "Lite-On LTST-S270KGKT side-looking"),
     "LTST-S270KRKT": ("C125114", V + "Lite-On LTST-S270KRKT side-looking"),
     "NC3MAH": ("DNP", H + "Neutrik NC3MAH = LCSC C5154126"),
-    "5415025-1": ("DNP", H + "TE 5415025-1 = LCSC C5164649 (6 in stock: UK distributor)"),
-    "PJ-063AH": ("DNP", H + "Same Sky PJ-063AH = LCSC C22434582; DigiKey UK / Mouser UK"),
-    "SBH11-PBPC-D20-ST-BK": ("DNP", H + "2 x 20 box header: BOOMELE C9138 (shrouded IDC header, male) or the Sullins part"),
+    "5415025-1": ("DNP", H + "TE 5415025-1 (or Molex 73138-5033) from a UK distributor"),
+    "PJ-063AH": ("DNP", H + "CUI / Same Sky PJ-063AH from DigiKey UK / Mouser UK"),
+    "2.54-2*20P": ("DNP", H + "BOOMELE 2 x 20 IDC header = LCSC C9138"),
     "B2P-VH": ("DNP", H + "JST B2P-VH = LCSC C160315"),
     "2.54-2*13PFemale": ("DNP", H + "BOOMELE 2x13 female 8.5 mm = LCSC C64320; pull contact 14 and plug the cavity first "
                                    "(the footprint has no hole at 14)"),

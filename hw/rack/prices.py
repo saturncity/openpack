@@ -14,36 +14,34 @@ PRICES = {  # mpn: (gbp_each, qty_break, source, uk_distributor)
                          "the cavity plugged at assembly: the footprint has no hole at 14 (ADR-0014 key)", "LCSC"),
     "LTST-S270KGKT": (0.03, 1, "est. (Lite-On side-looking green, LCSC C125113, USD 0.042, JLC parts record 2026-11-01 (stock unconfirmed))", "LCSC"),
     "LTST-S270KRKT": (0.03, 1, "est. (Lite-On side-looking red, LCSC C125114, USD 0.032, JLC parts record 2026-11-01 (stock unconfirmed))", "LCSC"),
-    "5415025-1": (6.95, 1, "est. (TE right-angle PCB BNC 50 ohm 4 GHz, 1/2-28 bulkhead; LCSC C5164649 USD 9.15, JLC parts record 2026-11-01 (stock unconfirmed); "
-                  "replaces Amphenol 112487, whose drawing could not be read)", "LCSC / DigiKey UK / Mouser UK"),
+    "5415025-1": (6.95, 1, "est. (TE right-angle PCB BNC 50 ohm 4 GHz, 1/2-28 bulkhead; buy UK: DigiKey UK / Mouser UK, LCSC C5164649 USD 9.15 for reference; Molex 73138-5033 is the drop-in alternative)", "DigiKey UK / Mouser UK"),
     "QPL9057TR7": (4.60, 1, DK + " (61,763 in stock); 25+ GBP 3.77, 100+ GBP 3.17", "DigiKey UK"),
-    "0451004.MRL": (0.90, 1, "est. (Littelfuse Nano2 451 4 A fast, 125 V)", "DigiKey UK / Farnell UK"),
+    "0451004.MRL": (0.90, 1, "est. (Littelfuse Nano2 451 4 A fast 125 V, 2410 case 6.1 x 2.5 mm, LCSC C27515 (LCSC record read 2026-11-01); footprint Fuse_Littelfuse-NANO2-451_453 = the 2410 land)", "LCSC"),
     "R_2512_1R_1W": (0.10, 1, "est. (1 ohm 1 % 2512 1 W thick film)", "LCSC / Farnell UK"),
     "QPQ1907SR": (2.82, 1, DK + " (7,548 in stock; 33-week lead); IL 1.3 typ / 2.2 max dB", "DigiKey UK"),
     "ESD103-B1-02EL": (0.30, 1, "est. (Infineon 15 V 0.09 pF RF ESD, TSLP-2-20; Farnell UK 2725731, LCSC C535146)",
                        "Farnell UK / LCSC"),
     "ESD101-B1-02EL": (0.30, 1, "est. (Infineon 5.5 V 0.1 pF RF ESD, TSLP-2-20; Farnell UK 2480926)", "Farnell UK"),
-    "LQW18AN39NG80D": (0.11, 1, DK + " (10,561 in stock): 39 nH, SRF 3.28 GHz, Idc 1 A, DCR 0.16 ohm", "DigiKey UK"),
-    "0402CS-18NXG": (0.15, 1, "est. (Coilcraft 0402CS 18 nH, the QPL9057 EVB L1)", "DigiKey UK / Mouser UK"),
-    "FB_0603_600R": (0.03, 10, "est. (600 ohm at 100 MHz 0603 ferrite bead, 1 A)", "LCSC"),
+    "CS0603-39NJ-S": (0.02, 10, "est. (Chilisin 39 nH 5 % 0603, SRF 2.2 GHz, Q 40, 600 mA, DCR 0.25 ohm; LCSC C142171, LCSC record read 2026-11-01)", "LCSC"),
+    "SDWL1005C18NGSTF": (0.02, 10, "est. (Sunlord 18 nH 2 % 0402, SRF 4.5 GHz; LCSC C361616, LCSC record read 2026-11-01)", "LCSC"),
+    "FB_0603_600R": (0.03, 10, "est. (Murata BLM18KG601SN1D 600 ohm 1.3 A 0603; LCSC C85833)", "LCSC"),
     "TPS259541DSGR": (0.558, 10, DK + " qty-10 break; 20-week lead, stock not shown", "DigiKey UK"),
     "TPS259531DSGR": (0.558, 10, DK + " qty-10 break (4,178 in stock)", "DigiKey UK"),
     "TPS62933DRLR": (1.20, 1, "est. (TI TPS62933 3 A buck, SOT-583)", "DigiKey UK / Farnell UK"),
     "TLV76733DGNR": (0.30, 1, "est. (as hw/rx/prices.py, USD 0.40)", "Farnell UK / DigiKey UK / Mouser UK"),
     "SC16IS752IPW,128": (5.92, 1, DK + " (11,036 in stock); the ,112 tube variant is obsolete", "DigiKey UK"),
-    "CX3225GB14745P0HPQCC": (0.58, 1, DK + " (3,000 in stock): 14.7456 MHz 3225 18 pF", "DigiKey UK"),
-    "NC3MAH": (2.08, 1, DK + " (Neutrik NC3MAH; qty-10 break not shown)", "DigiKey UK"),
+    "C3E-14.7456-18-3030-R": (0.12, 1, "est. (AKER 14.7456 MHz 3225 18 pF, ESR 100 ohm, -20..+70 C, 30 ppm; LCSC C6523919, LCSC record read 2026-11-01)", "LCSC"),
+    "NC3MAH": (2.08, 1, DK + " (Neutrik NC3MAH; the LCSC buy is C5154126, Extended, price there unconfirmed)", "LCSC / DigiKey UK"),
     "SMAJ58CA": (0.36, 1, DK + " (Littelfuse)", "DigiKey UK"),
     "SMBJ12A": (0.37, 1, DK + " (Littelfuse)", "DigiKey UK"),
     "SMF12A": (0.08, 1, "est. (SMF 200 W TVS SOD-123F)", "LCSC / Farnell UK"),
     "AO4407A": (0.25, 1, "est. (Alpha & Omega -30 V 12 A P-FET SO-8; DMP3013SFV-7 is 0-stock at DigiKey UK)", "LCSC"),
     "BZT52C12": (0.03, 1, "est. (12 V zener SOD-123)", "LCSC"),
-    "PJ-063AH": (1.22, 1, DK + " (Same Sky PJ-063AH 2.1 mm 8 A, 34,138 in stock; not locking)", "DigiKey UK"),
-    "SBH11-PBPC-D20-ST-BK": (0.49, 1, DK + " (Sullins 2x20 box header, 69,820 in stock)", "DigiKey UK"),
-    "B2P-VH": (0.15, 1, "est. (JST VH 2-pin 3.96 mm header, CM4IO 12 V feed)", "LCSC / Farnell UK"),
-    "U.FL-R-SMT-1(10)": (0.34, 10, "est. (as hw/rx/prices.py, USD 0.45)", "Farnell UK / RS UK"),
-    "IND_6u8_4A": (0.60, 1, "est. (6.8 uH 4 A shielded power inductor, 5x5 mm; TPS62933 reference design value)",
-                   "LCSC / DigiKey UK"),
+    "PJ-063AH": (1.22, 1, DK + " (CUI / Same Sky PJ-063AH 2.1 mm 8 A, 34,138 in stock; not locking): buy UK", "DigiKey UK"),
+    "2.54-2*20P": (0.10, 1, "est. (BOOMELE 2x20 2.54 mm IDC header, LCSC C9138, LCSC record read 2026-11-01)", "LCSC"),
+    "B2P-VH": (0.15, 1, "est. (JST B2P-VH 2-pin 3.96 mm header, CM4IO 12 V feed; LCSC C160315)", "LCSC"),
+    "U.FL-R-SMT-1(10)": (0.34, 10, "est. (Hirose U.FL-R-SMT-1(10), LCSC C88373 (not C88374))", "LCSC"),
+    "SRP5030T-6R8M": (0.62, 1, "est. (Bourns SRP5030T-6R8M 6.8 uH, Irms 4.0 A, Isat 4.3 A, DCR 76.2 mohm, Bourns datasheet read 2026-11-01; buy UK, not LCSC: C177249 is only 3.5 A)", "DigiKey UK / Mouser UK / Farnell UK"),
     "ALU_100u_25V": (0.08, 1, "est. (as hw/rx/prices.py)", "LCSC"),
     "C_22u_1206_25V_X5R": (0.10, 1, "est.", "LCSC"),
     "C_10u_1206_25V_X7R": (0.09, 1, "est. (as hw/rx/prices.py, USD 0.12)", "LCSC"),
@@ -97,7 +95,12 @@ EXTRAS = [
 ]
 
 # Not on the backplane BOM, priced elsewhere and added by audit.py for the rack total. Antenna kit per rack, ex VAT
-# (#34 cost-down, coordinator quotes 2026-11-01; audit.py Audit 5 sizes the coax from the wing geometry):
+# (#34 cost-down, coordinator quotes 2026-11-01; audit.py Audit 5 sizes the coax from the wing geometry). All GBP ex
+# VAT; UK VAT 20 % is added at checkout on every line (rack total inc VAT = 1.2 x). The brief asked for one CA3N030
+# (30 ft) per wing; Audit 5 shows the far wing needs >= 13.6 m on the smallest venue (6 x 6 m) and 21.5 m on the
+# 12 x 12 m one, so the far wing keeps the CA3N075 (+GBP 42.22; a CA3N050 covers stages <= 6 m wide, GBP 61.07).
+# The N-socket/BNC-plug adapter replaces the GBP 37.09 LCCA30301-FT1.5 lead: GBP 28.69 less per wing and 0.1 dB
+# instead of ~0.2 dB plus a mated pair.
 ANTENNA_KIT = [  # (item, qty, gbp_each, source)
     ("L-com HG2409P-NF 8 dBi 2.4 GHz flat patch", 2, 72.12, "ITM Components UK (ADR-0016)"),
     ("L-com CA3N030 CA-400 N-male/N-male 30 ft (9.14 m): rack -> near-wing boom", 1, 45.80,

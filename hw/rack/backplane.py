@@ -180,7 +180,7 @@ def build():
         for _ in range(2):
             C("10u 25V", v12, gnd)
         C("100n", v12, gnd)
-        lb = part("L", "L1", "6.8u", "Inductor_SMD:L_Bourns_SRP5030T", "IND_6u8_4A"); lb[1] += sw; lb[2] += v5
+        lb = part("L", "L1", "6.8u", "Inductor_SMD:L_Bourns_SRP5030T", "SRP5030T-6R8M"); lb[1] += sw; lb[2] += v5
         R("53.6k", v5, fb); R("10.2k", fb, gnd)               # 0.8 x (1 + 53.6/10.2) = 5.00 V
         for _ in range(2):
             C("22u 25V", v5, gnd)
@@ -200,7 +200,7 @@ def build():
 
     with Group("host"):
         # ---- ribbon header to the CM4IO J8 (pin n to pin n). The CM4IO's own 3V3/5V pins stay unconnected here ----
-        j2 = part("Conn_Host40", "J2", "CM4IO J8", "Connector_IDC:IDC-Header_2x20_P2.54mm_Vertical", "SBH11-PBPC-D20-ST-BK")
+        j2 = part("Conn_Host40", "J2", "CM4IO J8", "Connector_IDC:IDC-Header_2x20_P2.54mm_Vertical", "2.54-2*20P")
         used = set(HOST.values()) | {g for v in SLOT_UART.values() for g in v if g.startswith("GPIO")}
         for n, name in symbols_rack.HOST_HEADER.items():
             # spare CM4 GPIOs (0/1 = HAT ID EEPROM, 2/3, 7, 10, 11, 16) and the CM4IO's own 3V3/5V: no connection
@@ -218,7 +218,7 @@ def build():
             rst = Net(f"{rf}_RST"); u["~{RESET}"] += rst; R("10k", v3, rst); C("100n", rst, gnd)
             x1, x2 = Net(f"{rf}_XTAL1"), Net(f"{rf}_XTAL2"); u["XTAL1"] += x1; u["XTAL2"] += x2
             y = part("Crystal", "Y1" if rf == "U4" else "Y2", "14.7456M", "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm",
-                     "CX3225GB14745P0HPQCC")
+                     "C3E-14.7456-18-3030-R")
             y[1] += x1; y[2] += x2; C("22p", x1, gnd); C("22p", x2, gnd)
             u["~{CTSA}"] += gnd; u["~{CTSB}"] += gnd; u["~{RTSA}"] += NC; u["~{RTSB}"] += NC
             C("100n", v3, gnd)
@@ -244,7 +244,7 @@ def build():
             j["IN"] += ant_n; j["SHIELD"] += gnd
             e1 = part("ESD_Bidir", ref("D"), "ESD103-B1-02EL", "Diode_SMD:D_0402_1005Metric", "ESD103-B1-02EL")
             e1[1] += ant_n; e1[2] += gnd
-            lc = part("L", ref("L"), "39n", "Inductor_SMD:L_0603_1608Metric", "LQW18AN39NG80D")   # choke, SRF 3.28 GHz
+            lc = part("L", ref("L"), "39n", "Inductor_SMD:L_0603_1608Metric", "CS0603-39NJ-S")   # choke, SRF 2.2 GHz: > 1 kohm shunt in band (#34)
             lc[1] += ant_n; lc[2] += bias_rf
             C("100p", bias_rf, gnd); C("10n", bias_rf, gnd)
             # 1 ohm 2512 (1 W): damps the choke and limits surge into the clamp; at the 0.52 A worst-case eFuse limit
@@ -274,7 +274,7 @@ def build():
             for p in ("NC3", "NC4", "NC5", "NC8"):
                 u[p] += gnd                                   # "provide grounded land pads"
             u["VBIAS"] += vb; R("5.1k", v5l, vb); C("100p", vb, gnd)   # EVB R4 / C7: 50 mA at 5 V
-            lch = part("L", ref("L"), "18n", "Inductor_SMD:L_0402_1005Metric", "0402CS-18NXG")
+            lch = part("L", ref("L"), "18n", "Inductor_SMD:L_0402_1005Metric", "SDWL1005C18NGSTF")
             lch[1] += v5l; lch[2] += rf_o
             C("100p", rf_o, lna_out)                          # EVB C2
             # ---- band-pass: QPQ1907 BAW (2402.5-2481.5 MHz), after the LNA so its loss barely touches NF ----
