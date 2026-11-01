@@ -9,12 +9,16 @@ Stock was read where the page showed it; "0 stock" lines are open items in ADR-0
 DK = "DigiKey UK 2026-11-01, read"
 
 PRICES = {  # mpn: (gbp_each, qty_break, source, uk_distributor)
+    # #34 layout picks (coordinator decisions 2026-11-01). USD -> GBP at 0.76.
+    "2.54-2*13PFemale": (0.17, 1, "est. (BOOMELE 2x13 2.54 mm female 8.5 mm, LCSC C64320, USD 0.2225, JLC parts record 2026-11-01 (stock unconfirmed)); contact 14 pulled and "
+                         "the cavity plugged at assembly: the footprint has no hole at 14 (ADR-0014 key)", "LCSC"),
+    "LTST-S270KGKT": (0.03, 1, "est. (Lite-On side-looking green, LCSC C125113, USD 0.042, JLC parts record 2026-11-01 (stock unconfirmed))", "LCSC"),
+    "LTST-S270KRKT": (0.03, 1, "est. (Lite-On side-looking red, LCSC C125114, USD 0.032, JLC parts record 2026-11-01 (stock unconfirmed))", "LCSC"),
+    "5415025-1": (6.95, 1, "est. (TE right-angle PCB BNC 50 ohm 4 GHz, 1/2-28 bulkhead; LCSC C5164649 USD 9.15, JLC parts record 2026-11-01 (stock unconfirmed); "
+                  "replaces Amphenol 112487, whose drawing could not be read)", "LCSC / DigiKey UK / Mouser UK"),
     "QPL9057TR7": (4.60, 1, DK + " (61,763 in stock); 25+ GBP 3.77, 100+ GBP 3.17", "DigiKey UK"),
     "0451004.MRL": (0.90, 1, "est. (Littelfuse Nano2 451 4 A fast, 125 V)", "DigiKey UK / Farnell UK"),
     "R_2512_1R_1W": (0.10, 1, "est. (1 ohm 1 % 2512 1 W thick film)", "LCSC / Farnell UK"),
-    "M20-7831346": (2.19, 1, DK + " (Harwin 2x13 2.54 mm socket, 4,728 in stock)", "DigiKey UK"),
-    "LTST-C191KGKT": (0.11, 1, "DigiKey UK, read for hw/bom/pack_uk.csv (Lite-On 0603 green)", "DigiKey UK"),
-    "LTST-C191KRKT": (0.11, 1, "DigiKey UK, read for hw/bom/pack_uk.csv (Lite-On 0603 red)", "DigiKey UK"),
     "QPQ1907SR": (2.82, 1, DK + " (7,548 in stock; 33-week lead); IL 1.3 typ / 2.2 max dB", "DigiKey UK"),
     "ESD103-B1-02EL": (0.30, 1, "est. (Infineon 15 V 0.09 pF RF ESD, TSLP-2-20; Farnell UK 2725731, LCSC C535146)",
                        "Farnell UK / LCSC"),
@@ -29,7 +33,6 @@ PRICES = {  # mpn: (gbp_each, qty_break, source, uk_distributor)
     "SC16IS752IPW,128": (5.92, 1, DK + " (11,036 in stock); the ,112 tube variant is obsolete", "DigiKey UK"),
     "CX3225GB14745P0HPQCC": (0.58, 1, DK + " (3,000 in stock): 14.7456 MHz 3225 18 pF", "DigiKey UK"),
     "NC3MAH": (2.08, 1, DK + " (Neutrik NC3MAH; qty-10 break not shown)", "DigiKey UK"),
-    "112487": (7.18, 1, DK + " (Amphenol RF 112487 R/A bulkhead BNC, 4 GHz; 12-week lead)", "DigiKey UK"),
     "SMAJ58CA": (0.36, 1, DK + " (Littelfuse)", "DigiKey UK"),
     "SMBJ12A": (0.37, 1, DK + " (Littelfuse)", "DigiKey UK"),
     "SMF12A": (0.08, 1, "est. (SMF 200 W TVS SOD-123F)", "LCSC / Farnell UK"),
@@ -55,6 +58,7 @@ PRICES = {  # mpn: (gbp_each, qty_break, source, uk_distributor)
     "R_0402_1%": (0.01, 10, "est.", "LCSC"),
     "R_0402_100R_TF": (0.08, 10, "est. (100 ohm 0402 thin film, Wilkinson isolation)", "LCSC / Farnell UK"),
     "R_0402_0R": (0.01, 1, "est.", "LCSC"),
+    "TP-pad": (0.0, 1, "est. (footprint only: bare test pad)", "-"),
     "PCB_TRACE": (0.0, 1, "copper on the main board (hw/rack/wilkinson.py): no part", "-"),
 }
 
@@ -63,8 +67,6 @@ EXTRAS = [
     ("Raspberry Pi CM4 2 GB RAM / 8 GB eMMC, no wireless (SC0680 = CM4002008)", 1, 79.20,
      "The Pi Hut UK, qty 1, 2026-11-01 (coordinator decision on #95; DigiKey UK SC0680 was 0 stock at GBP 61.64)."
      " SC0681 (16 GB eMMC) same price is the drop-in alternative", "The Pi Hut UK"),
-    ("Harwin M20-003 polarising key, fitted in socket position 14 (ADR-0014 key)", 8, 0.22, DK + " (Harwin M20-003)",
-     "DigiKey UK / Farnell UK 512023"),
     ("Raspberry Pi CM4 IO Board (SC0326)", 1, 26.15, DK, "DigiKey UK"),
     ("40-way IDC ribbon 152 mm, socket-socket (Assmann H3AAH-4006G): main board J to CM4IO J8", 1, 1.30, DK, "DigiKey UK"),
     ("CM4IO 12 V pigtail: JST VH 2-pin housing to 2.1 mm DC plug, 200 mm", 1, 3.00, "est.", "LCSC / RS UK"),

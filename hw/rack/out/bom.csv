@@ -12,24 +12,24 @@ C28 C33 C36 C37 C38 C39 C44 C47 C48 C49,10,100p,C_100p_0402_C0G,0.020,0.20,10,LC
 C29 C40,2,10n,C_10n_0402,0.020,0.04,10,LCSC,est.
 D1,1,BZT52C12,BZT52C12,0.030,0.03,1,LCSC,est. (12 V zener SOD-123)
 D2,1,SMBJ12A,SMBJ12A,0.370,0.37,1,DigiKey UK,"DigiKey UK 2026-11-01, read (Littelfuse)"
-D3 D6,2,ESD101-B1-02EL,ESD101-B1-02EL,0.300,0.60,1,Farnell UK,"est. (Infineon 5.5 V 0.1 pF RF ESD, TSLP-2-20; Farnell UK 2480926)"
-D4 D1_1,2,ESD103-B1-02EL,ESD103-B1-02EL,0.300,0.60,1,Farnell UK / LCSC,"est. (Infineon 15 V 0.09 pF RF ESD, TSLP-2-20; Farnell UK 2725731, LCSC C535146)"
-D5 D2_1,2,SMF12A,SMF12A,0.080,0.16,1,LCSC / Farnell UK,est. (SMF 200 W TVS SOD-123F)
-D7 D11 D15 D19 D23 D27 D31 D35,8,green,LTST-C191KGKT,0.110,0.88,1,DigiKey UK,"DigiKey UK, read for hw/bom/pack_uk.csv (Lite-On 0603 green)"
-D8 D12 D16 D20 D24 D28 D32 D36,8,red,LTST-C191KRKT,0.110,0.88,1,DigiKey UK,"DigiKey UK, read for hw/bom/pack_uk.csv (Lite-On 0603 red)"
-D9 D10 D13 D14 D17 D18 D21 D22 D25 D26 D29 D30 D33 D34 D37 D38,16,SMAJ58CA,SMAJ58CA,0.360,5.76,1,DigiKey UK,"DigiKey UK 2026-11-01, read (Littelfuse)"
+D3 D6,2,ESD103-B1-02EL,ESD103-B1-02EL,0.300,0.60,1,Farnell UK / LCSC,"est. (Infineon 15 V 0.09 pF RF ESD, TSLP-2-20; Farnell UK 2725731, LCSC C535146)"
+D4 D7,2,SMF12A,SMF12A,0.080,0.16,1,LCSC / Farnell UK,est. (SMF 200 W TVS SOD-123F)
+D5 D8,2,ESD101-B1-02EL,ESD101-B1-02EL,0.300,0.60,1,Farnell UK,"est. (Infineon 5.5 V 0.1 pF RF ESD, TSLP-2-20; Farnell UK 2480926)"
+D9 D13 D17 D21 D25 D29 D33 D37,8,green,LTST-S270KGKT,0.030,0.24,1,LCSC,"est. (Lite-On side-looking green, LCSC C125113, USD 0.042, JLC parts record 2026-11-01 (stock unconfirmed))"
+D10 D14 D18 D22 D26 D30 D34 D38,8,red,LTST-S270KRKT,0.030,0.24,1,LCSC,"est. (Lite-On side-looking red, LCSC C125114, USD 0.032, JLC parts record 2026-11-01 (stock unconfirmed))"
+D11 D12 D15 D16 D19 D20 D23 D24 D27 D28 D31 D32 D35 D36 D39 D40,16,SMAJ58CA,SMAJ58CA,0.360,5.76,1,DigiKey UK,"DigiKey UK 2026-11-01, read (Littelfuse)"
 F1,1,4A fast,0451004.MRL,0.900,0.90,1,DigiKey UK / Farnell UK,"est. (Littelfuse Nano2 451 4 A fast, 125 V)"
 FB1 FB2,2,600R@100M,FB_0603_600R,0.030,0.06,10,LCSC,"est. (600 ohm at 100 MHz 0603 ferrite bead, 1 A)"
 J1,1,12V IN,PJ-063AH,1.220,1.22,1,DigiKey UK,"DigiKey UK 2026-11-01, read (Same Sky PJ-063AH 2.1 mm 8 A, 34,138 in stock; not locking)"
 J2,1,CM4IO J8,SBH11-PBPC-D20-ST-BK,0.490,0.49,1,DigiKey UK,"DigiKey UK 2026-11-01, read (Sullins 2x20 box header, 69,820 in stock)"
-J3 J4,2,ANT A,112487,7.180,14.36,1,DigiKey UK,"DigiKey UK 2026-11-01, read (Amphenol RF 112487 R/A bulkhead BNC, 4 GHz; 12-week lead)"
+J3 J4,2,ANT A,5415025-1,6.950,13.90,1,LCSC / DigiKey UK / Mouser UK,"est. (TE right-angle PCB BNC 50 ohm 4 GHz, 1/2-28 bulkhead; LCSC C5164649 USD 9.15, JLC parts record 2026-11-01 (stock unconfirmed); replaces Amphenol 112487, whose drawing could not be read)"
 J5,1,CM4IO 12V,B2P-VH,0.150,0.15,1,LCSC / Farnell UK,"est. (JST VH 2-pin 3.96 mm header, CM4IO 12 V feed)"
-J10 J11 J12 J13 J14 J15 J16 J17,8,SLOT 0,M20-7831346,2.190,17.52,1,DigiKey UK,"DigiKey UK 2026-11-01, read (Harwin 2x13 2.54 mm socket, 4,728 in stock)"
+J10 J11 J12 J13 J14 J15 J16 J17,8,SLOT 0,2.54-2*13PFemale,0.170,1.36,1,LCSC,"est. (BOOMELE 2x13 2.54 mm female 8.5 mm, LCSC C64320, USD 0.2225, JLC parts record 2026-11-01 (stock unconfirmed)); contact 14 pulled and the cavity plugged at assembly: the footprint has no hole at 14 (ADR-0014 key)"
 J20 J21 J22 J23 J24 J25 J26 J27,8,OUT 1,NC3MAH,2.080,16.64,1,DigiKey UK,"DigiKey UK 2026-11-01, read (Neutrik NC3MAH; qty-10 break not shown)"
 J30 J31 J32 J33 J34 J35 J36 J37 J40 J41 J42 J43 J44 J45 J46 J47,16,RF A0,U.FL-R-SMT-1(10),0.340,5.44,10,Farnell UK / RS UK,"est. (as hw/rx/prices.py, USD 0.45)"
 L1,1,6.8u,IND_6u8_4A,0.600,0.60,1,LCSC / DigiKey UK,"est. (6.8 uH 4 A shielded power inductor, 5x5 mm; TPS62933 reference design value)"
-L2 L4,2,18n,0402CS-18NXG,0.150,0.30,1,DigiKey UK / Mouser UK,"est. (Coilcraft 0402CS 18 nH, the QPL9057 EVB L1)"
-L3 L1_1,2,39n,LQW18AN39NG80D,0.110,0.22,1,DigiKey UK,"DigiKey UK 2026-11-01, read (10,561 in stock): 39 nH, SRF 3.28 GHz, Idc 1 A, DCR 0.16 ohm"
+L2 L4,2,39n,LQW18AN39NG80D,0.110,0.22,1,DigiKey UK,"DigiKey UK 2026-11-01, read (10,561 in stock): 39 nH, SRF 3.28 GHz, Idc 1 A, DCR 0.16 ohm"
+L3 L5,2,18n,0402CS-18NXG,0.150,0.30,1,DigiKey UK / Mouser UK,"est. (Coilcraft 0402CS 18 nH, the QPL9057 EVB L1)"
 NT1,1,GND-CHASSIS,R_0402_0R,0.010,0.01,1,LCSC,est.
 Q1,1,AO4407A,AO4407A,0.250,0.25,1,LCSC,est. (Alpha & Omega -30 V 12 A P-FET SO-8; DMP3013SFV-7 is 0-stock at DigiKey UK)
 R1 R3 R5 R11 R14 R16 R19 R32 R44 R52 R60 R68 R76 R82 R88 R94,16,10k,R_0402_1%,0.010,0.16,10,LCSC,est.
@@ -51,6 +51,7 @@ R47 R55 R63 R71,4,100,R_0402_1%,0.010,0.04,10,LCSC,est.
 R49 R50 R57 R58 R65 R66 R73 R74 R79 R80 R85 R86 R91 R92 R97 R98,16,560,R_0402_1%,0.010,0.16,10,LCSC,est.
 TL1 TL2 TL3 TL4 TL5 TL6 TL7 TL8 TL9 TL10 TL11 TL12 TL13 TL14 TL15 TL16 TL17 TL18 TL19 TL20 TL21 TL22 TL23 TL24 TL25 TL26 TL27 TL28,28,70R7 L/4 17.76mm w0.196,PCB_TRACE,0.000,0.00,1,-,copper on the main board (hw/rack/wilkinson.py): no part
 TL29 TL30 TL31 TL32 TL33 TL34 TL35 TL36 TL37 TL38 TL39 TL40 TL41 TL42 TL43 TL44,16,50R feed,PCB_TRACE,0.000,0.00,1,-,copper on the main board (hw/rack/wilkinson.py): no part
+TP1 TP2 TP3 TP4 TP5 TP6 TP7 TP8 TP9 TP10 TP11 TP12 TP13 TP14 TP15 TP16 TP17 TP18 TP19 TP20 TP21 TP22 TP23 TP24 TP25 TP26 TP27 TP28 TP29 TP30 TP31 TP32 TP33 TP34 TP35 TP36 TP37 TP38 TP39 TP40 TP41 TP42 TP43 TP44 TP45 TP46 TP47 TP48 TP49 TP50 TP51 TP52 TP53 TP54 TP55 TP56 TP57 TP58 TP59 TP60,60,+12V_PROT,TP-pad,0.000,0.00,1,-,est. (footprint only: bare test pad)
 U1 U10 U11 U12 U20 U21 U22 U23 U24 U25 U26 U27,12,TPS259541DSGR,TPS259541DSGR,0.558,6.70,10,DigiKey UK,"DigiKey UK 2026-11-01, read qty-10 break; 20-week lead, stock not shown"
 U2,1,TPS62933DRLR,TPS62933DRLR,1.200,1.20,1,DigiKey UK / Farnell UK,"est. (TI TPS62933 3 A buck, SOT-583)"
 U3,1,TLV76733,TLV76733DGNR,0.300,0.30,1,Farnell UK / DigiKey UK / Mouser UK,"est. (as hw/rx/prices.py, USD 0.40)"
@@ -60,7 +61,6 @@ U8 U9,2,QPQ1907,QPQ1907SR,2.820,5.64,1,DigiKey UK,"DigiKey UK 2026-11-01, read (
 U30 U31 U32 U33 U34 U35 U36 U37,8,TPS259531DSGR,TPS259531DSGR,0.558,4.46,10,DigiKey UK,"DigiKey UK 2026-11-01, read qty-10 break (4,178 in stock)"
 Y1 Y2,2,14.7456M,CX3225GB14745P0HPQCC,0.580,1.16,1,DigiKey UK,"DigiKey UK 2026-11-01, read (3,000 in stock): 14.7456 MHz 3225 18 pF"
 -,1,"Raspberry Pi CM4 2 GB RAM / 8 GB eMMC, no wireless (SC0680 = CM4002008)",-,79.200,79.20,1,The Pi Hut UK,"The Pi Hut UK, qty 1, 2026-11-01 (coordinator decision on #95; DigiKey UK SC0680 was 0 stock at GBP 61.64). SC0681 (16 GB eMMC) same price is the drop-in alternative"
--,8,"Harwin M20-003 polarising key, fitted in socket position 14 (ADR-0014 key)",-,0.220,1.76,1,DigiKey UK / Farnell UK 512023,"DigiKey UK 2026-11-01, read (Harwin M20-003)"
 -,1,Raspberry Pi CM4 IO Board (SC0326),-,26.150,26.15,1,DigiKey UK,"DigiKey UK 2026-11-01, read"
 -,1,"40-way IDC ribbon 152 mm, socket-socket (Assmann H3AAH-4006G): main board J to CM4IO J8",-,1.300,1.30,1,DigiKey UK,"DigiKey UK 2026-11-01, read"
 -,1,"CM4IO 12 V pigtail: JST VH 2-pin housing to 2.1 mm DC plug, 200 mm",-,3.000,3.00,1,LCSC / RS UK,est.
