@@ -1,0 +1,5 @@
+Phase: 0 of ? (fresh start). v2 branch created 2026-11-01 after the owner closed v1 on cost.
+Done since last update: The v1 audit is in docs/audit (why it cost £1,501 for the receiver end, why its radio plan could never reach 32 mics, and that its top requirement was never actually tested in the shipped configuration). The owner's new ranked priorities are in REQUIREMENTS.md: reliability and cost joint first, then latency (5 ms hard), then scaling to 32 and beyond, then automatic set-up. Cost now has budgets with a 25 % tripwire that triggers a review instead of a hard stop. The owner reviews at every phase boundary and before any board is ordered.
+Next: A radical idea board (docs/ideas): several extreme approaches to the radio link and the receiver, each written up by one agent, then evaluated by a different agent against REQUIREMENTS.md. The owner picks the architecture at the first review.
+Waiting on human: nothing.
+Risks: none new. v1's open risks are frozen on main (docs/design-log.md there) and summarised in docs/audit.
