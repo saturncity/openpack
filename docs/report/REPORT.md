@@ -4,6 +4,8 @@
 
 Date: 1 November 2026. Repository: `saturncity/openpack`, `main` after PR #129.
 
+> **Project closed on 1 November 2026 without a build.** The owner (the client) reviewed the finished digital design and decided not to build it. Their verdict is in section D6. Nothing on the shopping list was bought, and the bench tests in D4 will not run.
+
 ---
 
 ## How this report differs from a real IA
@@ -20,7 +22,7 @@ A real IB DT IA ends with a working prototype that was built, tested by hand and
 | **CadQuery fit checks** (3D models of the enclosures) | Test-fitting parts in a printed case |
 | **`audit.py`** (a script that recalculates every key number from the design files) | A lab notebook of calculations |
 
-So this report says "passes in simulation" or "passes by calculation", never "passes". The real tests are planned and listed in section D (issues #37–#42 and #92), and they run after one shopping trip (section C9).
+So this report says "passes in simulation" or "passes by calculation", never "passes". The real tests were planned (section D4, issues #37–#42 and #92) but will not run, because the project closed without a build.
 
 Every number in this report comes from the repository: `REQUIREMENTS.md`, `SPEC.md`, `docs/design-log.md`, the ADRs in `docs/adr/`, `STATUS.md`, `hw/REVIEW.md`, `docs/shopping-list.md` and the output of `python3 audit.py`.
 
@@ -376,7 +378,9 @@ These are the main items from the design log's "Open risks for audit" table, whi
 
 The others are 6 (antenna rear lobes read off a plot), 9 (phone leakage near the gap carriers) and 10 (band-edge filter loss).
 
-### D4. Planned bench tests (after the single purchase)
+### D4. Planned bench tests (not going ahead)
+
+These were planned for after the single purchase. They are recorded so that the gap between "passes in simulation" and "works" is visible. None of them will run.
 
 | Issue | Test |
 |---|---|
@@ -396,9 +400,33 @@ The others are 6 (antenna rear lobes read off a plot), 9 (phone leakage near the
 4. **For a v2:** a smarter loss concealment if the measured audible-event rate exceeds 10 per hour (ADR-0010); a downlink using the reserved 300 µs slot; and sub-1 GHz as the strongest fallback if UK Wi-Fi proves worse than modelled.
 5. **Let console settings retune the radio** (#132), and teach the host app the new firmware-update method (#128).
 
+### D6. Client's verdict and conclusion
+
+The client reviewed the finished design on 1 November 2026. In their words:
+
+- **"Solid prototype."** As a digitally verified design it holds together: every requirement has a design answer and a virtual test, and the numbers trace back to the repository.
+- **"Cost on receiver too high."** The rack (the receiving end) comes to **£1,501.50** ex VAT against the £800–830 hoped for (section C9). Even without the antenna stands it is £1,190.94, about **£149 per channel**.
+- **"Needs new innovation at the highest level."** The project will not be built in this form.
+
+**Why part swaps cannot fix the cost.** The rack's cost comes from the architecture, not from any one expensive part (`audit.py`, ex VAT):
+
+| Rack cost block | £ | Set by |
+|---|---:|---|
+| Main board, host and cables (412 × 321.5 mm 4-layer board order ~£300, Hammond case £140.76, CM4 £79.20) | 709.04 | One large board to carry eight receivers and the splitter network |
+| Antennas, coax and adapters | 294.86 | Wing install rule needed to meet R1 at UK power (ADR-0016, 0021) |
+| Two stands with mast kits | 310.56 | 4 m antenna height in the wings |
+| Eight receiver sub-boards | 187.04 | One radio per pack (FDMA, ADR-0002) |
+| **Total** | **1,501.50** | |
+
+Each choice was the cheapest way to meet a higher-ranked requirement. One pair of carriers per pack (R1, R3) needs one receiver per pack. Eight receivers need a splitter and a large board. UK power limits (EN 300 328) push the problem onto the antennas. So, as the client concluded, getting the receiving end near the target needs a change at the top, in how the packs share the air and how the rack hears them, not cheaper versions of the same parts. Such a change was not designed or evaluated here.
+
+**What carries forward.** Several parts stand on their own for a future design: the firmware running in the radio simulator, the virtual test gates, the requirement → ADR → test traceability, the UK regulatory analysis, the codec bake-off and the pack design ($33.34 in parts). The open risks in D3 are now permanent: without a build none of them can be closed by measurement.
+
 ---
 
 ## E. Commercial production
+
+*This section describes what production would have involved. Following the client's verdict (D6), none of it will go ahead.*
 
 **4 units versus 100.**
 
