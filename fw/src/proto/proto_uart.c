@@ -1,5 +1,5 @@
 /* Console glue: read lines from the console UART, run the role's command table, write the reply.
- * With a chosen openpack,proto (the USB CDC ACM instance, fw/boards/op_usb_cdc.dtsi: DK, pack board) the protocol is on
+ * With a chosen openpack-proto (the USB CDC ACM instance, fw/boards/op_usb_cdc.dtsi: DK, pack board) the protocol is on
  * USB and uart0 keeps the log; else the console UART (bsim pty, receiver board). See fw/PROTOCOL.md.
  */
 #include <zephyr/kernel.h>

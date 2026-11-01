@@ -240,13 +240,13 @@ config OP_PERSIST
 
 config OP_CONSOLE_USB_CDC
 	bool "Protocol on USB CDC ACM (PK-9) instead of the console UART"
-	default y if $(dt_chosen_enabled,openpack,proto)
+	default y if $(dt_chosen_enabled,openpack-proto)
 	select USB_DEVICE_STACK_NEXT
 	select USBD_CDC_ACM_CLASS
 	select UART_LINE_CTRL
 	select CDC_ACM_SERIAL_INITIALIZE_AT_BOOT
 	help
-	  The chosen openpack,proto node (fw/boards/op_usb_cdc.dtsi) exists on the DK and the pack board only. The USB
+	  The chosen openpack-proto node (fw/boards/op_usb_cdc.dtsi) exists on the DK and the pack board only. The USB
 	  stack is brought up at boot by Zephyr (CDC_ACM_SERIAL_INITIALIZE_AT_BOOT). uart0 keeps boot and log output.
 
 if OP_CONSOLE_USB_CDC

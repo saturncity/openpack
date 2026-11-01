@@ -3,7 +3,7 @@
  */
 / {
 	chosen {
-		openpack,proto = &cdc_acm_uart0;
+		openpack-proto = &cdc_acm_uart0;
 	};
 };
 
