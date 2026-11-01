@@ -150,7 +150,7 @@ def build():
         j1 = part("DC_Jack", "J1", "12V IN", "Connector_BarrelJack:BarrelJack_CUI_PJ-063AH_Horizontal", "PJ-063AH")
         v12in = power("+12V_IN")
         j1["+"] += v12in; j1["SLEEVE"] += gnd; j1["SW"] += NC
-        f1 = part("Fuse", "F1", "4A fast", "Fuse:Fuse_Littelfuse_NANO2_451_453", "0451004.MRL")
+        f1 = part("Fuse", "F1", "4A fast", "Fuse:Fuse_Littelfuse-NANO2-451_453", "0451004.MRL")
         f1[1] += v12in; f1[2] += v12raw
         # AO4407A: drain at the fuse, source to the load, gate to GND via 10k; the body diode conducts first, then
         # Vgs = -12 V turns it on. Reversed brick: body diode blocks, Vgs = 0. BZT52C12 clamps Vgs (AO4407A +-25 V).

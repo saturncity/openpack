@@ -63,6 +63,8 @@ PRICES = {  # mpn: (gbp_each, qty_break, source, uk_distributor)
 }
 
 # Items with no schematic symbol: the host computer, cables, panel parts. (item, qty, gbp_each, source, distributor)
+# #34 cost-downs (coordinator, 2026-11-01): real quotes for the case, USB lead and RF jumpers; GBP ex VAT (UK VAT 20 %
+# on top). Stock marked "unconfirmed" was not re-read at order time.
 EXTRAS = [
     ("Raspberry Pi CM4 2 GB RAM / 8 GB eMMC, no wireless (SC0680 = CM4002008)", 1, 79.20,
      "The Pi Hut UK, qty 1, 2026-11-01 (coordinator decision on #95; DigiKey UK SC0680 was 0 stock at GBP 61.64)."
@@ -70,19 +72,43 @@ EXTRAS = [
     ("Raspberry Pi CM4 IO Board (SC0326)", 1, 26.15, DK, "DigiKey UK"),
     ("40-way IDC ribbon 152 mm, socket-socket (Assmann H3AAH-4006G): main board J to CM4IO J8", 1, 1.30, DK, "DigiKey UK"),
     ("CM4IO 12 V pigtail: JST VH 2-pin housing to 2.1 mm DC plug, 200 mm", 1, 3.00, "est.", "LCSC / RS UK"),
-    ("U.FL-U.FL 1.13 mm cable 200 mm (Sevskiy CA-MHF1-MC1.13-200-MHF1), splitter port to sub-board J3/J4", 16, 4.48,
-     DK + " (109,584 in stock)", "DigiKey UK"),
+    ("U.FL-U.FL 1.13 mm jumper 100 mm (Taoglas CAB.6012), main-board port to receiver J3/J4 (#34: ports sit right "
+     "behind each receiver, 3.1 dB/m -> 0.3 dB + 2 mated pairs)", 16, 1.02,
+     "RS UK 069-0832, read by the coordinator 2026-11-01 (stock unconfirmed); alternative LCSC C7541876 (Kinghelm)",
+     "RS UK"),
     ("Neutrik NE8FDP etherCON RJ45 feedthrough (rear panel)", 1, 12.78, DK, "DigiKey UK"),
     ("Cat6 patch 0.3 m, NE8FDP to CM4IO RJ45", 1, 2.00, "est.", "RS UK / Farnell UK"),
-    ("Panel-mount USB-C socket to micro-USB plug, 0.3 m (CM4IO rpiboot service port, RK-1)", 1, 8.00,
-     "est. (not found on DigiKey UK: open item)", "RS UK / Farnell UK"),
+    ("Panel-mount USB-C socket to micro-B plug, 30 cm, M3 ears 20 mm apart (Adafruit 4056; CM4IO rpiboot port, RK-1;"
+     " no CC resistors: service with a USB-A-to-C lead)", 1, 3.83,
+     "The Pi Hut UK SKU 103462, GBP 4.60 inc VAT, read 2026-11-01 (sold out that day; Adafruit direct USD 4.95)",
+     "The Pi Hut UK"),
     ("Mean Well GST60A12-P1J 12 V 5 A desktop brick, 2.1 mm plug, C14 inlet", 1, 14.50, DK + " (6,852 in stock)",
      "DigiKey UK"),
     ("UK mains cord BS1363 to C13, 1.83 m (AC-12206-UK)", 1, 8.35, DK + " (7,931 in stock)", "DigiKey UK"),
-    ("Main board PCB 4-layer ~400 x 150 mm, JLC04161H-7628, ENIG", 1, 25.00, "est. (JLCPCB qty-5 price share)",
-     "JLCPCB (ships to UK)"),
-    ("1U 19 in steel case, ~250 mm deep, with blank rear panel to punch", 1, 60.00, "est.", "RS UK / Farnell UK"),
+    ("Main board PCB 4-layer 412 x 323 mm, JLC04161H-7628, ENIG (hw/rack/layout.py)", 1, 40.00,
+     "est. (JLCPCB qty-5 price share for a 0.133 m^2 4-layer board; quote before ordering)", "JLCPCB (ships to UK)"),
+    ("Hammond RM1U1913SBK 1U 19 in aluminium case, 330 mm deep (mech/rack.py; panels drilled per mech/out)", 1, 140.76,
+     "Rapid Online 31-1555, read by the coordinator 2026-11-01, in stock; DigiKey UK HM996-ND GBP 142.98 (90 in stock)",
+     "Rapid Online / DigiKey UK"),
+    ("M3 x 11 mm F-F hex spacer + 2 x M3 x 6 screws: receiver mounts (2 per slot, mech.json H1/H2)", 16, 0.30,
+     "est. (brass hex spacer class price)", "RS UK / Farnell UK"),
+    ("M2.5 x 10 mm F-F spacer + screws: CM4IO above the main board", 4, 0.30, "est.", "RS UK / Farnell UK"),
+    ("M3 x 5 mm F-F spacer + screws: main board to the case floor (8 holes)", 8, 0.25, "est.", "RS UK / Farnell UK"),
 ]
 
-# Not on the backplane BOM, priced elsewhere and added by audit.py for the rack total:
-ANTENNA_KIT_GBP = 340.56   # ADR-0016 (PR #93): 2 x (HG2409P-NF + CA3N050 + BNC jumper), ex VAT, ITM Components UK
+# Not on the backplane BOM, priced elsewhere and added by audit.py for the rack total. Antenna kit per rack, ex VAT
+# (#34 cost-down, coordinator quotes 2026-11-01; audit.py Audit 5 sizes the coax from the wing geometry):
+ANTENNA_KIT = [  # (item, qty, gbp_each, source)
+    ("L-com HG2409P-NF 8 dBi 2.4 GHz flat patch", 2, 72.12, "ITM Components UK (ADR-0016)"),
+    ("L-com CA3N030 CA-400 N-male/N-male 30 ft (9.14 m): rack -> near-wing boom", 1, 45.80,
+     "ITM Components UK, ex VAT, read 2026-11-01"),
+    ("L-com CA3N075 CA-400 N-male/N-male 75 ft (22.86 m): rack -> far-wing boom (12 m stage)", 1, 88.02,
+     "ITM Components UK, ex VAT, read 2026-11-01"),
+    ("Amphenol RF NF-BM-NT3G-50 N socket to BNC plug adapter at the rack BNC (replaces the GBP 37.09 LCCA30301-FT1.5)",
+     2, 8.40, "RS UK 285-6398, ex VAT, search snippet 2026-11-01"),
+    ("Thor LS003 4.0 m winch lighting stand, 35 mm top (antenna boom)", 2, 140.83,
+     "Simply Sound and Lighting LS003, GBP 169 inc VAT, in stock, 2026-11-01"),
+    ("L-com HGX-PMT07 stationary mast mount kit (U-bolts for 31.7-50.8 mm mast; fits the 35 mm stand top)", 2, 14.45,
+     "ITM Components UK, ex VAT, in stock, 2026-11-01"),
+]
+ANTENNA_KIT_GBP = round(sum(q * g for _, q, g, _ in ANTENNA_KIT), 2)

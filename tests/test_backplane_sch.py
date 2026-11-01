@@ -52,7 +52,7 @@ def test_erc_and_bom(built):
     assert [{k: str(v) for k, v in r.items()} for r in rows] == committed, "run python hw/rack/backplane.py --no-sch"
     for r in rows:                      # UK owner: every line has a UK distributor, a GBP price and a labelled source
         assert r["uk_distributor"] and float(r["unit_gbp"]) >= 0
-        assert r["source"].startswith(("est.", "DigiKey UK", "copper", "The Pi Hut")), r
+        assert r["source"].startswith(("est.", "DigiKey UK", "copper", "The Pi Hut", "RS UK", "Rapid Online")), r
 
 
 def test_no_skidl_calls_in_comments():

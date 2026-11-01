@@ -27,7 +27,7 @@ Qorvo QPQ1907: "QPQ1907 Data Sheet 040820" p.6 "Recommended land pattern" (top v
 KiCad's y-down frame. Pin 1 = INPUT, 4 = OUTPUT, 2/3/5 GND (p.3).
 
 Microstrip_NetTie: the schematic's TL parts (Wilkinson arms, 50 ohm feeds) are copper, not parts. The footprint is a
-0.2 mm net tie (two abutting 0.2 x 0.2 copper pads, net_tie_pad_groups "1, 2") placed where the line starts; the line
+1.0 mm net tie (two 0.16 mm pads 0.8 apart joined by a 0.16 mm copper bar, net_tie_pad_groups "1, 2") placed where the line starts; the line
 itself is a track of the far-end net drawn by layout.py at the width and length hw/rack/layout.py RF computes (#95 open
 item "give the TL net-ties real track geometry"). Excluded from BOM and position files.
 
@@ -136,9 +136,9 @@ def microstrip_nettie():
     b = pk._text("Reference", "REF**", 0, -0.6, "F.Fab", size=0.4)
     b += pk._text("Value", "TL", 0, 0.6, "F.Fab", size=0.4)
     b += '  (net_tie_pad_groups "1, 2")\n'
-    b += '  (pad "1" smd rect (at -0.1 0) (size 0.2 0.2) (layers "F.Cu"))\n'
-    b += '  (pad "2" smd rect (at 0.1 0) (size 0.2 0.2) (layers "F.Cu"))\n'
-    b += ('  (fp_poly (pts (xy -0.2 -0.1) (xy 0.2 -0.1) (xy 0.2 0.1) (xy -0.2 0.1)) (stroke (width 0) (type solid)) '
+    b += '  (pad "1" smd rect (at -0.4 0) (size 0.16 0.16) (layers "F.Cu"))\n'
+    b += '  (pad "2" smd rect (at 0.4 0) (size 0.16 0.16) (layers "F.Cu"))\n'
+    b += ('  (fp_poly (pts (xy -0.48 -0.08) (xy 0.48 -0.08) (xy 0.48 0.08) (xy -0.48 0.08)) (stroke (width 0) (type solid)) '
           '(fill yes) (layer "F.Cu"))\n')
     return pk._wrap("Microstrip_NetTie", "Microstrip start: 0.2 mm net tie, line drawn as a track (hw/rack/layout.py)",
                     b, attr="smd exclude_from_pos_files exclude_from_bom")
