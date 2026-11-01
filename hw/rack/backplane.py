@@ -20,6 +20,8 @@ import csv, importlib.util, math, pathlib, re, sys
 HERE = pathlib.Path(__file__).resolve().parent
 
 
+W70_DRAWN_MM, LQ_DRAWN_MM = 0.17, 18.02      # = hw/rack/layout.py W70, LQ
+
 def _load(name, path):
     spec = importlib.util.spec_from_file_location(name, path)
     mod = importlib.util.module_from_spec(spec)
@@ -90,7 +92,7 @@ def build():
     R0402, C0402, C0603, C1206 = ("Resistor_SMD:R_0402_1005Metric", "Capacitor_SMD:C_0402_1005Metric",
                                   "Capacitor_SMD:C_0603_1608Metric", "Capacitor_SMD:C_1206_3216Metric")
     CMPN = {"100n": "C_100n_0402", "1u": "C_1u_0402", "10u": "C_10u_0603_X5R", "22n": "C_22n_0402",
-            "33n": "C_33n_0402", "10n": "C_10n_0402", "100p": "C_100p_0402_C0G", "22p": "C_22p_0402_C0G",
+            "33n": "C_33n_0402", "10n": "C_10n_0402", "100p": "C_100p_0402_C0G", "22p": "C_22p_0402_C0G", "33p": "C_33p_0402_C0G",
             "10u 25V": "C_10u_1206_25V_X7R", "22u 25V": "C_22u_1206_25V_X5R"}
 
     def R(val, a, b, mpn="R_0402_1%", rf=None, fp=R0402):
@@ -218,8 +220,8 @@ def build():
             rst = Net(f"{rf}_RST"); u["~{RESET}"] += rst; R("10k", v3, rst); C("100n", rst, gnd)
             x1, x2 = Net(f"{rf}_XTAL1"), Net(f"{rf}_XTAL2"); u["XTAL1"] += x1; u["XTAL2"] += x2
             y = part("Crystal", "Y1" if rf == "U4" else "Y2", "14.7456M", "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm",
-                     "C3E-14.7456-18-3030-R")
-            y[1] += x1; y[2] += x2; C("22p", x1, gnd); C("22p", x2, gnd)
+                     "XC32M4-14.7456-F20NLDTL")
+            y[1] += x1; y[2] += x2; C("33p", x1, gnd); C("33p", x2, gnd)      # #126: 20 pF crystal, 2 x 33 pF + ~3 pF stray
             u["~{CTSA}"] += gnd; u["~{CTSB}"] += gnd; u["~{RTSA}"] += NC; u["~{RTSB}"] += NC
             C("100n", v3, gnd)
         for k in ("SPI1_SCLK", "SPI1_MOSI", "SPI1_MISO", "SPI1_CE0", "SPI1_CE1", "IRQ_U4", "IRQ_U5"):
@@ -231,8 +233,9 @@ def build():
         j["RF"] += sig; j["GND"] += gnd
         return j
 
-    tree = wilkinson.build_tree()[2]
-    w70, lq = tree["w70_m"] * 1e3, tree["lq_m"] * 1e3
+    # the drawn arm: hw/rack/layout.py's field-solved 70.7 ohm line (0.17 mm, gap 0.5 mm) and its lambda/4 (#126 review:
+    # the closed-form 0.196 / 17.76 of wilkinson.py is not what the board carries; tests/test_rack_layout.py checks)
+    w70, lq = W70_DRAWN_MM, LQ_DRAWN_MM
     rf_out = {}
     for ant, bnc, lna, flt, efb in (("A", "J3", "U6", "U8", "U10"), ("B", "J4", "U7", "U9", "U11")):
         with Group(f"rf_{ant.lower()}"):

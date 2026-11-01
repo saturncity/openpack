@@ -1,7 +1,7 @@
 {
  "inside_main_board": {
   "ok": true,
-  "detail": "[1.65, 0, 5.0, 413.65, 323.0, 6.6]"
+  "detail": "[1.65, 0, 5.0, 413.65, 321.5, 6.6]"
  },
  "inside_receiver0": {
   "ok": true,
@@ -200,8 +200,9 @@
   "lid_over_cm4io": 5.89,
   "side_wall": 1.65,
   "between_receivers": 4.0,
-  "board_front_gap": 0.85,
-  "rear_panel_to_receivers": 70.0
+  "board_front_gap": 2.35,
+  "rear_panel_to_receivers": 70.0,
+  "led_to_front_panel": 2.35
  },
  "lid_clearance": {
   "ok": true,
@@ -214,6 +215,10 @@
  "side_clearance": {
   "ok": true,
   "detail": "1.65 mm (>= 1)"
+ },
+ "led_reach": {
+  "ok": true,
+  "detail": "LED lens 2.35 mm behind the front panel (0.5..3.0)"
  },
  "rear_xlr0_in_panel": {
   "ok": true,

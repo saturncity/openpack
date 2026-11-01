@@ -191,6 +191,11 @@ def checks(m=None):
     ok("lid_clearance", margins["lid_over_receivers"] >= 2.0, f"{margins['lid_over_receivers']} mm (>= 2)")
     ok("cm4io_clearance", margins["lid_over_cm4io"] >= 2.0, f"{margins['lid_over_cm4io']} mm (>= 2)")
     ok("side_clearance", margins["side_wall"] >= 1.0, f"{margins['side_wall']} mm (>= 1)")
+    # #126: the board stops 2.35 mm short of the front panel; the side-looking LEDs sit with their lens on the board's
+    # front edge, so their light crosses that gap to the 2.5 mm holes (LTST-S270: 130 deg viewing angle)
+    led_gap = D - max(y for _, y in m["leds"])
+    margins["led_to_front_panel"] = round(led_gap, 2)
+    ok("led_reach", 0.5 <= led_gap <= 3.0, f"LED lens {led_gap:.2f} mm behind the front panel (0.5..3.0)")
     # 4. panel cut-outs: inside the panel's usable height (covers 1.63 mm, groove 2 mm est.) and >= 1.5 mm apart
     for which, cuts in (("rear", rear_cutouts(m)), ("front", front_cutouts(m))):
         ext = [(c[0], cut_extent(c)) for c in cuts]

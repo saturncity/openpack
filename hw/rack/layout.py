@@ -55,7 +55,7 @@ STACKUP = pk.STACKUP
 # sit there), front edge 0.85 mm short of the front panel. mech/rack.py builds the case around these numbers.
 # ---------------------------------------------------------------------------------------------------------------
 CASE_IN = (415.30, 323.85, 40.09)
-BW, BD = 412.0, 323.0
+BW, BD = 412.0, 321.5                      # #126 review: 2.35 mm clear of the front panel (was 323.0, 0.85)
 BOARD_X0 = (CASE_IN[0] - BW) / 2           # board x = 0 sits 1.65 mm from the left wall
 STANDOFF = 5.0                              # board underside above the case floor (M3 x 5 spacers)
 BOARD_T = 1.6
@@ -1264,15 +1264,14 @@ def prune_dangling(rep):
              if v["type"] == "track_dangling" for i in v["items"] if i["description"].startswith("Track")}
     if not vias and not stubs:
         return 0
+    # pass 1 removes the vias; pass 2 (stubs, from the DRC after pass 1) is undone by the caller if it unconnects anything
     b = P_.LoadBoard(str(BOARD))
     n = 0
     for t in list(b.GetTracks()):
         if t.Type() == P_.PCB_VIA_T:
             hit = key(t.GetPosition()) in vias
-        else:   # only short stray stubs; a hand escape stub stays (it joins its pad)
-            hit = P_.ToMM(t.GetLength()) < 1.0 and key(t.GetPosition()) in stubs and \
-                not any(t.GetNetCode() == p_.GetNetCode() and (p_.HitTest(t.GetStart()) or p_.HitTest(t.GetEnd()))
-                        for fp in b.GetFootprints() for p_ in fp.Pads())
+        else:   # short dangling stubs: strays, and hand escape stubs whose via the router did not need
+            hit = P_.ToMM(t.GetLength()) < 3.0 and key(t.GetPosition()) in stubs
         if hit:
             b.Delete(t)
             n += 1
@@ -1371,10 +1370,19 @@ def main(argv):
                                                        "tracks": RF_LOG}, indent=0) + "\n")
     (OUT / "mech.json").write_text(json.dumps(mech_record(fps), indent=1) + "\n")
     rep, errs, warns, unconn = drc()
-    pruned = prune_dangling(rep)
-    if pruned:
-        print(f"pruned {pruned} dangling vias / tracks")
+    for _ in range(2):                         # dangling vias first, then the stubs they leave
+        keep = BOARD.read_bytes()
+        n0 = len(unconn)
+        pruned = prune_dangling(rep)
+        if not pruned:
+            break
         rep, errs, warns, unconn = drc()
+        if len(unconn) > n0 or errs:           # a stub was carrying a connection: put the board back
+            BOARD.write_bytes(keep)
+            rep, errs, warns, unconn = drc()
+            print("prune undone (it unconnected something)")
+            break
+        print(f"pruned {pruned} dangling vias / tracks")
     print(pk.summarize(errs, warns, unconn))
     if "--no-out" not in argv:
         outputs = _load("hw_rack_outputs", HERE / "outputs_rack.py")

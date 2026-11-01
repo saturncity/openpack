@@ -30,12 +30,13 @@ Unresolved items, worst first. Each links to its entry.
 | 9 | Phone leakage into gap carriers at 11–17 MHz offset and real per-copy floor loss are unknown. bsim's Wi-Fi spectrum is a model. | The event-rate gate (≤ 1 audible dropout/h) cannot be decided in simulation. | G5/G6 measurement (ADR-0010). | RF-13, TS-5 |
 | 10 | QPQ1907 BAW filter loss at the band-edge carriers (2403, 2482) is a 2 dB estimate, and it is credited 0 dB rejection at 2370–2400 MHz (UK B40 phones). | Noise figure and blocking at the edges. | S2P data or VNA check. | RF-11 |
 | 11 | MCUboot images on the openpack boards are signed with the default development key (`root-ec-p256.pem`). | Anyone can sign firmware the bootloader accepts. | A private signing key before units leave the bench. | FW-9 |
-| 12 | **Rack Wilkinson trees lose 13.7 dB as routed** (ADR-0018 says ≤ 11) and the far-wing coax sits at 5.95 dB of the 6 dB RK-2 budget. The NF margin stays 8.2 dB, but the loss model (FR-4 tan δ, bends) is unmeasured, and a venue wider than 12 m needs the 100 ft lead (0.9 dB over budget). | NF and coax budgets (R1) rest on modelled losses. | VNA of one tree and both cable runs measured at the first venue. | RK-7c, RK-7h |
+| 12 | **Rack Wilkinson trees lose 13.7 dB as routed** (limit amended to ≤ 14 dB, #126). The NF margin stays 8.2 dB (6.6 dB with the 100 ft lead), but the loss model (FR-4 tan δ, bends) is unmeasured. | NF and coax budgets (R1) rest on modelled losses. | VNA of one tree and both cable runs measured at the first venue. | RK-7c, RK-7h |
 | 13 | **Codec choice not re-opened.** ADR-0005 picked ADPCM-6 because only it fits the TD copy in 85 B, and said: if TD ships off, ADPCM-8 vs ADPCM-6 becomes a quality tie for an owner A/B listening test. ADR-0017 ships TD off by default. No ADR records whether the choice was re-opened. | Non-TD packs (the default) may be giving up quality for no reason. | ADR-0005 amended: either keep ADPCM-6 because of per-pack TD, or offer ADPCM-8 on non-TD packs after a listening test. | AU-1 |
 | 14 | Pack BOM is $33.34 against the $35 cap only at Fanstel's direct module price ($13.47). At Digi-Key UK (£12.52 ≈ $16.47) it is about $36.3, and $36.63 at Digi-Key US. Assembly and coating are excluded. BT40NE lead time is about 10 weeks; TPS259541 (rack) about 20 weeks. | R12 cost target; schedule of the single purchase. | Purchase quote (#36). | SC-1, SC-4 |
 | 15 | bsim model limits: free space only, no body loss or fading, no compression or PIMD, runs of 20–60 s rather than 1 h, Wi-Fi skirt −12…−15 dB at 11 MHz (the 802.11 mask allows −20), nothing above 2480 MHz. | Twin results are relative evidence, not proof. | G5 calibration within 20 % of the twin. | TS-13 |
 | 16 | Fab DFM has not been run on any board; CPL rotations for several packages are unmapped. | DFM findings arrive at purchase time. | DFM reports attached to #34. | PR-4, PK-14 |
-| 17 | Rack total £1,241.62 ex VAT (£931.06 like for like) against an £800–830 target; owner-fixed case and CM4, and the far-wing 75 ft coax. | R12 cost. | Owner accepts, or picks parts to cut (#36). | RK-7k |
+| 17 | Rack total £1,501.50 ex VAT (£1,190.94 like for like) against an £800–830 target: the owner-fixed case and CM4, the £300 (est.) PCB order, the far-wing 75 ft coax. | R12 cost. | Owner accepts, or picks parts to cut (#36); a JLC quote replaces the PCB estimate. | RK-7k |
+| 18 | Hammond side-extrusion cover-screw lugs may touch the main board's side edges (drawing not conclusive, STEP not downloadable). | The board may not drop into the case. | Bare-board dry fit; notch the edges if needed (no copper there but pour). | RK-7a |
 
 ## RF and link budget
 
@@ -438,13 +439,14 @@ The rack main board (`hw/rack/layout.py` → `hw/rack/rack.kicad_pcb`) and its 1
 ### RK-7a. One board filling the 1U case
 - **Difficulty:** eight 48 × 90 mm receivers at the 52 mm ADR-0014 pitch, two RF chains, the CM4 IO board and every rear-panel connector have to fit the owner's case, the Hammond RM1U1913SBK (330 mm deep, inside 415.30 × 323.85 × 40.09 mm, Hammond drawing).
 - **Options:** one board filling the case; a narrow backplane strip plus a host tray joined by cables.
-- **Chosen:** one board, ****412.0 × 323.0 mm**, 4 layers (JLC04161H-7628, 1.6 mm), 444 footprints, 2291 tracks, 6265 vias (5573 GND)**. All panel connectors are on the board. The CM4 IO board sits on 10 mm spacers above it, and the receivers stand 11 mm up on their sockets.
-- **Fit (`mech/rack.py`, `tests/mech/test_rack_fit.py`, CadQuery in CI):** lid over the receivers **3.39 mm**, over the CM4 IO board 5.89 mm, side walls 1.65 mm, 4.0 mm between receivers, board 0.85 mm short of the front panel; the longest u.FL jumper path is 40.8 of 100 mm. 105 box checks and the CadQuery volume test pass.
+- **Chosen:** one board, **412.0 × 321.5 mm, 4 layers (JLC04161H-7628, 1.6 mm), 444 footprints, 2288 tracks, 6267 vias (5574 GND)**. The independent review of #126 kept the full-size board; it moved the front edge back to 321.5 mm (was 323.0), giving 2.35 mm to the front panel instead of 0.85. All panel connectors are on the board. The CM4 IO board sits on 10 mm spacers above it, and the receivers stand 11 mm up on their sockets.
+- **Fit (`mech/rack.py`, `tests/mech/test_rack_fit.py`, CadQuery in CI):** - **Fit (`mech/rack.py`, `tests/mech/test_rack_fit.py`, CadQuery in CI):** lid over the receivers **3.39 mm**, over the CM4 IO board 5.89 mm, side walls 1.65 mm, 4.0 mm between receivers, **2.35 mm from the board's front edge to the front panel**, with the side-looking LEDs' lenses on that edge (2.35 mm from the 2.5 mm holes, checked). The longest u.FL jumper path is 40.8 of 100 mm. 106 box checks and the CadQuery volume test pass.
+- **Case features (Hammond drawing, re-read for #126):** section LL gives 323.85 mm clear between the 3.18 mm panels, so the front gap is real. Section KK also draws, beyond the cut, the cover-screw speed nuts and lugs of the side extrusion: about 0–9.6 mm in from each side wall, z ≈ 6.6–11.4 mm, at the four side cover screws (top view: ~60 mm from each end). The board edge sits 1.65 mm from the wall at z 5.0–6.6, so it may touch them. The 2D drawing does not settle it, and the STEP model is not downloadable (403). The board has no parts or tracks there (GND pour and edge stitching only), so a 10 × 12 mm edge notch at those four places is a no-risk fix if the dry fit shows contact.
 - **Links:** `hw/rack/out/fab/mech.json`, `mech/out/rack_*.png`.
-- **Residual risk:** the 0.133 m² 4-layer board is the dearest PCB in the project (£40 est.); quote it before ordering.
-- **Bench:** a dry fit of the populated board in the case.
+- **Residual risk:** the PCB order is the dearest single line after the case: £300 est. for JLC's minimum of five boards with ENIG, the large stencil, extended-part fees, DHL for ~2 kg and import VAT (RK-7k); quote it before ordering. The side-lug contact above is unconfirmed.
+- **Bench:** a dry fit of the bare board in the case before assembly (side lugs, front gap, LED holes).
 
-### RK-7b. Routing a 412 × 323 mm board without Freerouting
+### RK-7b. Routing a 412 × 321.5 mm board without Freerouting
 - **Difficulty:** Freerouting is not available. The pack's 0.1 mm grid router (`hw/pack/router.py`) needs 13 M cells per layer for the whole board.
 - **Options:** one coarse grid; a windowed grid per connection.
 - **Chosen:**
@@ -454,15 +456,22 @@ The rack main board (`hw/rack/layout.py` → `hw/rack/rack.kicad_pcb`) and its 1
   - The EN pull-down and FLT pull-up sit at the host end of their nets, so no +3V3 has to run to the rear.
   - GND pins the generic fan-out walled in are wired by hand: TPS2595 pin 8 to its pad, QPL9057 GND pins to its pad, QPQ1907 pads to vias, TPS62933 pin 4.
 - **Links:** `hw/rack/layout.py` (`gnd_hand`, `EARLY_NETS`).
-- **Residual risk:** none electrical. A run takes about 35 minutes, and the whole layout re-runs on any change.
+- **Residual risk:** none electrical. A run takes about 35 minutes, and the whole layout re-runs on any change. After DRC, `prune_dangling()` removes the escape vias the router did not need, then their stubs; it undoes itself if anything goes unconnected.
 - **Bench:** no.
 
 ### RK-7c. Wilkinson trees as routed
-- **Difficulty:** ADR-0018 asks ≤ 11 dB worst-port loss for the splitter, ≥ 20 dB isolation and ≥ 15 dB return loss on FR-4. The ports must sit behind each receiver, so the distribution lines are long.
+- **Difficulty:** ADR-0018 asked ≤ 11 dB worst-port loss for the splitter, ≥ 20 dB isolation and ≥ 15 dB return loss on FR-4. The ports must sit behind each receiver, so the distribution lines are long.
+- **Options (#126 review):** this tree, at its as-routed loss; a central splitter feeding 16 coax runs to the slots (about 2 dB better NF, but PIMD worsens to 1.7 m on axis, and 16 runs would have to fit in 1U).
 - **Chosen:**
   - **Lines:** near-microstrip on L1 over a solid L2, with a 0.5 mm gap to the L1 pour (DRC rule "RF pour gap"). The 2D field solve (`hw/rx/rf_line.py`) gives 0.35 mm = 50.2 Ω and 0.17 mm = 70.3 Ω, so λ/4 = 18.02 mm. Netclass clearances only, no 0.09 mm override.
   - **Model:** `hw/rack/rf_routed.py` re-models the drawn copper in scikit-rf: lines, bends, T-junctions, the resistor parasitics and A's two vias. Corners are ±10 % width × εr 4.2/4.6.
-- **As routed:** tree A worst port **13.66 dB** (13.53–13.66 over the eight ports), tree B 13.47 dB; 13.85 dB at the tolerance corners. Isolation ≥ 39.4 dB (≥ 32.2 at the corners), return loss ≥ 28.2 dB (≥ 22.6). Each tree has 252 mm of divider arms (28 λ/4 arms of 18.02 mm) and 834 mm (A) / 754 mm (B) of 50 Ω distribution line, with 72 bends; A's feed crosses under tree B on L4 through 2 vias. **The worst port misses ADR-0018's 11 dB by 2.7 dB.** The ideal split is 9.03 dB. The rest is conductor and FR-4 loss (≈ 12 dB/m on a 0.35 mm line) over the ~180 mm each branch needs to reach ports spread over 400 mm. RK-7i gives the NF consequence (small).
+- **As routed:** tree A worst port **13.66 dB** (13.53–13.66 over the eight ports), tree B 13.47 dB; 13.85 dB at the tolerance corners. Isolation ≥ 39.4 dB (≥ 32.2 at the corners), return loss ≥ 28.2 dB (≥ 22.6). Each tree has 252 mm of divider arms (28 λ/4 arms of 18.02 mm) and 834 mm (A) / 754 mm (B) of 50 Ω distribution line, with 72 bends; A's feed crosses under tree B on L4 through 2 vias. The ideal split is 9.03 dB. The rest is conductor and FR-4 loss (≈ 12 dB/m on a 0.35 mm line) over the ~180 mm each branch needs to reach ports spread over 400 mm.
+- **Limit amended (#126):** SPEC RK-5 and ADR-0018 now say **≤ 14 dB as routed** (was ≤ 11; the ADR keeps the history). Reasons:
+  - the 52 mm slot pitch sets the tree's length;
+  - NF is 12.86 dB worst against the 21.1 dB need (RK-7i);
+  - the extra loss improves PIMD (1.2 m on axis against the 1.5 m spec);
+  - the central splitter was rejected (see Options).
+  `tests/test_rack_layout.py` and `rf_routed.py` assert 14 dB.
 - **Links:** `hw/rack/out/rf_routed.json`, `audit.py` Audit 6 (reads it), ADR-0018.
 - **Residual risk:** FR-4 tan δ (0.02) and the bend and junction models are estimates.
 - **Bench:** **yes**, VNA one tree, input to each port and port to port.
@@ -479,8 +488,9 @@ The rack main board (`hw/rack/layout.py` → `hw/rack/rack.kicad_pcb`) and its 1
 - **Difficulty:** the TPS62933 SOT-583 has SW, BST, SS and FB on one 0.5 mm-pitch side. A 1.5 mm SW track cannot leave pin 5, and it walled in BUCK_EN, BUCK_FB and BUCK_SS (all three failed).
 - **Chosen:** SW is a small F.Cu pour from pin 5 to the inductor and boot cap, as in TI's layout example (SLUSEA4D fig. 10-1). BST goes to the boot cap right of pin 6, SS climbs past pin 8, FB goes straight up to its divider, and EN goes left; a 100 nF sits at VIN/GND pins 3/4. The inductor moved up 2.25 mm, clear of slot 4's test pads.
 - **Links:** `hw/rack/layout.py` `BUCK_SW_ZONE`.
+- **Load (#126 review):** the real 5 V load is about 1.3 A (eight receivers, two LNAs, the 3.3 V LDO) against the 3 A buck. That gives about 10 mV of ripple and about 30 °C of rise. Only several faults at once would push it past 3 A, and the per-slot eFuses trip first.
 - **Residual risk:** the output caps are 4–6 mm from the inductor, joined through the B.Cu +5V pocket.
-- **Bench:** **yes**, 5 V ripple and SW ringing at 3 A.
+- **Bench:** **yes**, 5 V ripple and SW ringing at full load.
 
 ### RK-7f. eFuse current-limit pins
 - **Difficulty:** the TPS2595 ILM (pin 7) is on the side opposite where the first placement put its resistor; 10 eFuses failed to route.
@@ -494,11 +504,11 @@ The rack main board (`hw/rack/layout.py` → `hw/rack/rack.kicad_pcb`) and its 1
   - It is rated 600 mA, against the 0.52 A worst-case bias eFuse limit.
   - Accepted in place of the LQW18AN; ADR-0018 is amended.
   - **Bench:** S21 through the bias-T, within RK-7c.
-- **Crystal, AKER C3E-14.7456-18-3030-R (C6523919, ESR 100 Ω, −20…+70 °C):**
-  - Pierce start-up needs gm_crit = 4·ESR·ω²·(C0 + CL)² = **0.99 mA/V** (CL 14 pF from 2 × 22 pF + 3 pF stray; C0 3 pF est.).
-  - Against an est. 8 mA/V for a 3.3 V unbuffered CMOS stage (NXP gives none), the margin is **8×**, over the usual 5×. `audit.py` asserts it.
-  - Load pulling is +28 ppm, harmless for a UART. A wing is 0–40 °C.
-  - **Bench: yes.** It must still start with 500 Ω in series.
+- **Crystal: HCI XC32M4-14.7456-F20NLDTL (LCSC C3034317, ESR 60 Ω, 20 pF, −40…+85 °C, 6,684 in stock; #126 review).** It replaces the owner-listed AKER C6523919 (ESR 100 Ω, −20…+70 °C), which met the review's ESR and temperature asks only on paper margins. The load caps are now 2 × 33 pF (FH C1562), which with ~3 pF stray gives 19.5 pF.
+  - Pierce start-up needs gm_crit = 4·ESR·ω²·(C0 + CL)² = **1.04 mA/V** (C0 3 pF est.).
+  - Against an est. 8 mA/V for a 3.3 V unbuffered CMOS stage (NXP gives none), the margin is **7.7×**, over the usual 5×. `audit.py` asserts it.
+  - **Temperature basis:** inside the closed 1U case, not the wing: 0–40 °C ambient + ~15 °C internal rise (CM4 up to 9 W, buck, eFuses) = 55 °C est. The −40…+85 °C rating covers it with 30 °C to spare.
+  - **Bench: yes.** It must still start with 300 Ω (5 × ESR) in series.
 - **6.8 µH inductor:** Bourns SRP5030T-6R8M (Irms 4.0 A, Isat 4.3 A, DCR 76 mΩ, Bourns datasheet), bought in the UK and consigned; LCSC C177249 is only 3.5 A. The buck peaks at about 3.4 A at 3 A out.
 - **4 A fuse, C27515:** Littelfuse 0451004.MRL in the 2410 case (6.1 × 2.5 mm, LCSC record). Main's footprint name `Fuse_Littelfuse_NANO2_451_453` did not exist; the board uses KiCad's `Fuse_Littelfuse-NANO2-451_453`, the 2410 land (1.96 × 3.15 mm pads), not an 1808.
 - **Slot socket, BOOMELE 2×13 8.5 mm (C64320):** replaces the Harwin M20 + key. Contact 14 is pulled and the cavity plugged at assembly; the footprint has no hole at 14, so it matches the receiver's J1 (pin 14 cut). ADR-0014 and ADR-0018 are amended.
@@ -513,12 +523,13 @@ The rack main board (`hw/rack/layout.py` → `hw/rack/rack.kicad_pcb`) and its 1
 - **Difficulty:** the brief priced one L-com CA3N030 (9.14 m) per wing. Audit 5 routes the cables from the rack in one wing along the floor, across the stage at grid height and up each 4 m boom (ADR-0021), with 5 % slack and 1 m of dressing. The far wing then needs 15.2 m (6 m stage), 18.3 m (9 m) or 21.5 m (12 m); even a 6 × 6 m stage needs 13.6 m. With the rack at centre-front, each wing still needs 9.9–14.7 m.
 - **Options:** two CA3N030 (does not reach); CA3N030 + CA3N050 (stages ≤ 6 m wide only); CA3N030 + CA3N075 (every ADR-0021 venue).
 - **Chosen:** **CA3N030 near + CA3N075 far** (+£42.22 against the brief).
-  - **Far:** 22.86 m × 0.223 dB/m + 0.3 dB HG2409P lead + 0.1 dB adapter + 3 × 0.15 dB mated pairs = **5.95 dB**, inside the RK-2 6 dB budget.
+  - **Far:** 22.86 m × 0.223 dB/m + 0.3 dB HG2409P lead + 0.1 dB adapter + 3 × 0.15 dB mated pairs = **5.95 dB**, inside the 6 dB design target.
+  - **RK-2 rebased (#126 review):** the coax limit is now the wing NF need, not the 6 dB budget. Up to 14.2 dB of wing coax keeps NF ≤ 21.1 dB, and even the 100 ft CA3N100 (7.65 dB) gives NF 14.51 dB, 6.6 dB inside (Audit 6).
   - **Near:** 2.89 dB.
   - **Adapter:** an N-socket to BNC-plug adapter (RS 285-6398, £8.40) replaces the £37.09 LCCA30301-FT1.5 lead. It saves £28.69 per wing and one mated pair.
   - SPEC RK-2 and `docs/human/antenna-install.md` now describe this kit.
 - **Links:** `audit.py` Audit 5, `hw/rack/prices.py` ANTENNA_KIT.
-- **Residual risk:** the far run sits 0.05 dB under the budget. A wider venue, or a rack further away, needs the 100 ft lead, which is 0.9 dB over RK-2.
+- **Residual risk:** small. A venue wider than 12 m needs the 100 ft lead, which costs 1.7 dB of NF but stays well inside the need.
 - **Bench / site:** measure both runs at the first venue.
 
 ### RK-7i. Gain plan with the as-built losses
@@ -539,9 +550,15 @@ The rack main board (`hw/rack/layout.py` → `hw/rack/rack.kicad_pcb`) and its 1
 
 ### RK-7k. Rack cost against the target
 - **Difficulty:** the brief targets about £800–830 ex VAT; the rack was £953.92.
-- **Result (`audit.py`, GBP ex VAT; UK VAT 20 % on top):** **£1,241.62 ex VAT** (£1,489.94 inc VAT): main board, host and cables £449.16 (£84.14 of it class estimates) + 8 receivers £187.04 + antennas, coax and adapters £294.86 + two Thor LS003 stands and two HGX-PMT07 kits £310.56. Like for like with the £953.92 (no stands): **£931.06, about £100 over the £800–830 target**.
+- **Result (`audit.py`, GBP ex VAT; UK VAT 20 % on top):** **£1,501.50 ex VAT** (£1,801.80 inc VAT):
+  - main board, host and cables £709.04;
+  - eight receivers £187.04;
+  - antennas, coax and adapters £294.86;
+  - two Thor LS003 stands and two HGX-PMT07 kits £310.56.
+  Like for like with the £953.92 (no stands): **£1,190.94**, about £360 over the £800–830 target.
+- **PCB (#126 review):** the main-board PCB line is now the whole JLC order, **£300 est.** (the reviewer's £250–350 range; JLC's quote page needs a browser). It covers five 4-layer 412 × 321.5 mm ENIG boards, the large stencil, extended-part fees, DHL for ~2 kg and import VAT; it was £40 for one bare board.
 - **Chosen:** reported as is. The case (£140.76) and the CM4 (£79.20) are fixed by the owner, and RK-7h adds £42.22.
-- **Residual risk:** 16 main-board lines are still class estimates.
+- **Residual risk:** the PCB order (£300) and 15 small main-board lines are still estimates (£343.90 in all).
 - **Bench:** no.
 
 ## Firmware and timing

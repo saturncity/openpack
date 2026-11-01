@@ -161,6 +161,9 @@ def test_rf_lines_at_solved_widths(lay):
         assert L + 0.2 + 0.8 == pytest.approx(lay.LQ, abs=0.02), t["net"]
     segs = [s_ for s_ in lay.segments() if lay.is_rf(s_[0])]
     assert segs and all(w <= 0.36 for _, _, w, _ in segs)
+    # #126 review: the schematic's arm net-tie value carries the drawn line, not wilkinson.py's closed form
+    bom = {r["refs"].split()[0]: r for r in csv.DictReader(open(RK / "out" / "bom.csv"))}
+    assert bom["TL1"]["value"] == f"70R7 L/4 {lay.LQ:.2f}mm w{lay.W70:.3f}"
 
 
 def test_rf_solver_reproduces_record(lay):

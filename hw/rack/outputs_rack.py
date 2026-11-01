@@ -76,7 +76,8 @@ LCSC = {
     "CS0603-39NJ-S": ("C142171", V + "Chilisin CS0603-39NJ-S 39 nH 0603, SRF 2.2 GHz: above SRF it is a ~0.13 pF "
                                        "self-capacitance, |Z| > 1 kohm across 2400-2483.5 MHz, so the shunt choke still costs < 0.02 dB"),
     "SDWL1005C18NGSTF": ("C361616", V + "Sunlord SDWL1005C18NGSTF 18 nH 2 %, Q 25 at 250 MHz, SRF 4.5 GHz (equivalent)"),
-    "C3E-14.7456-18-3030-R": ("C6523919", V + "AKER C3E-14.7456-18-3030-R, 18 pF like the CX3225; ESR 100 ohm, -20..70 C"),
+    "XC32M4-14.7456-F20NLDTL": ("C3034317", V + "HCI XC32M4-14.7456-F20NLDTL, 20 pF, ESR 60 ohm, -40..+85 C (6,684 in stock)"),
+    "C_33p_0402_C0G": ("C1562", V + "FH 0402CG330J500NT (basic part)"),
     "SRP5030T-6R8M": ("CONSIGN", "Bourns SRP5030T-6R8M (Irms 4.0 A, Isat 4.3 A): buy UK (DigiKey / Mouser / Farnell), "
                                  "not LCSC (C177249 is only 3.5 A)"),
     "U.FL-R-SMT-1(10)": ("C88373", V + "Hirose U.FL-R-SMT-1(10)"),

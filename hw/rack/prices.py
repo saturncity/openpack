@@ -30,7 +30,9 @@ PRICES = {  # mpn: (gbp_each, qty_break, source, uk_distributor)
     "TPS62933DRLR": (1.20, 1, "est. (TI TPS62933 3 A buck, SOT-583)", "DigiKey UK / Farnell UK"),
     "TLV76733DGNR": (0.30, 1, "est. (as hw/rx/prices.py, USD 0.40)", "Farnell UK / DigiKey UK / Mouser UK"),
     "SC16IS752IPW,128": (5.92, 1, DK + " (11,036 in stock); the ,112 tube variant is obsolete", "DigiKey UK"),
-    "C3E-14.7456-18-3030-R": (0.12, 1, "est. (AKER 14.7456 MHz 3225 18 pF, ESR 100 ohm, -20..+70 C, 30 ppm; LCSC C6523919, LCSC record read 2026-11-01)", "LCSC"),
+    "XC32M4-14.7456-F20NLDTL": (0.06, 1, "LCSC C3034317 read via the JLC parts API: HCI 14.7456 MHz 3225 20 pF, ESR 60 ohm, -40..+85 C, 10 ppm (LCSC C3034317, USD 0.0814, "
+                                "JLC parts record read 2026-11-01, 6,684 in stock; #126 review: replaces the 100 ohm AKER C6523919)", "LCSC"),
+    "C_33p_0402_C0G": (0.02, 10, "est.", "LCSC"),
     "NC3MAH": (2.08, 1, DK + " (Neutrik NC3MAH; the LCSC buy is C5154126, Extended, price there unconfirmed)", "LCSC / DigiKey UK"),
     "SMAJ58CA": (0.36, 1, DK + " (Littelfuse)", "DigiKey UK"),
     "SMBJ12A": (0.37, 1, DK + " (Littelfuse)", "DigiKey UK"),
@@ -83,8 +85,10 @@ EXTRAS = [
     ("Mean Well GST60A12-P1J 12 V 5 A desktop brick, 2.1 mm plug, C14 inlet", 1, 14.50, DK + " (6,852 in stock)",
      "DigiKey UK"),
     ("UK mains cord BS1363 to C13, 1.83 m (AC-12206-UK)", 1, 8.35, DK + " (7,931 in stock)", "DigiKey UK"),
-    ("Main board PCB 4-layer 412 x 323 mm, JLC04161H-7628, ENIG (hw/rack/layout.py)", 1, 40.00,
-     "est. (JLCPCB qty-5 price share for a 0.133 m^2 4-layer board; quote before ordering)", "JLCPCB (ships to UK)"),
+    ("Main board PCB, full JLCPCB order (#126 review): 5 x 4-layer 412 x 321.5 mm JLC04161H-7628 ENIG bare boards, the "
+     "large framed stencil, the extended-part fees of the assembly, DHL for ~2 kg, UK import VAT and handling", 1, 300.00,
+     "est. (reviewer's estimate GBP 250-350 for the whole order, mid value; the JLC quote page needs a browser, so quote "
+     "before ordering); one board is used, four are spares", "JLCPCB (ships to UK)"),
     ("Hammond RM1U1913SBK 1U 19 in aluminium case, 330 mm deep (mech/rack.py; panels drilled per mech/out)", 1, 140.76,
      "Rapid Online 31-1555, read by the coordinator 2026-11-01, in stock; DigiKey UK HM996-ND GBP 142.98 (90 in stock)",
      "Rapid Online / DigiKey UK"),

@@ -26,7 +26,7 @@ Status: accepted. 2026-11-01, amended after the #95 review, the owner's wing-ant
     - The NT1 tie and the BNC bulkhead bodies both bond GND to the panel.
   - **Slots:**
     - ~~Harwin M20-7831346 + M20-003 key~~ **Amended #34 (owner parts list, 2026-11-01): BOOMELE 2.54-2*13PFemale 8.5 mm (LCSC C64320)** with contact 14 pulled and the cavity plugged at assembly; the main-board footprint has no hole at 14, so the keyed receiver header (no pin 14) and the socket match (8 per rack in the BOM).
-    - Slot-ID straps, LEDs (Lite-On LTST-C191KGKT and KRKT, 560 Ω), XLR NC3MAH with SMAJ58CA on pins 2/3.
+    - Slot-ID straps, LEDs (Lite-On LTST-S270KGKT and KRKT side-looking since #34, through the front panel; was LTST-C191; 560 Ω), XLR NC3MAH with SMAJ58CA on pins 2/3.
   - **Host:**
     - **CM4002008 (SC0680, no wireless) from The Pi Hut UK, £79.20, qty 1.** SC0681 (16 GB) at the same price is the drop-in alternative. DigiKey UK had 0 in stock.
     - The official CM4IO (SC0326) on a 40-way ribbon.
@@ -36,6 +36,12 @@ Status: accepted. 2026-11-01, amended after the #95 review, the owner's wing-ant
 - **Numbers** (Audit 6, worst-case limits):
   - **QPL9057 at 2442 MHz:** |S21| 23.1 dB (21.5 dB minimum proxy for NF), NF 0.48 typ / 0.90 max, IIP3 ≥ +5.9 dBm, input P1dB ≥ −7.6 dBm.
   - **Wilkinson:** 10.61 dB (scikit-rf 10.24), isolation ≥ 30.3 dB, RL 36/39 dB. It holds εr 4.2–4.6 and ±10 % etched width.
+  - **Amended #126 (2026-11-01): Wilkinson limit ≤ 14 dB as routed (was ≤ 11 dB, the model above).** As routed (`hw/rack/rf_routed.py`) the worst port is 13.66 dB (13.85 at the tolerance corners); isolation ≥ 39.4 dB, RL ≥ 28.2 dB. Why:
+    - the 52 mm slot pitch (ADR-0014) sets the tree's length: each branch needs ~180 mm of 50 Ω line to reach ports spread over 400 mm, at ≈ 12 dB/m on FR-4;
+    - system NF is 12.86 dB worst against the 21.1 dB wing need (Audit 6);
+    - the extra loss improves the PIMD distance: 1.2 m on axis against the 1.5 m spec;
+    - rejected: a central splitter with 16 coax runs to the slots (about 2 dB better NF, but PIMD worsens to 1.7 m, and 16 coax runs would have to fit in 1U).
+    History: ≤ 11 dB (#33, PR #95, modelled tree + 0.5 dB allowance) → ≤ 14 dB (#34 / #126, as routed).
   - **System NF, receivers on the BT40E (ADR-0021), worst-case LNA:**
     - with the ADR-0016 coax (4.2 dB): 9.68 / 8.12 / 9.68 dB at 2403 / 2442 / 2482;
     - at the 6 dB budget: **11.48 / 9.92 / 11.48 dB**. The band edges include the 2 dB skirt estimate.

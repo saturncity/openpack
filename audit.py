@@ -763,7 +763,8 @@ if __name__ == "__main__":
         print(f"    {label}: {pn} ({m:.2f} m, GBP {gbp:.2f}) -> {wing_coax_db(m):.2f} dB with the HG2409P lead, the N-BNC"
               f" adapter and 3 mated pairs (RK-2 budget {RK2_COAX_DB:.0f} dB)")
     assert near[1] >= near_need and far[1] >= far_need
-    assert wing_coax_db(far[1]) <= RK2_COAX_DB, "RK-2: the longest wing run stays inside the 6 dB coax budget"
+    # RK-2 (#126 review): the coax limit is the wing NF need (Audit 6 checks it); 6 dB stays the design target
+    assert wing_coax_db(far[1]) <= RK2_COAX_DB, "the longest wing run meets the 6 dB design target"
     assert (near[0], far[0]) == ("CA3N030", "CA3N075"), "hw/rack/prices.py ANTENNA_KIT carries these two lengths"
 
 
@@ -1243,6 +1244,12 @@ if __name__ == "__main__":
     assert nf_worst <= nf_need, "RK-5: every carrier, band edges with the skirt allowance, inside the wing NF need"
     print(f"    -> worst {nf_worst:.2f} dB at the 6 dB budget, {nf_need - nf_worst:.1f} dB inside the need"
           f" (BT40NE would give {worst_nf(COAX_BUDGET_DB, 'BT40NE', wil):.2f} dB, but its FEM compresses: ADR-0021)")
+    # RK-2 rebased on the NF need (#126 review): how much wing coax the 21.1 dB need allows, and the 100 ft lead
+    coax_max = max(i / 20 for i in range(0, 400) if worst_nf(i / 20, RX_MODULE, wil) <= nf_need)
+    nf100 = worst_nf(wing_coax_db(30.48), RX_MODULE, wil)
+    print(f"    RK-2 coax limit = the NF need: up to {coax_max:.1f} dB of wing coax keeps NF <= {nf_need:.1f} dB; the 100 ft"
+          f" CA3N100 ({wing_coax_db(30.48):.2f} dB) gives {nf100:.2f} dB, {nf_need - nf100:.1f} dB inside")
+    assert worst_nf(wing_coax_db(22.86), RX_MODULE, wil) <= nf_need and nf100 <= nf_need, "RK-2: wing coax inside the NF need"
 
     print(f"  stage headroom, near pack UK 9 dBm ON AXIS (worst; the rule keeps it off axis), Wi-Fi x3 at 6 m in the"
           f" beam; margins vs P1dB - {BACKOFF_DB:.0f} dB, PRX,MAX - {BACKOFF_DB:.0f} dB, PIMD scaled to the wanted:")
@@ -1288,14 +1295,16 @@ if __name__ == "__main__":
           f" (converted, hw/rx/out/bom.csv); antennas, coax, stands GBP {rp.ANTENNA_KIT_GBP:.2f} (hw/rack/prices.py ANTENNA_KIT)"
           f" -> rack GBP {tot:.2f} ex VAT. No cap in SPEC/AUDIT, so none asserted")
     assert all(r["uk_distributor"] and r["source"] for r in rk), "every rack BOM line needs a UK distributor and source"
-    # #34: the SC16IS752 crystal is now the AKER C3E-14.7456-18-3030-R (LCSC C6523919): ESR 100 ohm max, -20..+70 C.
+    # #126 review: the SC16IS752 crystal is the HCI XC32M4-14.7456-F20NLDTL (LCSC C3034317): ESR 60 ohm max, 20 pF,
+    # -40..+85 C (was the AKER C6523919, 100 ohm, -20..+70 C). Load caps 2 x 33 pF + ~3 pF stray = 19.5 pF.
     # Pierce start-up: critical transconductance gm_crit = 4 ESR (2 pi f)^2 (C0 + CL)^2 (ST AN2867 eq. 3); a 5x
     # gain margin is the usual rule. NXP gives no gm for the SC16IS752 oscillator, so the inverter figure is an estimate
     # for an unbuffered 3.3 V CMOS Pierce stage and the margin is a bench item (insert 5 x ESR in series: still starts).
-    f_x, esr, c0, cl = 14.7456e6, 100.0, 3.0e-12, 22e-12 * 22e-12 / 44e-12 + 3e-12   # C0 est., 2 x 22 pF + 3 pF stray
+    f_x, esr, c0, cl = 14.7456e6, 60.0, 3.0e-12, 33e-12 * 33e-12 / 66e-12 + 3e-12   # C0 est., 2 x 33 pF + 3 pF stray
     gm_crit = 4 * esr * (2 * math.pi * f_x) ** 2 * (c0 + cl) ** 2
     GM_EST = 8e-3                          # est.: unbuffered 3.3 V CMOS inverter gm, A/V
-    print(f"  SC16IS752 crystal (AKER, ESR {esr:.0f} ohm): CL {cl * 1e12:.0f} pF, gm_crit {gm_crit * 1e3:.2f} mA/V; 5x margin needs"
+    print(f"  SC16IS752 crystal (HCI XC32M4, ESR {esr:.0f} ohm): CL {cl * 1e12:.1f} pF, gm_crit {gm_crit * 1e3:.2f} mA/V; 5x margin needs"
           f" {5 * gm_crit * 1e3:.1f} mA/V, est. inverter {GM_EST * 1e3:.0f} mA/V -> margin {GM_EST / gm_crit:.1f}x (bench: start-up"
-          f" with {5 * esr:.0f} ohm in series); rated -20..+70 C covers a 0..40 C wing")
+          f" with {5 * esr:.0f} ohm in series); rated -40..+85 C against the inside of the closed 1U case (wing 0..40 C"
+          f" + ~15 C internal rise = 55 C est.)")
     assert GM_EST / gm_crit >= 5.0, "crystal oscillator gain margin >= 5 (estimate; bench item)"

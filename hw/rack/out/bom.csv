@@ -7,7 +7,7 @@ C5 C9 C10,3,10u 25V,C_10u_1206_25V_X7R,0.090,0.27,1,LCSC,"est. (as hw/rx/prices.
 C7,1,33n,C_33n_0402,0.020,0.02,10,LCSC,est.
 C12 C13,2,22u 25V,C_22u_1206_25V_X5R,0.100,0.20,1,LCSC,est.
 C16 C34 C45,3,10u,C_10u_0603_X5R,0.050,0.15,10,LCSC,est.
-C21 C22 C25 C26,4,22p,C_22p_0402_C0G,0.020,0.08,10,LCSC,est.
+C21 C22 C25 C26,4,33p,C_33p_0402_C0G,0.020,0.08,10,LCSC,est.
 C28 C33 C36 C37 C38 C39 C44 C47 C48 C49,10,100p,C_100p_0402_C0G,0.020,0.20,10,LCSC,est.
 C29 C40,2,10n,C_10n_0402,0.020,0.04,10,LCSC,est.
 D1,1,BZT52C12,BZT52C12,0.030,0.03,1,LCSC,est. (12 V zener SOD-123)
@@ -49,7 +49,7 @@ R22 R35,2,5.1k,R_0402_1%,0.010,0.02,10,LCSC,est.
 R23 R24 R25 R26 R27 R28 R29 R36 R37 R38 R39 R40 R41 R42,14,100,R_0402_100R_TF,0.080,1.12,10,LCSC / Farnell UK,"est. (100 ohm 0402 thin film, Wilkinson isolation)"
 R47 R55 R63 R71,4,100,R_0402_1%,0.010,0.04,10,LCSC,est.
 R49 R50 R57 R58 R65 R66 R73 R74 R79 R80 R85 R86 R91 R92 R97 R98,16,560,R_0402_1%,0.010,0.16,10,LCSC,est.
-TL1 TL2 TL3 TL4 TL5 TL6 TL7 TL8 TL9 TL10 TL11 TL12 TL13 TL14 TL15 TL16 TL17 TL18 TL19 TL20 TL21 TL22 TL23 TL24 TL25 TL26 TL27 TL28,28,70R7 L/4 17.76mm w0.196,PCB_TRACE,0.000,0.00,1,-,copper on the main board (hw/rack/wilkinson.py): no part
+TL1 TL2 TL3 TL4 TL5 TL6 TL7 TL8 TL9 TL10 TL11 TL12 TL13 TL14 TL15 TL16 TL17 TL18 TL19 TL20 TL21 TL22 TL23 TL24 TL25 TL26 TL27 TL28,28,70R7 L/4 18.02mm w0.170,PCB_TRACE,0.000,0.00,1,-,copper on the main board (hw/rack/wilkinson.py): no part
 TL29 TL30 TL31 TL32 TL33 TL34 TL35 TL36 TL37 TL38 TL39 TL40 TL41 TL42 TL43 TL44,16,50R feed,PCB_TRACE,0.000,0.00,1,-,copper on the main board (hw/rack/wilkinson.py): no part
 TP1 TP2 TP3 TP4 TP5 TP6 TP7 TP8 TP9 TP10 TP11 TP12 TP13 TP14 TP15 TP16 TP17 TP18 TP19 TP20 TP21 TP22 TP23 TP24 TP25 TP26 TP27 TP28 TP29 TP30 TP31 TP32 TP33 TP34 TP35 TP36 TP37 TP38 TP39 TP40 TP41 TP42 TP43 TP44 TP45 TP46 TP47 TP48 TP49 TP50 TP51 TP52 TP53 TP54 TP55 TP56 TP57 TP58 TP59 TP60,60,+12V_PROT,TP-pad,0.000,0.00,1,-,est. (footprint only: bare test pad)
 U1 U10 U11 U12 U20 U21 U22 U23 U24 U25 U26 U27,12,TPS259541DSGR,TPS259541DSGR,0.558,6.70,10,DigiKey UK,"DigiKey UK 2026-11-01, read qty-10 break; 20-week lead, stock not shown"
@@ -59,7 +59,7 @@ U4 U5,2,SC16IS752IPW,"SC16IS752IPW,128",5.920,11.84,1,DigiKey UK,"DigiKey UK 202
 U6 U7,2,QPL9057,QPL9057TR7,4.600,9.20,1,DigiKey UK,"DigiKey UK 2026-11-01, read (61,763 in stock); 25+ GBP 3.77, 100+ GBP 3.17"
 U8 U9,2,QPQ1907,QPQ1907SR,2.820,5.64,1,DigiKey UK,"DigiKey UK 2026-11-01, read (7,548 in stock; 33-week lead); IL 1.3 typ / 2.2 max dB"
 U30 U31 U32 U33 U34 U35 U36 U37,8,TPS259531DSGR,TPS259531DSGR,0.558,4.46,10,DigiKey UK,"DigiKey UK 2026-11-01, read qty-10 break (4,178 in stock)"
-Y1 Y2,2,14.7456M,C3E-14.7456-18-3030-R,0.120,0.24,1,LCSC,"est. (AKER 14.7456 MHz 3225 18 pF, ESR 100 ohm, -20..+70 C, 30 ppm; LCSC C6523919, LCSC record read 2026-11-01)"
+Y1 Y2,2,14.7456M,XC32M4-14.7456-F20NLDTL,0.060,0.12,1,LCSC,"LCSC C3034317 read via the JLC parts API: HCI 14.7456 MHz 3225 20 pF, ESR 60 ohm, -40..+85 C, 10 ppm (LCSC C3034317, USD 0.0814, JLC parts record read 2026-11-01, 6,684 in stock; #126 review: replaces the 100 ohm AKER C6523919)"
 -,1,"Raspberry Pi CM4 2 GB RAM / 8 GB eMMC, no wireless (SC0680 = CM4002008)",-,79.200,79.20,1,The Pi Hut UK,"The Pi Hut UK, qty 1, 2026-11-01 (coordinator decision on #95; DigiKey UK SC0680 was 0 stock at GBP 61.64). SC0681 (16 GB eMMC) same price is the drop-in alternative"
 -,1,Raspberry Pi CM4 IO Board (SC0326),-,26.150,26.15,1,DigiKey UK,"DigiKey UK 2026-11-01, read"
 -,1,"40-way IDC ribbon 152 mm, socket-socket (Assmann H3AAH-4006G): main board J to CM4IO J8",-,1.300,1.30,1,DigiKey UK,"DigiKey UK 2026-11-01, read"
@@ -70,7 +70,7 @@ Y1 Y2,2,14.7456M,C3E-14.7456-18-3030-R,0.120,0.24,1,LCSC,"est. (AKER 14.7456 MHz
 -,1,"Panel-mount USB-C socket to micro-B plug, 30 cm, M3 ears 20 mm apart (Adafruit 4056; CM4IO rpiboot port, RK-1; no CC resistors: service with a USB-A-to-C lead)",-,3.830,3.83,1,The Pi Hut UK,"The Pi Hut UK SKU 103462, GBP 4.60 inc VAT, read 2026-11-01 (sold out that day; Adafruit direct USD 4.95)"
 -,1,"Mean Well GST60A12-P1J 12 V 5 A desktop brick, 2.1 mm plug, C14 inlet",-,14.500,14.50,1,DigiKey UK,"DigiKey UK 2026-11-01, read (6,852 in stock)"
 -,1,"UK mains cord BS1363 to C13, 1.83 m (AC-12206-UK)",-,8.350,8.35,1,DigiKey UK,"DigiKey UK 2026-11-01, read (7,931 in stock)"
--,1,"Main board PCB 4-layer 412 x 323 mm, JLC04161H-7628, ENIG (hw/rack/layout.py)",-,40.000,40.00,1,JLCPCB (ships to UK),est. (JLCPCB qty-5 price share for a 0.133 m^2 4-layer board; quote before ordering)
+-,1,"Main board PCB, full JLCPCB order (#126 review): 5 x 4-layer 412 x 321.5 mm JLC04161H-7628 ENIG bare boards, the large framed stencil, the extended-part fees of the assembly, DHL for ~2 kg, UK import VAT and handling",-,300.000,300.00,1,JLCPCB (ships to UK),"est. (reviewer's estimate GBP 250-350 for the whole order, mid value; the JLC quote page needs a browser, so quote before ordering); one board is used, four are spares"
 -,1,"Hammond RM1U1913SBK 1U 19 in aluminium case, 330 mm deep (mech/rack.py; panels drilled per mech/out)",-,140.760,140.76,1,Rapid Online / DigiKey UK,"Rapid Online 31-1555, read by the coordinator 2026-11-01, in stock; DigiKey UK HM996-ND GBP 142.98 (90 in stock)"
 -,16,"M3 x 11 mm F-F hex spacer + 2 x M3 x 6 screws: receiver mounts (2 per slot, mech.json H1/H2)",-,0.300,4.80,1,RS UK / Farnell UK,est. (brass hex spacer class price)
 -,4,M2.5 x 10 mm F-F spacer + screws: CM4IO above the main board,-,0.300,1.20,1,RS UK / Farnell UK,est.

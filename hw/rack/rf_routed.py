@@ -35,8 +35,8 @@ H, T, ER, TAND, ROUGH = 0.2104e-3, 0.035e-3, 4.4, 0.02, 1.0e-6
 C0 = 299792458.0
 R_ISO, L_ISO, C_PAD = 100.0, 0.4e-9, 0.05e-12
 VIA_L, VIA_C = 0.3e-9, 0.04e-12
-# ADR-0018 / RK-5: <= 11 dB IL (the splitter), >= 20 dB output isolation, >= 15 dB return loss
-LIMITS = {"il_db": 11.0, "iso_db": 20.0, "rl_db": 15.0}
+# ADR-0018 / RK-5: <= 14 dB IL as routed (#126; was 11), >= 20 dB output isolation, >= 15 dB return loss
+LIMITS = {"il_db": 14.0, "iso_db": 20.0, "rl_db": 15.0}       # IL: ADR-0018 amended by #126 (was 11)
 
 
 def solve_table(geo):
