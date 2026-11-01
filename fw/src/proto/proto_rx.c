@@ -30,9 +30,10 @@ static const char *c_pair(void *c, int argc, char **argv, char *out, size_t n)
 	if (argc != 3) {
 		return "usage: pair <pack> <fA> <fB>";
 	}
-	/* same limits as host/channel_plan.py (AIR-5) */
+	/* host/channel_plan.py limits (AIR-5). fB up to 2482 in any region: receiving is not regulated, the host
+	 * validates the plan against its region and the pack enforces its own (ADR-0016). */
 	if (op_parse_int(argv[0], 1, 8, &p) || op_parse_int(argv[1], 2402, 2440, &a) ||
-	    op_parse_int(argv[2], 2402, 2480, &b) || b < a + 40) {
+	    op_parse_int(argv[2], 2402, 2482, &b) || b < a + 40) {
 		return "bad pairing";
 	}
 	s->pack = p;

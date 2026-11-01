@@ -28,6 +28,13 @@ static const char *c_id(void *c, int argc, char **argv, char *out, size_t n)
 	return NULL;
 }
 
+/* Highest copy-B carrier for a region (AIR-5, ADR-0016), same as host/channel_plan.py FB_MAX: EN 300 328
+ * (uk, eu) keeps a 2482 MHz BLE-2M carrier inside 2400-2483.5 at 9 dBm EIRP; us (15.205) and jp stop at 2480. */
+int op_fb_max(const char *region)
+{
+	return (!strcmp(region, "uk") || !strcmp(region, "eu")) ? 2482 : 2480;
+}
+
 static const char *c_chan(void *c, int argc, char **argv, char *out, size_t n)
 {
 	struct op_pack_state *s = c;
@@ -37,9 +44,9 @@ static const char *c_chan(void *c, int argc, char **argv, char *out, size_t n)
 		snprintf(out, n, " chan=%d,%d", s->cur.ch_a, s->cur.ch_b);
 		return NULL;
 	}
-	if (argc != 2 || op_parse_int(argv[0], 2402, 2440, &a) || op_parse_int(argv[1], 2402, 2480, &b) ||
-	    b < a + 40) {
-		return "usage: chan [<fA> <fB>] fA 2402-2440, fB >= fA+40";
+	if (argc != 2 || op_parse_int(argv[0], 2402, 2440, &a) ||
+	    op_parse_int(argv[1], 2402, op_fb_max(s->cur.region), &b) || b < a + 40) {
+		return "usage: chan [<fA> <fB>] fA 2402-2440, fB >= fA+40, fB <= 2482 uk/eu, 2480 us/jp";
 	}
 	s->cur.ch_a = a;
 	s->cur.ch_b = b;
@@ -70,8 +77,12 @@ static const char *c_region(void *c, int argc, char **argv, char *out, size_t n)
 		snprintf(out, n, " region=%s", s->cur.region);
 		return NULL;
 	}
-	if (argc != 1 || (strcmp(argv[0], "us") && strcmp(argv[0], "eu") && strcmp(argv[0], "jp"))) {
-		return "usage: region [us|eu|jp]";
+	if (argc != 1 || (strcmp(argv[0], "uk") && strcmp(argv[0], "us") && strcmp(argv[0], "eu") &&
+			  strcmp(argv[0], "jp"))) {
+		return "usage: region [uk|us|eu|jp]";
+	}
+	if (s->cur.ch_b > op_fb_max(argv[0])) {
+		return "fB above 2480 not allowed there: set chan first"; /* ADR-0016: 2482 is uk/eu only */
 	}
 	strcpy(s->cur.region, argv[0]);
 	return NULL;
@@ -99,6 +110,6 @@ void op_pack_state_init(struct op_pack_state *s, int id, int ch_a, int ch_b)
 	s->cur.ch_a = ch_a;
 	s->cur.ch_b = ch_b;
 	s->cur.power_dbm = 0;
-	strcpy(s->cur.region, "us");
+	strcpy(s->cur.region, "uk"); /* default region UK (ADR-0015) */
 	s->saved = s->cur;
 }

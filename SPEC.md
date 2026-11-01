@@ -7,10 +7,10 @@
 | ID | Requirement | Verify |
 |---|---|---|
 | SYS-1 | 8 bodypacks → 1 receiver rack, 1U, 8 balanced analog outputs (R9) | Inspection |
-| SYS-2 | Mic-in to XLR-out latency: ≤ 3.0 ms target, ≤ 5.0 ms hard (R3). Design (§2, bsim (a) + datasheets): 2.65 ms without time diversity, 4.96 ms with (d = 2, 81 B packets). Options to reach 4.6 ms with TD: `docs/analysis/td-latency.md` (#26) | bsim timestamps + logic analyzer |
+| SYS-2 | Mic-in to XLR-out latency: ≤ 3.0 ms target, ≤ 5.0 ms hard (R3). Design (§2, bsim (a) + datasheets): **time diversity off by default (ADR-0017): 2.65 ms** (2.27 ms with the PCM5102A FLT=1 strap on hw/rx). TD is a per-pack setting for hostile venues: 4.58 ms with FLT=1 (4.96 with FLT=0; d = 2, 81 B packets). Options: `docs/analysis/td-latency.md` (#26) | bsim timestamps + logic analyzer |
 | SYS-3 | Under the Q3 interference setup for 1 h: residual frame loss ≤ 0.1 %, ≤ 2 consecutive lost frames, ≤ 1 audible dropout event (R1) | bsim scenario (c), then Phase 5/6 |
 | SYS-4 | Audio: 48 kHz, 20 Hz–20 kHz ±0.5 dB, ViSQOL ≥ 4.0 vs 24-bit input on the Phase 1 corpus (R5) | ViSQOL |
-| SYS-5 | 2.4 GHz ISM only. Region from `host/channel_plan.yaml` `region` (ADR-0015). **UK (default):** Ofcom IR2030/7/1, ETSI EN 300 328 V2.2.2 non-adaptive non-FHSS, declared max **9 dBm EIRP** (below 10 dBm, so the Tx-gap/MU/adaptivity clauses 4.3.2.4–4.3.2.6 do not apply), PSD ≤ 10 dBm/MHz, 99 % OBW inside 2400–2483.5 MHz. **US:** FCC 15.247 DTS, ≤ 20 dBm EIRP | `audit.py` Audit 3 + ADR-0015 |
+| SYS-5 | 2.4 GHz ISM only. Region from `host/channel_plan.yaml` `region` (ADR-0015). **UK (default):** Ofcom IR2030/7/1, ETSI EN 300 328 V2.2.2 non-adaptive non-FHSS, declared max **9 dBm EIRP** (below 10 dBm, so the Tx-gap/MU/adaptivity clauses 4.3.2.4–4.3.2.6 do not apply), PSD ≤ 10 dBm/MHz, 99 % OBW inside 2400–2483.5 MHz (4.3.2.7), OOB ≤ −10/−20 dBm/MHz (4.3.2.8 Figure 3). The highest carrier is 2482: its OBW top edge is ≤ 2483.28 MHz and its OOB margin ≥ 6 dB (ADR-0016). **US:** FCC 15.247 DTS, ≤ 20 dBm EIRP, highest carrier 2480 (15.205 restricted band above 2483.5) | `audit.py` Audit 3/5 + ADR-0015/0016; 2482 OBW and OOB measured on a pack in Phase 5 |
 | SYS-6 | One RF carrier pair per pack (FDMA), no inter-pack sync | Design |
 | SYS-7 | No pack→rack link other than the audio uplink in v1; a 300 µs RX slot is reserved per frame (Q4) | Frame schedule test |
 
@@ -41,9 +41,9 @@ Corrected by #26 (`python3 audit.py`, `docs/analysis/td-latency.md`). The radio 
 | AIR-2 | Packet: 2 B preamble, 4 B access address = `0x8E89BED6 ^ (pack_id * 0x9E3779B1)`, 1 B header (RADIO S0: format version, 0 in v1), 1 B length, payload, 3 B CRC-24 (poly 0x00065B, address skipped), whitening on. This is the BLE 2M PDU layout, the only one the bsim RADIO model accepts (ADR-0009) |
 | AIR-3 | Payload (v1, ADPCM-6 shown; codec per ADR-0005): `seq u8` · `status u16` (bat 7 b, peak 6 b, flags 3 b: clip/lowbat/temp) · `codec_state` 3 B · `audio` 36 B · optional `td_audio` 39 B (frame n−2, Kconfig `OP_TIME_DIVERSITY`). Max 85 B |
 | AIR-4 | Frame period 1000 µs ±20 ppm (pack crystal). Schedule from frame start t0: copy A TX at t0, copy B TX at t0+T_A+T_GAP on channel B, RX slot at t0+700 µs for 300 µs (idle in v1) |
-| AIR-5 | Channel pair per pack from `host/channel_plan.yaml` (ADR-0015, #76): fA ∈ 2402–2440 MHz, fB ∈ [fA + 40, 2480]; 16 carriers, every one ≥ 3 MHz from every other; the 7 gap carriers that fit at 3 MHz (2423, 2426, 2448, 2451, 2473, 2476, 2479, clear of Wi-Fi 1/6/11) go one each to packs 2–8; pack 1 has two in-band carriers, each ≥ 5 MHz from all others; whichever pack stands next to an antenna, every other pack keeps one carrier ≥ 5 MHz from it. UK: where a venue runs Wi-Fi 13, 2473/2476/2479 are in-band (packs 6–8 lose their gap copy) |
+| AIR-5 | Channel pair per pack from `host/channel_plan.yaml` (ADR-0015, ADR-0016, #76): fA ∈ 2402–2440 MHz, fB ∈ [fA + 40, fmax], fmax = **2482 UK/EU, 2480 US** (validator, pack `chan`, Kconfig); 16 carriers, every one ≥ 3 MHz from every other; whichever pack stands next to an antenna, every other pack keeps one carrier ≥ 5 MHz from it. **UK:** 8 gap carriers clear of Wi-Fi 1/6/11 (2423, 2426, 2448, 2451, 2473, 2476, 2479, 2482), one per pack (pack 1: 2414/2482). **US** (`host/channel_plan_us.yaml`): the 7 below 2480 go to packs 2–8; pack 1 has two in-band carriers, each ≥ 5 MHz from all others. Where a venue runs Wi-Fi 13, 2473/2476/2479/2482 are lost (packs 1, 6–8 lose their gap copy) |
 | AIR-6 | TX power: software-set; region maximum enforced in firmware: **UK +7 dBm conducted** (9 dBm EIRP with the 2 dBi whip; nRF21540 at low gain, nRF5340 alone tops out at +3 dBm), **US +18 dBm** (20 dBm EIRP; BT40NE max +19.1 dBm, ADR-0007). Default region UK (ADR-0015) |
-| AIR-7 | Airtime per carrier ≤ 45 % of frame (two copies, time diversity on, at 2 Mbps) |
+| AIR-7 | Airtime per carrier ≤ 45 % of frame (two copies, time diversity on, at 2 Mbps; 25 % with TD off, the default, ADR-0017) |
 
 ## 4. Bodypack
 
@@ -83,7 +83,7 @@ Corrected by #26 (`python3 audit.py`, `docs/analysis/td-latency.md`). The radio 
 | ID | Requirement |
 |---|---|
 | RK-1 | 1U, external 12 V DC brick, rear: 8 XLR male, 2 BNC (antenna A/B) with switchable 12 V bias-T for active antennas, RJ45, USB-C (host service) (R9, R10) |
-| RK-2 | RF: per antenna input, LNA (NF ≤ 2 dB) → 1:8 splitter → 8 modules; coax loss budget 6 dB; antenna placement guidance in `docs/human/antennas.md` (stage wings, directional) |
+| RK-2 | RF: per antenna input, LNA (NF ≤ 2 dB, input P1dB ≥ −10 dBm, IIP3 ≥ 0 dBm) → 1:8 splitter → 8 modules; coax loss budget 6 dB. Antennas (ADR-0016): 2× L-com HG2409P-NF 8 dBi patch, each on 15.2 m of 400-series coax + BNC jumper (4.2 dB). Install rule `docs/human/antenna-install.md`: front of stage, aimed upstage, ≥ 6 m above the stage floor; Wi-Fi ≥ 4.5 m behind/beside, ≥ 12 m in front (R1 rests on it). **R10 verification note:** the 2 BNC stay; the link-on-a-body check (Phase 5/6) uses these antennas mounted per the rule, and Phase 5 also measures their real rear lobes (datasheet plot: −9 dB) |
 | RK-3 | Host: Raspberry Pi CM4 on a carrier with Ethernet; 8 module UARTs via the carrier or a USB-UART hub; boots to service ≤ 60 s |
 | RK-4 | Front: per channel, lock LED and audio peak LED; no display |
 

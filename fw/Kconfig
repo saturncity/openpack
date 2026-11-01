@@ -33,10 +33,15 @@ config OP_PACK_ID
 config OP_CH_A_MHZ
 	int "Copy A carrier (MHz, AIR-5)"
 	default 2424
+	range 2402 2440
 
 config OP_CH_B_MHZ
 	int "Copy B carrier (MHz, AIR-5: >= copy A + 40)"
 	default 2473
+	range 2442 2482
+	help
+	  2482 is UK/EU only (EN 300 328, ADR-0016); the pack's region setting caps fB at 2480 for us/jp
+	  at runtime (fw/src/proto/proto_pack.c op_fb_max). BabbleSim's phy stops at 2480.
 
 config OP_TEST_FRAME_LEN
 	int "Test only: AIR-3 payload length override (B), 0 = v1 default (42)"
