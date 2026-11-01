@@ -123,10 +123,11 @@ def test_nf_at_every_carrier():
 
 
 def test_gain_plan_bt40e():
-    """ADR-0021 gain plan: no pad, BT40E. Nothing compresses even with a pack 0.5 m on axis; PIMD holds from 1.5 m;
+    """ADR-0021 gain plan: no pad, BT40E. Nothing compresses even with a pack 0.5 m on axis; PIMD holds from 2 m on axis
+    (1.5 m with the 200 mm u.FL lead; #34's 100 mm jumper gives the radio 0.5 dB more, see audit.py Audit 6);
     the BT40NE's always-on nRF21540 would compress (why it was dropped)."""
     wil = audit.wilkinson_db()
     for d in audit.NEAR_M:
         assert audit.compression_margin(audit.gain_plan(d, "BT40E", wil)) >= 0
-    assert audit.gain_plan(1.5, "BT40E", wil)["imd_margin"] >= 0
+    assert audit.gain_plan(2.0, "BT40E", wil)["imd_margin"] >= 0
     assert audit.gain_plan(0.5, "BT40NE", wil)["fem_margin"] < 0

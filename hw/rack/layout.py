@@ -875,13 +875,57 @@ def place_gnd_vias(b, cu, pts, placed, spacing=0.9, tol=0.4, win=1.2):
 NETS = {}
 
 
+def gnd_hand(b, cu, fps, gnd_vias):
+    """GND pins that the generic fan-out would wall in or cannot reach, wired by hand (#34):
+    - TPS2595 pin 8 -> its exposed pad (a fan-out via to the right blocked the ILM pin 7 beside it);
+    - QPL9057 GND pins 3/4/6/8 -> its exposed pad (the 0.5 mm RF pour gap keeps the L1 pour off them);
+    - QPQ1907 pads 2+3 -> one via outboard, pad 5 -> one via on the other side;
+    - TPS62933 pin 4 -> a via just below it."""
+    import pcbnew as P_
+
+    def stub(a, c, w=0.2):
+        pk.add_track(b, NETS["GND"], P_.F_Cu, a, c, w)
+        cu.seg(0, a, c, w, "GND")
+
+    def via(c):
+        pk.add_via(b, NETS["GND"], c)
+        cu.via_at(c, "GND")
+        gnd_vias.append(c)
+
+    def to_ep(ref, nums, ep="9"):
+        e = [q for p_ in fps[ref].Pads() if p_.GetNumber() == ep for q in [pk.pad_poly(p_, P_.F_Cu)]][0]
+        xs = [q[0] for q in e]; ys = [q[1] for q in e]
+        for n in nums:
+            a = pc(fps, ref, n)
+            t = (min(max(a[0], min(xs) + 0.15), max(xs) - 0.15), min(max(a[1], min(ys) + 0.15), max(ys) - 0.15))
+            stub(a, t)
+            HAND.add((ref, n))
+    for ref, fp in fps.items():
+        if str(fp.GetFPID().GetLibItemName()).startswith("Texas_DSG0008A"):
+            to_ep(ref, ["8"])
+    for ref in ("U6", "U7"):
+        to_ep(ref, ["3", "4", "6", "8"])
+    for ref in ("U8", "U9"):
+        p2, p3, p5 = pc(fps, ref, "2"), pc(fps, ref, "3"), pc(fps, ref, "5")
+        side = 1 if p2[0] > p5[0] else -1
+        v = (p2[0] + side * 0.76, (p2[1] + p3[1]) / 2)
+        stub(p2, p3); stub(p2, (v[0], p2[1])); stub((v[0], p2[1]), v); via(v)
+        v5 = (p5[0] - side * 0.76, p5[1])
+        stub(p5, v5); via(v5)
+        HAND.update({(ref, "2"), (ref, "3"), (ref, "5")})
+    a = pc(fps, "U2", "4")
+    v = (a[0], a[1] - 0.95)
+    stub(a, v, 0.3); via(v)
+    HAND.add(("U2", "4"))
+
+
 def gnd_fanout(b, cu, pads, gnd_vias, log):
     """one via per SMD GND pad, as close as clearance allows (big pads: via in pad); the L1 pour joins them too"""
     import pcbnew as P_
     n = 0
     for (ref, num), lst in sorted(pads.items()):
         for it in lst:
-            if it.net != "GND" or it.layers != (0,):
+            if it.net != "GND" or it.layers != (0,) or (ref, num) in HAND:
                 continue
             poly = it.geom[0]
             xs = [q[0] for q in poly]; ys = [q[1] for q in poly]
@@ -1169,6 +1213,7 @@ def main(argv):
     log = []
     gnd_vias = []
     cu.zone(0, BUCK_SW_ZONE, "BUCK_SW")
+    gnd_hand(b, cu, fps, gnd_vias)
     print("placed, RF drawn", flush=True)
     nf = gnd_fanout(b, cu, pads, gnd_vias, log)
     print(f"GND fan-out {nf}", flush=True)

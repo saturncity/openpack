@@ -10,8 +10,8 @@ Status: accepted. 2026-11-01, amended after the #95 review, the owner's wing-ant
   - DigiKey UK and The Pi Hut pages, read 2026-11-01.
 - **Decision:**
   - **RF, per antenna.** The chain is:
-    1. BNC (Amphenol 112487) → ESD103 (±15 V, 0.09 pF);
-    2. bias-T: 39 nH LQW18AN choke, 100 pF + 10 nF, **1 Ω 2512 (1 W)**, SMF12A;
+    1. BNC (TE 5415025-1 since #34; was Amphenol 112487) → ESD103 (±15 V, 0.09 pF);
+    2. bias-T: 39 nH choke (#34: Chilisin CS0603-39NJ, LCSC C142171, SRF 2.2 GHz, still > 1 kΩ shunt in band; was LQW18AN), 100 pF + 10 nF, **1 Ω 2512 (1 W)**, SMF12A;
     3. TPS259541 bias eFuse: 0.46–0.52 A, off by default, EN and FLT on host GPIOs;
     4. 100 pF DC block → ESD101 → **QPL9057** (EVB values) → **QPQ1907 BAW** → 3-stage microstrip Wilkinson → 8 u.FL.
     - The 1 Ω 2512 dissipates 0.27 W at the worst-case limit, 27 % of its rating; the test asserts ≤ 50 %.
