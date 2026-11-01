@@ -660,6 +660,32 @@ ANT = {"name": "L-com HG2409P-NF", "dbi": 8.0, "hpbw": (75, 65), "fb_180": 18.0,
 # audience phone <= 1.5 m above its floor (standing); stage floor >= 0 m above the audience floor (studio, worst);
 # nearest audience 1 m horizontally from the antenna's foot.
 PACK_H, PHONE_H, STAGE_H, ROW_M = 1.5, 1.5, 0.0, 1.0
+# Wing coax (#34 cost-down; ADR-0021 rule: antenna 1 m offstage, 1/4 of the stage depth back, 4.0 m up). The rack sits
+# in one wing at the prompt corner (downstage, 0.5 m offstage, 1.0 m up in its case). Cable route: along the floor
+# to the boom, up the boom; the far wing's run crosses the stage overhead at grid height (BOOM_Z_M), never through the
+# acting area. L-com CA-400 (L-com CA-400 datasheet: 6.8 dB / 100 ft at 2500 MHz, 6.0 at 2000), ITM Components UK
+# prices ex VAT read 2026-11-01. The rack end uses an N-socket/BNC-plug adapter (RS 285-6398) instead of a jumper.
+STAGE_W_M, STAGE_D_M = (6.0, 9.0, 12.0), 12.0     # widths 6-12 m (coordinator), depth up to 12 m
+BOOM_Z_M, RACK_Z_M, RUN_SLACK, RUN_DRESS_M = 4.0, 1.0, 0.05, 1.0
+CA400_DB_M = 6.8 / 30.48                 # 0.223 dB/m at 2.5 GHz (the 2.4 GHz figure is lower; worst case kept)
+CA400 = (("CA3N025", 7.62, 38.96), ("CA3N030", 9.14, 45.80), ("CA3N050", 15.24, 61.07), ("CA3N075", 22.86, 88.02),
+         ("CA3N100", 30.48, 114.96))
+HG2409P_LEAD_DB, NBNC_ADAPTER_DB, MATED_PAIR_DB = 0.3 * 1.0, 0.1, 0.15   # 12 in RG-58 lead; N-BNC adapter; per pair
+RK2_COAX_DB = 6.0        # RK-2 coax budget
+
+
+def wing_runs_m(stage_w, stage_d=STAGE_D_M):
+    """cable metres from the rack to the near- and far-wing booms (Manhattan route, slack, dressing)"""
+    up = BOOM_Z_M - RACK_Z_M
+    near = 0.5 + stage_d / 4 + up
+    far = (stage_w + 1.0 + 0.5) + stage_d / 4 + up
+    f = lambda m: m * (1 + RUN_SLACK) + RUN_DRESS_M
+    return {"near": f(near), "far": f(far)}
+
+
+def wing_coax_db(cable_m):
+    return cable_m * CA400_DB_M + HG2409P_LEAD_DB + NBNC_ADAPTER_DB + 3 * MATED_PAIR_DB
+
 
 if __name__ == "__main__":
     print("\n== Audit 5: ADR-0016, 2482 MHz under EN 300 328 V2.2.2, real rack antenna, install rule ==")
@@ -723,12 +749,23 @@ if __name__ == "__main__":
           f" (front row {ROW_M:.0f} m out, phones {PHONE_H} m up, flat floor) -> {h_aud:.1f} m. Rule: antenna"
           f" >= {h_min:.1f} m above the stage floor")
     assert h_min == 6.0, "ADR-0016 front-of-stage rule said 6 m (superseded by ADR-0021, Audit 7)"
-    coax = {"CA3N050 400-series 50 ft (15.2 m)": 15.24 * COAX_DB_M["LMR-400"],
-            "HG2409P lead 12 in": 0.3 * COAX_DB_M["RG-58"], "LCCA30301-FT1.5 BNC-N jumper": 0.46 * COAX_DB_M["LMR-400"]}
-    loss = sum(coax.values()) + 3 * 0.15
-    print(f"  per antenna: {' + '.join(coax)} + 3 connectors = {loss:.1f} dB (RK-2 budget 6);"
-          f" GBP {ANT['gbp']:.2f} + 61.07 + 37.09 = {ANT['gbp'] + 61.07 + 37.09:.2f}, x2 per rack ex VAT")
-    assert loss <= 6.0 and 2 * (ANT["gbp"] + 61.07 + 37.09) <= 400
+    # #34 cost-down: size each wing's coax from the ADR-0021 geometry instead of one 50 ft run per antenna
+    runs = {w: wing_runs_m(w) for w in STAGE_W_M}
+    near_need = max(r["near"] for r in runs.values())
+    far_need = max(r["far"] for r in runs.values())
+    near = next(c for c in CA400 if c[1] >= near_need)
+    far = next(c for c in CA400 if c[1] >= far_need)
+    print(f"  coax runs, rack in a wing (prompt corner), booms {BOOM_Z_M} m up, 1 m offstage, 1/4 stage depth back,"
+          f" cable along the floor/up the boom/over the stage at grid height, x{1 + RUN_SLACK:.2f} + {RUN_DRESS_M} m dressing:")
+    for w, r in runs.items():
+        print(f"    stage {w:>4.1f} m wide: near wing {r['near']:4.1f} m, far wing {r['far']:4.1f} m")
+    for label, (pn, m, gbp) in (("near", near), ("far", far)):
+        print(f"    {label}: {pn} ({m:.2f} m, GBP {gbp:.2f}) -> {wing_coax_db(m):.2f} dB with the HG2409P lead, the N-BNC"
+              f" adapter and 3 mated pairs (RK-2 budget {RK2_COAX_DB:.0f} dB)")
+    assert near[1] >= near_need and far[1] >= far_need
+    # RK-2 (#126 review): the coax limit is the wing NF need (Audit 6 checks it); 6 dB stays the design target
+    assert wing_coax_db(far[1]) <= RK2_COAX_DB, "the longest wing run meets the 6 dB design target"
+    assert (near[0], far[0]) == ("CA3N030", "CA3N075"), "hw/rack/prices.py ANTENNA_KIT carries these two lengths"
 
 
 # ---- Receiver sub-board BOM (#32, ADR-0014). Written by hw/rx/rx.py from the SKiDL netlist + hw/rx/prices.py ----
@@ -1034,8 +1071,8 @@ BAW_SKIRT_EST_DB = 2.0   # est.: extra loss of a carrier whose 2 MHz extends pas
 BAW_IL = ((2402.5, 2421.5, 2.2), (2412.5, 2471.5, 1.3), (2457.5, 2476.5, 1.5), (2462.5, 2481.5, 2.2))
 BAW_REJ = ((925, 960, 34), (1559, 1606, 34), (2110, 2170, 44), (2300, 2370, 38), (2505, 2570, 40), (2570, 2690, 48),
            (4800, 5000, 37))     # 2505-2570: the cold (-20..25 C) 40 dB row
-WILK_LAYOUT_DB = 0.5     # est.: T-junctions, bends, resistor pads (not in the wilkinson.py model; #34)
-UFL_CABLE_DB = 1.0       # est.: 200 mm 1.13 mm coax ~3.5 dB/m + two mated u.FL pairs
+WILK_LAYOUT_DB = 0.5     # est. until hw/rack/out/rf_routed.json exists (#34: the tree as routed, scikit-rf), see wilkinson_db()
+UFL_CABLE_DB = 0.5       # #34: 100 mm 1.13 mm jumper, Taoglas 3.1 dB/m at 2.4 GHz -> 0.31 dB + two mated u.FL pairs
 SUBBOARD_DB = 0.9        # ADR-0014: PE4259 0.5 dB, u.FL jumper ~0.3 dB, three 10 pF blocks ~0.1 dB
 NRF21540 = {"g": 13.0, "nf": 2.7, "ip1db_min": -18.0}   # BT40NE FEM, for reference (ADR-0021 dropped it on rx)
 RX_MODULES = {"BT40E": {"g": -0.3, "nf": 0.3, "ip1db_min": None},   # u.FL straight to the nRF5340 (est. 0.3 dB)
@@ -1044,7 +1081,8 @@ RX_MODULE = "BT40E"      # ADR-0021: receivers on the BT40E, no pad
 NRF5340 = {"nf": 7.0, "prx_max": 0.0, "sens_2m": -95.0, "ci_test_wanted": -67.0, "pimd": -22.0, "pimd_wanted": -64.0,
            "ci": {0: 7.1, -2: -2.0, 2: -11.0, -4: -22.0, 4: -47.0, 6: -54.0}}   # NRF5340["nf"] est. (Audit 3)
 BACKOFF_DB = 6.0         # "does not compress": every stage's total input >= 6 dB below its worst-case input P1dB
-COAX_ADR16_DB, COAX_BUDGET_DB = 4.2, 6.0   # ADR-0016: CA3N050 15.2 m + BNC jumper; RK-2 budget
+COAX_BUDGET_DB = RK2_COAX_DB
+COAX_ADR16_DB = round(wing_coax_db(22.86), 2)   # #34: the far-wing CA3N075 run (worst wing), see Audit 5
 AUDIT4_SYS_NF_DB = cascade_nf_db([(-6, 6), (20, 2), (-10.5, 10.5), (0, 7)])   # 9.30 dB: Audit 4 / RK-5
 UE_DBM = 23.0
 UE_BANDS = {"B40 2390": (2390.0, PATCH_DBI), "B7 UL 2535": (2535.0, PATCH_DBI), "B1 UL 1950": (1950.0, 0.0),
@@ -1085,8 +1123,13 @@ def baw_db(f_mhz):
 
 
 def wilkinson_db():
-    """Modelled 1:8 worst-case insertion loss over the band (hw/rack/wilkinson.py) + the layout allowance."""
-    import importlib.util
+    """1:8 worst-case insertion loss over the band, port to port as routed (hw/rack/out/rf_routed.json: the drawn tree,
+    its 50 ohm distribution lines, bends, junctions, resistor parasitics and the port net ties, scikit-rf; #34), or the
+    hw/rack/wilkinson.py model + the layout allowance when that record is missing."""
+    import importlib.util, json
+    rec = pathlib.Path(__file__).resolve().parent / "hw/rack/out/rf_routed.json"
+    if rec.exists():
+        return json.loads(rec.read_text())["worst"]["il_db"]
     spec = importlib.util.spec_from_file_location("wk", pathlib.Path(__file__).resolve().parent / "hw/rack/wilkinson.py")
     wk = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(wk)
@@ -1188,7 +1231,7 @@ if __name__ == "__main__":
     assert lna["nf_max"] <= 2.0, "RK-2: LNA NF <= 2 dB"
     assert lna["ip1db_min"] >= -10 and lna["iip3_min"] >= 0, "RK-2: input P1dB >= -10 dBm, IIP3 >= 0 dBm"
     wil = wilkinson_db()
-    print(f"  1:8 Wilkinson {wil - WILK_LAYOUT_DB:.2f} dB + {WILK_LAYOUT_DB} layout; QPQ1907 at the carriers: "
+    print(f"  1:8 Wilkinson as routed {wil:.2f} dB worst port (hw/rack/out/rf_routed.json); QPQ1907 at the carriers: "
           + ", ".join(f"{f:.0f} {baw_db(f):.1f} dB" for f in CARRIERS)
           + f" (2403/2482 reach past the specified 2402.5-2481.5 MHz: +{BAW_SKIRT_EST_DB} dB est.)")
     nf_need = nf_need_wings_db()
@@ -1201,6 +1244,12 @@ if __name__ == "__main__":
     assert nf_worst <= nf_need, "RK-5: every carrier, band edges with the skirt allowance, inside the wing NF need"
     print(f"    -> worst {nf_worst:.2f} dB at the 6 dB budget, {nf_need - nf_worst:.1f} dB inside the need"
           f" (BT40NE would give {worst_nf(COAX_BUDGET_DB, 'BT40NE', wil):.2f} dB, but its FEM compresses: ADR-0021)")
+    # RK-2 rebased on the NF need (#126 review): how much wing coax the 21.1 dB need allows, and the 100 ft lead
+    coax_max = max(i / 20 for i in range(0, 400) if worst_nf(i / 20, RX_MODULE, wil) <= nf_need)
+    nf100 = worst_nf(wing_coax_db(30.48), RX_MODULE, wil)
+    print(f"    RK-2 coax limit = the NF need: up to {coax_max:.1f} dB of wing coax keeps NF <= {nf_need:.1f} dB; the 100 ft"
+          f" CA3N100 ({wing_coax_db(30.48):.2f} dB) gives {nf100:.2f} dB, {nf_need - nf100:.1f} dB inside")
+    assert worst_nf(wing_coax_db(22.86), RX_MODULE, wil) <= nf_need and nf100 <= nf_need, "RK-2: wing coax inside the NF need"
 
     print(f"  stage headroom, near pack UK 9 dBm ON AXIS (worst; the rule keeps it off axis), Wi-Fi x3 at 6 m in the"
           f" beam; margins vs P1dB - {BACKOFF_DB:.0f} dB, PRX,MAX - {BACKOFF_DB:.0f} dB, PIMD scaled to the wanted:")
@@ -1211,8 +1260,12 @@ if __name__ == "__main__":
               f" {g['near_radio'] - g['wanted_radio']:4.1f} dB -> C/I margin >= 6 MHz {g['ci_6mhz_margin']:+5.1f},"
               f" -4 MHz {g['ci_4mhz_margin']:+5.1f}")
         assert compression_margin(g) >= 0, f"no stage compresses with a pack {d} m on axis (BT40E, no pad)"
-    for d in (1.5, 4.0):
-        assert gain_plan(d, RX_MODULE, wil)["imd_margin"] >= 0, "PIMD holds once the pack is >= 1.5 m on axis"
+    imd_m = next(i / 10 for i in range(5, 100) if all(gain_plan(j / 10, RX_MODULE, wil)["imd_margin"] >= 0
+                                                      for j in range(i, 100, 5)))
+    print(f"  PIMD holds from {imd_m:.1f} m on axis (#34: the as-routed tree and the 100 mm u.FL jumper; third-order IMD"
+          f" rises 3 dB per dB of drive); the ADR-0021 rule keeps packs off axis")
+    for d in (2.0, 4.0):
+        assert gain_plan(d, RX_MODULE, wil)["imd_margin"] >= 0, "PIMD holds once the pack is >= 2 m on axis"
     bt40ne = gain_plan(NEAR_M[0], "BT40NE", wil)
     print(f"    BT40NE instead (nRF21540 always on): module margin {bt40ne['fem_margin']:+.1f} dB at 0.5 m -> why"
           f" ADR-0021 moved the receivers to the BT40E")
@@ -1239,6 +1292,19 @@ if __name__ == "__main__":
     est = sum(float(r["ext_gbp"]) for r in rk if r["source"].startswith("est."))
     tot = main_gbp + 8 * rx_gbp + rp.ANTENNA_KIT_GBP
     print(f"  main board + host + cables GBP {main_gbp:.2f} (est. lines GBP {est:.2f}); 8 sub-boards GBP {8 * rx_gbp:.2f}"
-          f" (converted, hw/rx/out/bom.csv); antennas + coax GBP {rp.ANTENNA_KIT_GBP:.2f} (ADR-0016)"
+          f" (converted, hw/rx/out/bom.csv); antennas, coax, stands GBP {rp.ANTENNA_KIT_GBP:.2f} (hw/rack/prices.py ANTENNA_KIT)"
           f" -> rack GBP {tot:.2f} ex VAT. No cap in SPEC/AUDIT, so none asserted")
     assert all(r["uk_distributor"] and r["source"] for r in rk), "every rack BOM line needs a UK distributor and source"
+    # #126 review: the SC16IS752 crystal is the HCI XC32M4-14.7456-F20NLDTL (LCSC C3034317): ESR 60 ohm max, 20 pF,
+    # -40..+85 C (was the AKER C6523919, 100 ohm, -20..+70 C). Load caps 2 x 33 pF + ~3 pF stray = 19.5 pF.
+    # Pierce start-up: critical transconductance gm_crit = 4 ESR (2 pi f)^2 (C0 + CL)^2 (ST AN2867 eq. 3); a 5x
+    # gain margin is the usual rule. NXP gives no gm for the SC16IS752 oscillator, so the inverter figure is an estimate
+    # for an unbuffered 3.3 V CMOS Pierce stage and the margin is a bench item (insert 5 x ESR in series: still starts).
+    f_x, esr, c0, cl = 14.7456e6, 60.0, 3.0e-12, 33e-12 * 33e-12 / 66e-12 + 3e-12   # C0 est., 2 x 33 pF + 3 pF stray
+    gm_crit = 4 * esr * (2 * math.pi * f_x) ** 2 * (c0 + cl) ** 2
+    GM_EST = 8e-3                          # est.: unbuffered 3.3 V CMOS inverter gm, A/V
+    print(f"  SC16IS752 crystal (HCI XC32M4, ESR {esr:.0f} ohm): CL {cl * 1e12:.1f} pF, gm_crit {gm_crit * 1e3:.2f} mA/V; 5x margin needs"
+          f" {5 * gm_crit * 1e3:.1f} mA/V, est. inverter {GM_EST * 1e3:.0f} mA/V -> margin {GM_EST / gm_crit:.1f}x (bench: start-up"
+          f" with {5 * esr:.0f} ohm in series); rated -40..+85 C against the inside of the closed 1U case (wing 0..40 C"
+          f" + ~15 C internal rise = 55 C est.)")
+    assert GM_EST / gm_crit >= 5.0, "crystal oscillator gain margin >= 5 (estimate; bench item)"

@@ -68,7 +68,7 @@ LCSC = {
     "TPS3808G01DBVR": ("C19653", V + "TI TPS3808G01DBVR, SOT-23-6"), "BSS138": ("C52895", V + "onsemi BSS138"),
     "BAT54,215": ("C85084", V + "Nexperia BAT54,215"), "S1J": ("C184326", V + "onsemi S1J, SMA, IFSM 30 A"),
     "SMF15A": ("C123802", V + "MDD SMF15A, SOD-123FL"), "SMF5.0A": ("C193402", V + "MDD SMF5.0A, SOD-123FL"),
-    "U.FL-R-SMT-1(10)": ("C88374", V + "Hirose U.FL-R-SMT-1(80): same part, 80-piece-reel suffix"),
+    "U.FL-R-SMT-1(10)": ("C88373", V + "Hirose U.FL-R-SMT-1(10); one code project-wide (#34, the rack uses it too; C88374 is the 80-piece reel)"),
     "TQ2SA-12V": ("C2684447", V + "Panasonic TQ2SA-12V-Z (taped TQ2SA-12V), 2245 at JLC"),
     "BT40E": ("CONSIGN", "Fanstel BT40E, not at LCSC: Digi-Key UK 13174285 (prices.py)"),
     "ALU_BP_47u_63V": ("DNP", "THT radial, hand-solder: Nichicon UEP1J470MPD bi-polar 10 x 16 mm (CAT.8100L), not at LCSC; "

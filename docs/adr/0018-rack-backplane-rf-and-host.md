@@ -10,8 +10,8 @@ Status: accepted. 2026-11-01, amended after the #95 review, the owner's wing-ant
   - DigiKey UK and The Pi Hut pages, read 2026-11-01.
 - **Decision:**
   - **RF, per antenna.** The chain is:
-    1. BNC (Amphenol 112487) → ESD103 (±15 V, 0.09 pF);
-    2. bias-T: 39 nH LQW18AN choke, 100 pF + 10 nF, **1 Ω 2512 (1 W)**, SMF12A;
+    1. BNC (TE 5415025-1 since #34; was Amphenol 112487) → ESD103 (±15 V, 0.09 pF);
+    2. bias-T: 39 nH choke (#34: Chilisin CS0603-39NJ, LCSC C142171, SRF 2.2 GHz, still > 1 kΩ shunt in band; was LQW18AN), 100 pF + 10 nF, **1 Ω 2512 (1 W)**, SMF12A;
     3. TPS259541 bias eFuse: 0.46–0.52 A, off by default, EN and FLT on host GPIOs;
     4. 100 pF DC block → ESD101 → **QPL9057** (EVB values) → **QPQ1907 BAW** → 3-stage microstrip Wilkinson → 8 u.FL.
     - The 1 Ω 2512 dissipates 0.27 W at the worst-case limit, 27 % of its rating; the test asserts ≤ 50 %.
@@ -25,8 +25,8 @@ Status: accepted. 2026-11-01, amended after the #95 review, the owner's wing-ant
     - Then the TPS259541 input eFuse (3.5 A, UVLO 9.98/9.15 V), TPS62933 5 V, TLV76733 3.3 V, per-slot TPS259541 (+12 V) and TPS259531 (+5 V) at 0.49 A, and a 1.5 A CM4IO feed.
     - The NT1 tie and the BNC bulkhead bodies both bond GND to the panel.
   - **Slots:**
-    - **Harwin M20-7831346** socket with a **Harwin M20-003 polarising key in position 14** (8 per rack in the BOM).
-    - Slot-ID straps, LEDs (Lite-On LTST-C191KGKT and KRKT, 560 Ω), XLR NC3MAH with SMAJ58CA on pins 2/3.
+    - ~~Harwin M20-7831346 + M20-003 key~~ **Amended #34 (owner parts list, 2026-11-01): BOOMELE 2.54-2*13PFemale 8.5 mm (LCSC C64320)** with contact 14 pulled and the cavity plugged at assembly; the main-board footprint has no hole at 14, so the keyed receiver header (no pin 14) and the socket match (8 per rack in the BOM).
+    - Slot-ID straps, LEDs (Lite-On LTST-S270KGKT and KRKT side-looking since #34, through the front panel; was LTST-C191; 560 Ω), XLR NC3MAH with SMAJ58CA on pins 2/3.
   - **Host:**
     - **CM4002008 (SC0680, no wireless) from The Pi Hut UK, £79.20, qty 1.** SC0681 (16 GB) at the same price is the drop-in alternative. DigiKey UK had 0 in stock.
     - The official CM4IO (SC0326) on a 40-way ribbon.
@@ -36,6 +36,12 @@ Status: accepted. 2026-11-01, amended after the #95 review, the owner's wing-ant
 - **Numbers** (Audit 6, worst-case limits):
   - **QPL9057 at 2442 MHz:** |S21| 23.1 dB (21.5 dB minimum proxy for NF), NF 0.48 typ / 0.90 max, IIP3 ≥ +5.9 dBm, input P1dB ≥ −7.6 dBm.
   - **Wilkinson:** 10.61 dB (scikit-rf 10.24), isolation ≥ 30.3 dB, RL 36/39 dB. It holds εr 4.2–4.6 and ±10 % etched width.
+  - **Amended #126 (2026-11-01): Wilkinson limit ≤ 14 dB as routed (was ≤ 11 dB, the model above).** As routed (`hw/rack/rf_routed.py`) the worst port is 13.66 dB (13.85 at the tolerance corners); isolation ≥ 39.4 dB, RL ≥ 28.2 dB. Why:
+    - the 52 mm slot pitch (ADR-0014) sets the tree's length: each branch needs ~180 mm of 50 Ω line to reach ports spread over 400 mm, at ≈ 12 dB/m on FR-4;
+    - system NF is 12.86 dB worst against the 21.1 dB wing need (Audit 6);
+    - the extra loss improves the PIMD distance: 1.2 m on axis against the 1.5 m spec;
+    - rejected: a central splitter with 16 coax runs to the slots (about 2 dB better NF, but PIMD worsens to 1.7 m, and 16 coax runs would have to fit in 1U).
+    History: ≤ 11 dB (#33, PR #95, modelled tree + 0.5 dB allowance) → ≤ 14 dB (#34 / #126, as routed).
   - **System NF, receivers on the BT40E (ADR-0021), worst-case LNA:**
     - with the ADR-0016 coax (4.2 dB): 9.68 / 8.12 / 9.68 dB at 2403 / 2442 / 2482;
     - at the 6 dB budget: **11.48 / 9.92 / 11.48 dB**. The band edges include the 2 dB skirt estimate.
@@ -81,5 +87,5 @@ Status: accepted. 2026-11-01, amended after the #95 review, the owner's wing-ant
      - check that the 200 mm u.FL cables reach slots 0 and 7;
      - the QPL9057 input match;
      - follow the QPQ1907 land pattern from the datasheet.
-  6. Confirm that the M20-003 key seats in the M20-78 dual-row socket on the first unit (Harwin lists it for M20 female families).
+  6. Confirm on the first unit that contact 14 pulls out of the BOOMELE C64320 cleanly and that the plugged cavity rejects a pin (#34; was the Harwin M20-003 key check).
   7. No panel USB-C to micro-USB lead was found (£8 estimate). TPS259541 has a 20-week lead time.

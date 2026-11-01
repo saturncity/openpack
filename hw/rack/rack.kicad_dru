@@ -1,0 +1,58 @@
+(version 1)
+# JLCPCB 4-layer standard capabilities (jlcpcb.com/capabilities/pcb-capabilities, 1 oz outer / 0.5 oz inner), the same
+# limits as hw/rx/rx.kicad_dru. The router works to larger values (0.15 clearance, 0.2 signal / 0.5 power / 1.5 entry
+# tracks, 0.6/0.3 via). Numbers: hw/REVIEW.md (rack section).
+
+(rule "JLC track width"
+  (constraint track_width (min 0.09mm)))
+
+# No unconditional copper-clearance rule (#116 review M1): it would override every netclass clearance. The netclasses
+# set them (rack.kicad_pro): Default 0.127, Power / Audio_I 0.15 (IPC-2221 B4 external coated 31-100 V asks 0.13 for
+# the P48 nets), Big 0.15 (12 V entry: IPC-2221 B4 asks 0.05 below 15 V), RF 0.15; board min_clearance 0.1 is the floor, above JLC's 0.09.
+
+(rule "JLC via"
+  (condition "A.Type == 'Via'")
+  (constraint hole_size (min 0.15mm))
+  (constraint via_diameter (min 0.25mm))
+  (constraint annular_width (min 0.075mm)))
+
+(rule "JLC PTH"
+  (condition "A.Type == 'Pad' && A.isPlated()")
+  (constraint hole_size (min 0.15mm) (max 6.3mm))
+  (constraint annular_width (min 0.1mm)))
+
+(rule "JLC NPTH"
+  (condition "A.Type == 'Pad' && !A.isPlated()")
+  (constraint hole_size (min 0.5mm)))
+
+(rule "JLC hole to hole"
+  (constraint hole_to_hole (min 0.25mm)))
+
+(rule "JLC copper to edge"
+  (constraint edge_clearance (min 0.3mm)))
+
+(rule "JLC silkscreen"
+  (layer "?.Silkscreen")
+  (constraint text_height (min 0.8mm))
+  (constraint text_thickness (min 0.15mm)))
+
+# RF: 50 ohm (0.35 mm) and 70.7 ohm (0.17 mm) lines on L1 over the solid L2 plane, JLC04161H-7628 (h 0.2104 mm,
+# er 4.4), with a 0.5 mm gap to the L1 pour: hw/rx/rf_line.py field solve, recorded in hw/rack/layout.py RF_SOLVE.
+# The gap is a rule against zones only: a pour closer than 0.5 mm turns the line into a coplanar one and drops Z0.
+(rule "RF width"
+  (condition "A.NetClass == 'RF' && A.Type == 'Track'")
+  (constraint track_width (min 0.16mm) (max 0.36mm)))
+
+(rule "RF pour gap"
+  (condition "(A.NetClass == 'RF' && B.Type == 'Zone') || (B.NetClass == 'RF' && A.Type == 'Zone')")
+  (constraint clearance (min 0.5mm)))
+
+# rails, the 12 V entry and the XLR audio legs (#104 review M1 lesson): never on the 15 um inner copper
+(rule "current paths on outer copper"
+  (condition "(A.NetClass == 'Power' || A.NetClass == 'Big' || A.NetClass == 'Audio_I') && A.Type == 'Track'")
+  (layer inner)
+  (constraint disallow track))
+
+(rule "12 V entry width"
+  (condition "A.NetClass == 'Big' && A.Type == 'Track'")
+  (constraint track_width (min 0.29mm)))
