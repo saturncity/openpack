@@ -737,7 +737,7 @@ The rack main board (`hw/rack/layout.py` → `hw/rack/rack.kicad_pcb`) and its 1
 ### PW-2. Cutoff voltage and runtime
 - **Difficulty:** the 3.3 V rail falls below PCM1840 IOVDD minimum (3.0 V) near end of discharge. A buck-boost (TPS63802) would fix it but costs ~$1 and breaks $35.
 - **Chosen:** firmware shuts down below **3.3 V under load** (was 3.2 V): IOVDD 3.0 + LDO 67 mV + path 54 mV + ADC error 80 mV = 3.201 V, rounded up; the path includes the cradle spring and measured tracks (121 mΩ). Shutdown needs 5 s below cutoff. Runtime **17.5 h** at 0.55 W, 85 % of the cell usable (PK-7 ≥ 16 h).
-- **Links:** ADR-0012, PR #75 review S1, PR #104, PR #119.
+- **Links:** ADR-0012, PR #75 review S1, PR #104, PR #119. SPEC PK-8 still said 3.2 V after the amendment; corrected to 3.3 V (found while writing the final report).
 - **Residual risk:** 1.5 h margin over 16 h; spring and contact resistance are estimates.
 - **Bench:** **yes**, PPK2 current and runtime.
 
