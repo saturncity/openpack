@@ -58,10 +58,16 @@ def test_module_pads(built):
     # I2S: module (master) -> PCM5102A BCK 13 / LRCK 15 / DIN 14 (SLAS859C pin functions)
     assert [net["U1", p] for p in ("C3", "C4", "B6")] == ["I2S_BCK", "I2S_LRCK", "I2S_SDOUT"]
     assert [net["U3", p] for p in ("13", "15", "14")] == ["I2S_BCK", "I2S_LRCK", "I2S_SDOUT"]
-    fem = ("Z6", "A6", "C2", "C6", "D1", "D2", "E0", "E1", "E2")   # nRF21540 control inside the module
+    # ADR-0021: BT40E (no nRF21540), 14x16 mm footprint. The nine pads the BT40NE wires to its FEM stay unused, so the
+    # GPIO map (ADR-0014) did not move; P1.05 (pad E1, the BT40NE's ANT_SEL) is left open and there are no FEM nets.
+    u1 = next(p for p in built[2].parts if p.ref == "U1")
+    assert (u1.value, u1.fields["MPN"], u1.footprint) == ("BT40E", "BT40E", "openpack:Fanstel_BT40E")
+    fem = ("Z6", "A6", "C2", "C6", "D1", "D2", "E0", "E1", "E2")
     assert {net["U1", n] for n in fem} == {"__NOCONNECT"}
     assert {pad for pad, _ in rx.PADS.values()}.isdisjoint(fem)
+    assert not [n for n in set(net.values()) if n and re.search(r"FEM|PDN|TX_EN|RX_EN|MODE", n)]
     assert (net["U1", "9"], net["U1", "F4"]) == ("+3V3", "+3V3")
+    assert pair(net, "C10") == pair(net, "C11") == pair(net, "C12") == {"+3V3", "GND"}   # VDD 10u + 100n, VDDH 100n
 
 
 def test_antenna_switch(built):

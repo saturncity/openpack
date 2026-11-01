@@ -10,8 +10,11 @@ DK = "Digi-Key qty-100 cut tape, 2026-10-31"
 GBP_PER_USD = 0.76   # assumed (1 GBP = 1.32 USD); replace with live UK quotes before ordering (#40)
 
 PRICES = {  # mpn: (usd_each_at_100, source, uk_distributor)
-    # UK: priced at DigiKey (ships to the UK), not Fanstel direct ($13.47, which adds import VAT + duty)
-    "BT40NE": (16.76, "Digi-Key qty-100 cut tape, part 22107427 (hw/pack/prices.py BT40NE_DIGIKEY_Q100)", "DigiKey UK"),
+    # ADR-0021: BT40E (no FEM). UK: priced at Digi-Key UK in GBP (GBP 9.7765 qty-100 cut tape, 803 in stock, 10 wk
+    # standard lead, read 2026-11-01); the USD figure is that GBP / GBP_PER_USD so the BOM's GBP column is the quote.
+    # Fanstel direct is $9.55 (BT40E_FANSTEL_Q100) but adds import VAT + duty.
+    "BT40E": (round(9.7765 / GBP_PER_USD, 2), "Digi-Key UK qty-100 cut tape GBP 9.7765, part 13174285, 803 in stock, "
+              "10 wk lead (read 2026-11-01)", "DigiKey UK"),
     "PCM5102APWR": (2.80, "Digi-Key qty-100, via findchips.com snapshot read 2026-10-31 (Mouser q100 $2.78)",
                     "Mouser UK / Farnell UK"),
     "PE4259-63": (0.41, "LCSC C470892 qty-100, via findchips.com/LCSC snapshot read 2026-10-31 (range $0.32-0.49)",
@@ -52,4 +55,5 @@ EXTRAS = [  # (item, qty, usd_each, source, uk_distributor)
     ("U.FL-U.FL jumper 50 mm (switch out -> module u.FL)", 1, 1.50, "est.", "LCSC / RS UK"),
 ]
 
-BT40NE_FANSTEL_Q100 = 13.47  # informational: Fanstel direct (fanstel.com/bt40f-nrf5340, #31 comment)
+BT40E_FANSTEL_Q100 = 9.55    # informational: Fanstel direct (docs/analysis/module-antenna.md, ADR-0021)
+BT40NE_DIGIKEY_Q100 = 16.76  # informational: the module this board used before ADR-0021 (Digi-Key qty-100)

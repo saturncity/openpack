@@ -32,3 +32,12 @@ int32_t op_aclk_quant(int32_t ppb, int32_t *steps)
 	}
 	return n * OP_ACLK_STEP_PPB;
 }
+
+int32_t op_aclk_dither(int32_t ppb, int32_t *acc)
+{
+	int32_t steps;
+	int32_t want = ppb + *acc;
+
+	*acc = want - op_aclk_quant(want, &steps);
+	return steps;
+}

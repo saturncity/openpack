@@ -2,84 +2,10 @@
   (version "D")
   (design
     (source "rx.py")
-    (date "10/31/2026 11:14 PM")
+    (date "11/01/2026 03:36 AM")
     (tool "SKiDL (3.0.0)")
     (sheet
       (number 1)
-      (name "/")
-      (tstamps "/")
-      (title_block
-        (title)
-        (company)
-        (rev)
-        (date)
-        (source "out/rx.py")
-        (comment
-          (number "1")
-          (value ""))
-        (comment
-          (number "2")
-          (value ""))
-        (comment
-          (number "3")
-          (value ""))
-        (comment
-          (number "4")
-          (value ""))
-        (comment
-          (number "5")
-          (value ""))
-        (comment
-          (number "6")
-          (value ""))
-        (comment
-          (number "7")
-          (value ""))
-        (comment
-          (number "8")
-          (value ""))
-        (comment
-          (number "9")
-          (value ""))))
-    (sheet
-      (number 2)
-      (name "/mcu1/")
-      (tstamps "/f0f0c750-503c-5678-9e62-e0dad76cd8d9/")
-      (title_block
-        (title)
-        (company)
-        (rev)
-        (date)
-        (source "out/rx.py")
-        (comment
-          (number "1")
-          (value ""))
-        (comment
-          (number "2")
-          (value ""))
-        (comment
-          (number "3")
-          (value ""))
-        (comment
-          (number "4")
-          (value ""))
-        (comment
-          (number "5")
-          (value ""))
-        (comment
-          (number "6")
-          (value ""))
-        (comment
-          (number "7")
-          (value ""))
-        (comment
-          (number "8")
-          (value ""))
-        (comment
-          (number "9")
-          (value ""))))
-    (sheet
-      (number 3)
       (name "/driver1/")
       (tstamps "/7733c520-0688-552a-bd17-c5a827a49212/")
       (title_block
@@ -116,9 +42,83 @@
           (number "9")
           (value ""))))
     (sheet
-      (number 4)
+      (number 2)
+      (name "/")
+      (tstamps "/")
+      (title_block
+        (title)
+        (company)
+        (rev)
+        (date)
+        (source "out/rx.py")
+        (comment
+          (number "1")
+          (value ""))
+        (comment
+          (number "2")
+          (value ""))
+        (comment
+          (number "3")
+          (value ""))
+        (comment
+          (number "4")
+          (value ""))
+        (comment
+          (number "5")
+          (value ""))
+        (comment
+          (number "6")
+          (value ""))
+        (comment
+          (number "7")
+          (value ""))
+        (comment
+          (number "8")
+          (value ""))
+        (comment
+          (number "9")
+          (value ""))))
+    (sheet
+      (number 3)
       (name "/dac1/")
       (tstamps "/82e6aa05-01ab-5aef-b2f4-90b019b1eeb2/")
+      (title_block
+        (title)
+        (company)
+        (rev)
+        (date)
+        (source "out/rx.py")
+        (comment
+          (number "1")
+          (value ""))
+        (comment
+          (number "2")
+          (value ""))
+        (comment
+          (number "3")
+          (value ""))
+        (comment
+          (number "4")
+          (value ""))
+        (comment
+          (number "5")
+          (value ""))
+        (comment
+          (number "6")
+          (value ""))
+        (comment
+          (number "7")
+          (value ""))
+        (comment
+          (number "8")
+          (value ""))
+        (comment
+          (number "9")
+          (value ""))))
+    (sheet
+      (number 4)
+      (name "/rf1/")
+      (tstamps "/c7465acf-bbdb-571f-91c7-fa52e0ca8e96/")
       (title_block
         (title)
         (company)
@@ -191,8 +191,8 @@
           (value ""))))
     (sheet
       (number 6)
-      (name "/rf1/")
-      (tstamps "/c7465acf-bbdb-571f-91c7-fa52e0ca8e96/")
+      (name "/mute1/")
+      (tstamps "/5ea1cf4f-6e07-50a4-8168-1a8faa970016/")
       (title_block
         (title)
         (company)
@@ -228,8 +228,8 @@
           (value ""))))
     (sheet
       (number 7)
-      (name "/mute1/")
-      (tstamps "/5ea1cf4f-6e07-50a4-8168-1a8faa970016/")
+      (name "/mcu1/")
+      (tstamps "/f0f0c750-503c-5678-9e62-e0dad76cd8d9/")
       (title_block
         (title)
         (company)
@@ -281,7 +281,7 @@
         (field
           (name "SKiDL Tag") "C1")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -307,7 +307,7 @@
         (field
           (name "SKiDL Tag") "C10")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -333,7 +333,7 @@
         (field
           (name "SKiDL Tag") "C11")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -359,7 +359,7 @@
         (field
           (name "SKiDL Tag") "C12")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -385,7 +385,7 @@
         (field
           (name "SKiDL Tag") "C2")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -411,7 +411,7 @@
         (field
           (name "SKiDL Tag") "C20")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -437,7 +437,7 @@
         (field
           (name "SKiDL Tag") "C21")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -463,7 +463,7 @@
         (field
           (name "SKiDL Tag") "C22")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -489,7 +489,7 @@
         (field
           (name "SKiDL Tag") "C23")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -515,7 +515,7 @@
         (field
           (name "SKiDL Tag") "C3")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -541,7 +541,7 @@
         (field
           (name "SKiDL Tag") "C30")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -567,7 +567,7 @@
         (field
           (name "SKiDL Tag") "C31")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -593,7 +593,7 @@
         (field
           (name "SKiDL Tag") "C32")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -619,7 +619,7 @@
         (field
           (name "SKiDL Tag") "C33")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -645,7 +645,7 @@
         (field
           (name "SKiDL Tag") "C34")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -671,7 +671,7 @@
         (field
           (name "SKiDL Tag") "C35")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -697,7 +697,7 @@
         (field
           (name "SKiDL Tag") "C36")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -723,7 +723,7 @@
         (field
           (name "SKiDL Tag") "C37")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -749,7 +749,7 @@
         (field
           (name "SKiDL Tag") "C38")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -775,7 +775,7 @@
         (field
           (name "SKiDL Tag") "C39")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -801,7 +801,7 @@
         (field
           (name "SKiDL Tag") "C4")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -827,7 +827,7 @@
         (field
           (name "SKiDL Tag") "C40")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "CP"))
@@ -853,7 +853,7 @@
         (field
           (name "SKiDL Tag") "C41")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -879,7 +879,7 @@
         (field
           (name "SKiDL Tag") "C42")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -905,7 +905,7 @@
         (field
           (name "SKiDL Tag") "C43")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "CP"))
@@ -931,7 +931,7 @@
         (field
           (name "SKiDL Tag") "C44")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -957,7 +957,7 @@
         (field
           (name "SKiDL Tag") "C45")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -983,7 +983,7 @@
         (field
           (name "SKiDL Tag") "C46")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -1009,7 +1009,7 @@
         (field
           (name "SKiDL Tag") "C47")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -1035,7 +1035,7 @@
         (field
           (name "SKiDL Tag") "C48")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -1061,7 +1061,7 @@
         (field
           (name "SKiDL Tag") "C49")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "CP"))
@@ -1087,7 +1087,7 @@
         (field
           (name "SKiDL Tag") "C5")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -1113,7 +1113,7 @@
         (field
           (name "SKiDL Tag") "C6")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -1139,7 +1139,7 @@
         (field
           (name "SKiDL Tag") "C60")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -1165,7 +1165,7 @@
         (field
           (name "SKiDL Tag") "C61")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -1191,7 +1191,7 @@
         (field
           (name "SKiDL Tag") "C7")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "CP"))
@@ -1217,7 +1217,7 @@
         (field
           (name "SKiDL Tag") "C8")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "C"))
@@ -1243,7 +1243,7 @@
         (field
           (name "SKiDL Tag") "C9")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "CP"))
@@ -1269,7 +1269,7 @@
         (field
           (name "SKiDL Tag") "D1")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "TVS"))
@@ -1295,7 +1295,7 @@
         (field
           (name "SKiDL Tag") "D10")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "BAT54"))
@@ -1321,7 +1321,7 @@
         (field
           (name "SKiDL Tag") "D2")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "TVS"))
@@ -1347,7 +1347,7 @@
         (field
           (name "SKiDL Tag") "D3")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "Diode"))
@@ -1373,7 +1373,7 @@
         (field
           (name "SKiDL Tag") "D4")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "Diode"))
@@ -1399,7 +1399,7 @@
         (field
           (name "SKiDL Tag") "D5")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "Diode"))
@@ -1425,7 +1425,7 @@
         (field
           (name "SKiDL Tag") "D6")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "Diode"))
@@ -1451,7 +1451,7 @@
         (field
           (name "SKiDL Tag") "D7")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "Diode"))
@@ -1477,7 +1477,7 @@
         (field
           (name "SKiDL Tag") "D8")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "BAT54"))
@@ -1503,7 +1503,7 @@
         (field
           (name "SKiDL Tag") "D9")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "BAT54"))
@@ -1529,7 +1529,7 @@
         (field
           (name "SKiDL Tag") "J1")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "Conn_Backplane"))
@@ -1555,7 +1555,7 @@
         (field
           (name "SKiDL Tag") "J2")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "Tag_TC2030"))
@@ -1581,7 +1581,7 @@
         (field
           (name "SKiDL Tag") "J3")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "UFL"))
@@ -1607,7 +1607,7 @@
         (field
           (name "SKiDL Tag") "J4")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "UFL"))
@@ -1633,7 +1633,7 @@
         (field
           (name "SKiDL Tag") "J5")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "UFL"))
@@ -1659,7 +1659,7 @@
         (field
           (name "SKiDL Tag") "K1")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "Relay_TQ2"))
@@ -1685,7 +1685,7 @@
         (field
           (name "SKiDL Tag") "Q1")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "NMOS"))
@@ -1711,7 +1711,7 @@
         (field
           (name "SKiDL Tag") "R1")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -1737,7 +1737,7 @@
         (field
           (name "SKiDL Tag") "R20")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -1763,7 +1763,7 @@
         (field
           (name "SKiDL Tag") "R21")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -1789,7 +1789,7 @@
         (field
           (name "SKiDL Tag") "R22")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -1815,7 +1815,7 @@
         (field
           (name "SKiDL Tag") "R23")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -1841,7 +1841,7 @@
         (field
           (name "SKiDL Tag") "R24")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -1867,7 +1867,7 @@
         (field
           (name "SKiDL Tag") "R25")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -1893,7 +1893,7 @@
         (field
           (name "SKiDL Tag") "R26")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -1919,7 +1919,7 @@
         (field
           (name "SKiDL Tag") "R27")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -1945,7 +1945,7 @@
         (field
           (name "SKiDL Tag") "R28")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -1971,7 +1971,7 @@
         (field
           (name "SKiDL Tag") "R29")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -1997,7 +1997,7 @@
         (field
           (name "SKiDL Tag") "R30")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2023,7 +2023,7 @@
         (field
           (name "SKiDL Tag") "R31")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2049,7 +2049,7 @@
         (field
           (name "SKiDL Tag") "R32")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2077,7 +2077,7 @@
         (field
           (name "SKiDL Tag") "R33")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2105,7 +2105,7 @@
         (field
           (name "SKiDL Tag") "R34")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2133,7 +2133,7 @@
         (field
           (name "SKiDL Tag") "R35")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2159,7 +2159,7 @@
         (field
           (name "SKiDL Tag") "R36")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2185,7 +2185,7 @@
         (field
           (name "SKiDL Tag") "R37")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2211,7 +2211,7 @@
         (field
           (name "SKiDL Tag") "R38")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2237,7 +2237,7 @@
         (field
           (name "SKiDL Tag") "R40")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2263,7 +2263,7 @@
         (field
           (name "SKiDL Tag") "R41")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2289,7 +2289,7 @@
         (field
           (name "SKiDL Tag") "R42")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2315,7 +2315,7 @@
         (field
           (name "SKiDL Tag") "R43")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2341,7 +2341,7 @@
         (field
           (name "SKiDL Tag") "R44")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2367,7 +2367,7 @@
         (field
           (name "SKiDL Tag") "R45")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2393,7 +2393,7 @@
         (field
           (name "SKiDL Tag") "R46")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2419,7 +2419,7 @@
         (field
           (name "SKiDL Tag") "R47")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2445,7 +2445,7 @@
         (field
           (name "SKiDL Tag") "R48")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2471,7 +2471,7 @@
         (field
           (name "SKiDL Tag") "R49")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2497,7 +2497,7 @@
         (field
           (name "SKiDL Tag") "R50")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2523,7 +2523,7 @@
         (field
           (name "SKiDL Tag") "R51")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2549,7 +2549,7 @@
         (field
           (name "SKiDL Tag") "R52")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2575,7 +2575,7 @@
         (field
           (name "SKiDL Tag") "R53")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2601,7 +2601,7 @@
         (field
           (name "SKiDL Tag") "R54")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2627,7 +2627,7 @@
         (field
           (name "SKiDL Tag") "R55")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2653,7 +2653,7 @@
         (field
           (name "SKiDL Tag") "R60")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2679,7 +2679,7 @@
         (field
           (name "SKiDL Tag") "R61")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2705,7 +2705,7 @@
         (field
           (name "SKiDL Tag") "R62")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2731,7 +2731,7 @@
         (field
           (name "SKiDL Tag") "R63")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "R"))
@@ -2742,25 +2742,25 @@
       (tstamps "6751bfdd-84c7-5d2f-96fc-26ce45c93266"))
     (comp
       (ref "U1")
-      (value "BT40NE")
-      (description "Fanstel BT40NE nRF5340 + nRF21540 FEM module, PCB antenna + u.FL")
-      (footprint "openpack:Fanstel_BT40NE")
+      (value "BT40E")
+      (description "Fanstel BT40E nRF5340 module, u.FL, no FEM (14x16 mm)")
+      (footprint "openpack:Fanstel_BT40E")
       (fields
         (field
-          (name "MPN") "BT40NE")
+          (name "MPN") "BT40E")
         (field
-          (name "Description") "Fanstel BT40NE nRF5340 + nRF21540 FEM module, PCB antenna + u.FL")
+          (name "Description") "Fanstel BT40E nRF5340 module, u.FL, no FEM (14x16 mm)")
         (field
-          (name "Footprint") "openpack:Fanstel_BT40NE")
+          (name "Footprint") "openpack:Fanstel_BT40E")
         (field
           (name "Datasheet"))
         (field
           (name "SKiDL Tag") "U1")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
-        (part "BT40NE"))
+        (part "BT40E"))
       (sheetpath
         (names "/mcu1/")
         (tstamps "/f0f0c750-503c-5678-9e62-e0dad76cd8d9/"))
@@ -2783,7 +2783,7 @@
         (field
           (name "SKiDL Tag") "U2")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "PE4259"))
@@ -2809,7 +2809,7 @@
         (field
           (name "SKiDL Tag") "U3")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "PCM5102A"))
@@ -2835,7 +2835,7 @@
         (field
           (name "SKiDL Tag") "U4")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "TLV76733"))
@@ -2861,7 +2861,7 @@
         (field
           (name "SKiDL Tag") "U5")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "TLV76733"))
@@ -2887,7 +2887,7 @@
         (field
           (name "SKiDL Tag") "U6")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "OPA1656"))
@@ -2913,7 +2913,7 @@
         (field
           (name "SKiDL Tag") "U7")
         (field
-          (name "SKiDL Line") "rx.py:61"))
+          (name "SKiDL Line") "rx.py:62"))
       (libsource
         (lib "openpack_rx")
         (part "TPS3808"))

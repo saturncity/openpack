@@ -34,9 +34,11 @@
 };
 
 /* #107: Fanstel BT40NE nRF21540 front-end (FEM), GPIO mode.
- * TODO(#107): PLACEHOLDER on the nRF5340 DK. The pack and receiver board targets do not exist yet; when they do
- * (boards/openpack_pack, boards/openpack_rx), move this node into their net-core devicetree unchanged. The pins
- * below are the BT40NE module-internal wiring, so they are right on the final boards and arbitrary on a DK.
+ * TODO(#107): PLACEHOLDER on the nRF5340 DK. The pack board target does not exist yet; when it does
+ * (boards/openpack_pack), move this node into its net-core devicetree unchanged. The pins below are the BT40NE
+ * module-internal wiring, so they are right on the pack and arbitrary on a DK.
+ * PACK ONLY: the receiver sub-board is a BT40E with no nRF21540 (ADR-0021). Receiver builds (SB_CONFIG_OP_ROLE_RX)
+ * disable this node through boards/role_rx_cpunet.overlay, and fw/src/rx/rx.c refuses to build with it enabled.
  *
  * Source: Fanstel, "BLE 5.3, 802.15.4 Modules, BT40/F/E/N/NE Product Specifications", Ver 1.09, July 2024
  * (https://fanstel.squarespace.com/s/BT40F_BT40N-Product-Specifications.pdf), pin table p.21 (BT40N/NE

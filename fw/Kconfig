@@ -68,21 +68,60 @@ config OP_PACK_FRAME_LEAD_US
 	default 100
 	range 1 499
 	help
-	  The app core places its 1 ms audio frame clock this far before the net core's latch (the
-	  DISABLED interrupt after copy B), from a sync the net core sends at start (ADR-0020). Read +
+	  The app core places its 1 ms audio frame clock this far before the net core's latch
+	  (OP_PACK_LATCH_LEAD_US before t0), from a sync the net core sends at start (ADR-0020). Read +
 	  ADPCM-6 encode + IPC must finish inside it; then no frame is ever skipped. Every us here is
-	  SYS-2 latency: 100 = SPEC section 2 "Encode + IPC". < 500: the net core's margin report takes
-	  a frame within half a frame after its latch as late.
+	  SYS-2 latency: SPEC section 2 "Encode + IPC" = this + OP_PACK_LATCH_LEAD_US. < 500: the net
+	  core's margin report takes a frame within half a frame after its latch as late.
+
+config OP_PACK_LATCH_LEAD_US
+	int "Pack: net-core payload latch (TIMER0 COMPARE3) this far before TXEN of copy A (us, #98)"
+	default 20
+	range 5 100
+	help
+	  The newest frame is copied into the radio buffer this long before t0. It must follow the end
+	  of copy B (t0 + 877 us at 81 B) and give the latch interrupt time before copy A's EasyDMA read
+	  (t0 + ramp-up): 20 + 40 us. Every us here is SYS-2 latency (TD on with FLT=1: 4.6 ms budget).
+
+config OP_PACK_LEAD_REPORT_FRAMES
+	int "Pack: net core reports the latch margin to the app core every this many frames (#97)"
+	default 100
+	range 10 1000
+	help
+	  The app core's lead loop (ADR-0022) steers the audio frame clock rate from these reports. The
+	  gains below assume 100 (one report = 100 ms).
+
+config OP_PACK_LEAD_KP_PPB
+	int "Pack lead loop proportional gain (ppb of frame clock rate per us of margin error)"
+	default 2000
+
+config OP_PACK_LEAD_KI_PPB
+	int "Pack lead loop integral gain (ppb per us of margin error per report)"
+	default 100
+
+config OP_PACK_LEAD_LIM_PPB
+	int "Pack lead loop correction limit (ppb), also the integrator clamp"
+	default 100000
+
+config OP_TEST_FCLK_PPB
+	int "Test only: frame clock rate offset on the TIMER1 fallback (ppb); bsim -op_fclk_ppb overrides"
+	default 0
+	help
+	  The bsim device has one crystal (-xo_drift moves TIMER0 and TIMER1 together), so the lead
+	  loop is tested with this offset on the frame clock: +371 = HFCLKAUDIO at FREQ 39846, +-40000
+	  for margin. Ignored by the I2S frame clock. Never set in a shipped build.
 
 config OP_PACK_FRAME_PRIO
 	int "Pack: frame thread priority (cooperative, above the system workqueue)"
 	default -2
 
 config OP_TEST_SCHED_REPORT
-	bool "Test only: net core prints a PACK_IPC line per second (latch margin, counters)"
-	default y if OP_TEST_BSIM_ARGS
+	bool "Test only: pack prints PACK_IPC (net) / PACK_FCLK (app) lines per second"
+	depends on ARCH_POSIX
+	default y if OP_TEST_BSIM_ARGS || SOC_COMPATIBLE_NRF5340_CPUAPP
 	help
-	  tests/bsim/sched/check.py reads the margin (latch - frame arrival). bsim only, never silicon.
+	  tests/bsim/sched/check.py reads the margin (latch - frame arrival); tests/bsim/scenarios/run.py
+	  (a) the device time of t0 and of the audio frame clock. bsim only, never silicon.
 
 config OP_TEST_APP_LOAD_PERIOD_US
 	int "Test only: app-core load thread wakes every this many us, 0 = off (tests/bsim/sched, #87)"
@@ -105,7 +144,7 @@ config OP_TEST_PROTO_POLL_MS
 	help
 	  Brings back the 50 ms console poll that exposed #87. The shipped build waits forever.
 
-# #107 / ADR-0015: nRF21540 front-end on the BT40NE (pack and receiver).
+# #107 / ADR-0015: nRF21540 front-end on the BT40NE. Pack only: the receiver is a BT40E (ADR-0021).
 config OP_FEM_NRF21540
 	bool "nRF21540 FEM present (devicetree node nrf_radio_fem)"
 	default y if DT_HAS_NORDIC_NRF21540_FEM_ENABLED

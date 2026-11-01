@@ -12,6 +12,24 @@ P, I, O, B, PI, PO, NC = (pack_symbols.P, pack_symbols.I, pack_symbols.O, pack_s
                           pack_symbols.PI, pack_symbols.PO, pack_symbols.NC)
 two_pin = pack_symbols.two_pin
 
+
+# BT40E (ADR-0021): Fanstel "BLE 5.3, 802.15.4 Modules, BT40/F/E/N/NE Product Specifications" v1.09 (July 2024).
+# p.11 BT40E mechanical drawing: 14x16x2.0 mm, 16 castellated pads (1-16), 45 LGA pads (Z0-F6), ground pads H0-H3,
+# u.FL receptacle on the module (no PCB antenna). p.14 "Pin Assignments of BT40" (BT40 and BT40E share the 14x16
+# drawing): every pad carries the same nRF5340 pin as in the BT40F table (pp.16-17, pack_symbols._BT40), F5 = NC.
+# No nRF21540, so the nine pads the BT40N/NE use for the FEM are plain GPIO here; unused ones are left open.
+def _bt40e_pins():
+    pins = []
+    for num, name in pack_symbols._BT40:
+        if name in ("VDD", "VDDH", "VBUS", "VSS", "GND"):
+            pins.append((num, name, PI, "L"))
+        elif name == "NC":
+            pins.append((num, name, NC, "L"))
+        else:
+            pins.append((num, name, B, "R"))
+    return pins
+
+
 # Backplane connector pinout: the table in docs/adr/0014-rx-backplane-connector.md (keep in sync; tests check it).
 # Pin 14 is the key: pulled from the header, its hole plugged in the main-board socket (#81 review S3).
 BACKPLANE = {
@@ -23,6 +41,7 @@ BACKPLANE = {
 }
 
 RX_SYMBOLS = {
+    "BT40E": ("U", _bt40e_pins(), "Fanstel BT40E nRF5340 module, u.FL, no FEM (14x16 mm)"),
     # PCM5102A TSSOP-20 (PW): TI SLAS859C (May 2015), section 7 "Pin Functions"
     "PCM5102A": ("U", [("1", "CPVDD", PI, "L"), ("2", "CAPP", P, "L"), ("3", "CPGND", PI, "L"), ("4", "CAPM", P, "L"),
                        ("5", "VNEG", PO, "L"), ("6", "OUTL", O, "L"), ("7", "OUTR", O, "L"), ("8", "AVDD", PI, "L"),

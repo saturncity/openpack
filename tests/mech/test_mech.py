@@ -27,6 +27,8 @@ def printable_parts():
     d = {k: v for k, v in pack.parts().items() if k in pack.PRINTED}
     d["door"] = rot(d["door"], (1, 0, 0), 180)    # door prints outer-face-down, snap arms up
     d["clip"] = rot(d["clip"], (1, 0, 0), 90)     # clip prints on its side: layers run along the spring arm
+    d["lid"] = rot(d["lid"], (1, 0, 0), 180)      # lid prints outer-face-down: light-pipe chimneys point up
+    d["switch_ext"] = rot(d["switch_ext"], (1, 0, 0), 90)   # switch fork prints lying on its flat side
     d.update({f"panel_{k}": v for k, v in panel.parts().items()})
     return d
 

@@ -23,7 +23,9 @@ counts as recovered when any copy of packet n or n+2 arrived; the firmware (rece
 lost, td = recovered from td_audio) is cross-checked against that, and against TD off for TD-off runs.
 
 Asserted (exit code != 0 on failure), per ADR-0003 / ADR-0010:
-  (a) SYS-2 sim latency <= 1.6 ms excl. I2S and ADC/DAC filters; RX-2 lock <= 2 s; 0 lost frames.
+  (a) SYS-2 sim latency <= 1.6 ms excl. I2S and ADC/DAC filters; RX-2 lock <= 2 s; 0 lost frames. The
+      latency clock starts at the pack app core's audio frame clock (frame done, PACK_FCLK) and runs
+      through TXEN (PACK_IPC t0, both in device time) to copy B end + 200 (phy dumps), #98.
       TD on: SYS-2 projection with the PCM5102A FLT=1 filter <= 4.6 ms (ADR-0017), 0 lost, receiver in TD mode.
   (b) channel-plan pack 8 (fA under Wi-Fi 6, fB in a gap) at 10/25/40 % busy: SYS-3 at 40 % with TD on.
       Both carriers under Wi-Fi (2437/2462) is reported, not asserted (no gap carrier, AIR-5 forbids it);
@@ -97,10 +99,10 @@ def kconfig_default(sym):
     return int(m[1])
 RAMP_TX = 41  # bsim TXEN -> on air, fast ramp-up (tests/bsim/sched/check.py)
 RAMP_RX = 40  # RXEN -> RX start
-ENC_IPC_US, OUT_SLOT_US = 100, 200  # SPEC section 2: encode + IPC; output deadline = copy B end + 200
+OUT_SLOT_US = 200  # SPEC section 2: output deadline = copy B end + 200
 I2S_FILTERS_US = 1000 + 167 + 160 + 458  # frame accumulation, DAC DMA block, ADC and DAC filters (SPEC 2, #26)
 DAC_FLT1_GAIN_US = 458 - 73  # PCM5102A FLT=1 low-latency filter, 3.5/fs (ADR-0017, hw/rx strap)
-SYS2_TD_MAX = 4600  # TD on with FLT=1 (ADR-0017: 4.58 ms)
+SYS2_TD_MAX = 4600  # TD on with FLT=1 (ADR-0017; 4.60 ms since #98 counts the latch -> TXEN wait)
 TD_US = 2000  # time diversity: frame n is played after packet n+2 (SPEC 2)
 TD_OFFSETS = (1, 2, 3)  # reported TD offsets (frames), #26
 SYS2_SIM_MAX, LOCK_MAX = 1600, 2.0
@@ -342,6 +344,15 @@ def link(sim, pdev, rdev, pid, fa, fb, t_from, rssi=None):
     return st, fr
 
 
+def fclk_to_txen(text):
+    """Pack log -> audio frame clock (frame done) -> next TXEN of copy A, us (#98). Both lines carry the
+    device time mod 1 ms: PACK_FCLK (app core frame clock ISR), PACK_IPC t0_hw_mod_us (net core). Max."""
+    f = [int(x) for x in re.findall(r"PACK_FCLK fclk_hw_mod_us=(\d+)", text)]
+    t = [int(x) for x in re.findall(r"PACK_IPC .*?t0_hw_mod_us=(\d+)", text)][1:]  # first: before t0
+    assert f and t, "no PACK_FCLK / PACK_IPC t0 lines in the pack log (CONFIG_OP_TEST_SCHED_REPORT)"
+    return max((b - a - 1) % 1000 + 1 for a in f[1:] or f for b in t)
+
+
 def fw_stats(text, t_lock):
     """Receiver log -> lock times (s) and RXAPP totals over whole seconds after the first lock."""
     locks = [int(t) / 1e6 for t in re.findall(r"RX lock epoch=\d+ t_us=(\d+)", text)]
@@ -486,6 +497,7 @@ class G2:
             dl = (re.findall(r"RX lock .*?deadline_us=(\d+)", sim.log(f"rx{k}")) or [None])[-1]
             _, starts = rx_ok(sim.dumps / f"d_2G4_{rdev:02d}.Rx.csv", aa(pid))
             wa = sorted(s for f, s in starts if f == fa)
+            lead = fclk_to_txen(sim.log(f"pack{k}"))
             lat, slack = [], []
             for x in fr:
                 i = bisect.bisect_right(wa, x[0]) - 1  # window A opened just before copy A
@@ -493,20 +505,22 @@ class G2:
                     continue
                 deadline = wa[i] - RAMP_RX + int(dl)
                 t0 = x[0] - RAMP_TX
-                lat.append(ENC_IPC_US + (x[3] + OUT_SLOT_US - t0))
+                lat.append(lead + (x[3] + OUT_SLOT_US - t0))
                 slack.append(x[3] + OUT_SLOT_US - deadline)
             tag = "a_td" if td else "a"
             L = max(lat) if lat else 1e9
             self.report(tag, "link", per)
             self.report(tag, "latency_sim_us", {"max": L, "mean": sum(lat) / max(1, len(lat)), "frames": len(lat),
+                                                "frame_clock_to_txen_us": lead,
                                                 "merge_deadline_slack_us_min": min(slack, default=None)})
             sys2 = L + I2S_FILTERS_US + (TD_US if td else 0)
             self.report(tag, "sys2_projection_us", sys2)
             self.report(tag, "sys2_projection_flt1_us", sys2 - DAC_FLT1_GAIN_US)
             print(self.line("a", per))
             if not td:
-                self.check("a", "SYS-2 sim latency (enc+IPC 100 + t0 -> copy B end + 200 output slot), excl. I2S/filters <= 1600 us",
-                           L <= SYS2_SIM_MAX, f"{L:.0f} us max over {len(lat)} frames")
+                self.check("a", "SYS-2 sim latency (audio frame clock -> TXEN -> copy B end + 200 output slot), "
+                           "excl. I2S/filters <= 1600 us",
+                           L <= SYS2_SIM_MAX, f"{L:.0f} us max over {len(lat)} frames (frame clock -> TXEN {lead} us)")
                 self.check("a", "receiver merge deadline inside the output slot (copy B end + 200 us)",
                            slack and min(slack) >= 0, f"min slack {min(slack, default=-1)} us")
                 self.check("a", "RX-2 lock <= 2 s", per["lock_s"] is not None and per["lock_s"] <= LOCK_MAX,
@@ -515,8 +529,8 @@ class G2:
                            per["fw_lost"] == 0 and per["fw_skips"] == 0 and per["fw_frames"] > 0 and
                            per["loss_a"] == 0 and per["loss_b"] == 0,
                            f"fw lost {per['fw_lost']}/{per['fw_frames']}, copy loss {per['loss_a']:.3%}/{per['loss_b']:.3%}")
-                print(f"    SYS-2 projection (+ accumulation, DAC DMA, ADC/DAC filters): {sys2 / 1e3:.2f} ms "
-                      f"(target 3.0, hard 5.0)")
+                print(f"    SYS-2 projection (+ accumulation, DAC DMA, ADC/DAC filters): {sys2 / 1e3:.2f} ms, "
+                      f"{(sys2 - DAC_FLT1_GAIN_US) / 1e3:.2f} ms with DAC FLT=1 (target 3.0, hard 5.0)")
             else:
                 p1 = sys2 - DAC_FLT1_GAIN_US
                 self.check("a_td", f"TD on: SYS-2 projection (sim + I2S/filters, DAC FLT=1, + TD 2000) <= {SYS2_TD_MAX} us",
