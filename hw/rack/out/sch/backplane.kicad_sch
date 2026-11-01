@@ -1,0 +1,145 @@
+(kicad_sch
+  (version 20250114)
+  (generator "skidl")
+  (generator_version "0.2.0")
+  (uuid d30f02ca-d252-4ba5-a795-efdfb9c9eae8)
+  (paper "A4")
+  (title_block
+    (title "OpenPack rack main board")
+    (date "2026-11-01")
+    (company "")
+    (comment 1 "Generated with SKiDL")
+    (comment 2 "")
+    (comment 3 "")
+    (comment 4 ""))
+  (lib_symbols)
+  (sheet
+    (at 138.18 73.66)
+    (size 18.29 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid 818fbebb-2eeb-5f44-8419-8ff160c87ce5)
+    (property "Sheetname" "power1"
+      (at 138.18 72.95 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "backplane_power1.kicad_sch"
+      (at 138.18 92.02 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top))))
+  (sheet
+    (at 140.97 142.24)
+    (size 17.78 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid 3291b14e-73b4-550f-9117-48a88c74da5f)
+    (property "Sheetname" "host1"
+      (at 140.97 141.53 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "backplane_host1.kicad_sch"
+      (at 140.97 160.6 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top))))
+  (sheet
+    (at 138.43 96.52)
+    (size 17.78 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid fc831db3-b9eb-5276-8371-7dfd64f1bd7d)
+    (property "Sheetname" "rf_a1"
+      (at 138.43 95.81 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "backplane_rf_a1.kicad_sch"
+      (at 138.43 114.88 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top))))
+  (sheet
+    (at 138.43 50.8)
+    (size 17.78 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid 3e1a5e77-79e1-55d4-acaa-09a77cff720c)
+    (property "Sheetname" "rf_b1"
+      (at 138.43 50.09 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "backplane_rf_b1.kicad_sch"
+      (at 138.43 69.16 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top))))
+  (sheet
+    (at 138.18 119.38)
+    (size 18.29 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid ebdaedab-de98-5089-872c-c903614d37c8)
+    (property "Sheetname" "slots1"
+      (at 138.18 118.67 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "backplane_slots1.kicad_sch"
+      (at 138.18 137.74 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top)))))
