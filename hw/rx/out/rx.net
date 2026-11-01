@@ -2,7 +2,7 @@
   (version "D")
   (design
     (source "rx.py")
-    (date "11/01/2026 04:06 AM")
+    (date "11/01/2026 04:16 AM")
     (tool "SKiDL (3.0.0)")
     (sheet
       (number 1)
@@ -43,117 +43,6 @@
           (value ""))))
     (sheet
       (number 2)
-      (name "/driver1/")
-      (tstamps "/7733c520-0688-552a-bd17-c5a827a49212/")
-      (title_block
-        (title)
-        (company)
-        (rev)
-        (date)
-        (source "out/rx.py")
-        (comment
-          (number "1")
-          (value ""))
-        (comment
-          (number "2")
-          (value ""))
-        (comment
-          (number "3")
-          (value ""))
-        (comment
-          (number "4")
-          (value ""))
-        (comment
-          (number "5")
-          (value ""))
-        (comment
-          (number "6")
-          (value ""))
-        (comment
-          (number "7")
-          (value ""))
-        (comment
-          (number "8")
-          (value ""))
-        (comment
-          (number "9")
-          (value ""))))
-    (sheet
-      (number 3)
-      (name "/mute1/")
-      (tstamps "/5ea1cf4f-6e07-50a4-8168-1a8faa970016/")
-      (title_block
-        (title)
-        (company)
-        (rev)
-        (date)
-        (source "out/rx.py")
-        (comment
-          (number "1")
-          (value ""))
-        (comment
-          (number "2")
-          (value ""))
-        (comment
-          (number "3")
-          (value ""))
-        (comment
-          (number "4")
-          (value ""))
-        (comment
-          (number "5")
-          (value ""))
-        (comment
-          (number "6")
-          (value ""))
-        (comment
-          (number "7")
-          (value ""))
-        (comment
-          (number "8")
-          (value ""))
-        (comment
-          (number "9")
-          (value ""))))
-    (sheet
-      (number 4)
-      (name "/dac1/")
-      (tstamps "/82e6aa05-01ab-5aef-b2f4-90b019b1eeb2/")
-      (title_block
-        (title)
-        (company)
-        (rev)
-        (date)
-        (source "out/rx.py")
-        (comment
-          (number "1")
-          (value ""))
-        (comment
-          (number "2")
-          (value ""))
-        (comment
-          (number "3")
-          (value ""))
-        (comment
-          (number "4")
-          (value ""))
-        (comment
-          (number "5")
-          (value ""))
-        (comment
-          (number "6")
-          (value ""))
-        (comment
-          (number "7")
-          (value ""))
-        (comment
-          (number "8")
-          (value ""))
-        (comment
-          (number "9")
-          (value ""))))
-    (sheet
-      (number 5)
       (name "/mcu1/")
       (tstamps "/f0f0c750-503c-5678-9e62-e0dad76cd8d9/")
       (title_block
@@ -190,7 +79,7 @@
           (number "9")
           (value ""))))
     (sheet
-      (number 6)
+      (number 3)
       (name "/test1/")
       (tstamps "/b0c68bbe-965c-59f9-b78b-9e0f005f248a/")
       (title_block
@@ -227,9 +116,120 @@
           (number "9")
           (value ""))))
     (sheet
-      (number 7)
+      (number 4)
       (name "/power1/")
       (tstamps "/1c71258b-4a63-53c3-96a6-ba5ec56f90dd/")
+      (title_block
+        (title)
+        (company)
+        (rev)
+        (date)
+        (source "out/rx.py")
+        (comment
+          (number "1")
+          (value ""))
+        (comment
+          (number "2")
+          (value ""))
+        (comment
+          (number "3")
+          (value ""))
+        (comment
+          (number "4")
+          (value ""))
+        (comment
+          (number "5")
+          (value ""))
+        (comment
+          (number "6")
+          (value ""))
+        (comment
+          (number "7")
+          (value ""))
+        (comment
+          (number "8")
+          (value ""))
+        (comment
+          (number "9")
+          (value ""))))
+    (sheet
+      (number 5)
+      (name "/driver1/")
+      (tstamps "/7733c520-0688-552a-bd17-c5a827a49212/")
+      (title_block
+        (title)
+        (company)
+        (rev)
+        (date)
+        (source "out/rx.py")
+        (comment
+          (number "1")
+          (value ""))
+        (comment
+          (number "2")
+          (value ""))
+        (comment
+          (number "3")
+          (value ""))
+        (comment
+          (number "4")
+          (value ""))
+        (comment
+          (number "5")
+          (value ""))
+        (comment
+          (number "6")
+          (value ""))
+        (comment
+          (number "7")
+          (value ""))
+        (comment
+          (number "8")
+          (value ""))
+        (comment
+          (number "9")
+          (value ""))))
+    (sheet
+      (number 6)
+      (name "/mute1/")
+      (tstamps "/5ea1cf4f-6e07-50a4-8168-1a8faa970016/")
+      (title_block
+        (title)
+        (company)
+        (rev)
+        (date)
+        (source "out/rx.py")
+        (comment
+          (number "1")
+          (value ""))
+        (comment
+          (number "2")
+          (value ""))
+        (comment
+          (number "3")
+          (value ""))
+        (comment
+          (number "4")
+          (value ""))
+        (comment
+          (number "5")
+          (value ""))
+        (comment
+          (number "6")
+          (value ""))
+        (comment
+          (number "7")
+          (value ""))
+        (comment
+          (number "8")
+          (value ""))
+        (comment
+          (number "9")
+          (value ""))))
+    (sheet
+      (number 7)
+      (name "/dac1/")
+      (tstamps "/82e6aa05-01ab-5aef-b2f4-90b019b1eeb2/")
       (title_block
         (title)
         (company)
