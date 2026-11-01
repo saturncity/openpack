@@ -110,7 +110,7 @@ Status: accepted. 2026-10-31, amended after the #81 review; amended 2026-11-01 f
   8. Region (UK rules, being re-decided): the receiver has no PA, and no part value on this board depends on the region.
      - **LNA:** ADR-0015 (PR #86) finds that a per-receiver LNA adds only 0.7 dB behind the rack LNA. This board never had a discrete LNA or its bias/match parts, so nothing is removed and nothing is saved.
      - The BT40E has no nRF21540, so there is nothing to bypass (ADR-0021).
-  9. Custom footprints (BT40E 14×16 mm, TQ2SA) come with layout.
+  9. ~~Custom footprints come with layout~~: done in #34 (`hw/rx/footprints_rx.py`): BT40E from the p.11 drawing; TQ2SA land pattern still provisional (hw/REVIEW.md receiver open item 1). The #34 layout also mounts J1 as a THT header on the underside (mezzanine retention), so its MPN is `HDR_2x13_2.54_KEY14`.
 
 ## Amendment 2026-11-01: receiver module BT40NE → BT40E (ADR-0021, #112)
 

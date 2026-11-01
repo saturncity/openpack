@@ -113,3 +113,103 @@ Process (docs/agents/hands-off.md, "PCB layout review"): `kicad-cli` renders eve
 7. **No 3D models are installed**, so the STEP is the bare board. The fit uses courtyard × datasheet height boxes (`outputs.py` `HEIGHT`).
 8. **USB D± are routed as two 0.2 mm tracks**, not a 90 Ω coupled pair (~50 mm on L4). That is fine for full-speed 12 Mb/s.
 9. **Fab DFM (end of project):** upload `hw/pack/out/fab/gerber` to JLCPCB's DFM check and attach the report. `bom_jlc.csv` has no LCSC numbers yet. Check the CPL rotations against JLC's preview (KiCad and JLC rotation conventions differ for some packages). Nothing has been uploaded and no account has been created.
+
+### Rules file finding (from the receiver review, 2026-11-01)
+
+- **`pack.kicad_dru` was never loaded.** KiCad 10 drops the whole rules file when one rule does not parse, and gives no message. Here the culprit was `min_resolved_spokes`. So the "JLC minimums" in the DRC lines above were not being checked.
+- **Fix:** the rule is gone. With the real rules, the pack is still **0 errors and 0 unconnected**. It now has 12 extra `text_thickness` warnings, because the IC refdes are 0.12 mm against JLC's 0.15 mm (cosmetic).
+- `test_dru_rules_are_loaded` appends a probe rule and checks that it fires.
+
+## Receiver sub-board (`hw/rx`)
+
+**Result: DRC 0 errors, 0 warnings, 0 unconnected against the JLCPCB rules (`rx.kicad_dru`, proven loaded). Checklist clean apart from the open items below.** Fab DFM upload is still to do (end of project).
+
+| | |
+|---|---|
+| Board | **48.0 × 90.0 mm**, 4 layers, 1.6 mm, ENIG. Mezzanine on the rack main board (#33): J1 is a 2×13 2.54 mm THT header on the **underside**, pin 14 pulled (ADR-0014), with two M3 standoff holes at the far end. 115 parts, 595 tracks, 476 vias (339 GND). All SMD parts are on top |
+| Stackup | JLC04161H-7628, as on the pack: L1 signal + GND pour / L2 solid GND / L3 GND pour + digital / L4 GND pour + a few links |
+| Rules | `hw/rx/rx.kicad_dru` adds three rules to the JLC minimums: `RF_50R` width 0.30–0.32 mm, RF gap ≥ 0.24 mm, and no Power/Audio_I track on inner copper. The router works to 0.15 mm clearance, 0.2 mm signal, 0.5 mm current paths and 0.6/0.3 mm vias |
+| Regenerate | `python3 hw/rx/layout_rx.py` (about 40 s). The run is deterministic apart from UUIDs. The zone fill is the one `kicad-cli` saves, so the gerbers carry the netclass RF gap |
+| Renders | `hw/rx/out/render/`: `L1_F.Cu` … `L4_B.Cu`, `F/B.Silkscreen`, `F/B.Mask`, `F/B.Paste`, `top_assembly`, `bottom_assembly`, `3d_top`, `3d_bottom`. All were looked at, plus 100 px/mm crops of the RF, relay/J1, driver and module areas |
+| Tests | `tests/test_rx_layout.py` (CI `pcb` job): DRC; rules loaded; saved fill = DRC fill; fresh fab outputs; gerbers regenerate identically; netlist ↔ pad parity; RF width/gap; current-path layers and widths; no digital net in the analog region; BOM/CPL coverage; CPL rotations; mech record |
+
+**Floor plan (y up from the J1 edge):**
+- **J1 strip (y < 7):** the audio pins 1–6 are on the left and the digital pins 13–26 on the right, as ADR-0014 orders them.
+- **Left column, bottom to top (the audio path):**
+  - K1 relay, contacts on the left and coil end to the right;
+  - C48 and C47, the 47 µF BP radials;
+  - the four S1J clamps, R47/R50;
+  - the OPA1656 with its feedback parts and decoupling;
+  - C40, then the PCM5102A (analog pins face left, I2S pins face right);
+  - the RF block at the top.
+- **Middle column:**
+  - the +12 V/+5 V TVS over J1 pins 7–10;
+  - D7/Q1 coil drive by the coil end;
+  - R1/D9/C7 hold-up;
+  - the TPS3808;
+  - the VCM network;
+  - U5 (+3V3A).
+- **Right:** the BT40E (top), U4 (+3V3), TC2030, the backplane series resistors over J1 pins 13–26, and test points.
+
+### Checklist
+
+| Item | Finding | Status |
+|---|---|---|
+| **Module / keepout** | **BT40E footprint** (`footprints_rx.py`), from Fanstel p.11: 14 × 16 mm, 16 castellations at the module edges, 45 LGA pads at 1.5/1.2 mm pitch, H0–H3. The module sits in the top-right corner with its u.FL end 0.5 mm from the top edge, so the J5 → module jumper plugs in from the board edge.<br>The BT40E has **no PCB antenna** (u.FL only, ADR-0021), so there is no antenna copper keepout. Instead, L1 under the module is a GND pour with no tracks except the LGA fan-out stubs (`TAG_MODULE`). LGA signals leave through vias between the pad rows, on L3. | ✓ |
+| **RF line** | **50 Ω grounded coplanar waveguide on L1 over L2**, `RF_50R`: **w = 0.31 mm, gap 0.25 mm → 50.1 Ω** (εeff 2.94). It is sized with a 2D quasi-static field solve of this stackup (`hw/rx/rf_line.py`: FD Laplace, 5 µm grid, h 0.2104 mm, εr 4.4, 35 µm copper).<br>The closed-form conductor-backed CPW formula (Wadell/Ghione, also KiCad's calculator) was tried first and gave 0.39 mm. It is wrong for gap > h: at the microstrip limit it reads 57 Ω where Hammerstad–Jensen gives 50. The solver reads 51.35 Ω on the pack's 0.346 mm microstrip, and that +1.35 Ω offset is the calibration (grid check: 2.5 µm moves it 0.7 Ω). Neighbours: 0.30 mm → 51.0 Ω, 0.32 mm → 49.3 Ω. Solder mask is not modelled (about −1 to −2 Ω).<br>Route: J3/J4 → 10 pF → PE4259 RF2/RF1 → RFC → 10 pF → J5. The longest line is 4.6 mm (0.07 λ in FR4), so impedance control at the fab is not needed. | ✓ |
+| **Via fence** | 38 GND vias 1.0 mm off each RF line at 1.2 mm pitch (λ/28 in FR4). L1 has a perimeter fence at 3 mm pitch and stitching on a 4 mm grid. The u.FL ground pads and the PE4259 GND pin each have their own via. | ✓ |
+| **Analog / quiet ground** | The analog column (DAC analog side, driver, clamps, coupling caps, relay contacts, J1 audio pins) is a tagged region, **closed on all three routing layers** to every digital and switching net: I2S, UART, SWD, LEDs, slot straps, ANT_SEL, OUT_EN, XSMT_EN, RLY_G/RLY_COIL, raw +12 V, +5 V and +3V3 (`test_noisy_nets_outside_analog_region`). Under it, L2 is solid and L3/L4 are unbroken GND pours, so no digital return current flows under the audio path.<br>I2S reaches the DAC's right-hand pins on L3 (stripline between the L2 plane and the L4 pour). The +3V3A LDO (U5) sits 11 mm from the DAC, on purpose; it is the analog supply. | ✓ |
+| **Regulators / relay coil vs audio** | U4 (+3V3 LDO) is 27.5 mm from the op-amp and 32.6 mm from the DAC. Q1/D7 (coil drive) is 37 mm from the op-amp. The coil pins (1/10) are at K1's right-hand end. The coil current loop is +12 V J1 pins 7/8 → K1.1 → K1.10 → Q1 → GND vias, all outside the analog region.<br>The audio-leg tracks come within **2.0 mm** of the coil pins only inside K1's own footprint, where the contacts are. That cannot be avoided with a DPDT relay and is accepted. | ✓ |
+| **Current paths** | Following the #104 M1 lesson, +12V, +12V_R, +12VA, +5V, +3V3, +3V3A, RLY_COIL and all ten audio-leg nets (phantom short: 0.9 A peak) are 0.5 mm on **L1/L4 only** (35 µm). They neck to 0.3 mm for ≤ 1.7 mm at small pads.<br>The only 0.2 mm +3V3 copper is three logic ties (PCM5102A FLT, PE4259 VDD at 9 µA, and its 100 nF). `test_current_paths_outer_and_wide` asserts the layers, ≥ 60 % full width per net, necks ≤ 2 mm, ties ≤ 20 mm. The `rx.kicad_dru` rule forbids these classes on inner layers. | ✓ |
+| **Decoupling** (pin → cap pad) | **PCM5102A:** DVDD 1.9 mm, LDOO 1.9, AVDD 2.1, CPVDD 2.4, CAPP/CAPM 2.6 (L-stubs drawn before the GND fan-out), VNEG 3.7.<br>**OPA1656 V+:** 100 nF 1.9 mm, 10 µF 4.4 mm.<br>**LDOs:** U4 in 2.0 / out 2.6; U5 in 3.2 / out 3.4.<br>**Others:** TPS3808 1.5, PE4259 2.3.<br>**BT40E VDD (pad 9):** 3.2 / 4.5 mm. VDDH (F4, under the module) is 7.3 mm away through its fan-out via. Fanstel needs no external parts on an LDO-fed rail (p.26). | ✓ |
+| **Backplane connector** | J1 follows ADR-0014. Pin 1 is at (8.76, 5.54) from the bottom-left corner: odd pins on the upper row (y 5.54), even pins on y 3.0, pairs every 2.54 mm in +x. The header is on the underside, so as seen from the top this mirrors the order the footprint gives on top. `place_j1` asserts the order, and `mech.json` records it for #33.<br>TVS D1/D2 sit right over the +12 V/+5 V pins. GND pins 5/6 guard audio from power. The digital series resistors are in two rows over pins 13–26. | ✓ |
+| **Test points** | Following the #104 M2 lesson: **TP1–TP13**, Ø1 mm pads: +12V, +12VA, +5V, +3V3, +3V3A, GND on both the analog and the digital side, I2S BCK/LRCK/SDOUT (logic analyser), VCM, ANT_SEL, RLY_G. SWD is on the TC2030. | ✓ |
+| **JLC assembly files** | `bom_jlc.csv` lists every part with an LCSC # or DNP/CONSIGN/MATCH, and an `LCSC source` column. The CPL uses the pack's rotation table (SOT-23* +180, SOIC +270, QFN +270, checked by test). DNP parts are not in the CPL. See open item 3 for the unverified codes. | partial |
+| **Silkscreen** | Refdes sit inside the IC and relay bodies. Passives keep theirs on F.Fab. J3/J4 are labelled "ANT A"/"ANT B", and there is a "J1 underside, pin 1" marker. DRC shows 0 silk warnings. | ✓ |
+
+### Fixes made during review (found in the renders, crops or DRC, then fixed in `layout_rx.py`)
+
+1. **The PE4259 GND pin had no via.** RF1/RF2 came in horizontally on either side of it, which left no room. Fix: both lines now enter the pins at 45°, which opens a wedge for pin 2's stub and via.
+2. **Dangling tracks on L4 (I2S).** The router grew a net's tree from the raw A* cells. After string-pulling, a later branch could start at a cell the laid track no longer passed, which left two unconnected items. Fix: the tree now grows only from the committed segments. The pack's copy of this loop has the same latent bug, but its board shows 0 unconnected.
+3. **CAPP/CAPM/VNEG were unreachable.** The CPGND/AGND fan-out vias took the room between the TSSOP pins and the caps. Fix: the caps sit in line with their pins, with L-stubs drawn before the GND fan-out.
+4. **PCM5102A FLT (+3V3) was unreachable for a 0.5 mm rail track**, behind the I2S pins. Fix: no-current straps route as 0.2 mm logic ties, listed in `LOGIC_TIES` and tested.
+5. **The RF gap in the gerbers was 0.20 mm, not 0.25.** The pcbnew fill used the zone clearance; netclass clearances only reach the filler through the project file. Fix: the board is saved from `kicad-cli pcb drc --refill-zones --save-board`. `test_saved_fill_is_the_drc_fill` runs DRC without a refill.
+6. **The rules file was not loaded** (pack and rx; see the pack note above). Fix: the bad rule is removed and a probe test added.
+7. **RF width from a formula outside its range** (0.39 mm → 46 Ω real). Fix: the field solve gives 0.31 mm.
+8. **The COLD leg looped round J1 on L1** (`L1_F.Cu`, bottom left), and R49/R52 sat far from the relay. Fix: the 22 Ω/100 k pairs sit in the strip between J1 and K1. HOT reaches pin 3 on L1; COLD drops to L4 and passes under pin 2 to pin 4. No crossing.
+9. **Digital bundle on L4.** Twelve backplane lines ran up to the module on L4, splitting its pour. Fix: digital prefers L3 (stripline between the L2 plane and the L4 pour), and L4 is now near-solid.
+10. **The analog region left out the driver's feedback parts** (R43/R44/C42 at x 12.6–15.4). Fix: the region is widened and TP1 (+12 V) moved out of it.
+11. **Decoupling too far.** The OPA1656 V+ 100 nF was 4.8 mm away. The TLV76733 in/out caps were on the wrong sides (6 mm). The TPS3808 cap was 4.3 mm away. Fix: 1.9 mm, 2.0/2.6 mm and 1.5 mm.
+12. **Silk overlaps** (K1/D7, U6/C40, J3/U3 refdes over pads). Fix: refdes moved inside the bodies and the antenna labels added.
+
+### Mechanical record for the rack (#33)
+
+There is no rack mechanics yet, so this layout defines it (`layout_rx.MECH` → `hw/rx/out/fab/mech.json`):
+
+- **Board:** 48.0 × 90.0 × 1.6 mm.
+- **J1:** pin 1 at (8.76, 5.54) mm from the bottom-left corner, on the J1 (short) edge, header on the underside.
+- **Standoffs:** two M3 at (3.4, 86.6) and (44.6, 40.0).
+- **Stack height:**
+  - main-board 2×13 socket (8.5 mm) + header body 2.5 mm = sub-board underside 11.0 mm above the main board;
+  - tallest top part: C47/C48 radial, 12.5 mm assumed, so ≈ 25 mm above the main-board top, inside 1U's ~40 mm.
+- **Rack fit:** 8 slots at ≥ 52 mm pitch = 416 mm, inside a 19″ 1U case (~425 mm inside).
+- **Socket:** #33's socket must be a 2×13 female with position 14 plugged (ADR-0014). The U.FL inputs J3/J4 are at x 8.8 mm, 4.5 mm and 11 mm below the top edge, for the splitter coax.
+
+### Open items (must close before ordering)
+
+1. **TQ2SA land pattern is provisional.** The 11.0 mm row pitch and 2.0 × 1.0 mm pads are not from the Panasonic drawing, which was not available offline. Check it against the TQ-SMD "recommended PC board pattern" before ordering.
+2. **The BT40E u.FL position (12.05, 14.6) is scaled from the p.11 drawing.** It is F.Fab only, so it does not affect copper. The pad grid is dimensioned on the drawing.
+3. **LCSC codes:**
+   - 7 lines are checked codes (the same parts as the pack table, read 2026-11-01), plus PE4259 from `prices.py`;
+   - **13 lines are unverified codes** from memory; this task allowed no network use;
+   - **17 lines are `MATCH`** (commodity values whose code could not be confirmed offline; JLC's BOM tool matches them by MPN/value);
+   - CONSIGN: BT40E (Fanstel/Digi-Key UK) and TQ2SA-12V (Farnell/RS);
+   - DNP: J1 and C47/C48 (THT, hand-solder or JLC THT), R33–R35 (not fitted), TPs, TC2030.
+
+   Confirm every code in JLC's BOM tool, which shows the MPN behind each code.
+4. **C47/C48 height.** A 47 µF 63 V bipolar radial, 10 mm diameter, is 12.5–16 mm tall depending on series. Pin the part, then the #33 standoff height (ADR-0014 item 6).
+5. **CPL:** SOT-363 (PE4259), HVSSOP-8 (TLV76733), the TSSOP-20 and the relay have no rotation-table entry. Check them in JLC's CPL preview.
+6. **Board size:** the right half below the module (x 30–48, y 14–56) is sparse. Moving the +12 V/supervisor block there would free about 10 mm of height (48 × 80) if rack depth gets tight.
+7. **No 3D models are installed** (as on the pack), so the STEP is the bare board.
+8. **PE4259 isolation (ADR-0014 item 5):** the two input lines are 1.3 mm apart only at the switch pins, with the GND pin via between them. Measure A↔B isolation on the bench.
+9. **Fab DFM (end of project):** upload `hw/rx/out/fab/gerber` and attach the report.
