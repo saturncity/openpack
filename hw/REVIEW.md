@@ -196,7 +196,7 @@ Process (docs/agents/hands-off.md, "PCB layout review"): `kicad-cli` renders eve
 - **S1, pin-14 key (fixed).**
   - J1 is now `openpack:PinHeader_2x13_P2.54mm_Key14`: the stock footprint with **pad 14 deleted, so there is no hole**, and "KEY" silk at the empty position on both sides. A full 26-pin header cannot be fitted.
   - The header is XFCN **PZ254V-12-26P** (LCSC C22465887, 2401 at JLC), with pin 14 cut before hand-soldering.
-  - The main-board socket (#33) must be **Samtec SSW-113-01-G-D-14**. That is the SSW polarizing option: a PK-06-N key in position 14, per the SSW drawing, fig. 3. It is ordered from Samtec direct (Samtec Europe, UK). ADR-0014 records it.
+  - The main-board socket is the one #33 already chose (ADR-0018): **Harwin M20-7831346 with a Harwin M20-003 polarising key in position 14**, both from DigiKey UK. ADR-0014 now points to it. The key plugs the socket, and the missing hole stops a full header, so neither side can be fitted wrong on its own.
   - `test_j1_key_has_no_hole_at_14` checks the footprint, the board, the BOM and the ADR.
 - **S2, RF grounds (fixed).** The GND pads of J3/J4/J5, the PE4259 and the BT40E (castellation 10, LGA, H0–H3) now have a **solid zone connection** (`zone_connect 2`). Every other GND pad keeps its thermal relief. `test_rf_ground_pads_solid` checks this. DRC is still 0/0/0.
 - **S3, K1 orientation (fixed, preview check kept).**

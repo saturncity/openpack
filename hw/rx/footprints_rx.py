@@ -97,7 +97,7 @@ def tq2sa():
 
 # J1 key (ADR-0014, #116 review S1): the stock KiCad 2x13 header with pad 14 deleted, so there is no hole at 14 and a
 # full 26-pin header cannot be fitted. Pin 14 of the Samtec TSW-113-17-G-D is cut off before assembly, and the main-board
-# socket (#33) is the keyed Samtec SSW-113-01-G-D-14 (PK-06-N key in position 14, SSW drawing fig. 3).
+# socket (#33, ADR-0018) is the Harwin M20-7831346 with a Harwin M20-003 polarising key in position 14.
 HDR_SRC = ("Connector_PinHeader_2.54mm.pretty", "PinHeader_2x13_P2.54mm_Vertical")
 
 

@@ -260,7 +260,8 @@ def test_j1_key_has_no_hole_at_14(lay):
     bom = {r["refs"]: r for r in csv.DictReader(open(RX / "out" / "bom.csv"))}
     assert bom["J1"]["mpn"] == "PZ254V-12-26P"
     assert "C22465887" in open(FAB / "bom_jlc.csv").read()
-    assert "SSW-113-01-G-D-14" in (ROOT / "docs" / "adr" / "0014-rx-backplane-connector.md").read_text()
+    assert "M20-003" in (ROOT / "docs" / "adr" / "0014-rx-backplane-connector.md").read_text()
+    assert "M20-003 polarising key in position 14" in (ROOT / "docs" / "adr" / "0018-rack-backplane-rf-and-host.md").read_text()
 
 
 def test_rf_ground_pads_solid(lay):
