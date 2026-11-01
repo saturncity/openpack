@@ -39,13 +39,20 @@ class Fake:
             self.send(r.encode() + b"\n")
 
     def _run(self):
-        buf = b""
+        buf, skip = b"", 0
         while self.alive:
             try:
                 buf += os.read(self.master, 4096)
             except OSError:
                 return
-            while b"\n" in buf:
+            while True:
+                if skip:                  # an accepted `dfu N` is followed by N raw bytes: consume them, never parse
+                    n = min(skip, len(buf))
+                    buf, skip = buf[n:], skip - n
+                    if skip:
+                        break
+                if b"\n" not in buf:
+                    break
                 line, buf = buf.split(b"\n", 1)
                 words = line.decode(errors="replace").split()
                 if not words:
@@ -55,6 +62,9 @@ class Fake:
                     self.script(self, words[0])
                 else:
                     self.reply(words[0])
+                if (words[0] == "dfu" and len(words) > 1 and words[1].isdigit()
+                        and (self.replies.get("dfu") or "").startswith("ok") and not self.script):
+                    skip = int(words[1])
 
     def close(self):
         self.alive = False
