@@ -2,7 +2,7 @@
   (version 20250114)
   (generator "skidl")
   (generator_version "0.2.0")
-  (uuid 689a486e-23a7-4795-b72b-a629f0fc62f3)
+  (uuid fce24482-2d3b-496c-b875-be00f3f9846a)
   (paper "A4")
   (title_block
     (title "OpenPack receiver sub-board")
@@ -14,7 +14,7 @@
     (comment 4 ""))
   (lib_symbols)
   (sheet
-    (at 138.18 130.81)
+    (at 130.56 107.95)
     (size 18.29 17.78)
     (exclude_from_sim no)
     (in_bom yes)
@@ -28,19 +28,19 @@
       (color 0 0 0 0.0))
     (uuid 818fbebb-2eeb-5f44-8419-8ff160c87ce5)
     (property "Sheetname" "power1"
-      (at 138.18 130.1 0)
+      (at 130.56 107.24 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left bottom)))
     (property "Sheetfile" "rx_power1.kicad_sch"
-      (at 138.18 149.17 0)
+      (at 130.56 126.31 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left top))))
   (sheet
-    (at 162.56 107.95)
+    (at 153.67 107.95)
     (size 17.78 17.78)
     (exclude_from_sim no)
     (in_bom yes)
@@ -54,19 +54,19 @@
       (color 0 0 0 0.0))
     (uuid c7ab11de-16e8-5383-9c0b-f71038184bd8)
     (property "Sheetname" "mcu1"
-      (at 162.56 107.24 0)
+      (at 153.67 107.24 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left bottom)))
     (property "Sheetfile" "rx_mcu1.kicad_sch"
-      (at 162.56 126.31 0)
+      (at 153.67 126.31 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left top))))
   (sheet
-    (at 139.7 107.95)
+    (at 139.7 130.81)
     (size 17.78 17.78)
     (exclude_from_sim no)
     (in_bom yes)
@@ -80,19 +80,19 @@
       (color 0 0 0 0.0))
     (uuid 39453a1b-d097-5c39-8ed3-629107628224)
     (property "Sheetname" "rf1"
-      (at 139.7 107.24 0)
+      (at 139.7 130.1 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left bottom)))
     (property "Sheetfile" "rx_rf1.kicad_sch"
-      (at 139.7 126.31 0)
+      (at 139.7 149.17 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left top))))
   (sheet
-    (at 116.84 107.95)
+    (at 139.7 62.23)
     (size 17.78 17.78)
     (exclude_from_sim no)
     (in_bom yes)
@@ -106,19 +106,19 @@
       (color 0 0 0 0.0))
     (uuid 35c9c436-70b3-5350-93c8-31fc2ce87e7e)
     (property "Sheetname" "dac1"
-      (at 116.84 107.24 0)
+      (at 139.7 61.52 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left bottom)))
     (property "Sheetfile" "rx_dac1.kicad_sch"
-      (at 116.84 126.31 0)
+      (at 139.7 80.59 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left top))))
   (sheet
-    (at 137.67 85.09)
+    (at 138.94 85.09)
     (size 19.3 17.78)
     (exclude_from_sim no)
     (in_bom yes)
@@ -132,19 +132,19 @@
       (color 0 0 0 0.0))
     (uuid d8927df6-ec32-5990-a575-a86ff084286e)
     (property "Sheetname" "driver1"
-      (at 137.67 84.38 0)
+      (at 138.94 84.38 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left bottom)))
     (property "Sheetfile" "rx_driver1.kicad_sch"
-      (at 137.67 103.45 0)
+      (at 138.94 103.45 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left top))))
   (sheet
-    (at 138.43 62.23)
+    (at 116.84 130.81)
     (size 17.78 17.78)
     (exclude_from_sim no)
     (in_bom yes)
@@ -158,13 +158,39 @@
       (color 0 0 0 0.0))
     (uuid 0018f056-40ec-5d59-94b9-678794088173)
     (property "Sheetname" "mute1"
-      (at 138.43 61.52 0)
+      (at 116.84 130.1 0)
       (effects
         (font
           (size 1.27 1.27))
         (justify left bottom)))
     (property "Sheetfile" "rx_mute1.kicad_sch"
-      (at 138.43 80.59 0)
+      (at 116.84 149.17 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left top))))
+  (sheet
+    (at 162.56 130.81)
+    (size 17.78 17.78)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid))
+    (fill
+      (color 0 0 0 0.0))
+    (uuid fe77ae2e-8ceb-513d-b9d1-f2f7a87b901b)
+    (property "Sheetname" "test1"
+      (at 162.56 130.1 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left bottom)))
+    (property "Sheetfile" "rx_test1.kicad_sch"
+      (at 162.56 149.17 0)
       (effects
         (font
           (size 1.27 1.27))

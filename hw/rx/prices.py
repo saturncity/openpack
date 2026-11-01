@@ -29,7 +29,9 @@ PRICES = {  # mpn: (usd_each_at_100, source, uk_distributor)
     "U.FL-R-SMT-1(10)": (0.45, "est. (Hirose U.FL receptacle, q100)", "Farnell UK / RS UK"),
     "SMF15A": (0.10, "est. (SMF 200 W TVS SOD-123F, q100)", "LCSC / Farnell UK"),
     "SMF5.0A": (0.10, "est. (SMF 200 W TVS SOD-123F, q100)", "LCSC / Farnell UK"),
-    "HDR_2x13_2.54_SMD_KEY14": (0.40, "est. (2x13 2.54 mm gold pin header, pin 14 pulled as the key, q100)", "LCSC"),
+    "PZ254V-12-26P": (0.40, "est. (XFCN 2x13 2.54 mm THT header, LCSC C22465887, 2401 in stock at JLC 2026-11-01; pin 14 cut "
+                      "for the key; mates the Harwin M20-7831346 socket + M20-003 key in position 14 on the main board, ADR-0018)", "LCSC"),
+    "TP-pad": (0.0, "footprint only", "-"),
     "ALU_100u_25V": (0.10, "est. (100 uF 25 V SMD aluminium, 6.3 mm)", "LCSC"),
     "ALU_22u_25V": (0.07, "est. (22 uF 25 V SMD aluminium, 5 mm)", "LCSC"),
     "ALU_47u_25V": (0.08, "est. (47 uF 25 V SMD aluminium, 5 mm)", "LCSC"),
@@ -51,7 +53,7 @@ PRICES = {  # mpn: (usd_each_at_100, source, uk_distributor)
 
 # Items with no schematic symbol.
 EXTRAS = [  # (item, qty, usd_each, source, uk_distributor)
-    ("PCB 4-layer ~40x80 mm (50 ohm RF traces)", 1, 1.50, "est. (qty-100 panel share)", "JLCPCB (ships to UK)"),
+    ("PCB 4-layer 48x90 mm (50 ohm RF traces)", 1, 1.50, "est. (qty-100 panel share; size from the #34 layout)", "JLCPCB (ships to UK)"),
     ("U.FL-U.FL jumper 50 mm (switch out -> module u.FL)", 1, 1.50, "est.", "LCSC / RS UK"),
 ]
 

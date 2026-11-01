@@ -6,8 +6,8 @@
 (rule "JLC track width"
   (constraint track_width (min 0.09mm)))
 
-(rule "JLC copper clearance"
-  (constraint clearance (min 0.09mm)))
+# No custom copper-clearance rule (#116 review M1): an unconditional one overrides the netclass clearances (Default and
+# Power 0.127 in pack.kicad_pro) and the pours would fill at the fab minimum. min_clearance 0.1 is the floor.
 
 (rule "JLC via"
   (condition "A.Type == 'Via'")
@@ -34,11 +34,6 @@
   (layer "?.Silkscreen")
   (constraint text_height (min 0.8mm))
   (constraint text_thickness (min 0.15mm)))
-
-# Every SMD GND pad has its own via to the L2 plane (layout.py gnd_fanout), so one thermal spoke
-# into the L1 pour is enough.
-(rule "GND thermal spokes"
-  (constraint min_resolved_spokes (min 1)))
 
 # RF_50R: 50 ohm microstrip on L1 over the L2 plane, JLC04161H-7628 (h 0.2104 mm, er 4.4, 35 um):
 # w = 0.346 mm (layout.py width_for). No carrier RF trace on this board: the BT40NE's nRF21540 -> u.FL
