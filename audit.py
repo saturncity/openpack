@@ -1255,8 +1255,8 @@ if __name__ == "__main__":
         assert compression_margin(g) >= 0, f"no stage compresses with a pack {d} m on axis (BT40E, no pad)"
     imd_m = next(i / 10 for i in range(5, 100) if all(gain_plan(j / 10, RX_MODULE, wil)["imd_margin"] >= 0
                                                       for j in range(i, 100, 5)))
-    print(f"  PIMD holds from {imd_m:.1f} m on axis (the 100 mm u.FL jumper, #34, gives the radio 0.5 dB more than the"
-          f" 200 mm one, and third-order IMD rises 3 dB per dB); the ADR-0021 rule keeps packs off axis")
+    print(f"  PIMD holds from {imd_m:.1f} m on axis (#34: the as-routed tree and the 100 mm u.FL jumper; third-order IMD"
+          f" rises 3 dB per dB of drive); the ADR-0021 rule keeps packs off axis")
     for d in (2.0, 4.0):
         assert gain_plan(d, RX_MODULE, wil)["imd_margin"] >= 0, "PIMD holds once the pack is >= 2 m on axis"
     bt40ne = gain_plan(NEAR_M[0], "BT40NE", wil)
