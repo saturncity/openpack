@@ -16,3 +16,4 @@ These terms are used verbatim in code, issues and ADRs; do not substitute synony
 - **PLC**: Packet loss concealment at the receiver: repeat the last frame with a 1 ms linear fade, mute after 10 ms of loss (RX-6).
 - **jitter slot**: The fixed 200 µs output deadline after copy B ends in which the receiver decodes and releases a frame, so latency is constant (SPEC section 2).
 - **twin**: The digital twin: the same Zephyr firmware built for BabbleSim `nrf5340bsim` with simulated Wi-Fi interferers and the real host software, run on a laptop and in CI; hardware only calibrates it (PLAN).
+- **frame lead**: How long before the net core's payload latch (20 µs before TXEN, #98) the pack's audio frame clock ticks: 100 µs, the deadline for read + encode + IPC. Set once by the start-up sync (ADR-0020), then held by the lead loop on HFCLKAUDIO (ADR-0022). Avoid "latency margin".

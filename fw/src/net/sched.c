@@ -19,6 +19,8 @@
  * the same for 42 B and 81 B. At start the net core tells the app core where that latch is
  * (op_sched_sync), and the app core places its audio frame clock OP_PACK_FRAME_LEAD_US before it, so
  * every frame lands in its own slot and audio frame done -> TXEN = the two leads (#87, ADR-0020).
+ * Every OP_PACK_LEAD_REPORT_FRAMES frames the net core sends the window's latch margins back
+ * (OP_LEAD_LEN); the app core steers its frame clock rate to hold the lead (#97, ADR-0022).
  *
  * All peripheral access is via the nrfx HAL (the bsim models only see HAL writes, ADR-0009).
  */
@@ -66,6 +68,26 @@ static bool fresh, on_b, armed;
 static uint32_t underrun, overrun, cc_b = CC_B_US(BOOT_LEN);
 static int32_t margin_min = INT32_MAX, margin_max = INT32_MIN; /* latch - arrival, us */
 static uint32_t t0_hw_mod; /* test only: device time of the next t0, mod OP_FRAME_US */
+/* #97 lead report window: margins of the frames since the last report. The first window is short:
+ * the app core takes its margin as the loop's reference, and over 10 frames even a 40 ppm offset
+ * moves it only 0.4 us.
+ */
+#define LEAD_FIRST_FRAMES 10
+static int32_t win_max = INT32_MIN, win_min = INT32_MAX;
+static uint32_t win_n, win_len = LEAD_FIRST_FRAMES;
+static uint8_t lead_msg[OP_LEAD_LEN];
+
+static void lead_send(struct k_work *w)
+{
+	uint8_t m[OP_LEAD_LEN];
+	unsigned int key = irq_lock();
+
+	memcpy(m, lead_msg, sizeof(m));
+	irq_unlock(key);
+	(void)op_ipc_send(m, sizeof(m)); /* a lost report only delays the loop by one window */
+}
+
+static K_WORK_DEFINE(lead_work, lead_send);
 
 #define CC_NOW NRF_TIMER_CC_CHANNEL2 /* capture only */
 
@@ -103,6 +125,17 @@ void op_sched_put(const uint8_t *payload, size_t len)
 	fresh = true;
 	margin_min = MIN(margin_min, m);
 	margin_max = MAX(margin_max, m);
+	win_max = MAX(win_max, m);
+	win_min = MIN(win_min, m);
+	if (++win_n == win_len) {
+		sys_put_le16((uint16_t)(int16_t)win_max, &lead_msg[0]);
+		sys_put_le16((uint16_t)(int16_t)win_min, &lead_msg[2]);
+		win_n = 0;
+		win_len = CONFIG_OP_PACK_LEAD_REPORT_FRAMES;
+		win_max = INT32_MIN;
+		win_min = INT32_MAX;
+		k_work_submit(&lead_work);
+	}
 	irq_unlock(key);
 }
 

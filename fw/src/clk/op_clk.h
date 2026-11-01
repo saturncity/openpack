@@ -37,3 +37,8 @@ int32_t op_aclk_set_ppb(int32_t ppb);
 uint64_t op_aclk_played_q16(void);
 /* Quantise ppb to whole HFCLKAUDIO steps (round to nearest). Pure, shared with the unit test. */
 int32_t op_aclk_quant(int32_t ppb, int32_t *steps);
+/* Pack frame lead (#97): dither a correction between whole HFCLKAUDIO steps, first-order
+ * sigma-delta. Call once per frame; returns this frame's steps. *acc (ppb, start at 0) carries the
+ * remainder, so the mean over frames is ppb / OP_ACLK_STEP_PPB steps with |error| < 1 step / frame
+ * count. Pure, shared with the unit test. */
+int32_t op_aclk_dither(int32_t ppb, int32_t *acc);
