@@ -682,7 +682,7 @@ if __name__ == "__main__":
     print(f"  install height: actors >= {d_actor:.1f} m (near-far) -> {h_actor:.1f} m; audience >= {d_wifi:.1f} m"
           f" (front row {ROW_M:.0f} m out, phones {PHONE_H} m up, flat floor) -> {h_aud:.1f} m. Rule: antenna"
           f" >= {h_min:.1f} m above the stage floor")
-    assert h_min == 6.0, "docs/human/antenna-install.md says 6 m"
+    assert h_min == 6.0, "ADR-0016 front-of-stage rule said 6 m (superseded by ADR-0021, Audit 7)"
     coax = {"CA3N050 400-series 50 ft (15.2 m)": 15.24 * COAX_DB_M["LMR-400"],
             "HG2409P lead 12 in": 0.3 * COAX_DB_M["RG-58"], "LCCA30301-FT1.5 BNC-N jumper": 0.46 * COAX_DB_M["LMR-400"]}
     loss = sum(coax.values()) + 3 * 0.15
@@ -832,3 +832,74 @@ if __name__ == "__main__":
     assert 41 + 2 * air_us(57) + 100 <= 700 < 41 + 2 * air_us(63) + 100
     # 0.75 ms frames: 36 samples = 27 B audio + 6 B header + 30 B td = 63 B; fits 750 us only with no RX slot.
     assert 41 + 2 * air_us(63) + 100 <= 750
+
+
+# ---- Audit 7: R1 with the rack antennas in the wings (#101, ADR-0021, docs/analysis/r1-wing-antennas.md). ----
+# Owner constraint 2026-11-01: rack antennas only at the sides of the stage (wings), so ADR-0016's front-of-stage
+# rule (>= 6 m up, aimed upstage) is out. Model: sim/loss/wing_geometry.py (3-D free space, HG2409P-NF cuts, the
+# bsim modem tables). Venues: studio 6 m, proscenium 10 m, proscenium 12 m. bsim: run.py --geometry (two receivers
+# per pack, RX-5 replayed per carrier). The bsim numbers below are from those runs (2026-11-01, 20 s each).
+def _wing():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("wing_geometry", pathlib.Path(__file__).resolve().parent / "sim/loss/wing_geometry.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["wing_geometry"] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+if __name__ == "__main__":
+    import sys
+    from dataclasses import replace as _repl
+    wg = _wing()
+    print("\n== Audit 7: R1 with the rack antennas in the wings (#101, ADR-0021) ==")
+    thr = wg.ci_threshold_db(2423)
+    print(f"  twin: an 11 MHz gap copy (TD length) needs C/I >= {thr:.1f} dB per Wi-Fi channel; design adds"
+          f" {wg.MARGIN_DB:.0f} dB. Neighbour pack tolerance 3/4/5 MHz: "
+          + " / ".join(f"{wg.neighbour_tolerance_db(o):.1f}" for o in (3, 4, 5)) + " dB")
+    assert -13 <= thr <= -11.5, "same threshold as Audit 4 (12.7 dB short at the Q3 geometry)"
+    naive = wg.Install(crew_ap_m=3.0)       # mid-wing, 2 m, straight across, crew Wi-Fi allowed 3 m away
+    for v in wg.VENUES:
+        sn = wg.summary(wg.evaluate(v, naive))
+        sr = wg.summary(wg.evaluate(v, wg.RULE))
+        nf = wg.near_far(v, wg.RULE)
+        sc = wg.summary(wg.evaluate(v, _repl(wg.RULE, crew_ap_m=3.0)))
+        print(f"  {v.name:<16} naive (mid-wing, 2 m, across, crew Wi-Fi >= 3 m): {sn['pass_sel']:5.1%} of the stage"
+              f" with margin, worst {sn['worst_margin']:+.1f} dB | ADR-0021 rule: {sr['pass_sel']:5.1%}, worst"
+              f" {sr['worst_margin']:+.1f} dB, with an actor at the boom {nf['worst']:+.1f} dB | rule but crew Wi-Fi"
+              f" 3 m away: worst {sc['worst_margin']:+.1f}")
+        assert sn["worst_margin"] < -wg.MARGIN_DB + 1.5, "the naive wing mount is short (why the rule exists)"
+        assert sr["pass_sel"] >= 0.97 and sr["worst_margin"] >= -0.5, "rule: >= 97 % of the stage with the full 3 dB, all with >= 2.5"
+        assert sr["worst_best"] > -wg.MARGIN_DB and nf["worst"] > -wg.MARGIN_DB, "rule: every point above the twin threshold, near pack included"
+        assert sc["worst_margin"] < -wg.MARGIN_DB, "crew Wi-Fi in the wings breaks it: the rule bans it"
+    lo = [wg.near_far(v, wg.RULE_LO)["worst"] for v in wg.VENUES]
+    print(f"  same rule on a 2 m stand: near-far worst {min(lo):+.1f} dB (3.5 m boom: actors >= "
+          f"{wg.dist(wg.antennas(wg.STUDIO, wg.RULE)[0][1], wg.near(wg.STUDIO, wg.RULE)[0]):.1f} m away)")
+    assert min(lo) < -wg.MARGIN_DB, "2 m is too low: an actor at the stand blocks 3 MHz neighbours on both antennas"
+    for o in (wg.OMNI3,):
+        w = min(wg.summary(wg.evaluate(v, _repl(wg.RULE, ant=o)))["worst_margin"] for v in wg.VENUES)
+        print(f"  omni 3 dBi in the wings instead: worst {w:+.1f} dB (sees the audience as well as the stage)")
+        assert w < -wg.MARGIN_DB
+
+    print("  rack chain (PR #95 / ADR-0018 draft gains, worst case, no coax): actor walking 0.5 m past the boom")
+    for eirp, reg in ((wg.EIRP_UK, "UK"), (wg.EIRP_US, "US")):
+        for ins, ax, lab in ((wg.RULE, False, "rule, 3.5 m boom"), (wg.RULE, True, "off-rule, 0.5 m on axis")):
+            _, nL, _ = wg.near(wg.STUDIO, ins, 0.5, eirp, ax)
+            wifi = wg.evaluate(wg.STUDIO, ins).iw["L"][0]
+            lna, mod, rad = wg.chain_levels(nL)
+            tot = wg.dbm_sum(lna, *[wifi - (nL - lna)] * 3)   # near pack + 3 Wi-Fi channels at the worst seat
+            _, _, byp = wg.chain_levels(nL, module_lna=False)
+            head = wg.CHAIN["lna_ip1db_min"] - tot
+            print(f"    {reg} {lab:<24} antenna {nL:6.1f} dBm -> rack LNA input {tot:6.1f} dBm with Wi-Fi"
+                  f" ({head:4.1f} dB under worst P1dB), every module's radio {rad:+5.1f} dBm (module LNA on) /"
+                  f" {byp:+5.1f} (bypassed)")
+            if not ax:
+                assert head >= 15 and rad <= wg.CHAIN["nrf5340_pmax"], "rule: no compression, module LNA may stay on"
+            elif reg == "UK":
+                assert head >= 10 and rad > 0 >= byp, "off-rule: rack LNA fine, other modules overload unless bypassed"
+    # bsim (c), run.py --geometry docs/analysis/r1-wing/<case>.json --eirp 9 --plan host/channel_plan_us.yaml,
+    # 20 s per run. Packs passing SYS-3 (<= 0.1 %, <= 2 in a row) of the 7 with a gap carrier below 2480 (pack 1's
+    # is 2482: credited by equivalence, ADR-0016). Filled from the 2026-11-01 runs; see the analysis doc.
+    WING_BSIM = {}
+    for case, r in WING_BSIM.items():
+        print(f"  bsim {case}: " + ", ".join(f"{k} {v}/7" for k, v in r.items()))
