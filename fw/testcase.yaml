@@ -45,3 +45,15 @@ tests:
     sysbuild: true
     build_only: true
     extra_args: SB_CONFIG_OP_TIME_DIVERSITY=y
+  # Our boards (#118): pins generated from the netlists (fw/boards/openpack/gen_pins.py), MCUboot, both cores.
+  # Out-of-tree board root: west twister --board-root fw (CI), west build -- -DBOARD_ROOT=$PWD/fw.
+  fw.build.board.pack:
+    platform_allow: openpack_pack/nrf5340/cpuapp
+    sysbuild: true
+    build_only: true
+    extra_args: SB_CONFIG_BOOTLOADER_MCUBOOT=y
+  fw.build.board.rx:
+    platform_allow: openpack_rx/nrf5340/cpuapp
+    sysbuild: true
+    build_only: true
+    extra_args: SB_CONFIG_BOOTLOADER_MCUBOOT=y

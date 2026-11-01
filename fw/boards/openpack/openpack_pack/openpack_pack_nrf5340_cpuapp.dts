@@ -1,0 +1,21 @@
+/* OpenPack body-pack (Fanstel BT40NE), nRF5340 application core (#118). No pin numbers here: see the generated -pins.dtsi. */
+/dts-v1/;
+#include "../common/openpack_nrf5340_cpuapp.dtsi"
+#include "openpack_pack_nrf5340_cpuapp-pins.dtsi"
+
+/ {
+	model = "OpenPack body-pack (Fanstel BT40NE) nRF5340 Application";
+	compatible = "openpack,openpack-pack-nrf5340-cpuapp";
+};
+
+/* HFXO internal load capacitance set by Fanstel for the module: BT40NE: 12.5 pF (Fanstel v1.09 p.18). */
+&hfxo {
+	load-capacitors = "internal";
+	load-capacitance-femtofarad = <12500>;
+};
+
+/* PK-9: recessed USB-C to the module's USB (config + MCUboot serial DFU); not a charging port. */
+zephyr_udc0: &usbd {
+	compatible = "nordic,nrf-usbd";
+	status = "okay";
+};

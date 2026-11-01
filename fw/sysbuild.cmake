@@ -1,6 +1,12 @@
 # One app, two images on nRF5340 (FW-1): the same source builds for cpuapp and cpunet.
 if(NOT "${SB_CONFIG_NET_CORE_BOARD}" STREQUAL "" AND NOT TARGET fw_net)
-  if(SB_CONFIG_OP_ROLE_RX)
+  # #118: each OpenPack board carries one role (the pack has the PCM1840 and nRF21540, the receiver the PCM5102A).
+  if(BOARD STREQUAL "openpack_pack" AND SB_CONFIG_OP_ROLE_RX)
+    message(FATAL_ERROR "openpack_pack is the pack board: build the receiver for openpack_rx")
+  elseif(BOARD STREQUAL "openpack_rx" AND NOT SB_CONFIG_OP_ROLE_RX)
+    message(FATAL_ERROR "openpack_rx is the receiver board: SB_CONFIG_OP_ROLE_RX must stay y")
+  endif()
+  if(SB_CONFIG_OP_ROLE_RX AND NOT BOARD STREQUAL "openpack_rx") # openpack_rx has no FEM node to drop
     # ADR-0021: receiver = BT40E, no nRF21540. Drop the pack's FEM node from the receiver net core.
     set(rx_overlay ${CMAKE_CURRENT_LIST_DIR}/boards/role_rx_cpunet.overlay)
     if(NOT rx_overlay IN_LIST fw_net_EXTRA_DTC_OVERLAY_FILE)

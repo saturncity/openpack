@@ -1,0 +1,17 @@
+identifier: openpack_pack/nrf5340/cpuapp
+name: OpenPack-pack-nRF5340-cpuapp
+vendor: openpack
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+ram: 448
+flash: 464
+supported:
+  - gpio
+  - i2s
+  - adc
+  - usbd
+  - usb_device
+  - watchdog
+  - counter

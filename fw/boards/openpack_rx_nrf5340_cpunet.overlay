@@ -1,0 +1,2 @@
+/* App-level devicetree for the receiver net core (#118): icmsg IPC. The board has no nRF21540 node (BT40E). */
+#include "ipc_icmsg_cpunet.dtsi"

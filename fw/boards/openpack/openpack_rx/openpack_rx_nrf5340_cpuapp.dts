@@ -1,0 +1,15 @@
+/* OpenPack receiver sub-board (Fanstel BT40E), nRF5340 application core (#118). No pin numbers here: see the generated -pins.dtsi. */
+/dts-v1/;
+#include "../common/openpack_nrf5340_cpuapp.dtsi"
+#include "openpack_rx_nrf5340_cpuapp-pins.dtsi"
+
+/ {
+	model = "OpenPack receiver sub-board (Fanstel BT40E) nRF5340 Application";
+	compatible = "openpack,openpack-rx-nrf5340-cpuapp";
+};
+
+/* HFXO internal load capacitance set by Fanstel for the module: BT40E: 11 pF (Fanstel v1.09 p.18, ADR-0014 amendment). */
+&hfxo {
+	load-capacitors = "internal";
+	load-capacitance-femtofarad = <11000>;
+};
