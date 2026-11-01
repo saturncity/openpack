@@ -68,21 +68,32 @@ config OP_PACK_FRAME_LEAD_US
 	default 100
 	range 1 499
 	help
-	  The app core places its 1 ms audio frame clock this far before the net core's latch (the
-	  DISABLED interrupt after copy B), from a sync the net core sends at start (ADR-0020). Read +
+	  The app core places its 1 ms audio frame clock this far before the net core's latch
+	  (OP_PACK_LATCH_LEAD_US before t0), from a sync the net core sends at start (ADR-0020). Read +
 	  ADPCM-6 encode + IPC must finish inside it; then no frame is ever skipped. Every us here is
-	  SYS-2 latency: 100 = SPEC section 2 "Encode + IPC". < 500: the net core's margin report takes
-	  a frame within half a frame after its latch as late.
+	  SYS-2 latency: SPEC section 2 "Encode + IPC" = this + OP_PACK_LATCH_LEAD_US. < 500: the net
+	  core's margin report takes a frame within half a frame after its latch as late.
+
+config OP_PACK_LATCH_LEAD_US
+	int "Pack: net-core payload latch (TIMER0 COMPARE3) this far before TXEN of copy A (us, #98)"
+	default 20
+	range 5 100
+	help
+	  The newest frame is copied into the radio buffer this long before t0. It must follow the end
+	  of copy B (t0 + 877 us at 81 B) and give the latch interrupt time before copy A's EasyDMA read
+	  (t0 + ramp-up): 20 + 40 us. Every us here is SYS-2 latency (TD on with FLT=1: 4.6 ms budget).
 
 config OP_PACK_FRAME_PRIO
 	int "Pack: frame thread priority (cooperative, above the system workqueue)"
 	default -2
 
 config OP_TEST_SCHED_REPORT
-	bool "Test only: net core prints a PACK_IPC line per second (latch margin, counters)"
-	default y if OP_TEST_BSIM_ARGS
+	bool "Test only: pack prints PACK_IPC (net) / PACK_FCLK (app) lines per second"
+	depends on ARCH_POSIX
+	default y if OP_TEST_BSIM_ARGS || SOC_COMPATIBLE_NRF5340_CPUAPP
 	help
-	  tests/bsim/sched/check.py reads the margin (latch - frame arrival). bsim only, never silicon.
+	  tests/bsim/sched/check.py reads the margin (latch - frame arrival); tests/bsim/scenarios/run.py
+	  (a) the device time of t0 and of the audio frame clock. bsim only, never silicon.
 
 config OP_TEST_APP_LOAD_PERIOD_US
 	int "Test only: app-core load thread wakes every this many us, 0 = off (tests/bsim/sched, #87)"
