@@ -37,7 +37,13 @@
 #include <hal/nrf_radio.h>
 #include <hal/nrf_timer.h>
 #include <hal/nrf_dppi.h>
+#include <zephyr/devicetree.h>
 #include "op_rx.h"
+
+/* ADR-0021: the receiver module is a BT40E (no nRF21540). The #107 FEM node is pack-only (fw/boards/role_rx_cpunet.overlay). */
+#if DT_NODE_HAS_STATUS(DT_NODELABEL(nrf_radio_fem), okay) || defined(CONFIG_OP_FEM_NRF21540)
+#error "receiver build has the nRF21540 FEM enabled; the BT40E has none (ADR-0021)"
+#endif
 #include "op_td.h"
 
 #define DPPI_RXEN 0 /* TIMER0 COMPARE0/1 -> RADIO RXEN */

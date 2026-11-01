@@ -1,5 +1,5 @@
 # ADR-0014: Receiver sub-board: backplane connector pinout, antenna switch, DAC, balanced driver, output mute
-Status: accepted. 2026-10-31, amended after the #81 review. Issue #32. Schematic `hw/rx/rx.py` (SKiDL). SPICE decks `hw/spice/rx_driver*.cir` with the shared `opa1656.lib`. Tests `tests/test_rx_sch.py`, `tests/test_spice_rx_driver.py`.
+Status: accepted. 2026-10-31, amended after the #81 review; amended 2026-11-01 for ADR-0021 (module BT40NE → BT40E, see the amendment at the end). Issue #32. Schematic `hw/rx/rx.py` (SKiDL). SPICE decks `hw/spice/rx_driver*.cir` with the shared `opa1656.lib`. Tests `tests/test_rx_sch.py`, `tests/test_spice_rx_driver.py`.
 - **Context:** RX-1/RX-8 fix the parts (nRF5340 module, SPDT switch, PCM5102, balanced driver, UART, I2S) and the levels (+18 dBu max, −20 dBFS = −2 dBu, Zout ≤ 100 Ω). They do not fix the board split, rails, connector, GPIO map or mute. QUESTIONS.md keeps I2S on the backplane for a future digital add-on. ADR-0011 left the antenna GPIO a weak stub. The owner is UK-based.
 - **Sources:**
   - TI PCM5102A SLAS859C: pins, 2.1 Vrms full scale (typical), 1 kΩ minimum load, 470 Ω/2.2 nF filter, BCK PLL, Table 3/4/7 filters, §11.2 XSMT.
@@ -17,7 +17,7 @@ Status: accepted. 2026-10-31, amended after the #81 review. Issue #32. Schematic
   - **Rails.** The driver takes +12 V through 10 Ω, then a **BAT54 hold-up diode**, then 100 µF (+12VA). The diode stops C7 draining into a collapsing backplane. +5 V from the rack buck feeds two TLV76733: +3V3 (module, DAC DVDD, switch, supervisor) and +3V3A (DAC AVDD + CPVDD).
   - **RF.** J3 ANT_A / J4 ANT_B → 10 pF → PE4259 RF2 / RF1 → RFC → J5 → U.FL jumper → module u.FL.
     - **ANT_SEL = P1.01 (pad D6)**, a net-core GPIO with a 100 k pull-down. Low = antenna A (`op_rx_ant_select(0)`).
-    - The module's own nRF21540 ANT_SEL (P1.05) must pick its u.FL port.
+    - The BT40E (ADR-0021) has one RF port, its u.FL, wired straight to the nRF5340: no FEM, no module ANT_SEL. P1.05 is an unused GPIO.
   - **GPIO map.**
     - UART: TX P0.20 (C5), RX P0.22 (D5). These are the DK console pins; no flow control.
     - I2S master: BCK P0.24 (C3), LRCK P0.23 (C4), SDOUT P0.13 (B6). The PCM5102A PLL needs BCK = 32 or 64 fs (SLAS859C Table 11), so firmware uses 16- or 32-bit slots.
@@ -45,10 +45,10 @@ Status: accepted. 2026-10-31, amended after the #81 review. Issue #32. Schematic
   - **Into 10 nF per leg + 600 Ω: phase margin 50° / 49°** (asserted ≥ 45°). Step overshoot 0.35 % (asserted ≤ 10 %).
   - **Phantom short** (P48, relay closed, charged pin shorted): S1J peak 0.86 A, I²t 0.38 mA²s, against 3.7 A²s from IFSM. The cap holds about 21 V, not 39 V, because the 10 k cap-side bleed sits against the 6.8 k phantom feed.
   - **Power cycle** (on → K1 closes at 5 s → brick dies at 6 s): XLR differential < 1 µV, common mode 12 µV. K1 opens 8 ms after the trip; the hold-up keeps the op-amps linear meanwhile. VCM never exceeds +12VA.
-- **BOM** (`hw/rx/out/bom.csv`, printed by `audit.py`): **$34.58 / £26.35 per sub-board** at qty 100.
-  - The BT40NE is priced at DigiKey ($16.76). GBP is a conversion at 0.76 ex VAT, not a UK quote. Each line names a UK-reachable distributor.
+- **BOM** (`hw/rx/out/bom.csv`, printed by `audit.py`): **$30.68 / £23.38 per sub-board** at qty 100.
+  - The BT40E is priced at Digi-Key UK, £9.78 qty 100 (converted to $12.86); was the BT40NE at $16.76. Other GBP figures are conversions at 0.76 ex VAT, not UK quotes. Each line names a UK-reachable distributor.
   - The mute adds about $4.2: relay, supervisor, FET, diodes.
-  - SPEC/AUDIT set no cap. Q14's "~$150–250" guess for the whole rack is exceeded by the 8 sub-boards alone ($277).
+  - SPEC/AUDIT set no cap. Q14's "~$150–250" guess for the whole rack is exceeded by the 8 sub-boards alone ($245).
 
 ## Backplane connector J1 (sub-board side, 2×13 2.54 mm; odd pins one row, even the other)
 
@@ -101,7 +101,7 @@ Status: accepted. 2026-10-31, amended after the #81 review. Issue #32. Schematic
      - `op_rx_ant_select()` driving P1.01 from the net core;
      - XSMT_EN and OUT_EN, with OUT_EN set ≥ 5 s after boot and only after XSMT is un-muted;
      - slot read;
-     - module ANT_SEL → u.FL.
+     - no FEM node: the #107 nRF21540 node is pack-only (`fw/boards/role_rx_cpunet.overlay`, ADR-0021).
   3. The stability numbers rest on a macromodel with an **assumed** second pole at 30 MHz, not taken from the datasheet. Re-run with TI's OPA1656 model, or bench a step into 10 nF. If it rings, move the 22 Ω inside the loop.
   4. The relay release time with the flyback diode is modelled as 8 ms; measure it on the bench. The supervisor trip is 10.78 V ± 1.5 %. A brick sagging slowly to just above the trip is not a thump case, because the outputs stay linear.
   5. PE4259 tuning cap and its ≈18–20 dB isolation at 2.4 GHz come with layout (#34). The jumper costs about 0.3 dB.
@@ -109,5 +109,19 @@ Status: accepted. 2026-10-31, amended after the #81 review. Issue #32. Schematic
   7. UK: the GBP figures are conversions. Confirm live quotes and stock before #40.
   8. Region (UK rules, being re-decided): the receiver has no PA, and no part value on this board depends on the region.
      - **LNA:** ADR-0015 (PR #86) finds that a per-receiver LNA adds only 0.7 dB behind the rack LNA. This board never had a discrete LNA or its bias/match parts, so nothing is removed and nothing is saved.
-     - The nRF21540 inside the BT40NE cannot be depopulated. Firmware may run it in bypass (ADR-0015).
-  9. Custom footprints (BT40NE, TQ2SA) come with layout.
+     - The BT40E has no nRF21540, so there is nothing to bypass (ADR-0021).
+  9. Custom footprints (BT40E 14×16 mm, TQ2SA) come with layout.
+
+## Amendment 2026-11-01: receiver module BT40NE → BT40E (ADR-0021, #112)
+
+- **Why:** ADR-0021 (PR #103) puts the rack antennas in the wings. The wings need system NF ≤ 21.1 dB; the BT40E gives 11.5 dB behind PR #95's QPL9057 + QPQ1907 + Wilkinson chain, every stage stays ≥ 6 dB under P1dB (the BT40NE's always-on nRF21540, P1dB −18 dBm, did not), and the receiver never transmits in v1 (ADR-0004). The pack keeps the BT40NE (ADR-0007).
+- **Datasheet checks** (Fanstel *BT40/F/E/N/NE Product Specifications* v1.09, July 2024):
+  - **RF port:** u.FL receptacle on the module, the only antenna port (p.1 Model Summaries "u.FL"; p.11 drawing). The PE4259 RFC → C22 → J5 → 50 mm U.FL jumper → BT40E u.FL path is unchanged.
+  - **Pinout:** p.14 "Pin Assignments of BT40" (shared by the BT40 and BT40E): the same pad names and nRF5340 pins as the BT40F/NE table (pp.16–17), F5 = NC. The nine BT40NE FEM pads (Z6, A6, C2, C6, D1, D2, E0, E1, E2) are plain GPIO; this board uses none of them, so the **GPIO map above and the firmware pins do not change**. P1.05 (E1) stays unconnected.
+  - **Footprint:** 14 × 16 × 2.0 mm, 16 castellated + 45 LGA pads + H0–H3 ground pads (p.11), not the BT40NE's 15 × 29.9 mm. `openpack:Fanstel_BT40E` comes with layout (#34).
+  - **Decoupling:** crystals and both DC/DC inductors are on the module, "no external component is required" (p.26); the supply must be ripple-free, with a ferrite + ≥ 47 µF only for a noisy one (p.27). +3V3 is a TLV76733 LDO, so C10 10 µF + C11 100 nF at VDD and C12 100 nF at VDDH stay as they are.
+  - **HFXO:** Fanstel sets the internal load capacitors to 11 pF for the BT40E (12.5 pF for the BT40NE, p.18). The rx board target (when it exists) sets that; the DK has its own crystal.
+- **Certification:** FCC ID **X8WBT40F** / ISED 4100A-BT40F cover the BT40E, tested with the 6 dBi ANT060 dipole (p.1, p.3); TELEC 201-210217/01; "CE, RCM: Compliant". No Fanstel UKCA or EU DoC is published (as for the BT40NE, `docs/analysis/module-antenna.md`). The receiver is receive-only, so the rack's UK DoC under the Radio Equipment Regulations 2017 covers EN 300 328 receiver requirements (blocking) and EN 301 489-1/-17 for the finished rack; ask Fanstel for the BT40E EN 300 328 report before #40.
+- **Firmware:** the #107 nRF21540 node stays in the DK net-core overlay for the pack. Receiver builds (`SB_CONFIG_OP_ROLE_RX=y`) add `fw/boards/role_rx_cpunet.overlay`, which disables it and drops `&radio { fem }`; `fw/src/rx/rx.c` fails to compile if the node or `CONFIG_OP_FEM_NRF21540` is still enabled.
+- **BOM:** BT40E at Digi-Key UK £9.7765 qty 100 cut tape (803 in stock, 10 wk, read 2026-11-01) = $12.86 at 0.76. Sub-board $34.58 → **$30.68** (£26.35 → £23.38): −$3.90 / −£2.97 per sub-board, **−$31 / −£24 per rack** at Digi-Key UK. ADR-0021's −$58 compares Fanstel direct ($9.55) with the BT40NE at Digi-Key; buying both direct gives −$31 too ($13.47 − $9.55 = $3.92 × 8).
+- **Gone:** consequences item 2's "module ANT_SEL → u.FL" and item 8's FEM bypass; the receiver half of #105's ANT_SEL open item.

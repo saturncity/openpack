@@ -105,7 +105,7 @@ config OP_TEST_PROTO_POLL_MS
 	help
 	  Brings back the 50 ms console poll that exposed #87. The shipped build waits forever.
 
-# #107 / ADR-0015: nRF21540 front-end on the BT40NE (pack and receiver).
+# #107 / ADR-0015: nRF21540 front-end on the BT40NE. Pack only: the receiver is a BT40E (ADR-0021).
 config OP_FEM_NRF21540
 	bool "nRF21540 FEM present (devicetree node nrf_radio_fem)"
 	default y if DT_HAS_NORDIC_NRF21540_FEM_ENABLED

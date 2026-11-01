@@ -5,9 +5,9 @@ Run:  python hw/rx/rx.py            -> ERC, then writes in hw/rx/out/:
         sch/rx.kicad_sch (KiCad 9 schematic), svg/ (rendered pages)
       python hw/rx/rx.py --no-sch    -> netlist/BOM/ERC only (fast)
 
-Blocks: BT40NE module (ADR-0007), PE4259 antenna A/B switch into the module u.FL (RX-1, RX-5),
-PCM5102A DAC (I2S), OPA1656 balanced line driver on +12 V (RX-8, hw/spice/rx_driver.cir is the
-same circuit), backplane connector (power, UART, I2S, balanced audio; pinout in ADR-0014).
+Blocks: BT40E module (ADR-0021, no FEM; the pack keeps ADR-0007's BT40NE), PE4259 antenna A/B switch into
+the module u.FL (RX-1, RX-5), PCM5102A DAC (I2S), OPA1656 balanced line driver on +12 V (RX-8,
+hw/spice/rx_driver.cir is the same circuit), backplane connector (power, UART, I2S, balanced audio; pinout in ADR-0014).
 """
 import csv, importlib.util, pathlib, sys
 
@@ -27,11 +27,12 @@ prices = _load("hw_rx_prices", HERE / "prices.py")
 OUT = HERE / "out"
 LIB = HERE / "openpack_rx.kicad_sym"
 
-# Module pad -> nRF5340 GPIO used on this board (Fanstel BT40/F/E/N/NE spec v1.08, Pin Functions; see
-# hw/pack/symbols.py). Firmware devicetree for the rx board must match (ADR-0014).
+# Module pad -> nRF5340 GPIO used on this board (Fanstel BT40/F/E/N/NE spec v1.09: p.14 BT40/BT40E pin assignments,
+# the same pad names and GPIOs as the BT40F/NE table pp.16-17; see symbols_rx.py). Firmware devicetree for the rx board
+# must match (ADR-0014). None of these is one of the nine BT40NE FEM pads, so the map did not move with ADR-0021.
 PADS = {
     "UART_TX": ("C5", "P0.20"),    # = nrf5340dk uart0 TX (zephyr,console), nrf5340_cpuapp_common-pinctrl.dtsi
-    "UART_RX": ("D5", "P0.22"),    # = nrf5340dk uart0 RX; RTS/CTS unused (P0.21 is an nRF21540 pad in the BT40NE)
+    "UART_RX": ("D5", "P0.22"),    # = nrf5340dk uart0 RX; RTS/CTS unused (P0.21 = C2, an nRF21540 pad on the BT40NE)
     "I2S_BCK": ("C3", "P0.24"),    # I2S SCK_M, same pad as the pack (ADR-0012)
     "I2S_LRCK": ("C4", "P0.23"),   # I2S LRCK_M, same pad as the pack
     "I2S_SDOUT": ("B6", "P0.13"),  # I2S SDOUT (pack uses C5 for SDIN; C5 is the console TX here)
@@ -112,8 +113,12 @@ def build():
         C("C8", "100n", v12a, gnd)
 
     with Group("mcu"):
-        # ---- BT40NE: VDD = VDDH = 3.3 V. USB unused on the receiver (UART DFU, FW-6) ----
-        u1 = part("BT40NE", "U1", "BT40NE", "openpack:Fanstel_BT40NE", "BT40NE")
+        # ---- BT40E (ADR-0021): nRF5340 + u.FL, no nRF21540. VDD = VDDH = 3.3 V. USB unused (UART DFU, FW-6) ----
+        # Fanstel v1.09 p.26: crystals and both DC/DC inductors are on the module, "no external component is
+        # required"; p.27 asks for a ripple-free supply (ferrite + >= 47 uF only for a noisy one). +3V3 is the
+        # TLV76733 LDO, so 10 uF + 100 nF at VDD (pad 9) and 100 nF at VDDH (pad F4) are the decoupling.
+        # Footprint: 14x16 mm, p.11 drawing (not the BT40NE's 15x29.9 mm); comes with layout (#34).
+        u1 = part("BT40E", "U1", "BT40E", "openpack:Fanstel_BT40E", "BT40E")
         u1["9"] += v3; u1["F4"] += v3
         for p in ("10", "A0", "B0", "C0", "D0", "H0", "H1", "H2", "H3"):
             u1[p] += gnd
@@ -145,10 +150,11 @@ def build():
         u1["16"] += swdio; u1["15"] += swclk
         for p in u1.pins:
             if not p.net:
-                p += NC      # spare GPIO, NC, USB, and the nine nRF21540-internal pads
+                p += NC      # spare GPIO (incl. P1.05, the BT40NE's ANT_SEL pad E1), NC, USB, VBUS
 
     with Group("rf"):
-        # ---- RX-1 antenna A/B: two u.FL from the rack splitters -> PE4259 -> u.FL -> jumper -> module u.FL ----
+        # ---- RX-1 antenna A/B: two u.FL from the rack splitters -> PE4259 -> u.FL -> jumper -> BT40E u.FL ----
+        # (the BT40E's only RF port: straight into the nRF5340, no module LNA/FEM, ADR-0021)
         # PE4259 Table 5 (single-pin mode): CTRL low = RFC-RF2, high = RFC-RF1. So ANT_SEL 0 = antenna A on RF2.
         u2 = part("PE4259", "U2", "PE4259", "Package_TO_SOT_SMD:SOT-363_SC-70-6", "PE4259-63")
         ja, jb, jo = (part("UFL", r, v, "Connector_Coaxial:U.FL_Hirose_U.FL-R-SMT-1_Vertical", "U.FL-R-SMT-1(10)")
