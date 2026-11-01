@@ -10,6 +10,8 @@
  * frames whose seq advances by more than 1; a repeated seq is the pack's own underrun, not a skip).
  * Plus RX-6/RX-7: plc (concealed frames), fill at arrival (mean/min/max, milli-samples), applied
  * clock correction (ppb), slips (slot underruns/overruns, cumulative), DAC samples played.
+ * Time diversity (ADR-0017): td = frames recovered from packet n+2 (RX-4, counted in valid too), and
+ * td_on = the pack sends TD packets (its frames arrive 2 ms later).
  * One RXAPP line per second of the counts in that second (tests/bsim/rx/check*.py parse them).
  */
 #include <zephyr/kernel.h>
@@ -27,7 +29,7 @@ BUILD_ASSERT(OP_FRAME_LEN - HDR == ADPCM6_FRAME_BYTES, "AIR-3 v1 payload is one 
 BUILD_ASSERT(ADPCM6_FRAME_SAMPLES == OP_JSLOT_FRAME && OP_PLC_N == OP_JSLOT_FRAME, "1 ms frames");
 
 struct stats {
-	uint32_t frames, valid, lost, a_ok, b_ok, skips, plc;
+	uint32_t frames, valid, lost, a_ok, b_ok, skips, plc, td;
 	int32_t rssi_sum;
 	int64_t fill_sum; /* Q16 */
 	int64_t ppb_sum;
@@ -36,7 +38,7 @@ struct stats {
 
 static struct stats st;
 static uint8_t last_seq, last_epoch;
-static bool last_valid;
+static bool last_valid, td_on;
 static struct op_jslot slot;
 static struct op_plc plc;
 static struct op_clk pi;
@@ -95,8 +97,10 @@ static void on_frame(const uint8_t *data, size_t len)
 		last_epoch = m->epoch;
 		last_valid = false;
 	}
+	td_on = m->flags & OP_RX_TD;
 	if (valid) {
 		st.valid++;
+		st.td += !!(m->flags & OP_RX_TD_REC);
 		st.a_ok += !!(m->flags & OP_RX_A_OK);
 		st.b_ok += !!(m->flags & OP_RX_B_OK);
 		st.rssi_sum += m->rssi;
@@ -124,17 +128,18 @@ static void report(struct k_work *w)
 	uint32_t under = slot.under, over = slot.over;
 	uint64_t dac = dac_samples;
 	int32_t corr = ppb;
+	bool tdo = td_on;
 
 	stats_clear(&st);
 	irq_unlock(key);
 	printk("RXAPP t_ms=%u epoch=%u frames=%u valid=%u lost=%u a_ok=%u b_ok=%u skips=%u rssi=%d "
 	       "plc=%u fill_mean_ms=%d fill_min_ms=%d fill_max_ms=%d ppb=%d ppb_mean=%d "
-	       "under=%u over=%u dac=%llu\n",
+	       "under=%u over=%u dac=%llu td=%u td_on=%d\n",
 	       (uint32_t)k_uptime_get(), ep, s.frames, s.valid, s.lost, s.a_ok, s.b_ok, s.skips,
 	       s.valid ? s.rssi_sum / (int32_t)s.valid : 0, s.plc,
 	       s.frames ? milli(s.fill_sum / s.frames) : 0, s.frames ? milli(s.fill_min) : 0,
 	       s.frames ? milli(s.fill_max) : 0, corr,
-	       s.frames ? (int32_t)(s.ppb_sum / s.frames) : 0, under, over, dac);
+	       s.frames ? (int32_t)(s.ppb_sum / s.frames) : 0, under, over, dac, s.td, tdo);
 }
 
 static K_WORK_DEFINE(report_work, report);
@@ -145,6 +150,11 @@ static void expiry(struct k_timer *t)
 }
 
 static K_TIMER_DEFINE(report_timer, expiry, NULL);
+
+int op_rx_app_td(void)
+{
+	return td_on;
+}
 
 int op_rx_app_start(void)
 {

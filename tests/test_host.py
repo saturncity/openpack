@@ -42,8 +42,8 @@ def fake_module(replies):
     return os.ttyname(slave), seen, (master, slave)
 
 
-REPLIES = {"info": "ok fw=0.1", "status": "ok locked=1 rssi=-60 loss=0.0 batt=90 peak=-12 clip=0 temp=0", "trim": "ok", "pair": "ok",
-           "scan": "ok 2400:-90 2402:-88", "dfu": "ok"}
+REPLIES = {"info": "ok fw=0.1", "status": "ok locked=1 rssi=-60 loss=0.0 batt=90 peak=-12 clip=0 temp=0 td=0", "trim": "ok",
+           "pair": "ok", "td": "ok", "scan": "ok 2400:-90 2402:-88", "dfu": "ok"}
 
 
 @pytest.fixture
@@ -95,12 +95,24 @@ def test_fb_cap_by_region(path, region, fb):
     lambda p: p[1].update(fB=2459),                      # no-gap pack 1 within 5 MHz of pack 2's 2463
     lambda p: p[3].update(fB=2466),                      # pack 2 near: pack 3 loses 2426 and 2466 (near-far)
     lambda p: [p[i].update(fA=a) for i, a in ((6, 2417), (7, 2420))],   # 5 in-band carriers under Wi-Fi 1
+    lambda p: p[2].update(td="yes"),                     # td is a bool (ADR-0017)
 ])
 def test_bad_plans_rejected(edit, path):
     plan = yaml.safe_load(getattr(channel_plan, path).read_text())
     edit(plan["packs"])
     with pytest.raises(ValueError):
         channel_plan.validate(plan)
+
+
+def test_td_plan(tmp_path):
+    """ADR-0017: time diversity is off unless a pack says td: true."""
+    assert channel_plan.td() == set() and channel_plan.td(channel_plan.PATH_US) == set()
+    plan = yaml.safe_load(channel_plan.PATH.read_text())
+    plan["packs"][1]["td"] = True
+    plan["packs"][2]["td"] = False
+    (tmp_path / "p.yaml").write_text(yaml.safe_dump(plan))
+    assert channel_plan.td(tmp_path / "p.yaml") == {1}
+    assert channel_plan.load(tmp_path / "p.yaml")[1] == (2414, 2482)
 
 
 def test_bad_region_rejected():
@@ -122,7 +134,14 @@ def test_api(client):
     assert c.put("/packs/2/trim", json={"gain_db": 99}).status_code == 422
     assert c.get("/rx").json()[0] == {"n": 1, "fw": "0.1"}
     assert c.put("/rx/3/pair", json={"pack": 3, "fA": 2426, "fB": 2468}).status_code == 200
-    assert "pair 3 2426 2468" in mods[2][1]
+    assert "pair 3 2426 2468" in mods[2][1] and "td off" in mods[2][1]  # pushed after pair (ADR-0017)
+    assert p[0]["td"] is False and p[0]["status"]["td"] == "0"
+    app.state.td = {3}
+    try:
+        assert c.put("/rx/3/pair", json={"pack": 3, "fA": 2426, "fB": 2468}).status_code == 200
+        assert mods[2][1][-1] == "td on" and c.get("/packs/3").json()["td"] is True
+    finally:
+        app.state.td = set()
     assert c.put("/rx/3/pair", json={"pack": 3, "fA": 2426, "fB": 2463}).status_code == 422
     assert c.post("/rx/4/firmware", content=b"\x00\x01\x02\n\x03").status_code == 200
     assert mods[3][1][-1] == b"\x00\x01\x02\n\x03"

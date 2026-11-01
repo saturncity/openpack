@@ -3,6 +3,9 @@ source "share/sysbuild/Kconfig"
 config OP_ROLE_RX
 	bool "Build the receiver role (default: pack); applied to app and net core images"
 
+config OP_TIME_DIVERSITY
+	bool "Pack time diversity on at boot (ADR-0017); applied to app and net core images"
+
 config NET_CORE_BOARD
 	string
 	default "nrf5340dk/nrf5340/cpunet" if $(BOARD) = "nrf5340dk"

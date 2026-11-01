@@ -10,9 +10,12 @@
 #define OP_RX_VALID (1u << 0) /* frame[] holds a CRC-valid copy */
 #define OP_RX_A_OK  (1u << 1) /* copy A was CRC-valid */
 #define OP_RX_B_OK  (1u << 2) /* copy B was CRC-valid */
+#define OP_RX_TD    (1u << 3) /* the pack sends time diversity (81 B): frame is 2 packets late (ADR-0017) */
+#define OP_RX_TD_REC (1u << 4) /* both copies lost, frame recovered from packet n+2's td_audio (RX-4) */
 
+/* With OP_RX_TD, A_OK/B_OK/rssi are those of the frame's own packet (n), not of packet n+2. */
 struct op_rx_msg {
-	uint8_t frame[OP_FRAME_LEN]; /* AIR-3 payload of the winning copy (RX-4: first valid wins) */
+	uint8_t frame[OP_FRAME_LEN]; /* AIR-3 v1 frame of the winning copy (RX-4: first valid wins) */
 	uint8_t flags;
 	uint8_t epoch; /* lock count: increments on every (re-)lock, seq restarts are not losses */
 	int8_t rssi;   /* dBm of the winning copy, 0 when none */
@@ -21,6 +24,7 @@ struct op_rx_msg {
 
 int op_rx_start(void);     /* net core */
 int op_rx_app_start(void); /* app core */
+int op_rx_app_td(void);    /* app core: 1 if the last frame came from a time-diversity pack */
 
 /* RX-1 SPDT antenna switch. Weak no-op until the hw/rx board fixes the GPIO; bsim has one antenna. */
 void op_rx_ant_select(uint8_t ant);

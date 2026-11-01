@@ -1,5 +1,6 @@
 """Receiver module driver over serial. Wire format: host/PROTOCOL.md, firmware side fw/PROTOCOL.md."""
 import re
+import termios
 import threading
 import time
 
@@ -37,7 +38,8 @@ def request(port, line, payload=b"", timeout=1.0):
         raise ModuleError("port busy")
     try:
         reply = _exchange(port, line, payload, deadline, timeout)
-    except (serial.SerialException, OSError, ValueError) as e:  # ValueError: pyserial on a port closed under it
+    except (serial.SerialException, OSError, ValueError, termios.error) as e:  # ValueError: pyserial on a port closed under it;
+        # termios.error: tcflush/tcsetattr on a pty whose peer was just killed (pyserial does not wrap it; it would kill the poller task)
         raise ModuleError(str(e) or type(e).__name__) from e
     finally:
         lock.release()

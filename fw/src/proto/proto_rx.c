@@ -16,9 +16,9 @@ static const char *c_status(void *c, int argc, char **argv, char *out, size_t n)
 	if (s->sample) {
 		s->sample(s);
 	}
-	snprintf(out, n, " locked=%d rssi=%d loss=%d.%03d batt=%u peak=%d clip=%d temp=%d", s->locked,
+	snprintf(out, n, " locked=%d rssi=%d loss=%d.%03d batt=%u peak=%d clip=%d temp=%d td=%d", s->locked,
 		 s->rssi_dbm, s->loss_permille / 1000, s->loss_permille % 1000, s->telem.bat_pct,
-		 s->telem.peak_dbfs, !!(s->telem.flags & OP_ST_CLIP), !!(s->telem.flags & OP_ST_TEMP));
+		 s->telem.peak_dbfs, !!(s->telem.flags & OP_ST_CLIP), !!(s->telem.flags & OP_ST_TEMP), !!s->td);
 	return NULL;
 }
 
@@ -54,6 +54,24 @@ static const char *c_trim(void *c, int argc, char **argv, char *out, size_t n)
 	return NULL;
 }
 
+/* Time diversity the booth expects from this pack (ADR-0017). The receiver needs no setting, it tells TD
+ * packets by length; `status td=` is what the pack actually sends, so the host can flag a mismatch. */
+static const char *c_td(void *c, int argc, char **argv, char *out, size_t n)
+{
+	struct op_rx_state *s = c;
+	int v;
+
+	if (argc == 0) {
+		snprintf(out, n, " td=%s", s->td_plan ? "on" : "off");
+		return NULL;
+	}
+	if (argc != 1 || (v = op_parse_onoff(argv[0])) < 0) {
+		return "usage: td [on|off]";
+	}
+	s->td_plan = v;
+	return NULL;
+}
+
 static const char *c_scan(void *c, int argc, char **argv, char *out, size_t n)
 {
 	/* stub until the radio is up (#23): empty band at -100 dBm */
@@ -73,6 +91,7 @@ static const char *c_dfu(void *c, int argc, char **argv, char *out, size_t n)
 const struct op_cmd op_rx_cmds[] = {
 	{"info", c_info}, {"status", c_status}, {"pair", c_pair},
 	{"trim", c_trim}, {"scan", c_scan},     {"dfu", c_dfu},
+	{"td", c_td},
 };
 const size_t op_rx_ncmds = sizeof(op_rx_cmds) / sizeof(op_rx_cmds[0]);
 

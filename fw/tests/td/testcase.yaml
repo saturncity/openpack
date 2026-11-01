@@ -1,0 +1,5 @@
+tests:
+  # AIR-3 td_audio pack/unpack and RX-4 recovery from packet n+2 (ADR-0017).
+  fw.td.unit:
+    platform_allow: native_sim
+    tags: openpack
