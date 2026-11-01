@@ -21,9 +21,21 @@ config OP_DAC_BLOCK_SAMPLES
 	int "DAC DMA block (samples)"
 	default 8
 
+config OP_TIME_DIVERSITY
+	bool "Time diversity on at boot (pack td setting, AIR-3 td_audio, RX-4, ADR-0017)"
+	help
+	  Packet n also carries frame n-2's codec_state + audio (td_audio, 39 B): 81 B payloads instead of
+	  42 B, +2000 us latency (4.58 ms with PCM5102A FLT=1). Off by default (ADR-0017); a per-pack
+	  configuration setting (td on|off, fw/PROTOCOL.md) for hostile venues, not switched mid-show.
+	  The receiver needs no setting: it tells TD packs by payload length. Sysbuild: SB_CONFIG_OP_TIME_DIVERSITY.
+
 config OP_RX_WINDOW_US
 	int "Reserved RX window at the end of each frame (us)"
+	default 0 if OP_TIME_DIVERSITY
 	default 300
+	help
+	  AIR-4 / SYS-7 slot, idle in v1. Two 81 B TD copies end at t0 + 877 us, so a pack with TD on
+	  forfeits it (ADR-0017): the TD build sets 0, and td on on a 300 us build sends into it.
 
 config OP_PACK_ID
 	int "Pack ID (AIR-2 access address), set from host/channel_plan.yaml"
@@ -42,17 +54,6 @@ config OP_CH_B_MHZ
 	help
 	  2482 is UK/EU only (EN 300 328, ADR-0016); the pack's region setting caps fB at 2480 for us/jp
 	  at runtime (fw/src/proto/proto_pack.c op_fb_max). BabbleSim's phy stops at 2480.
-
-config OP_TEST_FRAME_LEN
-	int "Test only: AIR-3 payload length override (B), 0 = v1 default (42)"
-	default 0
-	range 0 85
-	help
-	  bsim G2 scenarios (tests/bsim/scenarios, #27) set 81 (ADPCM-6 frame + 39 B td_audio, AIR-3) to
-	  measure per-copy loss at the time-diversity packet length before OP_TIME_DIVERSITY exists
-	  (ADR-0001, #26). Payload content is unchanged; recovery from packet n+2 is done offline.
-	  Needs OP_RX_WINDOW_US=0 on the pack and OP_RX_TRACK_WIN_US<=10 on the receiver to fit 1 ms.
-	  Net core only: the receiver app core ignores IPC messages of the other size (no fw loss counts).
 
 config OP_TEST_BSIM_ARGS
 	bool "Test only: pack id and carriers from the bsim command line (-op_pack_id, -op_ch_a, -op_ch_b)"

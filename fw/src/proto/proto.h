@@ -54,6 +54,8 @@ struct op_rx_state {
 	void (*sample)(struct op_rx_state *s);
 	int locked, rssi_dbm;
 	int loss_permille;
+	int td;      /* the pack sends time-diversity packets (81 B payload, ADR-0017), from the merge */
+	int td_plan; /* what the booth says this pack should send (`td on|off`), 0 until set */
 	struct op_telem telem;
 };
 extern const struct op_cmd op_rx_cmds[];
@@ -66,6 +68,7 @@ struct op_pack_cfg {
 	int ch_a, ch_b; /* MHz */
 	int power_dbm;  /* -40..3 */
 	char region[4]; /* uk (default) | us | eu | jp */
+	int td;         /* time diversity (AIR-3 td_audio, ADR-0017): 0 (default) | 1 */
 };
 struct op_pack_state {
 	struct op_pack_cfg cur, saved; /* saved is RAM only: NVS persistence not wired (see fw/PROTOCOL.md) */
@@ -75,3 +78,5 @@ extern const struct op_cmd op_pack_cmds[];
 extern const size_t op_pack_ncmds;
 void op_pack_state_init(struct op_pack_state *s, int id, int ch_a, int ch_b);
 int op_fb_max(const char *region); /* 2482 uk/eu, 2480 us/jp (AIR-5, ADR-0016) */
+/* `td` argument: "on" -> 1, "off" -> 0, else -1. */
+int op_parse_onoff(const char *s);

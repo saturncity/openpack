@@ -47,7 +47,7 @@ def c(bench):
 def test_packs_rx_present_and_absent(c):
     p = c.get("/packs").json()
     assert [e["status"] is not None for e in p] == [n in SLOTS for n in range(1, 9)]
-    assert all(set(e["status"]) == {"locked", "rssi", "loss", "batt", "peak", "clip", "temp"} for e in p if e["status"])
+    assert all(set(e["status"]) == {"locked", "rssi", "loss", "batt", "peak", "clip", "temp", "td"} for e in p if e["status"])
     assert all("error" in e for e in p if e["status"] is None)
     rx = c.get("/rx").json()
     assert [e.get("fw") for e in rx if "fw" in e] == ["0.1.0"] * 3

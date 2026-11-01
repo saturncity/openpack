@@ -8,7 +8,10 @@
  *   copy B TXEN at t0+T+T_GAP, on air [t0+R+T+T_GAP, t0+R+2T+T_GAP]  channel B
  * Copy B starts on air exactly T_GAP after copy A ends: B.start - A.end = (CC1 + R) - (R + T) = T_GAP.
  * The retune (DISABLED ISR -> frequency write) has T_GAP - R = 60 us at the default T_GAP.
- * Both copies end before t0 + OP_RX_WINDOW start (AIR-4 reserved RX slot, idle in v1).
+ * Both copies end before t0 + OP_RX_WINDOW start (AIR-4 reserved RX slot, idle in v1). The payload is
+ * 42 B, or 81 B with time diversity on (AIR-3 td_audio, composed by the app core, ADR-0017); T and the
+ * copy B start follow the length of the frame being sent. 81 B copies end at t0 + 877 us: a TD pack
+ * forfeits the RX slot (the TD build sets OP_RX_WINDOW_US = 0).
  *
  * Payload: the newest IPC frame (op_sched_put) is latched in the DISABLED interrupt after copy B
  * (LATCH_US) for the next t0. At start the net core tells the app core where that latch is
@@ -30,22 +33,31 @@
 #define DPPI_CH 0 /* the net core runs no BT controller, nothing else allocates DPPI */
 #define RAMP_US 40
 /* AIR-2: preamble 2 + address 4 + S0 1 + length 1 + payload + CRC 3, 4 us/byte at 2 Mbit/s. */
-#define AIR_US  ((2 + 4 + 1 + 1 + OP_FRAME_LEN + 3) * 4)
-#define CC_B_US (AIR_US + CONFIG_OP_T_GAP_US)
+#define AIR_US(len)  ((2 + 4 + 1 + 1 + (len) + 3) * 4)
+#define CC_B_US(len) (AIR_US(len) + CONFIG_OP_T_GAP_US)
 
 BUILD_ASSERT(CONFIG_OP_T_GAP_US > RAMP_US, "retune needs T_GAP > ramp-up");
-BUILD_ASSERT(RAMP_US + 2 * AIR_US + CONFIG_OP_T_GAP_US <= OP_FRAME_US - CONFIG_OP_RX_WINDOW_US,
+BUILD_ASSERT(RAMP_US + 2 * AIR_US(OP_FRAME_LEN) + CONFIG_OP_T_GAP_US <= OP_FRAME_US - CONFIG_OP_RX_WINDOW_US,
 	     "both copies must end before the reserved RX slot (AIR-4)");
+BUILD_ASSERT(RAMP_US + 2 * AIR_US(OP_PAYLOAD_MAX) + CONFIG_OP_T_GAP_US <=
+		     OP_FRAME_US - (IS_ENABLED(CONFIG_OP_TIME_DIVERSITY) ? CONFIG_OP_RX_WINDOW_US : 0),
+	     "time diversity: both 81 B copies must fit the frame (ADR-0017)");
 
-/* Payload latch: the DISABLED interrupt after copy B (load()), in TIMER0 us after t0. */
-#define LATCH_US (CC_B_US + RAMP_US + AIR_US)
-#define CC_NOW   NRF_TIMER_CC_CHANNEL2 /* capture only */
-
-static uint8_t pkt[2 + OP_FRAME_LEN]; /* S0, LENGTH, payload */
-static uint8_t pending[OP_FRAME_LEN];
-static bool fresh, on_b;
-static uint32_t underrun, overrun;
+static uint8_t pkt[2 + OP_PAYLOAD_MAX]; /* S0, LENGTH, payload */
+static uint8_t pending[OP_PAYLOAD_MAX];
+static uint8_t pending_len;
+static bool fresh, on_b, armed;
+/* Before the app core's first frame: an empty payload of the boot td setting's length. */
+#define BOOT_LEN (IS_ENABLED(CONFIG_OP_TIME_DIVERSITY) ? OP_PAYLOAD_MAX : OP_FRAME_LEN)
+static uint32_t underrun, overrun, cc_b = CC_B_US(BOOT_LEN);
 static int32_t margin_min = INT32_MAX, margin_max = INT32_MIN; /* latch - arrival, us */
+
+/* Payload latch: the DISABLED interrupt after copy B (load()), in TIMER0 us after t0. It follows the
+ * payload length on air (TD: 81 B copies end later). The app core is phased once, at start, to the
+ * boot length's latch; a later `td` switch keeps one frame per slot but moves the lead (fw/PROTOCOL.md).
+ */
+#define LATCH_US(len) (CC_B_US(len) + RAMP_US + AIR_US(len))
+#define CC_NOW        NRF_TIMER_CC_CHANNEL2 /* capture only */
 
 /* TIMER0 us since the last t0 (0..OP_FRAME_US-1). */
 static uint32_t phase_us(void)
@@ -57,11 +69,14 @@ static uint32_t phase_us(void)
 /* us until the next latch, 1..OP_FRAME_US */
 static int32_t to_latch_us(void)
 {
-	return OP_FRAME_US - (int32_t)((phase_us() + OP_FRAME_US - LATCH_US) % OP_FRAME_US);
+	return OP_FRAME_US - (int32_t)((phase_us() + OP_FRAME_US - LATCH_US(pkt[1])) % OP_FRAME_US);
 }
 
-void op_sched_put(const uint8_t *frame, size_t len)
+void op_sched_put(const uint8_t *payload, size_t len)
 {
+	if (len != OP_FRAME_LEN && len != OP_PAYLOAD_MAX) {
+		return;
+	}
 	unsigned int key = irq_lock();
 	/* Margin to this frame's own latch: the app core aims for OP_PACK_FRAME_LEAD_US (pack.c); the
 	 * deviation from that is taken within +-half a frame, so a late frame shows as negative.
@@ -73,7 +88,8 @@ void op_sched_put(const uint8_t *frame, size_t len)
 	if (fresh) {
 		overrun++;
 	}
-	memcpy(pending, frame, MIN(len, sizeof(pending)));
+	memcpy(pending, payload, len);
+	pending_len = len;
 	fresh = true;
 	margin_min = MIN(margin_min, m);
 	margin_max = MAX(margin_max, m);
@@ -91,11 +107,18 @@ int op_sched_sync(void)
 	return op_ipc_send(m, sizeof(m));
 }
 
-/* Runs in the RADIO ISR after copy B: next frame's payload. A missing frame repeats the last one. */
+/* Runs in the RADIO ISR after copy B: next frame's payload. A missing frame repeats the last one.
+ * Copy B of the next frame starts AIR_US(len) + T_GAP after t0; COMPARE1 is not due until then.
+ */
 static void load(void)
 {
 	if (fresh) {
-		memcpy(&pkt[2], pending, OP_FRAME_LEN);
+		memcpy(&pkt[2], pending, pending_len);
+		pkt[1] = pending_len;
+		cc_b = CC_B_US(pending_len);
+		if (armed) {
+			nrf_timer_cc_set(NRF_TIMER0, NRF_TIMER_CC_CHANNEL1, cc_b);
+		}
 		fresh = false;
 	} else {
 		underrun++;
@@ -121,7 +144,8 @@ static void radio_isr(const void *arg)
 static void timer_isr(const void *arg)
 {
 	nrf_timer_event_clear(NRF_TIMER0, NRF_TIMER_EVENT_COMPARE0);
-	nrf_timer_cc_set(NRF_TIMER0, NRF_TIMER_CC_CHANNEL1, CC_B_US);
+	nrf_timer_cc_set(NRF_TIMER0, NRF_TIMER_CC_CHANNEL1, cc_b);
+	armed = true;
 	nrf_timer_int_disable(NRF_TIMER0, NRF_TIMER_INT_COMPARE0_MASK);
 }
 
@@ -132,7 +156,7 @@ static void radio_init(void)
 		.s0len = 1,
 		.lflen = 8,
 		.plen = NRF_RADIO_PREAMBLE_LENGTH_16BIT,
-		.maxlen = OP_FRAME_LEN,
+		.maxlen = OP_PAYLOAD_MAX,
 		.statlen = 0,
 		.balen = 3,
 		.whiteen = true,
@@ -199,7 +223,7 @@ int op_sched_start(void)
 		return err;
 	}
 	pkt[0] = 0; /* S0: format version 0 (ADR-0009) */
-	pkt[1] = OP_FRAME_LEN;
+	pkt[1] = BOOT_LEN;
 	radio_init();
 	IRQ_CONNECT(RADIO_IRQn, 0, radio_isr, NULL, 0);
 	irq_enable(RADIO_IRQn);
@@ -223,8 +247,11 @@ int op_sched_start(void)
 	if (IS_ENABLED(CONFIG_OP_TEST_SCHED_REPORT)) {
 		k_timer_start(&report_timer, K_SECONDS(1), K_SECONDS(1));
 	}
-	printk("SCHED start pack_id=%d fA=%d fB=%d air_us=%d cc_b_us=%d latch_us=%d\n", OP_PACK_ID,
-	       OP_CH_A_MHZ, OP_CH_B_MHZ, AIR_US, CC_B_US, LATCH_US);
+	printk("SCHED start pack_id=%d fA=%d fB=%d air_us=%d cc_b_us=%d latch_us=%d td_air_us=%d "
+	       "td_cc_b_us=%d td_latch_us=%d\n",
+	       OP_PACK_ID, OP_CH_A_MHZ, OP_CH_B_MHZ, AIR_US(OP_FRAME_LEN), CC_B_US(OP_FRAME_LEN),
+	       LATCH_US(OP_FRAME_LEN), AIR_US(OP_PAYLOAD_MAX), CC_B_US(OP_PAYLOAD_MAX),
+	       LATCH_US(OP_PAYLOAD_MAX));
 	return 0;
 }
 

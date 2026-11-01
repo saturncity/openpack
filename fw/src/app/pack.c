@@ -12,6 +12,9 @@
  * the time to its next latch (op_sched_sync); the first frame clock is placed
  * CONFIG_OP_PACK_FRAME_LEAD_US before a latch. That lead is the frame thread's deadline for read +
  * encode + IPC: under any load that leaves the thread its deadline, no frame is skipped.
+ *
+ * Time diversity (ADR-0017): with the pack's `td` setting on, op_td_tx appends frame n-2's td_audio
+ * (codec_state + audio, 39 B) to frame n, an 81 B payload (AIR-3); the net core times it per length.
  */
 #include <errno.h>
 #include <string.h>
@@ -22,6 +25,7 @@
 #include "op_frame.h"
 #include "op_audio.h"
 #include "adpcm6.h"
+#include "op_td.h"
 
 #define HDR 3 /* AIR-3: seq u8, status u16 LE; then one ADPCM-6 frame (codec_state + audio) */
 #define MIN_FIRST_US 50 /* first frame clock at least this far after the sync arrives */
@@ -74,9 +78,10 @@ static void on_net(const uint8_t *m, size_t len)
 
 static void frame_thread(void *a, void *b, void *c)
 {
-	uint8_t f[OP_FRAME_LEN] = {0};
+	uint8_t f[OP_FRAME_LEN] = {0}, p[OP_FRAME_TD_LEN];
 	int16_t pcm[OP_AUDIO_FRAME_SAMPLES];
 	uint8_t seq = 0;
+	static struct op_td_tx td; /* zeroed: no frame n-2 yet */
 
 	for (;;) {
 		k_sem_take(&tick, K_FOREVER);
@@ -86,7 +91,8 @@ static void frame_thread(void *a, void *b, void *c)
 		f[0] = seq++;
 		/* f[1..2] status: telemetry (PK-10) lands with the battery/peak sensors */
 		adpcm6_encode(pcm, &f[HDR]);
-		(void)op_ipc_send(f, sizeof(f)); /* a lost frame shows as a seq skip on air */
+		/* a lost frame shows as a seq skip on air */
+		(void)op_ipc_send(p, op_td_tx(&td, f, op_pack_td(), p));
 	}
 }
 

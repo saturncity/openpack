@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.20.0)
+find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
+project(td)
+target_sources(app PRIVATE src/main.c ../../src/td/op_td.c)
+target_include_directories(app PRIVATE ../../src/td ../../include)
