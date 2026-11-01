@@ -9,9 +9,10 @@ The wire format is `host/PROTOCOL.md` (the contract; `host/modules.py: request()
 | Request | Firmware behaviour |
 |---|---|
 | `info` | `ok fw=0.1.0` |
-| `status` | `ok locked= rssi= loss= batt= peak= clip= temp=`. `loss` is a fraction with 3 decimals. Values from a stub (`op_rx_stub_sample`) until #23/#24 |
+| `status` | `ok locked= rssi= loss= batt= peak= clip= temp= td=`. `loss` is a fraction with 3 decimals. Values from a stub (`op_rx_stub_sample`) until #23/#24, except `td`: 1 when the merge receives 81 B time-diversity packets from the pack (`op_rx_app_td`, ADR-0017) |
 | `pair <pack> <fA> <fB>` | pack 1..8, fA 2402..2440, fB in [fA+40, 2482], else `err bad pairing`. Any region: receiving is not regulated, `host/channel_plan.py` checks the plan against its region (ADR-0016) |
 | `trim <dB>` | decimal, +-24, one decimal kept |
+| `td [on\|off]` | what the booth expects this pack to send (host `td: true` in the plan, sent after `pair`). Stored only: the receiver tells time diversity per pack from the payload length (42 B off, 81 B on) and needs no setting. `td` alone reads it back (`ok td=on`) |
 | `scan` | 42 entries 2400..2482 step 2, stub `-100` dBm |
 | `dfu <n>` | `err dfu not implemented` (the raw payload would then be read as lines; not wired) |
 
@@ -21,11 +22,12 @@ A command without arguments reads the value.
 
 | Request | Reply |
 |---|---|
-| `info` | `ok fw= role=pack id= chan=A,B power= region=` |
+| `info` | `ok fw= role=pack id= chan=A,B power= region= td=` |
 | `id [0-7]` | `ok` / `ok id=n` |
 | `chan [<fA> <fB>]` | fA 2402..2440, fB in [fA+40, 2482] in region uk/eu, [fA+40, 2480] in us/jp (ADR-0016, same as `host/channel_plan.py` `FB_MAX`) |
 | `power [dBm]` | -40..3 (nRF5340 radio range) |
 | `region [uk\|us\|eu\|jp]` | default `uk` (ADR-0015). Caps `chan` fB (above). Switching to us/jp while fB is 2482 gives `err`: set `chan` first. Power is not yet clamped by region |
+| `td [on\|off]` | time diversity (ADR-0017): packet n also carries frame n-2's codec_state + audio (`td_audio`, AIR-3), 81 B payload, +2 ms latency, recovered by the receiver when both copies of frame n fail (RX-4). Default `off`, or `on` in a `SB_CONFIG_OP_TIME_DIVERSITY` build. A configuration-time setting like `chan`: it takes effect on the next frame and the receiver re-locks on the new length (a few frames lost), so do not switch it mid-show. A TD pack sends into the AIR-4 RX slot (idle in v1) |
 | `save` | copies the config to a RAM slot. NVS/settings persistence is not wired (follow-up) |
 
 On bsim the console is uart0 (pty). On the DK it is also the uart0 VCOM: the CDC ACM instance is not wired (needs the USB device stack and an overlay), so PK-9 over real USB is not covered yet.

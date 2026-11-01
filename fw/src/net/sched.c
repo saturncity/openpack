@@ -8,7 +8,10 @@
  *   copy B TXEN at t0+T+T_GAP, on air [t0+R+T+T_GAP, t0+R+2T+T_GAP]  channel B
  * Copy B starts on air exactly T_GAP after copy A ends: B.start - A.end = (CC1 + R) - (R + T) = T_GAP.
  * The retune (DISABLED ISR -> frequency write) has T_GAP - R = 60 us at the default T_GAP.
- * Both copies end before t0 + OP_RX_WINDOW start (AIR-4 reserved RX slot, idle in v1).
+ * Both copies end before t0 + OP_RX_WINDOW start (AIR-4 reserved RX slot, idle in v1). The payload is
+ * 42 B, or 81 B with time diversity on (AIR-3 td_audio, composed by the app core, ADR-0017); T and the
+ * copy B start follow the length of the frame being sent. 81 B copies end at t0 + 877 us: a TD pack
+ * forfeits the RX slot (the TD build sets OP_RX_WINDOW_US = 0).
  *
  * All peripheral access is via the nrfx HAL (the bsim models only see HAL writes, ADR-0009).
  */
@@ -25,35 +28,52 @@
 #define DPPI_CH 0 /* the net core runs no BT controller, nothing else allocates DPPI */
 #define RAMP_US 40
 /* AIR-2: preamble 2 + address 4 + S0 1 + length 1 + payload + CRC 3, 4 us/byte at 2 Mbit/s. */
-#define AIR_US  ((2 + 4 + 1 + 1 + OP_FRAME_LEN + 3) * 4)
-#define CC_B_US (AIR_US + CONFIG_OP_T_GAP_US)
+#define AIR_US(len)  ((2 + 4 + 1 + 1 + (len) + 3) * 4)
+#define CC_B_US(len) (AIR_US(len) + CONFIG_OP_T_GAP_US)
 
 BUILD_ASSERT(CONFIG_OP_T_GAP_US > RAMP_US, "retune needs T_GAP > ramp-up");
-BUILD_ASSERT(RAMP_US + 2 * AIR_US + CONFIG_OP_T_GAP_US <= OP_FRAME_US - CONFIG_OP_RX_WINDOW_US,
+BUILD_ASSERT(RAMP_US + 2 * AIR_US(OP_FRAME_LEN) + CONFIG_OP_T_GAP_US <= OP_FRAME_US - CONFIG_OP_RX_WINDOW_US,
 	     "both copies must end before the reserved RX slot (AIR-4)");
+BUILD_ASSERT(RAMP_US + 2 * AIR_US(OP_PAYLOAD_MAX) + CONFIG_OP_T_GAP_US <=
+		     OP_FRAME_US - (IS_ENABLED(CONFIG_OP_TIME_DIVERSITY) ? CONFIG_OP_RX_WINDOW_US : 0),
+	     "time diversity: both 81 B copies must fit the frame (ADR-0017)");
 
-static uint8_t pkt[2 + OP_FRAME_LEN]; /* S0, LENGTH, payload */
-static uint8_t pending[OP_FRAME_LEN];
-static bool fresh, on_b;
-static uint32_t underrun, overrun;
+static uint8_t pkt[2 + OP_PAYLOAD_MAX]; /* S0, LENGTH, payload */
+static uint8_t pending[OP_PAYLOAD_MAX];
+static uint8_t pending_len;
+static bool fresh, on_b, armed;
+/* Before the app core's first frame: an empty payload of the boot td setting's length. */
+#define BOOT_LEN (IS_ENABLED(CONFIG_OP_TIME_DIVERSITY) ? OP_PAYLOAD_MAX : OP_FRAME_LEN)
+static uint32_t underrun, overrun, cc_b = CC_B_US(BOOT_LEN);
 
-void op_sched_put(const uint8_t *frame, size_t len)
+void op_sched_put(const uint8_t *payload, size_t len)
 {
+	if (len != OP_FRAME_LEN && len != OP_PAYLOAD_MAX) {
+		return;
+	}
 	unsigned int key = irq_lock();
 
 	if (fresh) {
 		overrun++;
 	}
-	memcpy(pending, frame, MIN(len, sizeof(pending)));
+	memcpy(pending, payload, len);
+	pending_len = len;
 	fresh = true;
 	irq_unlock(key);
 }
 
-/* Runs in the RADIO ISR after copy B: next frame's payload. A missing frame repeats the last one. */
+/* Runs in the RADIO ISR after copy B: next frame's payload. A missing frame repeats the last one.
+ * Copy B of the next frame starts AIR_US(len) + T_GAP after t0; COMPARE1 is not due until then.
+ */
 static void load(void)
 {
 	if (fresh) {
-		memcpy(&pkt[2], pending, OP_FRAME_LEN);
+		memcpy(&pkt[2], pending, pending_len);
+		pkt[1] = pending_len;
+		cc_b = CC_B_US(pending_len);
+		if (armed) {
+			nrf_timer_cc_set(NRF_TIMER0, NRF_TIMER_CC_CHANNEL1, cc_b);
+		}
 		fresh = false;
 	} else {
 		underrun++;
@@ -79,7 +99,8 @@ static void radio_isr(const void *arg)
 static void timer_isr(const void *arg)
 {
 	nrf_timer_event_clear(NRF_TIMER0, NRF_TIMER_EVENT_COMPARE0);
-	nrf_timer_cc_set(NRF_TIMER0, NRF_TIMER_CC_CHANNEL1, CC_B_US);
+	nrf_timer_cc_set(NRF_TIMER0, NRF_TIMER_CC_CHANNEL1, cc_b);
+	armed = true;
 	nrf_timer_int_disable(NRF_TIMER0, NRF_TIMER_INT_COMPARE0_MASK);
 }
 
@@ -90,7 +111,7 @@ static void radio_init(void)
 		.s0len = 1,
 		.lflen = 8,
 		.plen = NRF_RADIO_PREAMBLE_LENGTH_16BIT,
-		.maxlen = OP_FRAME_LEN,
+		.maxlen = OP_PAYLOAD_MAX,
 		.statlen = 0,
 		.balen = 3,
 		.whiteen = true,
@@ -131,7 +152,7 @@ int op_sched_start(void)
 		return err;
 	}
 	pkt[0] = 0; /* S0: format version 0 (ADR-0009) */
-	pkt[1] = OP_FRAME_LEN;
+	pkt[1] = BOOT_LEN;
 	radio_init();
 	IRQ_CONNECT(RADIO_IRQn, 0, radio_isr, NULL, 0);
 	irq_enable(RADIO_IRQn);
@@ -152,8 +173,9 @@ int op_sched_start(void)
 	if (CONFIG_OP_PACK_TEST_RUN_MS > 0) {
 		k_timer_start(&test_stop_timer, K_MSEC(CONFIG_OP_PACK_TEST_RUN_MS), K_NO_WAIT);
 	}
-	printk("SCHED start pack_id=%d fA=%d fB=%d air_us=%d cc_b_us=%d\n", OP_PACK_ID,
-	       OP_CH_A_MHZ, OP_CH_B_MHZ, AIR_US, CC_B_US);
+	printk("SCHED start pack_id=%d fA=%d fB=%d air_us=%d cc_b_us=%d td_air_us=%d td_cc_b_us=%d\n",
+	       OP_PACK_ID, OP_CH_A_MHZ, OP_CH_B_MHZ, AIR_US(OP_FRAME_LEN), CC_B_US(OP_FRAME_LEN),
+	       AIR_US(OP_PAYLOAD_MAX), CC_B_US(OP_PAYLOAD_MAX));
 	return 0;
 }
 

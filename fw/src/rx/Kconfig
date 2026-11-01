@@ -4,6 +4,14 @@ config OP_RX_TRACK_WIN_US
 	int "RX-3 tracking window: accept a copy within +- this of its expected start (us)"
 	default 50
 
+config OP_RX_TRACK_WIN_TD_US
+	int "RX-3 tracking window for a time-diversity pack, 81 B packets (us)"
+	default 10
+	range 1 37
+	help
+	  Two 368 us copies + T_GAP leave room for +-37 us at most before the deadline and re-centring
+	  overrun the 1 ms frame; 10 us is what bsim G2 runs (#82). The receiver picks it per pack.
+
 config OP_RX_MISS_LIMIT
 	int "RX-3 consecutive frames with no valid copy before re-acquisition"
 	default 100

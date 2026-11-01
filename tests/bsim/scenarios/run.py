@@ -4,8 +4,7 @@
 usage: run.py [--long] [--only abcde] [--build DIR] [--no-build] [--out DIR] [--jobs N] [--keep]
 needs BSIM_OUT_PATH, BSIM_COMPONENTS_PATH and a west workspace (ZEPHYR_BASE, Zephyr SDK) for the builds.
 
-Builds 5 images (pack, receiver, pack that goes silent after 3 s, and both at the time-diversity packet
-length) once; every pack id and carrier pair comes from host/channel_plan_us.yaml (default --plan; the
+Builds 4 images (pack, receiver, pack that goes silent after 3 s, pack with time diversity on) once; every pack id and carrier pair comes from host/channel_plan_us.yaml (default --plan; the
 BabbleSim phy rejects centres above 2480 MHz, so the UK plan's 2482 carrier for pack 1 cannot run here,
 ADR-0016; packs 2-8 are identical in both plans) through the bsim-only
 -op_pack_id/-op_ch_a/-op_ch_b options (CONFIG_OP_TEST_BSIM_ARGS). Each scenario launches the 2G4 phy
@@ -18,14 +17,17 @@ calibrated ones in tests/bsim/wlan_params.yaml (10 % and 40 % from #18, 25 % fro
 
 Evidence per frame comes from the phy dumps: a copy counts if the receiver's Rx dump has a status-OK
 reception of it (sync within 20-30 us of the pack's Tx start, the pack's access address). Time diversity
-(TD, AIR-3/RX-4, ADR-0001) is not in firmware yet (#26): TD runs use 81 B packets (OP_TEST_FRAME_LEN) so
-the per-copy loss is measured at the TD air time, and frame n counts as recovered when any copy of
-packet n or n+2 arrived. Firmware loss (receiver app core RXAPP lines) is cross-checked against TD off.
+(TD, AIR-3/RX-4, ADR-0017, #91): TD runs use the real TD pack (SB_CONFIG_OP_TIME_DIVERSITY, 81 B payload with
+frame n-2's td_audio) and the same receiver image, which tells TD packs by length. From the dumps, frame n
+counts as recovered when any copy of packet n or n+2 arrived; the firmware (receiver app core RXAPP lines:
+lost, td = recovered from td_audio) is cross-checked against that, and against TD off for TD-off runs.
 
 Asserted (exit code != 0 on failure), per ADR-0003 / ADR-0010:
   (a) SYS-2 sim latency <= 1.6 ms excl. I2S and ADC/DAC filters; RX-2 lock <= 2 s; 0 lost frames.
+      TD on: SYS-2 projection with the PCM5102A FLT=1 filter <= 4.6 ms (ADR-0017), 0 lost, receiver in TD mode.
   (b) channel-plan pack 8 (fA under Wi-Fi 6, fB in a gap) at 10/25/40 % busy: SYS-3 at 40 % with TD on.
-      Both carriers under Wi-Fi (2437/2462) is reported, not asserted (no gap carrier, AIR-5 forbids it).
+      Both carriers under Wi-Fi (2437/2462) is reported, not asserted (no gap carrier, AIR-5 forbids it);
+      its TD runs assert RX-4: frames lost on both copies are recovered from td_audio by the firmware.
   (c) 8 packs + 8 receivers, near pack at -20 dBm: no cross-pack copy loss without Wi-Fi; SYS-3 per pack
       at 40 % with TD on (loss <= 0.1 %, <= 2 consecutive lost frames). Events/h reported (ADR-0010).
   (d) +-40 ppm (pack +40, receiver -40): radio tracking holds, 0 lost, 0 seq skips, 0 re-acquire.
@@ -60,14 +62,14 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 BOARD = "nrf5340bsim/nrf5340/cpuapp"
-TD = ["-Dfw_net_CONFIG_OP_TEST_FRAME_LEN=81"]  # net core only: the app cores keep the v1 42 B frame (codec); --td-len
+TD_LEN = 81  # AIR-3 payload with td_audio (42 + 39 B)
 IMAGES = {  # name: west build -- args (sysbuild; fw = app core image, fw_net = net core image)
     "pack": [],
     "rx": ["-DSB_CONFIG_OP_ROLE_RX=y"],
     "pack3s": ["-Dfw_net_CONFIG_OP_PACK_TEST_RUN_MS=3000"],
-    # TD length: 2 x 368 us copies + T_GAP leave no room for the AIR-4 RX slot or a +-50 us window.
-    "pack_td": TD + ["-Dfw_net_CONFIG_OP_RX_WINDOW_US=0"],
-    "rx_td": ["-DSB_CONFIG_OP_ROLE_RX=y"] + TD + ["-Dfw_net_CONFIG_OP_RX_TRACK_WIN_US=10"],
+    # TD on at boot (ADR-0017); OP_RX_WINDOW_US defaults to 0 with it (2 x 368 us copies + T_GAP fill the slot).
+    # The receiver needs no TD image: it picks the 81 B timeline (+-10 us window) from the payload length.
+    "pack_td": ["-DSB_CONFIG_OP_TIME_DIVERSITY=y"],
 }
 PL_10M, ATT_WLAN, ATT_NEAR, ATT_DEFAULT = 60.2, 46.2, 20.0, 60.0  # free space 2.44 GHz: 10 m, 2 m; near
 ATT_PACK = PL_10M - 20  # pack radio 0 dBm + att = EIRP - path loss; set from --eirp in main()
@@ -86,6 +88,8 @@ RAMP_TX = 41  # bsim TXEN -> on air, fast ramp-up (tests/bsim/sched/check.py)
 RAMP_RX = 40  # RXEN -> RX start
 ENC_IPC_US, OUT_SLOT_US = 100, 200  # SPEC section 2: encode + IPC; output deadline = copy B end + 200
 I2S_FILTERS_US = 1000 + 167 + 160 + 458  # frame accumulation, DAC DMA block, ADC and DAC filters (SPEC 2, #26)
+DAC_FLT1_GAIN_US = 458 - 73  # PCM5102A FLT=1 low-latency filter, 3.5/fs (ADR-0017, hw/rx strap)
+SYS2_TD_MAX = 4600  # TD on with FLT=1 (ADR-0017: 4.58 ms)
 TD_US = 2000  # time diversity: frame n is played after packet n+2 (SPEC 2)
 TD_OFFSETS = (1, 2, 3)  # reported TD offsets (frames), #26
 SYS2_SIM_MAX, LOCK_MAX = 1600, 2.0
@@ -109,7 +113,7 @@ def crowded(links, near):
 def plan(path):
     """host/channel_plan.yaml -> {id: (fA, fB)}; tiny parser, the file is flat."""
     out = {}
-    for m in re.finditer(r"^\s*(\d+):\s*\{fA:\s*(\d+),\s*fB:\s*(\d+)\}", Path(path).read_text(), re.M):
+    for m in re.finditer(r"^\s*(\d+):\s*\{fA:\s*(\d+),\s*fB:\s*(\d+)[^}]*\}", Path(path).read_text(), re.M):
         out[int(m[1])] = (int(m[2]), int(m[3]))
     assert len(out) == 8, out
     return out
@@ -274,12 +278,12 @@ def fw_stats(text, t_lock):
     """Receiver log -> lock times (s) and RXAPP totals over whole seconds after the first lock."""
     locks = [int(t) / 1e6 for t in re.findall(r"RX lock epoch=\d+ t_us=(\d+)", text)]
     reacq = len(re.findall(r"RX reacquire", text))
-    tot = {k: 0 for k in ("frames", "valid", "lost", "skips")}
+    tot = {k: 0 for k in ("frames", "valid", "lost", "skips", "td", "td_on")}
     for m in re.findall(r"RXAPP (.*)", text):
         x = {k: int(v) for k, v in re.findall(r"(\w+)=(-?\d+)", m)}
         if locks and x["t_ms"] / 1e3 - 1 >= locks[0] + t_lock:
             for k in tot:
-                tot[k] += x[k]
+                tot[k] += x.get(k, 0)
     return locks, reacq, tot
 
 
@@ -309,7 +313,7 @@ class G2:
 
     def packs(self, sim, ids, td, near=None, offsets=True):
         """Add packs and their receivers (one receiver per pack, rack side). Returns [(pid, pdev, rdev, fa, fb)]."""
-        pk, rx = ("pack_td", "rx_td") if td else ("pack", "rx")
+        pk, rx = ("pack_td", "rx") if td else ("pack", "rx")
         out = []
         for i, k in enumerate(ids):
             plan_id = isinstance(k, int)
@@ -341,7 +345,8 @@ class G2:
             t_from = (locks[0] + warm) * 1e6 if locks else 1e18
             st, _ = link(sim, pdev, rdev, pid, fa, fb, t_from) if locks else ({"frames": 0}, [])
             st.update(lock_s=locks[0] if locks else None, reacquire=reacq, fw_frames=tot["frames"],
-                      fw_lost=tot["lost"], fw_skips=tot["skips"],
+                      fw_lost=tot["lost"], fw_skips=tot["skips"], fw_td=tot["td"], fw_td_secs=tot["td_on"],
+                      fw_td_rate=tot["td"] / tot["frames"] if tot["frames"] else None,
                       fw_loss=tot["lost"] / tot["frames"] if tot["frames"] else None, fA=fa, fB=fb)
             per[k] = st
         return per
@@ -355,13 +360,14 @@ class G2:
                 f" | TD on {s['loss_on']:.3%} run {s['run_on']} ev/h {s['events_h_on']:.0f}"
                 f" | TD d=1 {s['loss_on1']:.3%} run {s['run_on1']}, d=1 A-only {s['loss_on1a']:.3%} run {s['run_on1a']}"
                 f", d=2 A-only {s['loss_on2a']:.3%} run {s['run_on2a']}, d=3 {s['loss_on3']:.3%} run {s['run_on3']}"
-                f" | fw lost {s['fw_lost']}/{s['fw_frames']} skips {s['fw_skips']} reacq {s['reacquire']}")
+                f" | fw lost {s['fw_lost']}/{s['fw_frames']} td-recovered {s['fw_td']} skips {s['fw_skips']}"
+                f" reacq {s['reacquire']}")
 
     # (a) 1 pack, clean channel: SYS-2 sim latency, RX-2 lock, zero loss; TD-length latency reported.
     def sc_a(self):
         secs = self.secs(5, 30)
         for td in (False, True):
-            sim = Sim("a_td" if td else "a", secs if not td else 2, self.out)
+            sim = Sim("a_td" if td else "a", secs if not td else 3, self.out)
             links = self.packs(sim, [(kconfig_default("OP_CH_A_MHZ"), kconfig_default("OP_CH_B_MHZ"))], td,
                                offsets=False)
             assert sim.run(), "sim a failed"
@@ -369,7 +375,7 @@ class G2:
             per = self.measure(sim, links)[k]
             fr = [x for x in tx_frames(sim.dumps / f"d_2G4_{pdev:02d}.Tx.csv", fa, fb)
                   if per["lock_s"] is not None and x[0] >= (per["lock_s"] + 0.1) * 1e6]
-            dl = re.search(r"deadline_us=(\d+)", sim.log(f"rx{k}"))
+            dl = (re.findall(r"RX lock .*?deadline_us=(\d+)", sim.log(f"rx{k}")) or [None])[-1]
             _, starts = rx_ok(sim.dumps / f"d_2G4_{rdev:02d}.Rx.csv", aa(pid))
             wa = sorted(s for f, s in starts if f == fa)
             lat, slack = [], []
@@ -377,7 +383,7 @@ class G2:
                 i = bisect.bisect_right(wa, x[0]) - 1  # window A opened just before copy A
                 if i < 0 or x[0] - wa[i] > 150:
                     continue
-                deadline = wa[i] - RAMP_RX + int(dl[1])
+                deadline = wa[i] - RAMP_RX + int(dl)
                 t0 = x[0] - RAMP_TX
                 lat.append(ENC_IPC_US + (x[3] + OUT_SLOT_US - t0))
                 slack.append(x[3] + OUT_SLOT_US - deadline)
@@ -388,6 +394,7 @@ class G2:
                                                 "merge_deadline_slack_us_min": min(slack, default=None)})
             sys2 = L + I2S_FILTERS_US + (TD_US if td else 0)
             self.report(tag, "sys2_projection_us", sys2)
+            self.report(tag, "sys2_projection_flt1_us", sys2 - DAC_FLT1_GAIN_US)
             print(self.line("a", per))
             if not td:
                 self.check("a", "SYS-2 sim latency (enc+IPC 100 + t0 -> copy B end + 200 output slot), excl. I2S/filters <= 1600 us",
@@ -403,11 +410,20 @@ class G2:
                 print(f"    SYS-2 projection (+ accumulation, DAC DMA, ADC/DAC filters): {sys2 / 1e3:.2f} ms "
                       f"(target 3.0, hard 5.0)")
             else:
-                print(f"    TD length: sim latency {L:.0f} us + TD 2000 -> SYS-2 projection {sys2 / 1e3:.2f} ms "
-                      f"(target 3.0, hard 5.0)")
+                p1 = sys2 - DAC_FLT1_GAIN_US
+                self.check("a_td", f"TD on: SYS-2 projection (sim + I2S/filters, DAC FLT=1, + TD 2000) <= {SYS2_TD_MAX} us",
+                           L < 1e9 and p1 <= SYS2_TD_MAX,
+                           f"{p1:.0f} us (sim {L:.0f} us; FLT=0 {sys2:.0f} us, hard limit 5000)")
+                self.check("a_td", "TD on: receiver in TD mode, merge deadline inside the output slot, 0 lost frames (fw)",
+                           per["fw_td_secs"] > 0 and slack and min(slack) >= 0 and per["fw_lost"] == 0 and
+                           per["fw_frames"] > 0 and per["loss_a"] == 0 and per["loss_b"] == 0,
+                           f"td_on {per['fw_td_secs']} s, min slack {min(slack, default=-1)} us, "
+                           f"fw lost {per['fw_lost']}/{per['fw_frames']}")
+                print(f"    TD on: sim latency {L:.0f} us + TD 2000 -> SYS-2 projection {sys2 / 1e3:.2f} ms, "
+                      f"{p1 / 1e3:.2f} ms with DAC FLT=1 (target 3.0, hard 5.0)")
             sim.cleanup(self.a.keep)
 
-    def loss_runs(self, sc, ids, busies, secs, near=None, assert_at=None):
+    def loss_runs(self, sc, ids, busies, secs, near=None, assert_at=None, assert_rec=False):
         for busy in busies:
             for td in (False, True) if busy else (False,):
                 tag = f"{sc}_{busy}{'_td' if td else ''}"
@@ -417,8 +433,8 @@ class G2:
                     self.wifi(sim, busy, links)
                 assert sim.run(), f"sim {tag} failed"
                 per = self.measure(sim, links)
-                self.report(sc, f"busy{busy}_{'td_len' if td else 'v1_len'}", per)
-                print(f"  {tag}: {TD[0].split('=')[1] + ' B TD-length' if td else 'v1 42 B'} packets, Wi-Fi {busy} % busy")
+                self.report(sc, f"busy{busy}_{'td' if td else 'v1_len'}", per)
+                print(f"  {tag}: {f'TD on, {TD_LEN} B' if td else 'v1 42 B'} packets, Wi-Fi {busy} % busy")
                 for k, s in per.items():
                     print(self.line(k, s))
                 key = "on" if td else "off"
@@ -436,19 +452,30 @@ class G2:
                                    s.get("frames") and s["loss_a"] == 0 and s["loss_b"] == 0 and s["fw_lost"] == 0,
                                    f"copy loss {s.get('loss_a', 1):.3%}/{s.get('loss_b', 1):.3%}, fw lost {s.get('fw_lost')}",
                                    xfail=XF_PLAN if k in hit else None)
-                if not td:
-                    for k, s in per.items():  # firmware merge agrees with the dump-derived TD-off loss
-                        if s.get("frames") and s["fw_frames"]:
-                            d = abs(s["fw_loss"] - s["loss_off"])
-                            self.check(sc, f"{tag} pack {k}: fw loss matches dumps (within 0.2 % abs or 5 % rel)",
-                                       d <= max(0.002, 0.05 * s["loss_off"]), f"fw {s['fw_loss']:.3%} vs dumps {s['loss_off']:.3%}")
+                for k, s in per.items():  # firmware merge (+ RX-4 recovery when TD) agrees with the dumps
+                    if s.get("frames") and s["fw_frames"]:
+                        d = abs(s["fw_loss"] - s[f"loss_{key}"])
+                        self.check(sc, f"{tag} pack {k}: fw loss matches dumps (within 0.2 % abs or 5 % rel)",
+                                   d <= max(0.002, 0.05 * s[f"loss_{key}"]),
+                                   f"fw {s['fw_loss']:.3%} vs dumps {s[f'loss_{key}']:.3%}")
+                        if td:
+                            rec = s["loss_off"] - s["loss_on"]  # lost on both copies, packet n+2 arrived
+                            self.check(sc, f"{tag} pack {k}: RX-4 fw recovers from td_audio what the dumps say "
+                                       "(within 0.2 % abs or 5 % rel)",
+                                       s["fw_td_secs"] > 0 and abs(s["fw_td_rate"] - rec) <= max(0.002, 0.05 * rec),
+                                       f"fw {s['fw_td']} frames ({s['fw_td_rate']:.3%}) vs dumps {rec:.3%}")
+                if td and assert_rec:
+                    n = sum(s.get("fw_td", 0) for s in per.values())
+                    self.check(sc, f"{tag}: frames lost on both copies are recovered from td_audio (RX-4)", n > 0,
+                               f"{n} frames recovered by the firmware")
                 sim.cleanup(self.a.keep)
 
     # (b) 1 pack, Wi-Fi 1/6/11 at 10/25/40 %.
     def sc_b(self):
         secs = self.secs(10, 120)
         self.loss_runs("b", [8], (10, 25, 40), secs, assert_at=40)
-        self.loss_runs("b_inband", [tuple(int(x) for x in self.a.inband.split(","))], (10, 40) if not self.a.long else (10, 25, 40), secs)
+        self.loss_runs("b_inband", [tuple(int(x) for x in self.a.inband.split(","))], (10, 40) if not self.a.long else (10, 25, 40), secs,
+                       assert_rec=True)
 
     # (c) 8 packs + 8 receivers, Wi-Fi 1/6/11, one pack near the rack at -20 dBm.
     def sc_c(self):
@@ -534,18 +561,13 @@ def main():
     ap.add_argument("--c-secs", type=float, default=0, help="(c) Wi-Fi run length in s (default 5, --long 60)")
     ap.add_argument("--plan", default=str(REPO / "host/channel_plan_us.yaml"),
                     help="channel plan for (b) and (c); bsim cannot run carriers above 2480 (UK pack 1, ADR-0016)")
-    ap.add_argument("--td-len", type=int, default=81,
-                    help="TD-length packet payload B (81 = full td_audio, AIR-3; e.g. 63 = ADPCM-3 td_audio, #26)")
     a = ap.parse_args()
-    TD[:] = [f"-Dfw_net_CONFIG_OP_TEST_FRAME_LEN={a.td_len}"]
-    IMAGES["pack_td"][0], IMAGES["rx_td"][1] = TD[0], TD[0]
     global ATT_PACK
     ATT_PACK = PL_10M - a.eirp
     WIFI_CH[:] = [int(x) for x in a.wifi.split(",")]
     need = set()
     for sc in a.only:
-        need |= {"a": {"pack", "rx", "pack_td", "rx_td"}, "b": {"pack", "rx", "pack_td", "rx_td"},
-                 "c": {"pack", "rx", "pack_td", "rx_td"}, "d": {"pack", "rx"}, "e": {"pack", "rx", "pack3s"}}[sc]
+        need |= {"a": {"pack", "rx", "pack_td"}, "b": {"pack", "rx", "pack_td"}, "c": {"pack", "rx", "pack_td"}, "d": {"pack", "rx"}, "e": {"pack", "rx", "pack3s"}}[sc]
     t = time.time()
     exes = build(sorted(need), Path(a.build).resolve(), a.jobs, a.no_build)
     g = G2(a, exes)

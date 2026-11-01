@@ -10,6 +10,7 @@ from . import channel_plan, modules
 
 app = FastAPI(title="OpenPack host", version="0.1.0")
 app.state.plan = channel_plan.load()
+app.state.td = channel_plan.td()  # packs with time diversity on (ADR-0017)
 # Receiver n (1..8) = n-th port; set OPENPACK_RX_PORTS=/dev/ttyUSB0,/dev/ttyUSB1,...
 app.state.ports = [p for p in os.environ.get("OPENPACK_RX_PORTS", "").split(",") if p]
 
@@ -42,7 +43,7 @@ def _kv(s):
 
 def _pack(request, n):
     a, b = request.app.state.plan[n]
-    out = {"id": n, "fA": a, "fB": b}
+    out = {"id": n, "fA": a, "fB": b, "td": n in request.app.state.td}
     try:
         out["status"] = _kv(_ask(request, n, "status"))
     except HTTPException as e:
@@ -90,6 +91,8 @@ def pair(n: int, body: Pair, request: Request):
     if request.app.state.plan.get(body.pack) != (body.fA, body.fB):
         raise HTTPException(422, "pair does not match channel_plan.yaml")  # API-3: plan is the source
     _ask(request, n, f"pair {body.pack} {body.fA} {body.fB}")
+    # ADR-0017: the receiver learns what the plan expects; its status td= says what the pack really sends
+    _ask(request, n, f"td {'on' if body.pack in request.app.state.td else 'off'}")
     return body
 
 
