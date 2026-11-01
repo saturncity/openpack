@@ -37,7 +37,7 @@ On bsim the console is uart0 (pty). On the DK it is also the uart0 VCOM: the CDC
 
 ## AIR-3 status word (PK-10)
 
-`op_status_pack()`: bits 0-6 battery percent (0..100), bits 7-12 peak = 63 + dBFS (63 = full scale, -63..0), bits 13-15 flags clip, lowbat, temp. SPEC gives only the field widths; this order is our choice. The pack does not yet put it in frames (the frame source is #20/#21); the receiver reply carries the decoded fields.
+`op_status_pack()`: bits 0-6 battery percent (0..100), bits 7-12 peak = 63 + dBFS (63 = full scale, -63..0), bits 13-15 flags clip, lowbat, temp. SPEC gives only the field widths; this order is our choice. The pack's frame pipeline (`src/app/pack.c`) sends status 0 until the battery and peak sensors land; the receiver reply carries the decoded fields.
 
 ## Gaps in host/PROTOCOL.md
 

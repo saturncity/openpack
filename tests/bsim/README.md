@@ -3,7 +3,8 @@
 BabbleSim scenario scripts.
 
 - `probe/`: AIR-1 radio probe and the Wi-Fi calibration of `wlan_params.yaml` (#18).
-- `sched/`: pack frame schedule from the phy Tx dump (AIR-4, #22).
+- `sched/`: pack frame schedule from the phy Tx dump (AIR-4, #22); payloads bit-exact against the input WAV,
+  latch margin, and the app-core stress build (`OP_TEST_APP_LOAD_*`, `OP_TEST_PROTO_POLL_MS`, #87).
 - `rx/`: receiver lock, tracking, merge, pack reboot (RX-2..RX-4, RX-10, #23).
 - `scenarios/run.py`: the G2 gate, scenarios (a)-(e) of PLAN.md Phase 2 (#27). CI job "G2 scenarios" in
   `.github/workflows/fw.yml`. Local: `python3 tests/bsim/scenarios/run.py` (CI lengths, a few minutes) or
