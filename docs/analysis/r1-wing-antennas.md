@@ -1,134 +1,164 @@
 # R1 with the rack antennas only in the wings
 
-#101, part of #6. 2026-11-01. Supersedes the install part of ADR-0016 (front of stage, ≥ 6 m up, aimed upstage). That mount is no longer allowed: the owner allows rack antennas only at the sides of the stage. Decision: ADR-0021. Model: `sim/loss/wing_geometry.py`. Numbers: `python3 audit.py` Audit 7. Twin: `tests/bsim/scenarios/run.py --geometry docs/analysis/r1-wing/<case>.json`. Human steps: `docs/human/antenna-install.md`.
+#101, part of #6. 2026-11-01. Supersedes the install part of ADR-0016 (front of stage, ≥ 6 m up, aimed upstage). That mount is no longer allowed: the owner allows rack antennas only at the sides of the stage. Decision: ADR-0021, which also settles PR #95's gain-plan stop-and-ask. Model: `sim/loss/wing_geometry.py`. Numbers: `python3 audit.py` Audit 7. Twin: `tests/bsim/scenarios/run.py --geometry docs/analysis/r1-wing/<case>.json`. Human steps: `docs/human/antenna-install.md`.
 
-**Answer:** yes, in the twin, under a new wing rule, with less margin than before. One L-com HG2409P-NF per wing goes 1 m offstage of the acting area, ¼ of the stage depth back from the front edge and **3.5 m up**. It aims at the **far upstage corner**, tilted **15° down**. There is **no Wi-Fi transmitter in either wing or on stage**, and any backstage Wi-Fi is ≥ 6 m from both antennas. The receiver's per-carrier antenna choice (RX-5) across the two wings carries the near-far case. Under that rule:
-- every stage point, in the studio and in both proscenium houses, holds its gap copy above the twin threshold, with an actor walking past an antenna included;
-- the worst point keeps **2.8 of the 3 dB** design margin;
-- bsim at 10 % and 40 % Wi-Fi gives **7 of 7** bsim-runnable packs passing SYS-3, TD off and TD on in all three venues, with an actor at a boom and the RX-5 probe every 1000 frames (§4: the old 100 cost 0.16 % for one pack with TD off). Pack 1 is credited by equivalence, as in ADR-0016.
+**Answer:** yes, in the twin, under a new wing rule and a receiver-module change, with less margin than before.
 
-The antennas, coax and 2482 carrier stay. What changes:
-- the mount: a 3.5 m lighting boom or stand in each wing;
-- one firmware default: the RX-5 probe every 1000 frames, not 100;
-- one gain-plan change for PR #95: a fixed 10 dB pad after the rack BAW filter (§3). It resolves that PR's near-pack stop-and-ask under this rule, and its NF costs 0.15 dB of the R1 margin.
+The configuration:
+- **Antennas:** one L-com HG2409P-NF per wing, 1 m offstage of the acting area and ¼ of the stage depth back from the front edge. Each sits **4 m up** on a lighting boom, aims at the **far upstage corner** and tilts **10° down**.
+- **No Wi-Fi transmitter in either wing or on stage.** Backstage Wi-Fi stays ≥ 6 m from both antennas, and crew phones in the wings are in airplane mode.
+- **Receivers:** BT40E modules (no nRF21540), with no pad.
+- **Firmware:** RX-5 probes every 1000 frames, not 100, and gains a miss-triggered switch with a hold (§4).
+
+Under that configuration:
+- **Model:** every stage point in a 6 m studio, a 10 m and a 12 m proscenium house holds its gap copy ≥ **1.5 dB above the twin threshold**. That covers any pack hot anywhere (at a boom or on stage), and actors in both wings at once.
+- **bsim:** **7 of 7** bsim-runnable packs meet SYS-3 in every case: 10 % and 40 % Wi-Fi, TD off and TD on, one or two hot packs, at a boom or on stage. The tightest is 0.086 % with TD off. Pack 1 is credited on 2482 by equivalence, as in ADR-0016.
+- **What changed from ADR-0016:**
+  - the mount: a 4 m boom or stand per wing;
+  - the receiver module: BT40NE → BT40E, which removes PR #95's overload and saves $58 per rack;
+  - two RX-5 firmware changes (the probe interval, and the miss-triggered switch).
+- **What did not change:** the antennas, coax, 2482 carrier, channel plan and rack chain.
 
 ## 1. Model
 
-- **Geometry:** x runs across the stage (antenna L at −x, R at +x), y runs upstage from the front edge, z is height above the stage floor. Free space at 2442 MHz. No body loss, no fading, and no credit for the proscenium wall. That matches ADR-0015/0016's C/I.
+- **Geometry:** x runs across the stage (antenna L at −x, R at +x), y runs upstage from the front edge, z is height above the stage floor. Free space at 2442 MHz. No body loss, no fading, and no credit for the proscenium wall. That matches the ADR-0015/0016 C/I.
 - **Venues:**
 
 | venue | acting area | wings | audience |
 |---|---|---|---|
 | studio | 6 × 5 m | 1.5 m | end-on, front row 1 m from the edge, 8 raked rows, 9 m wide, floor level with the stage |
-| proscenium | 10 × 8 m | 3 m | stalls 1 m below the stage, front row 2.5 m out, 18 rows, 16 m wide; boxes at ±8 m beside the arch, 3 m up; circle front |
+| proscenium | 10 × 8 m | 3 m | stalls 1 m below the stage, front row 2.5 m out, 18 rows, 16 m wide; boxes ±8 m beside the arch, 3 m up; circle front |
 | large proscenium | 12 × 10 m | 4 m | 22 rows, 20 m wide, boxes at ±9.5 m |
 
 - **Sources:**
-  - Packs at 1.2 m height, on a 0.5 m grid over the acting area.
-  - Every seat (and box, and the circle) is a 20 dBm Wi-Fi source, as in Q3. Each antenna takes its single worst source on all three channels.
+  - Packs at 1.2 m height, on a 0.5 m grid over the acting area, plus an actor walking 0.5 m past each boom.
+  - Every seat is a 20 dBm Wi-Fi source (Q3). Each antenna takes its single worst seat on all three channels at once.
   - Crew Wi-Fi is modelled anywhere in either wing, outside a keep-out radius.
-- **Antenna:** HG2409P-NF cuts as read in ADR-0016: HPBW 75° H / 65° V, rear lobes −9/−10 dB, 180° −18/−30 dB. The 60° and 90° points are interpolated (est.), and Phase 5 measures the pattern (#92). The 3-D pattern isn't published, so the model is pessimistic both ways:
+- **Antenna:** the HG2409P-NF cuts as read in ADR-0016: HPBW 75° H / 65° V, rear lobes −9/−10 dB, 180° −18/−30 dB. The 60° and 90° points are interpolated (est.); Phase 5 measures the pattern (#92). The 3-D pattern isn't published, so the model is pessimistic both ways:
   - the wanted pack gets the **lower** of the two cuts at its off-axis angle;
   - every interferer (Wi-Fi, a hot pack) gets the **higher**.
 - **Thresholds:** from the BabbleSim modem tables (`sim/loss/bsim_modem.py`), TD-length copy, PER ≤ 0.1 %.
-  - An 11 MHz gap carrier needs C/I ≥ **−12.3 dB** against each Wi-Fi channel, the same 12.7 dB-short figure as Audit 4. The design adds 3 dB (ADR-0016), so "margin" below means C/I − (−12.3) − 3 dB.
-  - A neighbouring pack may be **8.3 / 19.5 / 24.9 dB** hotter at 3 / 4 / 5 MHz offset. #76 found the same: 3 MHz fails, 5 MHz is fine.
-- **Diversity:** RX-5 (ADR-0011, `fw/src/rx/ant.c`) chooses the antenna **per carrier**. It stays on the stronger-RSSI antenna, probes the other one every 100 frames, and ages a missed window by 1 dB. So a carrier that a hot neighbour blocks on one antenna moves to the other after about 6 dB + ΔRSSI of misses, and the copy on the other carrier covers that gap. A pack keeps its frames if its gap copy holds on either antenna. The "strict" column counts only the stronger-RSSI antenna.
+  - An 11 MHz gap carrier needs C/I ≥ **−12.3 dB** against each Wi-Fi channel, the same 12.7 dB-short figure as Audit 4. The design adds 3 dB (ADR-0016), so "margin" below means C/I − (−12.3) − 3 dB. A margin of −3 is the twin threshold itself.
+  - A neighbouring pack may be **8.3 / 19.5 / 24.9 dB** hotter at 3 / 4 / 5 MHz offset (#76: 3 MHz fails, 5 MHz is fine).
+- **Silicon vs twin:** the nRF5340 PS v1.1 C/I (PR #95: ±2 MHz −2/−11, ±4 −22/−47, ≥ 6 −54 dB) interpolates to about −12 dB at 3 MHz on the worse side. The plan has no 4 MHz pairs, so the twin is the stricter of the two.
+- **Diversity:** RX-5 (ADR-0011, `fw/src/rx/ant.c`) chooses the antenna **per carrier**. A pack keeps its frames if its gap copy holds on either antenna. That needs RX-5 to leave a blocked antenna, which needed one fix (§4).
+- **Near-far:**
+  - `near_far_any`: one hot pack anywhere (boom or any stage point), every other pack anywhere.
+  - `near_far_any(both=True)`: two hot packs, mirror images.
+  - `near_far_both`: actors at both booms, every (X, Y, Z) triple, including victims with a 3 MHz neighbour on each side (2426 between 2423/2429, 2476 between 2473/2479, 2479 between 2476/2482).
 
-## 2. Options
+## 2. Options (antenna and install)
 
-Margin is in dB over the 3 dB design margin at the worst stage point; ≥ 0 meets the design and ≥ −3 meets the twin threshold. "Stage ok" is the share of stage points with the full margin. Near-far: an actor walks within 0.5 m (horizontal) of antenna L in the worst direction, and every other pack stands anywhere on stage. Every row bans crew Wi-Fi in the wings unless it says otherwise. Run `python3 sim/loss/wing_geometry.py` for every row.
+Margin is in dB over the 3 dB design margin at the worst stage point; −3 is the twin threshold. "Wi-Fi" is with no hot pack, "near-far" is the worst with a hot pack anywhere, and "both" is the worst with two (mirrored or at both booms). Every row bans crew Wi-Fi in the wings unless it says otherwise. All rows come from `wing_geometry.py` (the script `audit.py` Audit 7 calls).
 
-| # | Option | studio 6 m: stage ok / worst / near-far | prosc. 10 m | prosc. 12 m | R1 | Cost / complexity |
-|---|---|---|---|---|---|---|
-| W0 | Panel mid-wing, 2 m up, aimed straight across | 91.6 % / −1.7 / −2.6 | 97.8 % / −0.9 / −1.0 | 97.0 % / −0.9 / −1.5 | partial: in the twin everywhere, but no margin, and strict RSSI loses 17–41 % of the stage to near-far | £0 |
-| W0c | W0 with crew Wi-Fi allowed ≥ 3 m from an antenna | −1.7 | −5.8 | −7.3 | ✗ (a crew AP in the far wing is in the beam) | — |
-| **W1** | **Rule (ADR-0021): ¼ depth, 1 m offstage, 3.5 m up, aimed at the far upstage corner (≈ 30°), 15° down, no Wi-Fi in the wings or on stage** | **97.9 % / −0.2 / −0.2** | **100 % / +0.9 / +0.9** | **99.6 % / −0.2 / −0.2** | **✓ 2.8 of 3 dB at the worst point** | a 3.5 m boom or stand per wing (venue stock) |
-| W1-lo | W1 on a 2 m stand (10° tilt) | 86.7 % / −2.3 / **−3.7** | 99.2 % / −0.1 / **−3.5** | 98.7 % / −0.8 / **−3.7** | ✗ near-far: an actor at the stand blocks a 3 MHz neighbour on both antennas | £0 |
-| W1-crew | W1, crew Wi-Fi allowed 3 m away | −7.3 | −10.0 | −11.1 | ✗ | — |
-| W2 | Omni 3 dBi in the wings, W1 mount | 0 % / −6.2 | 0 % / −9.7 | 0 % / −9.1 | ✗ the omni sees the audience as well as the stage | ~£30 per antenna |
-| W3 | Generic 6 dBi wide panel (~100°), mid-wing, 2 m, toe 15°, tilt 20° | 100 % / +0.2 / −3.1 | 100 % / +0.9 / −1.7 | 100 % / +0.5 / −1.5 | partial: better against Wi-Fi, worse near-far at 2 m; no real part with a verified pattern | new part + R13 rework |
-| W4 | Pad / AGC on the rack LNA | changes no C/I (§5) | | | n/a: near-far is a selectivity ratio, not compression | hw |
-| W5 | TD on (4.58 ms, R3 hard limit) | no change in W1 (gap copies already hold); fallback for packs that can't keep the rule | | | ✓ as a fallback | per-pack setting (ADR-0017) |
-| W6 | Channel-plan ordering (3 MHz pairs kept apart) | every gap carrier has a 3 MHz neighbour (2423/2426, 2448/2451, 2473–2482), so a static order can't remove the pairs; RX-5 across the wings does that job | | | n/a | — |
+| # | Option | studio 6 m: Wi-Fi / near-far / both | prosc. 10 m | prosc. 12 m | R1 |
+|---|---|---|---|---|---|
+| W0 | Panel mid-wing, 2 m up, aimed straight across | −1.7 / −2.6 / **−4.8** | −0.9 / −1.0 / **−9.5** | −0.9 / −1.5 / **−11.2** | ✗ actors on both sides |
+| W1-lo | W1 on a 2 m stand | −2.3 / −3.7 / −5.5 | −0.1 / −3.6 / −9.3 | −0.8 / −3.7 / −11.5 | ✗ |
+| W1-3.2 | W1 at 3.2 m | −0.5 / −0.5 / −0.5 | +0.5 / −1.8 / −2.2 | −0.1 / −3.2 / **−3.8** | ✗ 12 m house |
+| W1-3.5 | W1 at 3.5 m, 10° | −0.5 / −0.5 / −0.5 | +0.9 / −1.0 / −1.0 | +0.2 / −2.6 / −2.6 | ✓ but thin (floor) |
+| **W1** | **Rule: ¼ depth, 1 m offstage, 4.0 m up, aimed at the far upstage corner (≈ 30°), 10° down** | **−1.2 / −1.2 / −1.2** | **+0.2 / −0.1 / −0.1** | **+0.1 / −1.5 / −1.5** | **✓ ≥ 1.5 dB over the twin threshold** |
+| W1-crew | W1, crew Wi-Fi allowed 3 m from an antenna | −6.8 | −9.0 | −10.3 | ✗ (a crew AP in the far wing is in the beam) |
+| W2 | Omni 3 dBi in the wings, W1 mount | −5.6 | −10.5 | −10.5 | ✗ sees the audience as well as the stage |
+| W3 | Generic 6 dBi wide panel (~100°), mid-wing 2 m, toe 15°, tilt 20° | +0.2 / −3.1 / −6.3 | +0.9 / −1.7 / −10.9 | +0.5 / −1.5 / −13.2 | ✗ near-far, and no real part with a verified pattern |
+| W5 | TD on (4.58 ms, R3 hard limit) | gap copies already hold under W1; fallback for packs that can't keep the rule | | | ✓ fallback |
+| W6 | Channel-plan ordering | every gap carrier has a 3 MHz neighbour. Moving pack 6's in-band 2429 to 2431 would free 2426, but 2476 and 2479 sit inside the 2473–2482 gap block at 3 MHz spacing. RX-5 across the wings does the job instead (`near_far_both` = Wi-Fi-only worst under W1) | | | n/a |
 
-**Install tolerance** (W1, one setting off at a time; worst over the three venues, near-far included):
+**Install tolerance** (W1, one setting off at a time; worst over all venues and near-far cases):
 
 | setting | worst margin |
 |---|---|
-| height 4.0 m | −0.9 |
-| height 3.0 m | −2.3 |
-| height 2.5 m | −3.7 ✗ |
-| tilt 10° / 20° | −0.5 |
-| tilt 25° | −1.8 |
-| aim ±5° | −0.8 |
-| position ⅕ / 0.3 of the depth | −1.2 / −1.6 |
-| 0.5 / 1.5 m offstage | −1.2 / −1.6 |
+| height 3.5 m | −2.6 |
+| height 3.7 m | −2.2 |
+| height 4.3 m | −1.5 |
+| height 4.5 m | −2.0 |
+| tilt 5° | −1.6 |
+| tilt 15° | −1.8 |
+| tilt 20° | −2.4 |
+| aim 25° / 35° | −1.4 / −1.9 |
+| position ⅕ / 0.3 of the depth | −1.0 / −2.2 |
+| 0.5 / 1.5 m offstage | −1.8 / −2.3 |
 
-With several settings off at once, it reaches −4.5 dB, which is below the twin threshold. That is why the install doc says to set it up exactly as written, and why the height floor is 3 m.
+Every single deviation stays above the twin threshold. Several at once can fall below it, so the install doc asks for the numbers as written. Studio: 92 % of the stage has the full 3 dB, and the rest has ≥ 1.8 dB.
 
-## 3. Near-far and the rack chain
+## 3. Near-far and the gain plan
 
-With the W1 rule:
-- An actor walking past a boom is ≥ 2.35 m from the antenna, at −38.1 dBm (UK) at its connector. Packs on stage reach that antenna at −36 to −50 dBm, so the near pack is at most ~12 dB hotter. A 3 MHz neighbour can then lose its copy on that antenna only at the far corners, where the other wing's antenna holds it (near-far worst = Wi-Fi-only worst, extra 0–0.4 % of the stage).
-- On a 2 m stand (W1-lo), the actor is 0.94 m away at −27.6 dBm, and 12–13 % of the stage depends on the other wing. Every venue is then 0.5–0.7 dB under the twin threshold.
+**Near-far under W1:**
+- An actor at a boom's foot is 2.8 m from the antenna, at −40.9 dBm (UK, pattern and tilt included). That equals 7.7 m on axis.
+- A pack on stage in an antenna's beam can be hotter, up to about 12 dB over the weakest stage pack on the same antenna. That is the case `near_far_any` finds: in the 12 m house, a hot pack 1 m inside the stage-left edge, with its 3 MHz neighbour at the downstage-left corner. RX-5 moves the victim's carrier to the other wing, where it holds with 1.5 dB over the twin threshold.
+- With actors in both wings at once (`near_far_both`), the worst case is no worse than with no hot pack.
 
-Rack chain, with PR #95's latest plan (ADR-0018 draft at `01570d9`, Audit 6 there):
-- QPL9057: 23.0 dB, worst input P1dB −7.6 dBm.
-- Losses: BAW 2.2 dB, Wilkinson 11.1, u.FL 1.0, sub-board 0.9.
-- Module nRF21540: +13 dB, input P1dB **−18.0 dBm**, and **no bypass**.
-- nRF5340 PRX,MAX: 0 dBm.
+**Gain plan (the decision for #33 / PR #95 and the receiver board).** PR #95's chain at `01570d9`:
+- QPL9057 23.0 dB (21.5 dB proxy for NF), worst input P1dB −7.6 dBm;
+- BAW 2.2 dB (+2 dB at the band edges), Wilkinson 11.1, u.FL 1.0, sub-board 0.9;
+- BT40NE nRF21540 +13 dB, P1dB −18 dBm, **no bypass**;
+- nRF5340 PRX,MAX 0 dBm, PIMD −22 dBm.
 
-"Headroom" follows PR #95's rule: total input at least 6 dB under each stage's worst P1dB. No coax (worst case). The near pack and Wi-Fi 1/6/11 come from the worst seat, all on air at once. PR #95's tables use on-axis free-space distances, so the levels are also given as the on-axis distance that would produce them.
+PR #95's rule: every stage's total input ≥ 6 dB under its worst P1dB, and PIMD scaled to the weakest wanted pack. Levels assume no coax; the NF uses the 6 dB coax budget at a band-edge carrier, and the cascade reproduces PR #95 (9.39 / 15.89 / 25.31 dB). The interferers are the boom actor, Wi-Fi 1/6/11 from the worst seat and a 23 dBm LTE B40 phone (2390 MHz, unfiltered ahead of the LNA) from the worst seat, all at once.
 
-| venue (W1 rule) | near pack at antenna | Wi-Fi per channel | B40 phone (23 dBm, 2390 MHz) | headroom LNA / nRF21540 / radio, no pad | with a 10 dB pad after the BAW |
+**NF the wings need.** The weakest wing pack is −47.7 dBm at its better antenna (12 m house, far corner), or −67.7 dBm with 10 dB body loss and a 10 dB fade. An NF of ≤ **21.1 dB** costs ≤ 0.5 dB of the R1 margin (Audit 6's noise-cost form). RK-5's 9.30 dB was Audit 4's assumed chain for the 10 m front-of-stage link, not an R1 need. In the wings, the far packs are 3–12 m away.
+
+| option | NF (6 dB coax, band edge) | R1 cost | worst headroom under W1, UK / US (B40 phone included) | off-rule, pack 0.5 m on axis: compression / with PIMD | modules per rack |
 |---|---|---|---|---|---|
-| studio 6 m | −38.1 dBm (= 5.6 m on axis) | −32.8 | −29.6 (= 10.7 m) | +14.9 / **−3.3** / +1.7 | +14.9 / +6.7 / +11.7 |
-| proscenium 10 m | −38.1 (5.6 m) | −36.9 | −33.8 (17.3 m) | +18.5 / +0.3 / +5.3 | +18.5 / +10.3 / +15.3 |
-| proscenium 12 m | −38.1 (5.6 m) | −37.9 | −34.7 (19.3 m) | +19.2 / +1.0 / +6.0 | +19.2 / +11.0 / +16.0 |
+| (c) W1, BT40NE, no pad | 9.39 | 0.04 | **−14.6** / −5.9 ✗ (studio Wi-Fi + phone overload the nRF21540) | −14.2 / −44.6 | — |
+| (c) + fixed 10 dB pad, BT40NE | 15.89 | 0.16 | +5.4 / +4.1 | −4.2 / −24.6 | + pad parts |
+| (a) + (c): switched 0/20 dB pad, BT40NE | 25.31 when padded | **1.21** ✗ | +13.8 / +12.3, but the studio's audience Wi-Fi keeps it padded all show | +4.0 / −4.6 | + 2 switches, RSSI control, RX-5 support |
+| **(b) + (c): BT40E receivers (no FEM), no pad** | **11.48** | **0.06** | **+12.0 / +12.3** | **+4.0** / −18.0 | **−$58** (8 × $9.55 vs $16.76) |
 
-- **The rule answers PR #95's stop-and-ask on the near pack.** That item was option (c), "panels out of reach": the closest actor is 2.35 m away, and the pattern and tilt make it the same as 5.6 m on axis.
-- **Without a pad,** the studio's front-row Wi-Fi alone leaves the nRF21540 3.3 dB short of the back-off (PR #95: −2.8 dB at the ADR-0016 distances).
-- **A fixed 10 dB pad after the BAW** (PR #95's 10 dB row: safe near pack 1.6 m, safe phone 9.1 m, NF 15.9 dB at the 6 dB coax) clears every venue. Its NF costs **0.15 dB** of the R1 margin at stage ranges: the weakest pack is −47.4 dBm, −67.4 with 10 dB body loss and 10 dB fade. RK-5's NF ≤ 9.3 dB came from Audit 4's 10 m link and is not needed in the wings.
-- **Off-rule** (pack 0.5 m on axis, −17.2 dBm): the nRF21540 is still 3.7 dB short with the pad. That case needs PR #95's 20 dB pad, and the rule exists to prevent it.
-- **Crew phones** in the wings are closer than the 9.1 m safe-phone distance, so the install doc says airplane mode in the wings, not just Wi-Fi off.
-- bsim doesn't model compression. The `*-onaxis` runs (§4) show only the C/I side.
+**Recommendation: (b) + (c).**
+- BT40E modules on the eight receiver sub-boards, no pad, and the W1 rule.
+- It is the only option that meets the wing NF need with margin, keeps every stage ≥ 6 dB under P1dB and inside the nRF5340 PIMD in all venues and both regions, and still doesn't compress with a pack 0.5 m on axis. PIMD fails there, which is why the rule exists. It is also the cheapest.
+- The receiver never transmits in v1 (ADR-0004), so it doesn't need a PA. A later downlink would get the nRF5340's own +3 dBm, plenty at stage range.
+- `hw/rx/rx.py` takes its pin functions from the Fanstel BT40/F/E/N/NE spec v1.08, which also covers the BT40E. Confirm the BT40E outline and u.FL position before layout (#34).
+- Crew phones in the wings would be inside any option's phone distance, so the install doc says airplane mode in the wings.
+- bsim doesn't model compression; the `*-onaxis` runs (§4) show only the C/I side.
 
 ## 4. bsim
 
-Run: `run.py --only bc --eirp 9 --plan host/channel_plan_us.yaml --geometry docs/analysis/r1-wing/<case>.json --busy 10,40 --c-secs 20`. That is 8 packs and 16 receivers (one per pack per antenna) plus Wi-Fi 1/6/11, with RX-5 replayed per carrier and about 19.7 k frames per run. "TD off" uses v1 42 B packets, the shipping default (ADR-0017). "TD on" uses 81 B TD-length packets. SYS-3 means ≤ 0.1 % loss and ≤ 2 frames lost in a row. Pack 1 runs the US in-band pair 2414/2456, because bsim stops at 2480. It shows the known in-band numbers (TD off 21.5 %, TD on 8.8 % at 40 %) and is credited on 2482 by equivalence (ADR-0016), so the counts are of packs 2–8.
+The run: `run.py --only bc --eirp 9 --plan host/channel_plan_us.yaml --geometry docs/analysis/r1-wing/<case>.json --busy 10,40 --c-secs 20`.
+- **Setup:** 8 packs, 16 receivers (one per pack per antenna) and Wi-Fi 1/6/11 at each antenna's worst seat, with RX-5 replayed per carrier using the `fw/src/rx/Kconfig` defaults. About 19.7 k frames per run.
+- **TD off** uses v1 42 B packets, the shipping default (ADR-0017). **TD on** uses 81 B TD-length packets.
+- **SYS-3:** ≤ 0.1 % loss and ≤ 2 frames lost in a row.
+- **Pack 1** runs the US in-band pair 2414/2456, because bsim stops at 2480. It shows the known in-band numbers (TD off 21.5 %, TD on 8.8 % at 40 %) and is credited on 2482 by equivalence (ADR-0016), so the counts are of packs 2–8.
 
-Pack placement per case (`wing_geometry.bsim_case`):
-- the near pack walks 0.5 m past antenna L's boom (−38.1 dBm there, 2.35 m away);
-- its 3 MHz neighbours stand where their gap copy is weakest with it there;
-- the rest stand at the lowest-margin stage points, at least 1.5 m apart;
-- each antenna gets its worst audience seat as the Wi-Fi source.
+| case | what is hot | 10 % TD off / on | 40 % TD off / on | worst pack, 40 % TD off |
+|---|---|---|---|---|
+| studio-rule, prosc10-rule, prosc12-rule | pack 7 walking past L's boom; its 3 MHz neighbours where they are weakest | 7/7, 7/7 | 7/7, 7/7 | ≤ 0.005 % |
+| prosc12-near2 | pack 2 at L's boom | 7/7, 7/7 | 7/7, 7/7 | 0.000 % |
+| **prosc12-both**, **studio-both** | **actors at both booms**: 2 at L, 6 at R; victim 3 (2426, between 2423 and 2429) | 7/7, 7/7 | 7/7, 7/7 | 0.015 / 0.005 % |
+| prosc12-any | `near_far_any`'s worst: pack 2 on stage 1 m inside the left edge, in L's beam; victim 3 at the downstage-left corner | 7/7, 7/7 | 7/7, 7/7 | **0.086 %** (TD on 0.020 %) |
+| prosc12-any-both, prosc10-any-both, studio-any-both | the same with a mirror-image hot pack on the other side | 7/7, 7/7 | 7/7, 7/7 | 0.066 / 0.025 / 0.000 % |
+| prosc12-onaxis, studio-onaxis (off-rule) | pack 7 0.5 m straight in front of L at its height (−17.2 dBm) | — | 7/7, 7/7 | 0.051 % |
 
-| case | near pack | 10 % TD off | 10 % TD on | 40 % TD off | 40 % TD on | worst pack (40 %, TD off) |
-|---|---|---|---|---|---|---|
-| studio-rule | 7 | 7/7 | 7/7 | 7/7 | 7/7 | 0.000 % (probe 1000); 7: 0.015 % (probe 100) |
-| prosc10-rule | 7 | 7/7 | 7/7 | 7/7 | 7/7 | 7: 0.005 % (probe 1000); 0.061 % (probe 100) |
-| prosc12-rule | 7 | 7/7 | 7/7 | 7/7 | 7/7 | 0.000 % (probe 1000); 7: 0.020 % (probe 100) |
-| prosc12-near2 | 2 | 7/7 | 7/7 | **7/7 at probe 1000** (2: 0.020 %); 6/7 at probe 100 (2: 0.163 %) | 7/7 | see left |
-| prosc12-onaxis (off-rule: pack 7 0.5 m on axis, −17.2 dBm) | 7 | — | — | 6/7 (6: 0.076 %, run 3) at probe 1000; 5/7 at probe 100 (6: 0.53 %, 8: 0.53 %) | **7/7** (6: 0.010 %, 8: 0.015 %) | — |
-| studio-onaxis (off-rule) | 7 | — | — | 5/7 at probe 100 (6: 0.43 %, 8: 0.51 %) | **7/7** | — |
+- **(b):** one pack at the lowest-margin stage point, two receivers. In every venue it loses 0.000 % at 10 / 25 / 40 %, TD off and TD on. `b_inband` (both carriers under Wi-Fi) fails at 40 % as in ADR-0016. That is pack 1's case in bsim only.
+- **No Wi-Fi:** every case loses 0 frames, the hot packs included. RX-5 now carries #76's near-pack XFAIL.
+- **Tightest margin:** prosc12-any at 40 % with TD off, 0.086 % against the 0.1 % limit (17 frames in 19.7 k, run of 1). TD on gives 0.020 %.
 
-- **(b):** one pack at the lowest-margin stage point, two receivers. In every venue it loses 0.000 % at 10 / 25 / 40 %, TD off and TD on. `b_inband` (both carriers under Wi-Fi) fails at 40 % as in ADR-0016 (TD on 8.5–8.6 %); that is pack 1's case in bsim only.
-- **No Wi-Fi:** every case loses 0 frames, the near pack included. This is the check that the 3 MHz neighbours survive a near pack (#76's XFAIL), and RX-5 now carries it.
-- **What bsim found that the model didn't: the RX-5 probe.** Every 100 frames, RX-5 sends one copy's window to the other antenna. For a pack at one wing, the far antenna can't hear its gap copy over the Wi-Fi, so that frame rests on the in-band copy alone, which loses ~47 % at 40 %. That came to 1 % × ~40 % × ~47 % = **0.16 %** for near pack 2 with TD off. ADR-0011 assumed the other copy always covers a probe, but with wing antennas the other copy is often the Wi-Fi-busy one. **Fix:** the `OP_RX_ANT_PROBE_FRAMES` default goes from 100 to **1000** (`fw/src/rx/Kconfig`). That cuts the cost 10× (0.020 %, 7/7). A blocked antenna still ages out after hyst + ΔRSSI misses, using the stored RSSI of the other antenna, so a block is escaped as fast as before; only the return after an actor walks away waits up to 1 s. The replay reads the Kconfig default, and `--rx5-probe N` overrides it. The 10 % runs were at probe 100, which is strictly harder.
-- **Off-rule** (an antenna at actor height, actor 0.5 m in front of it): the near pack's 3 MHz neighbours (packs 6, 8) fail with TD off. TD on brings them back to 7/7. That is why the rule sets a 3 m floor, and why TD on is the fallback for a venue that can't keep it.
+**What bsim found that the model didn't, and the two RX-5 fixes:**
+1. **Probe cost.** Every 100 frames, RX-5 sends one copy's window to the other antenna. For a pack at one wing, the far antenna can't hear its gap copy over the Wi-Fi, so that frame rests on the in-band copy alone, which loses ~47 % at 40 %.
+   - Cost: 1 % × ~40 % × ~47 % ≈ **0.16 %** with TD off (prosc12-near2).
+   - Fix: `OP_RX_ANT_PROBE_FRAMES` 100 → **1000**, so 0.02 %.
+2. **Intermittent block.** A hot pack 3 MHz away blocks the stronger antenna only while its copies overlap in time: about **2 %** of windows, in short gaps. ADR-0011's 1 dB-per-miss ageing resets on the next valid copy, so the carrier never leaves that antenna. Each blocked window then lands on a frame whose in-band copy is lost ~47 % of the time.
+   - Cost: prosc12-any lost **1.0 %** with TD off and 0.117 % with TD on, while the other antenna alone would have lost 0.010 %.
+   - Fix: a **miss-triggered switch** (`op_ant_set_miss`, `OP_RX_ANT_MISS_DB` 12, `OP_RX_ANT_HOLD_FRAMES` 1000). On a missed window, move to the other antenna at once if its last window was valid and it is ≤ 12 dB weaker, then hold for 1000 windows. That gives 0.086 % / 0.020 %, and it also brings the off-rule on-axis case to 7/7.
+   - Unit tests: `fw/tests/rx_ant` (6/6 on native_sim). The replay mirrors `ant.c` (`tests/test_wing.py`).
+3. **Exporter bug** (fixed before these runs): a first export had subtracted the EIRP twice for the boom actor, which made it 9 dB too weak.
 
 ## 5. What changed, and what didn't
 
-- **Hardware:** antennas unchanged: the same 2 × HG2409P-NF, CA3N050 and jumpers (£340.56 per rack, ADR-0016), plus a mount ≥ 3.2 m in each wing. Theatres keep lighting booms in the wings. If a venue has none, a wind-up lighting stand is part of the Phase 5 purchase (ADR-0019 list), not a new design item.
-- **Gain plan (PR #95):** a fixed **10 dB pad after the QPQ1907** in each RF chain (§3). RK-5's NF ≤ 9.3 dB is relaxed for the wing install: NF 15.9 dB costs 0.15 dB of the R1 margin. PR #95 owns the part and the SPEC line; it is posted there, not built here.
-- **Firmware:** `OP_RX_ANT_PROBE_FRAMES` default 100 → 1000 (§4). RX-5 already chooses per carrier.
+- **Antennas:** unchanged. The same 2 × HG2409P-NF, CA3N050 and jumpers (£340.56 per rack, ADR-0016), plus a mount ≥ 3.7 m in each wing. Theatres keep lighting booms in the wings. A venue with none needs a wind-up stand, on the Phase 5 list (ADR-0019).
+- **Receiver board (#32/#34) and gain plan (#33 / PR #95):**
+  - BT40NE → **BT40E** on the eight receiver sub-boards, no pad, nothing switched.
+  - RK-5's NF limit becomes ≤ 21.1 dB for the wing install.
+  - This is posted on PR #95; it is not built here.
+- **Firmware (here):** RX-5 probe 1000, and the miss-triggered switch with hold.
 - **Channel plan:** unchanged (W6).
-- **TD:** stays off by default (ADR-0017); on per pack for an actor who can't keep the rule.
+- **TD:** stays off by default (ADR-0017); per pack where a venue can't keep the rule.
 
 ## 6. Limits
 
-- The pattern's 60° and 90° points, the 3-D combination, the audience heights and the 20 dBm-per-seat assumption are estimates. The worst point has 0.2 dB of slack against the 3 dB margin, so the Phase 5 pattern measurement (#92) and the Phase 6 house test decide.
-- Free space only: no body loss, multipath or curtain loss (wing masking costs ~1 dB). Body blocking (R10) is helped by the two opposite wings, but it isn't modelled here.
-- bsim holds each geometry still for 20 s. RX-5 is replayed from a converged state, so walking transients (the ~6 + ΔRSSI missed windows before a switch) are covered by the other copy, but they aren't timed.
-- bsim stops at 2480 MHz, so pack 1's 2482 carrier is credited by equivalence (ADR-0016).
+- **Pattern and audience:** the pattern's 60° and 90° points, the 3-D combination, the audience heights and 20 dBm per seat are estimates. The worst point has 1.5 dB of slack against the 3 dB margin, and bsim's tightest case is 0.086 % against 0.1 %. Phase 5 (#92: the pattern) and Phase 6 (a full house) decide.
+- **Propagation:** free space only: no body loss, multipath or curtain loss (wing masking costs ~1 dB). Body blocking (R10) is helped by the two opposite wings, but it isn't modelled here.
+- **Static geometry:** bsim holds each geometry still for 20 s. RX-5 is replayed from a converged state, so walking transients are covered by the other copy, but they aren't timed.
+- **2482 carrier:** bsim stops at 2480 MHz, so pack 1's 2482 carrier is credited by equivalence (ADR-0016).
+- **Compression:** compression and PIMD come from datasheet limits (PR #95), not from bsim. The BT40E outline is not yet checked.

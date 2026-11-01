@@ -22,6 +22,19 @@ config OP_RX_ANT_PROBE_FRAMES
 	  40 % Wi-Fi); at 1000 it is 0.02 %. A blocked antenna still ages out after hyst + dRSSI misses,
 	  so switching away does not wait for a probe; switching back waits up to 1 s.
 
+config OP_RX_ANT_MISS_DB
+	int "RX-5 miss-triggered switch: other antenna within this many dB (ADR-0021), 0 = off"
+	default 12
+	help
+	  On a missed window on the current antenna, switch at once if the other antenna's last window
+	  on that channel was valid and its RSSI is no more than this below. With wing antennas a hot pack
+	  3 MHz away blocks the stronger antenna for a few % of windows, too few for the 1 dB ageing to
+	  move it: bsim prosc12-any lost 1.0 % frames with TD off that way (0.010 % on the other antenna).
+
+config OP_RX_ANT_HOLD_FRAMES
+	int "RX-5 windows the RSSI rule waits after a miss-triggered switch (ADR-0021)"
+	default 1000
+
 config OP_PACK_TEST_RUN_MS
 	int "Test only: the pack stops transmitting after this many ms, 0 = never (tests/bsim/rx scenario e)"
 	default 0

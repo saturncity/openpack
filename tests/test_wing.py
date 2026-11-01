@@ -12,7 +12,7 @@ def _run_py():
     spec = importlib.util.spec_from_file_location("g2run", ROOT / "tests/bsim/scenarios/run.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
-    mod.RX5.update(probe=1000, hyst=6)
+    mod.RX5.update(probe=1000, hyst=6, miss_db=0, hold=1000)   # ADR-0011 rule alone; tests pass miss_db to opt in
     return mod
 
 
@@ -46,3 +46,16 @@ def test_rx5_probe_cost_scales_with_interval():
     got100, *_ = run.rx5_replay(ok, [-40, -60], 1, probe=100)
     got1000, *_ = run.rx5_replay(ok, [-40, -60], 1, probe=1000)
     assert n - sum(got100) == 100 and n - sum(got1000) == 10
+
+
+def test_rx5_miss_switch_rescues_intermittent_block():
+    """ADR-0021: L is 3 dB stronger but a hot 3 MHz neighbour blocks 2 % of its windows; R is clean."""
+    run = _run_py()
+    n = 20000
+    ok_l = [i % 50 != 7 for i in range(n)]
+    ok_r = [True] * n
+    old, *_ = run.rx5_replay([ok_l, ok_r], [-47, -50], 0, miss_db=0)
+    new, used, sw = run.rx5_replay([ok_l, ok_r], [-47, -50], 0, miss_db=12, hold=1000)
+    assert n - sum(old) == n // 50                  # ageing alone never leaves L: every block costs a copy
+    assert n - sum(new) <= 3                        # first miss moves the carrier to R, which holds
+    assert sum(used) / n > 0.99

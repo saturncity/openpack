@@ -858,68 +858,96 @@ if __name__ == "__main__":
           f" {wg.MARGIN_DB:.0f} dB. Neighbour pack tolerance 3/4/5 MHz: "
           + " / ".join(f"{wg.neighbour_tolerance_db(o):.1f}" for o in (3, 4, 5)) + " dB")
     assert -13 <= thr <= -11.5, "same threshold as Audit 4 (12.7 dB short at the Q3 geometry)"
-    naive = wg.Install(crew_ap_m=3.0)       # mid-wing, 2 m, straight across, crew Wi-Fi allowed 3 m away
+    T = -wg.MARGIN_DB                         # twin threshold, in "dB over the design margin" units
+
+    def worst_all(v, ins):
+        """Wi-Fi-only worst, then near-far with the hot pack anywhere (boom or stage), then two hot packs (mirror)."""
+        return (wg.summary(wg.evaluate(v, ins)), wg.near_far_any(v, ins, k_hot=40)["worst"],
+                wg.near_far_any(v, ins, both=True, k_hot=12)["worst"], wg.near_far_both(v, ins)["worst"])
+
+    naive = wg.Install(crew_ap_m=99.0)        # mid-wing, 2 m, straight across
     for v in wg.VENUES:
-        sn = wg.summary(wg.evaluate(v, naive))
-        sr = wg.summary(wg.evaluate(v, wg.RULE))
-        nf = wg.near_far(v, wg.RULE)
+        sn, an, bn, _ = worst_all(v, naive)
+        sr, ar, br, wr = worst_all(v, wg.RULE)
         sc = wg.summary(wg.evaluate(v, _repl(wg.RULE, crew_ap_m=3.0)))
-        print(f"  {v.name:<16} naive (mid-wing, 2 m, across, crew Wi-Fi >= 3 m): {sn['pass_sel']:5.1%} of the stage"
-              f" with margin, worst {sn['worst_margin']:+.1f} dB | ADR-0021 rule: {sr['pass_sel']:5.1%}, worst"
-              f" {sr['worst_margin']:+.1f} dB, with an actor at the boom {nf['worst']:+.1f} dB | rule but crew Wi-Fi"
-              f" 3 m away: worst {sc['worst_margin']:+.1f}")
-        assert sn["worst_margin"] < -wg.MARGIN_DB + 1.5, "the naive wing mount is short (why the rule exists)"
-        assert sr["pass_sel"] >= 0.97 and sr["worst_margin"] >= -0.5, "rule: >= 97 % of the stage with the full 3 dB, all with >= 2.5"
-        assert sr["worst_best"] > -wg.MARGIN_DB and nf["worst"] > -wg.MARGIN_DB, "rule: every point above the twin threshold, near pack included"
-        assert sc["worst_margin"] < -wg.MARGIN_DB, "crew Wi-Fi in the wings breaks it: the rule bans it"
-    lo = [wg.near_far(v, wg.RULE_LO)["worst"] for v in wg.VENUES]
-    print(f"  same rule on a 2 m stand: near-far worst {min(lo):+.1f} dB (3.5 m boom: actors >= "
-          f"{wg.dist(wg.antennas(wg.STUDIO, wg.RULE)[0][1], wg.near(wg.STUDIO, wg.RULE)[0]):.1f} m away)")
-    assert min(lo) < -wg.MARGIN_DB, "2 m is too low: an actor at the stand blocks 3 MHz neighbours on both antennas"
+        print(f"  {v.name:<16} naive (mid-wing, 2 m, across): Wi-Fi worst {sn['worst_margin']:+.1f}, near-far {an:+.1f},"
+              f" both sides {bn:+.1f} dB | ADR-0021 rule: {sr['pass_sel']:5.1%} of the stage with the full margin,"
+              f" worst Wi-Fi {sr['worst_margin']:+.1f}, near-far {ar:+.1f}, both sides {br:+.1f}, both booms {wr:+.1f}"
+              f" | rule but crew Wi-Fi 3 m away: {sc['worst_margin']:+.1f}")
+        assert bn < T, "the naive wing mount fails with actors on both sides (why the rule exists)"
+        assert min(sr["worst_best"], ar, br, wr) >= T + 1.4, "rule: >= 1.4 dB over the twin threshold, all cases"
+        assert sr["pass_sel"] >= 0.9
+        assert sc["worst_margin"] < T, "crew Wi-Fi in the wings breaks it: the rule bans it"
+    floor = {z: min(min(x if isinstance(x, float) else x["worst_best"] for x in worst_all(v, _repl(wg.RULE, z=z)))
+                    for v in wg.VENUES) for z in (3.2, 3.5)}
+    lo = min(min(x if isinstance(x, float) else x["worst_best"] for x in worst_all(v, wg.RULE_LO)) for v in wg.VENUES)
+    q, n_l, _ = wg.near(wg.STUDIO, wg.RULE)
+    print(f"  boom height: 3.2 m {floor[3.2]:+.1f}, 3.5 m {floor[3.5]:+.1f}, 2 m stand {lo:+.1f} dB (floor 3.5 m). An actor"
+          f" at the 4 m boom's foot is {wg.dist(wg.antennas(wg.STUDIO, wg.RULE)[0][1], q):.1f} m away, {n_l:.1f} dBm")
+    assert floor[3.5] > T > floor[3.2] and lo < T
     for o in (wg.OMNI3,):
         w = min(wg.summary(wg.evaluate(v, _repl(wg.RULE, ant=o)))["worst_margin"] for v in wg.VENUES)
         print(f"  omni 3 dBi in the wings instead: worst {w:+.1f} dB (sees the audience as well as the stage)")
-        assert w < -wg.MARGIN_DB
+        assert w < T
 
-    print("  rack chain (PR #95 / ADR-0018 draft, nRF21540 always on, no coax; total input >= 6 dB under each P1dB):")
-    for v in wg.VENUES:
-        e = wg.evaluate(v, wg.RULE)
-        _, n_l, _ = wg.near(v, wg.RULE)
-        wifi = e.iw["L"][0]
-        tot = wg.dbm_sum(n_l, *[wifi] * 3)              # near pack + Wi-Fi 1/6/11 at the worst seat, all on air
-        m0, m10 = wg.chain_margins(tot), wg.chain_margins(tot, pad_db=wg.PAD_DB)
-        ph = wg.phone_dbm(v, wg.RULE)
-        eq_n, eq_p = wg.on_axis_equiv_m(n_l, wg.EIRP_UK), wg.on_axis_equiv_m(ph, 23.0, f=2390.0)
-        print(f"    {v.name:<16} near pack {n_l:.1f} dBm (= {eq_n:.1f} m on axis), Wi-Fi {wifi:.1f} x3, B40 phone {ph:.1f}"
-              f" (= {eq_p:.1f} m on axis). Headroom LNA / nRF21540 / radio: no pad {m0[0]:+.1f} / {m0[1]:+.1f} /"
-              f" {m0[2]:+.1f}; {wg.PAD_DB:.0f} dB pad {m10[0]:+.1f} / {m10[1]:+.1f} / {m10[2]:+.1f}")
-        assert min(m10) >= 0, "ADR-0021 + 10 dB pad: nothing compresses"
-        assert eq_n >= 1.6 and eq_p >= 9.1, "inside PR #95's 10 dB-pad row (safe near pack 1.6 m, safe phone 9.1 m)"
-    m_studio = wg.chain_margins(wg.dbm_sum(*[wg.evaluate(wg.STUDIO, wg.RULE).iw["L"][0]] * 3))
-    assert m_studio[1] < 0, "studio audience Wi-Fi alone crowds the nRF21540 with no pad: the pad is needed"
-    _, n_ax, _ = wg.near(wg.STUDIO, wg.RULE, 0.5, wg.EIRP_UK, True)
-    print(f"    off-rule (pack 0.5 m on axis, {n_ax:.1f} dBm): nRF21540 headroom with the pad"
-          f" {wg.chain_margins(n_ax, pad_db=wg.PAD_DB)[1]:+.1f} dB (PR #95: a 20 dB pad would be needed)")
+    print("  rack chain (PR #95 chain at 01570d9; no coax for levels, 6 dB coax + band edge for NF; every stage's total"
+          " input >= 6 dB under its worst P1dB, nRF5340 PIMD scaled as PR #95):")
     s_min = min(wg.summary(wg.evaluate(v, wg.RULE))["s_min"] for v in wg.VENUES)
-    c = s_min - 10.0 - 10.0                               # weakest pack, body 10 dB + fade 10 dB (as Audit 6)
-    nf_pad = 15.9                                         # PR #95's 10 dB-pad row at the 6 dB coax budget
-    noise = -174 + 10 * math.log10(2e6) + nf_pad
-    cost = 10 * math.log10(1 + 10 ** ((noise - (c - CI_REQ_DB - MARGIN_DB)) / 10))
-    print(f"    noise: weakest wing pack {s_min:.1f} dBm (-20 dB body + fade: {c:.1f}); with the pad NF {nf_pad} dB costs"
-          f" {cost:.2f} dB of the 3 dB R1 margin (stage ranges, not Audit 4's 10 m)")
-    assert cost <= 0.5
+    weak = s_min - 10.0 - 10.0                            # weakest wing pack, body 10 dB + fade 10 dB (as Audit 6)
+    nf_need = wg.nf_needed_db(weak)
+    print(f"    NF the wings need: weakest pack {s_min:.1f} dBm free space, {weak:.1f} with body + fade -> NF <= {nf_need:.1f}"
+          f" dB costs <= 0.5 dB of the R1 margin (RK-5's 9.30 dB was Audit 4's 10 m assumption, not an R1 need)")
+    assert 18 <= nf_need <= 24
+
+    def levels(v, eirp=wg.EIRP_UK, on_axis=False):
+        e = wg.evaluate(v, wg.RULE)
+        _, n_l, _ = wg.near(v, wg.RULE, 0.5, eirp, on_axis)
+        w, ph = e.iw["L"][0], wg.phone_dbm(v, wg.RULE)
+        return wg.dbm_sum(n_l, w, w, w, ph), [n_l, w, w, w, ph]
+
+    opts = {"(c) rule, BT40NE, no pad": ("BT40NE", 0.0), "(c) + fixed 10 dB pad, BT40NE": ("BT40NE", 10.0),
+            "(c) + switched 0/20 dB pad, BT40NE (studio Wi-Fi alone keeps it at 20)": ("BT40NE", 20.0),
+            "(c) + (b) BT40E receivers, no pad (chosen)": ("BT40E", 0.0)}
+    res = {}
+    for name, (mod, pad) in opts.items():
+        nf = wg.system_nf_db(6.0, pad, mod)
+        cost = wg.noise_cost_db(nf, weak)
+        head = min(min(min(wg.chain_margins(levels(v)[0], 0.0, pad, module=mod)),
+                       wg.imd_margin_db(levels(v)[1], weak, 0.0, pad, mod)) for v in wg.VENUES)
+        tot_ax, sig_ax = levels(wg.STUDIO, on_axis=True)
+        off = min(min(wg.chain_margins(tot_ax, 0.0, pad, module=mod)), wg.imd_margin_db(sig_ax, weak, 0.0, pad, mod))
+        comp_ax = min(wg.chain_margins(tot_ax, 0.0, pad, module=mod))
+        us = min(min(wg.chain_margins(levels(v, wg.EIRP_US)[0], 0.0, pad, module=mod)) for v in wg.VENUES)
+        usd = 8 * (wg.MODULES[mod]["usd"] - wg.MODULES["BT40NE"]["usd"])
+        res[name] = (nf, cost, head, comp_ax, off, us)
+        print(f"    {name:<74} NF {nf:5.2f} dB (R1 cost {cost:.2f} dB) | rule: worst headroom {head:+5.1f} dB, US"
+              f" {us:+5.1f} | off-rule 0.5 m on axis: compression {comp_ax:+5.1f}, incl. PIMD {off:+5.1f} | modules"
+              f" {usd:+.0f} USD/rack")
+    ch = res["(c) + (b) BT40E receivers, no pad (chosen)"]
+    assert ch[0] <= nf_need and ch[2] >= 0 and ch[5] >= 0, "BT40E + rule: NF inside the wing need, nothing compresses"
+    assert ch[3] >= 0, "BT40E: even a pack 0.5 m on axis does not compress any stage (PIMD aside)"
+    assert res["(c) rule, BT40NE, no pad"][2] < 0, "BT40NE with no pad: studio Wi-Fi + phone crowd the nRF21540"
+    assert res["(c) + fixed 10 dB pad, BT40NE"][3] < 0 <= res["(c) + fixed 10 dB pad, BT40NE"][2]
+    assert res["(c) + switched 0/20 dB pad, BT40NE (studio Wi-Fi alone keeps it at 20)"][0] > nf_need
+    _, n_l, _ = wg.near(wg.STUDIO, wg.RULE)
+    print(f"    near pack under the rule: {n_l:.1f} dBm = {wg.on_axis_equiv_m(n_l, wg.EIRP_UK):.1f} m on axis (PR #95"
+          f" option c); BT40E rx-only is enough: the receiver never transmits in v1 (ADR-0004)")
     # bsim (c), run.py --geometry docs/analysis/r1-wing/<case>.json --eirp 9 --plan host/channel_plan_us.yaml,
     # 20 s per run. Packs passing SYS-3 (<= 0.1 %, <= 2 in a row) of the 7 with a gap carrier below 2480 (pack 1's
     # is 2482: credited by equivalence, ADR-0016). Filled from the 2026-11-01 runs; see the analysis doc.
-    WING_BSIM = {  # case: {run: packs 2-8 passing}; 10 % runs with the old 100-frame probe (strictly harder)
-        "studio-rule": {"10% TD off": 7, "10% TD on": 7, "40% TD off": 7, "40% TD on": 7},
-        "prosc10-rule": {"10% TD off": 7, "10% TD on": 7, "40% TD off": 7, "40% TD on": 7},
-        "prosc12-rule": {"10% TD off": 7, "10% TD on": 7, "40% TD off": 7, "40% TD on": 7},
-        "prosc12-near2": {"10% TD off": 7, "10% TD on": 7, "40% TD off": 7, "40% TD on": 7},
-        "prosc12-onaxis (off-rule)": {"40% TD off": 6, "40% TD on": 7},
-        "studio-onaxis (off-rule, probe 100)": {"40% TD off": 5, "40% TD on": 7},
+    # bsim (c), 2026-11-01: run.py --geometry docs/analysis/r1-wing/<case>.json --eirp 9 --plan
+    # host/channel_plan_us.yaml --busy 10,40 --c-secs 20, RX-5 replayed with the fw/src/rx/Kconfig defaults (probe 1000,
+    # miss switch 12 dB, hold 1000). Packs 2-8 passing SYS-3 (<= 0.1 %, <= 2 in a row) at 10 / 40 % Wi-Fi, TD off / on,
+    # and the worst pack's TD-off loss at 40 %. Pack 1 (2482) is credited by equivalence (ADR-0016).
+    WING_BSIM = {
+        "studio-rule": (7, 7, 7, 7, 0.000), "prosc10-rule": (7, 7, 7, 7, 0.005), "prosc12-rule": (7, 7, 7, 7, 0.005),
+        "prosc12-near2": (7, 7, 7, 7, 0.000), "prosc12-both": (7, 7, 7, 7, 0.015), "studio-both": (7, 7, 7, 7, 0.005),
+        "prosc12-any": (7, 7, 7, 7, 0.086), "prosc12-any-both": (7, 7, 7, 7, 0.066),
+        "studio-any-both": (7, 7, 7, 7, 0.000), "prosc10-any-both": (7, 7, 7, 7, 0.025),
+        "prosc12-onaxis (off-rule, 40 % only)": (None, None, 7, 7, 0.051),
+        "studio-onaxis (off-rule, 40 % only)": (None, None, 7, 7, 0.051),
     }
     for case, r in WING_BSIM.items():
-        print(f"  bsim {case}: " + ", ".join(f"{k} {v}/7" for k, v in r.items()))
-    assert all(v == 7 for c, r in WING_BSIM.items() if c.endswith("-rule") or c.endswith("near2") for v in r.values())
-    assert WING_BSIM["prosc12-onaxis (off-rule)"]["40% TD on"] == 7 > WING_BSIM["prosc12-onaxis (off-rule)"]["40% TD off"]
+        print(f"  bsim {case:<38} 10 % off/on {r[0]}/{r[1]}, 40 % off/on {r[2]}/{r[3]} of 7; worst 40 % TD off {r[4]:.3f} %")
+    assert all(x == 7 for r in WING_BSIM.values() for x in r[:4] if x is not None), "R1: 7/7 + pack 1 everywhere"
+    assert max(r[4] for r in WING_BSIM.values()) < 0.1, "SYS-3 with TD off (the shipping default, ADR-0017)"

@@ -32,10 +32,18 @@ struct op_ant {
 	uint8_t cur[2];  /* chosen antenna per channel */
 	int8_t last[2][2]; /* last-valid RSSI (dBm) per channel x antenna */
 	bool seen[2][2];
+	bool ok[2][2];     /* the last window on (channel, antenna) held a valid copy */
+	int8_t miss_db;    /* miss-triggered switch (ADR-0021): 0 = off; else other within this many dB */
+	uint16_t hold;     /* after a miss-triggered switch, windows before the RSSI rule may switch back */
+	uint16_t hold_left[2];
 	uint32_t switches;
 };
 
 void op_ant_init(struct op_ant *s, uint16_t probe_frames, int8_t hyst_db);
+/* ADR-0021: on a missed window on the current antenna, switch at once if the other antenna's last window on that
+ * channel was valid and its RSSI is no more than miss_db below; then hold it hold_frames windows against the RSSI
+ * rule, so an intermittently blocked stronger antenna (a hot 3 MHz neighbour) does not win it straight back. */
+void op_ant_set_miss(struct op_ant *s, int8_t miss_db, uint16_t hold_frames);
 uint8_t op_ant_pick(const struct op_ant *s, uint8_t ch, uint32_t frame);
 /* A window on (ch, ant) ended: rssi of a CRC-valid copy, or valid = false. Returns true on a switch. */
 bool op_ant_report(struct op_ant *s, uint8_t ch, uint8_t ant, bool valid, int8_t rssi_dbm);

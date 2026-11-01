@@ -65,4 +65,33 @@ ZTEST(rx_ant, test_first_heard_wins)
 	zassert_equal(s.cur[0], 1, NULL);
 }
 
+ZTEST(rx_ant, test_miss_switch_and_hold)
+{
+	/* ADR-0021: antenna 0 is 3 dB stronger but misses now and then (a hot 3 MHz neighbour); antenna 1 is clean. */
+	op_ant_set_miss(&s, 12, 50);
+	op_ant_report(&s, 0, 0, true, -47);
+	op_ant_report(&s, 0, 1, true, -50);
+	zassert_equal(s.cur[0], 0, NULL);
+	zassert_true(op_ant_report(&s, 0, 0, false, 0), "a miss with the other antenna good: switch at once");
+	zassert_equal(s.cur[0], 1, NULL);
+	/* A valid probe on antenna 0 does not win it back during the hold, although it is stronger. */
+	zassert_false(op_ant_report(&s, 0, 0, true, -40), "hold: RSSI rule waits");
+	for (int i = 0; i < 49; i++) {
+		zassert_false(op_ant_report(&s, 0, 1, true, -50), "hold window %d", i);
+	}
+	zassert_true(op_ant_report(&s, 0, 1, true, -50), "hold over: 10 dB stronger antenna 0 wins back");
+	zassert_equal(s.cur[0], 0, NULL);
+}
+
+ZTEST(rx_ant, test_miss_switch_needs_good_other)
+{
+	op_ant_set_miss(&s, 12, 50);
+	op_ant_report(&s, 1, 0, true, -47);
+	op_ant_report(&s, 1, 1, false, 0);    /* other antenna's last window missed */
+	zassert_false(op_ant_report(&s, 1, 0, false, 0), "other not known good: stay");
+	op_ant_report(&s, 1, 1, true, -70);   /* other good but 23 dB weaker */
+	zassert_false(op_ant_report(&s, 1, 0, false, 0), "other more than 12 dB below: stay");
+	zassert_equal(s.cur[1], 0, NULL);
+}
+
 ZTEST_SUITE(rx_ant, NULL, NULL, before, NULL, NULL);

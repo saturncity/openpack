@@ -46,7 +46,7 @@ Wing antennas (#101, ADR-0021, docs/analysis/r1-wing-antennas.md): --geometry FI
 sim/loss/wing_geometry.py --write) gives every pack and the Wi-Fi a per-antenna attenuation (antenna L, R). Each
 pack then gets two receivers, one per antenna, so the dumps hold what each antenna would have delivered. RX-5
 (ADR-0011: per-carrier antenna choice, probe every OP_RX_ANT_PROBE_FRAMES, 1 dB ageing per missed window,
-OP_RX_ANT_HYST_DB hysteresis) is replayed per frame on those outcomes, with the RSSI from the geometry: that is
+OP_RX_ANT_HYST_DB hysteresis; ADR-0021: miss-triggered switch OP_RX_ANT_MISS_DB with an OP_RX_ANT_HOLD_FRAMES hold) is replayed per frame on those outcomes, with the RSSI from the geometry: that is
 the "bsim with two path losses" of SPEC RX-5. (b) puts its pack at the file's "single" position (the stage
 point with the lowest margin). --rx-gain/--wifi-gain/--near/--near-att are ignored with --geometry.
 """
@@ -111,26 +111,36 @@ def rx_kconfig(sym):
     return int(m[1])
 
 
-def rx5_replay(ok, rssi, ch, probe=None, hyst=None):
-    """RX-5 (fw/src/rx/ant.c) on per-antenna outcomes of channel ch (0 = copy A, 1 = copy B). ok[ant][i]: the copy
-    of frame i arrived on antenna ant; rssi[ant]: its RSSI there (dBm, static geometry). The state starts converged
-    (on the stronger antenna, both RSSIs known), as after the first probes of a show; the lock transient is not
-    counted. Returns (got[i], antenna used[i], switches)."""
+def rx5_replay(ok, rssi, ch, probe=None, hyst=None, miss_db=None, hold=None):
+    """RX-5 (fw/src/rx/ant.c, ADR-0011 + ADR-0021 miss switch) on per-antenna outcomes of channel ch (0 = copy A,
+    1 = copy B). ok[ant][i]: the copy of frame i arrived on antenna ant; rssi[ant]: its RSSI there (dBm, static
+    geometry). The state starts converged (on the stronger antenna, both RSSIs known and last windows valid), as after
+    the first probes of a show; the lock transient is not counted. Returns (got[i], antenna used[i], switches)."""
     probe = RX5["probe"] if probe is None else probe
     hyst = RX5["hyst"] if hyst is None else hyst
+    miss_db = RX5["miss_db"] if miss_db is None else miss_db
+    hold = RX5["hold"] if hold is None else hold
     cur = 0 if rssi[0] >= rssi[1] else 1
-    last, seen, sw = [round(r) for r in rssi], [True, True], 0
+    last, seen, okw, sw, left = [round(r) for r in rssi], [True, True], [True, True], 0, 0
     got, used = [], []
     for i in range(len(ok[0])):
         ant = (1 - cur) if probe and i % probe == (0 if ch == 0 else probe // 2) else cur
         v = ok[ant][i]
         got.append(v)
         used.append(ant)
+        okw[ant] = v
         if v:
             last[ant], seen[ant] = round(rssi[ant]), True
         elif ant == cur and seen[cur] and last[cur] > -127:
             last[cur] -= 1
+        if ant == cur and left:
+            left -= 1
         other = 1 - cur
+        if not v and ant == cur and miss_db and seen[other] and okw[other] and last[other] >= last[cur] - miss_db:
+            cur, sw, left = other, sw + 1, hold
+            continue
+        if left:
+            continue
         if seen[other] and (not seen[cur] or last[other] - last[cur] >= hyst):
             cur, sw = other, sw + 1
     return got, used, sw
@@ -643,12 +653,16 @@ def main():
     ap.add_argument("--geometry", default="",
                     help="wing-antenna geometry JSON (sim/loss/wing_geometry.py --write): per-antenna attenuations,"
                          " two receivers per pack, RX-5 replayed (#101)")
+    ap.add_argument("--rx5-miss-db", type=int, default=-1,
+                    help="--geometry: RX-5 miss-switch window for the replay, 0 = off (default: Kconfig OP_RX_ANT_MISS_DB)")
     ap.add_argument("--rx5-probe", type=int, default=0,
                     help="--geometry: RX-5 probe period in frames for the replay (default: Kconfig OP_RX_ANT_PROBE_FRAMES)")
     ap.add_argument("--td-len", type=int, default=81,
                     help="TD-length packet payload B (81 = full td_audio, AIR-3; e.g. 63 = ADPCM-3 td_audio, #26)")
     a = ap.parse_args()
-    RX5.update(probe=a.rx5_probe or rx_kconfig("OP_RX_ANT_PROBE_FRAMES"), hyst=rx_kconfig("OP_RX_ANT_HYST_DB"))
+    RX5.update(probe=a.rx5_probe or rx_kconfig("OP_RX_ANT_PROBE_FRAMES"), hyst=rx_kconfig("OP_RX_ANT_HYST_DB"),
+               miss_db=rx_kconfig("OP_RX_ANT_MISS_DB") if a.rx5_miss_db < 0 else a.rx5_miss_db,
+               hold=rx_kconfig("OP_RX_ANT_HOLD_FRAMES"))
     TD[:] = [f"-Dfw_net_CONFIG_OP_TEST_FRAME_LEN={a.td_len}"]
     IMAGES["pack_td"][0], IMAGES["rx_td"][1] = TD[0], TD[0]
     global ATT_PACK
